@@ -5,7 +5,7 @@
 ## 1. Definição do Negócio
 
 **Nome da empresa/marca:**
-[PREENCHER]
+Journey.Storage™
 
 **Segmento de atuação:**
 [PREENCHER]
