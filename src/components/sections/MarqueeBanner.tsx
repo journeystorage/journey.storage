@@ -23,7 +23,7 @@ export default function MarqueeBanner() {
   return (
     <div className="relative overflow-hidden bg-orange py-3.5">
       <div
-        className={`flex whitespace-nowrap ${prefersReducedMotion ? '' : 'animate-[marquee_25s_linear_infinite]'}`}
+        className={`flex whitespace-nowrap ${prefersReducedMotion ? '' : 'animate-[marquee_8s_linear_infinite] md:animate-[marquee_25s_linear_infinite]'}`}
       >
         {items.map((item, i) => (
           <span key={i} className="mx-6 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-warm-white/90 md:mx-10">

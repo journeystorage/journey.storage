@@ -14,6 +14,7 @@ export default function Hero() {
 
   const { scrollY } = useScroll()
   const bgY = useTransform(scrollY, [0, 800], [0, 120])
+  // Parallax only on mobile — desktop keeps image fixed for consistent framing
   const parallaxStyle = prefersReducedMotion ? {} : { y: bgY }
 
   useEffect(() => {
@@ -33,14 +34,16 @@ export default function Hero() {
 
   return (
     <section id={sectionIds.hero} className="grain relative h-screen min-h-[700px] overflow-hidden bg-black">
-      <motion.div className="absolute inset-0" style={parallaxStyle}>
+      <motion.div className="absolute inset-0 lg:!transform-none" style={parallaxStyle}>
         <Image
           src="/images/hero/home-hero-bg.jpg"
           alt="A woman standing at the threshold between her apartment and a modern storage facility"
           fill
-          className="object-cover object-center"
+          className="object-cover object-center lg:scale-125 lg:object-[center_15%]"
           priority
-          sizes="100vw"
+          quality={100}
+          sizes="(max-width: 768px) 200vw, 100vw"
+          unoptimized
         />
       </motion.div>
 
@@ -50,9 +53,17 @@ export default function Hero() {
 
       {/* Ghost watermark */}
       <div className="pointer-events-none absolute inset-0 z-[3] flex items-center overflow-hidden select-none" aria-hidden="true">
-        <span className="ml-[5%] text-[12rem] md:text-[18rem] lg:text-[28rem] font-black uppercase leading-none text-warm-white/[0.02]">
+        <motion.span
+          className="ml-[5%] text-[12rem] md:text-[18rem] lg:text-[28rem] font-black uppercase leading-none text-warm-white"
+          initial={{ opacity: 0.03 }}
+          animate={prefersReducedMotion ? { opacity: 0.03 } : {
+            opacity: [0.03, 0.06, 0.03],
+            x: [0, 15, 0],
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        >
           SPACE
-        </span>
+        </motion.span>
       </div>
 
       {/* Decorative rings */}
