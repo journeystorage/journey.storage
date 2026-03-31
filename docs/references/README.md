@@ -12,7 +12,8 @@ references/
 ├── footer/         prints de footers
 ├── typography/     prints de estilos tipográficos
 ├── color-palette/  prints de paletas e sites com cores interessantes
-└── full-pages/     prints de páginas inteiras
+├── full-pages/     prints de páginas inteiras
+└── map/            prints de seções com mapa / locations
 ```
 
 ## Como salvar um print

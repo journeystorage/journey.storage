@@ -1,16 +1,8 @@
-# Notas — Footers
+# Notas — Footer
 
-Anote aqui o que gostou em cada referência salva nesta pasta.
-
-## Template de nota
-
-```
-### [nome-do-arquivo.png]
-**Site:**
-**O que gostei:**
-**Quero usar:**
-```
-
----
-
-<!-- Adicione suas notas abaixo -->
+Referência parcial: ver full-pages/agressov.jpeg (mesmo arquivo)
+- O que gostei: Multi-coluna em dark background. Form e contato no mesmo nível.
+- O que NÃO gostei: Pesado demais. Journey precisa de um footer mais limpo e mínimo.
+- Estrutura definida: 4 colunas (Logo+slogan+social | Company links | Business links | Legal links)
+- Email capture compacto opcional abaixo das colunas
+- Referências aspiracionais para buscar futuramente: stripe.com, linear.app, vercel.com
