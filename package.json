@@ -1,5 +1,6 @@
 {
   "name": "journey-storage",
+  "version": "0.1.0",
   "private": true,
   "packageManager": "npm@11.9.0",
   "workspaces": [
@@ -7,20 +8,31 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo dev",
-    "dev:web": "turbo dev --filter=@journey/web",
-    "dev:consulting": "turbo dev --filter=@journey/consulting",
-    "dev:investors": "turbo dev --filter=@journey/investors",
-    "build": "npm run build -w @journey/web",
-    "build:web": "npm run build -w @journey/web",
-    "build:consulting": "npm run build -w @journey/consulting",
-    "start": "next start apps/web",
-    "lint": "turbo lint"
+    "dev": "next dev",
+    "dev:consulting": "next dev --port 3001 -c apps/consulting",
+    "dev:investors": "next dev --port 3002 -c apps/investors",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "next": "^16.2.1"
+    "@hookform/resolvers": "^5.2.2",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.7.0",
+    "next": "^16.2.1",
+    "postcss": "^8.5.8",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-hook-form": "^7.72.0",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.2",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "puppeteer": "^24.40.0",
     "turbo": "^2.5.0"
   }
 }
