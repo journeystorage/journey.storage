@@ -1,6 +1,0 @@
-[build]
-  command = "cd ../.. && npx turbo build --filter=@journey/consulting"
-  publish = ".next"
-
-[build.environment]
-  NODE_VERSION = "20"
