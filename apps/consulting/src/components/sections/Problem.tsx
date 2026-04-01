@@ -101,7 +101,7 @@ export default function Problem() {
                 {/* Stenciled text on the door — painted-on feel */}
                 <div className="absolute inset-0 z-10 flex items-end p-6 md:p-8 lg:p-8">
                   <motion.p
-                    className="text-[1.35rem] md:text-[1.5rem] lg:text-[1.6rem] font-black uppercase leading-[1.15] tracking-[-0.01em] text-warm-white/[0.35] select-none"
+                    className="text-[1.75rem] md:text-[2rem] lg:text-[2.25rem] font-black uppercase leading-[1.1] tracking-[-0.01em] text-warm-white/[0.45] select-none"
                     style={{
                       mixBlendMode: 'overlay',
                       textShadow: '0 1px 3px rgba(0,0,0,0.08)',
