@@ -10,16 +10,17 @@
 
 ## Local Server
 - **Always serve on localhost** — never screenshot a `file:///` URL.
-- Start the dev server: `npm run dev` (Next.js dev server at `http://localhost:3000`)
+- Start the dev server: `npm run dev:web` (main site at `http://localhost:3000`)
+- Consulting: `npm run dev:consulting` (port 3001) | Investors: `npm run dev:investors` (port 3002)
 - Start it in the background before taking any screenshots.
 - If the server is already running, do not start a second instance.
 
 ## Screenshot Workflow
 - Puppeteer is installed as a project dev dependency (`node_modules/puppeteer`).
-- **Always screenshot from localhost:** `node scripts/screenshot.mjs http://localhost:3000`
-- Screenshots are saved automatically to `./screenshots/` with timestamp and viewport name (mobile, tablet, desktop), both full-page and above-the-fold.
-- `scripts/screenshot.mjs` lives in the project. Use it as-is.
-- After screenshotting, read the PNG from `screenshots/` with the Read tool — Claude can see and analyze the image directly.
+- **Always screenshot from localhost:** `node apps/web/scripts/screenshot.mjs http://localhost:3000`
+- Screenshots are saved automatically to `apps/web/screenshots/` with timestamp and viewport name (mobile, tablet, desktop), both full-page and above-the-fold.
+- `apps/web/scripts/screenshot.mjs` lives in the web app. Use it as-is.
+- After screenshotting, read the PNG from `apps/web/screenshots/` with the Read tool — Claude can see and analyze the image directly.
 - When comparing, be specific: "heading is 32px but reference shows ~24px", "card gap is 16px but should be 24px"
 - Check: spacing/padding, font size/weight/line-height, colors (exact hex), alignment, border-radius, shadows, image sizing
 
