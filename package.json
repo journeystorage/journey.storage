@@ -11,11 +11,10 @@
     "dev:web": "turbo dev --filter=@journey/web",
     "dev:consulting": "turbo dev --filter=@journey/consulting",
     "dev:investors": "turbo dev --filter=@journey/investors",
-    "build": "npm run build -w @journey/web && mv apps/web/.next/static .static_tmp && cp -r apps/web/.next/standalone/. . && mv .static_tmp apps/web/.next/static",
-    "build:web": "npm run build -w @journey/web && mv apps/web/.next/static .static_tmp && cp -r apps/web/.next/standalone/. . && mv .static_tmp apps/web/.next/static",
-    "build:consulting": "npm run build -w @journey/consulting && mv apps/consulting/.next/static .static_tmp && cp -r apps/consulting/.next/standalone/. . && mv .static_tmp apps/consulting/.next/static",
-    "start": "node apps/web/server.js",
-    "start:consulting": "node apps/consulting/server.js",
+    "build": "npm run build -w @journey/web && rm -rf .next server.js && cp apps/web/.next/standalone/apps/web/server.js . && cp -r apps/web/.next/standalone/apps/web/.next .next && cp -r apps/web/.next/static .next/static && cp -r apps/web/public/. public/",
+    "build:web": "npm run build -w @journey/web && rm -rf .next server.js && cp apps/web/.next/standalone/apps/web/server.js . && cp -r apps/web/.next/standalone/apps/web/.next .next && cp -r apps/web/.next/static .next/static && cp -r apps/web/public/. public/",
+    "build:consulting": "npm run build -w @journey/consulting && rm -rf .next server.js && cp apps/consulting/.next/standalone/apps/consulting/server.js . && cp -r apps/consulting/.next/standalone/apps/consulting/.next .next && cp -r apps/consulting/.next/static .next/static && cp -r apps/consulting/public/. public/",
+    "start": "node server.js",
     "lint": "turbo lint"
   },
   "dependencies": {
