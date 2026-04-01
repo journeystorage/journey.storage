@@ -11,12 +11,10 @@
     "dev:web": "turbo dev --filter=@journey/web",
     "dev:consulting": "turbo dev --filter=@journey/consulting",
     "dev:investors": "turbo dev --filter=@journey/investors",
-    "build": "npm run build -w @journey/web",
-    "build:web": "npm run build -w @journey/web",
-    "build:consulting": "npm run build -w @journey/consulting",
-    "start": "npm run start -w @journey/web",
-    "start:web": "npm run start -w @journey/web",
-    "start:consulting": "npm run start -w @journey/consulting",
+    "build": "npm run build -w @journey/web && cp -r apps/web/.next .next && cp apps/web/next.config.ts . && cp -r apps/web/public public",
+    "build:web": "npm run build -w @journey/web && cp -r apps/web/.next .next && cp apps/web/next.config.ts . && cp -r apps/web/public public",
+    "build:consulting": "npm run build -w @journey/consulting && cp -r apps/consulting/.next .next && cp apps/consulting/next.config.ts . && cp -r apps/consulting/public public",
+    "start": "next start",
     "lint": "turbo lint"
   },
   "dependencies": {
