@@ -56,7 +56,7 @@ export default function Problem() {
           <motion.div className="relative text-center mb-14 lg:mb-16" {...anim(0)}>
             {/* Ghost watermark — bottom edge at label midline */}
             <div className="pointer-events-none absolute inset-x-0 top-0 -translate-y-[80%] md:-translate-y-[55%] z-0 select-none overflow-visible flex justify-center" aria-hidden="true">
-              <span className="text-[4.5rem] md:text-[8rem] lg:text-[11rem] font-black uppercase leading-none text-black/[0.03] whitespace-nowrap">
+              <span className="text-[4.5rem] md:text-[12rem] lg:text-[15rem] font-black uppercase leading-none text-black/[0.03] whitespace-nowrap">
                 GUESSING
               </span>
             </div>
