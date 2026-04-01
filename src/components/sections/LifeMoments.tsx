@@ -14,28 +14,28 @@ const themeColors = [
 
 const moments = [
   {
-    image: '/images/moments/home-moments-moving.jpg',
+    image: '/images/moments/home-moments-moving-v2.jpg',
     alt: 'A person packing belongings during a home move',
     question: 'Moving to a new home?',
     answer: "You're out before you're in. We hold the middle.",
     objectPosition: 'object-center',
   },
   {
-    image: '/images/moments/home-moments-newchapter.jpg',
+    image: '/images/moments/home-moments-newchapter-v2.jpg',
     alt: 'A person looking forward at a new beginning',
     question: 'Starting a new chapter?',
     answer: "New beginnings don't mean leaving everything behind.",
     objectPosition: 'object-top',
   },
   {
-    image: '/images/moments/home-moments-business.jpg',
+    image: '/images/moments/home-moments-business-v2.jpg',
     alt: 'A small business workspace overflowing with inventory',
     question: 'Business outgrowing its walls?',
     answer: "Your growth shouldn't wait for square footage.",
     objectPosition: 'object-center',
   },
   {
-    image: '/images/moments/home-moments-cityliving.jpg',
+    image: '/images/moments/home-moments-cityliving-v2.jpg',
     alt: 'A cozy but compact city apartment',
     question: 'Living in the city?',
     answer: "The extra room your apartment doesn't have.",
@@ -70,6 +70,32 @@ export default function LifeMoments() {
       intervalRef.current = setInterval(next, 4000)
     }
   }
+
+  const prev = useCallback(() => {
+    setActive((p) => (p - 1 + moments.length) % moments.length)
+  }, [])
+
+  // Swipe support
+  const touchStart = useRef<{ x: number; y: number } | null>(null)
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+  }, [])
+
+  const onTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (!touchStart.current) return
+    const dx = e.changedTouches[0].clientX - touchStart.current.x
+    const dy = e.changedTouches[0].clientY - touchStart.current.y
+    touchStart.current = null
+    // Only trigger if horizontal swipe is dominant and exceeds threshold
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return
+    if (dx < 0) { next() } else { prev() }
+    // Reset auto-play timer
+    if (intervalRef.current) clearInterval(intervalRef.current)
+    if (!paused && !prefersReducedMotion) {
+      intervalRef.current = setInterval(next, 4000)
+    }
+  }, [next, prev, paused, prefersReducedMotion])
 
   const prevIdx = (active - 1 + moments.length) % moments.length
   const nextIdx = (active + 1) % moments.length
@@ -157,7 +183,11 @@ export default function LifeMoments() {
             </div>
 
             {/* Right: carousel */}
-            <div className="relative flex items-center justify-center h-[420px] md:h-[480px] lg:h-[560px]">
+            <div
+              className="relative flex items-center justify-center h-[420px] md:h-[480px] lg:h-[560px] touch-pan-y"
+              onTouchStart={onTouchStart}
+              onTouchEnd={onTouchEnd}
+            >
               {moments.map((moment, i) => {
                 let position: 'left' | 'center' | 'right' | 'hidden' = 'hidden'
                 if (i === active) position = 'center'
@@ -198,7 +228,7 @@ export default function LifeMoments() {
                           alt={moment.alt}
                           fill
                           className={`object-cover ${moment.objectPosition}`}
-                          sizes="360px"
+                          sizes="(max-width: 768px) 280px, (max-width: 1024px) 320px, 360px"
                         />
                         <div
                           className={`absolute inset-0 transition-opacity duration-500 ${
