@@ -8,16 +8,21 @@
   ],
   "scripts": {
     "dev": "turbo dev",
-    "build": "turbo build",
-    "build:web": "turbo build --filter=@journey/web && cp -r apps/web/.next .next && cp apps/web/next.config.ts next.config.ts && cp -r apps/web/public public-web",
-    "build:consulting": "turbo build --filter=@journey/consulting && cp -r apps/consulting/.next .next && cp apps/consulting/next.config.ts next.config.ts && cp -r apps/consulting/public public-consulting",
-    "lint": "turbo lint",
     "dev:web": "turbo dev --filter=@journey/web",
     "dev:consulting": "turbo dev --filter=@journey/consulting",
-    "dev:investors": "turbo dev --filter=@journey/investors"
+    "dev:investors": "turbo dev --filter=@journey/investors",
+    "build": "npm run build -w @journey/web",
+    "build:web": "npm run build -w @journey/web",
+    "build:consulting": "npm run build -w @journey/consulting",
+    "start": "npm run start -w @journey/web",
+    "start:web": "npm run start -w @journey/web",
+    "start:consulting": "npm run start -w @journey/consulting",
+    "lint": "turbo lint"
+  },
+  "dependencies": {
+    "next": "^16.2.1"
   },
   "devDependencies": {
-    "next": "^16.2.1",
     "turbo": "^2.5.0"
   }
 }
