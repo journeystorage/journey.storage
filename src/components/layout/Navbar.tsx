@@ -2,12 +2,16 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
+import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { navLinks, businessDropdownLinks, sectionIds } from '@/lib/constants'
 import { scrollToSection } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 
 export default function Navbar() {
+  const pathname = usePathname()
+  const router = useRouter()
+  const isHome = pathname === '/'
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -30,15 +34,23 @@ export default function Navbar() {
     (id: string) => {
       setMobileOpen(false)
       setDropdownOpen(false)
-      scrollToSection(id)
+      if (isHome) {
+        scrollToSection(id)
+      } else {
+        router.push(`/#${id}`)
+      }
     },
-    [],
+    [isHome, router],
   )
 
   const handleLogoClick = useCallback(() => {
     setMobileOpen(false)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [])
+    if (isHome) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      router.push('/')
+    }
+  }, [isHome, router])
 
   return (
     <>
@@ -46,8 +58,10 @@ export default function Navbar() {
         className={[
           'fixed top-0 left-0 right-0 z-50',
           'transition-all duration-300 ease-out',
-          scrolled
-            ? 'bg-black/95 backdrop-blur-[12px] border-b border-white/[0.04]'
+          scrolled || !isHome
+            ? isHome
+              ? 'bg-black/95 backdrop-blur-[12px] border-b border-white/[0.04]'
+              : 'bg-warm-white border-b border-black/[0.06]'
             : 'bg-transparent border-b border-transparent',
         ].join(' ')}
       >
@@ -62,7 +76,7 @@ export default function Navbar() {
             aria-label="Scroll to top"
           >
             <Image
-              src="/images/brand/logo-white.svg"
+              src={isHome ? '/images/brand/logo-white.svg' : '/images/brand/logo-dark.svg'}
               alt="Journey.Storage™ logo"
               width={180}
               height={40}
@@ -78,7 +92,7 @@ export default function Navbar() {
               <button
                 key={link.label}
                 onClick={() => handleAnchor(link.href.replace('#', ''))}
-                className="text-body-sm font-bold text-warm-white transition-opacity duration-150 hover:opacity-70 cursor-pointer"
+                className={`text-body-sm font-bold transition-opacity duration-150 hover:opacity-70 cursor-pointer ${isHome ? 'text-warm-white' : 'text-black'}`}
               >
                 {link.label}
               </button>
@@ -86,7 +100,7 @@ export default function Navbar() {
 
             {/* Blog — Phase 2 */}
             <span
-              className="text-body-sm font-bold text-warm-white/40 cursor-default"
+              className={`text-body-sm font-bold cursor-default ${isHome ? 'text-warm-white/40' : 'text-black/30'}`}
               title="Coming soon"
             >
               Blog
@@ -102,7 +116,7 @@ export default function Navbar() {
                 onClick={() => setDropdownOpen((prev) => !prev)}
                 aria-expanded={dropdownOpen}
                 aria-haspopup="true"
-                className="flex items-center gap-1 text-body-sm font-bold text-warm-white transition-opacity duration-150 hover:opacity-70 cursor-pointer"
+                className={`flex items-center gap-1 text-body-sm font-bold transition-opacity duration-150 hover:opacity-70 cursor-pointer ${isHome ? 'text-warm-white' : 'text-black'}`}
               >
                 Business
                 <ChevronDown
@@ -150,7 +164,7 @@ export default function Navbar() {
           {/* ── Mobile hamburger ── */}
           <button
             onClick={() => setMobileOpen(true)}
-            className="lg:hidden text-warm-white cursor-pointer"
+            className={`lg:hidden cursor-pointer ${isHome ? 'text-warm-white' : 'text-black'}`}
             aria-label="Open menu"
           >
             <Menu size={24} />
