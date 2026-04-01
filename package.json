@@ -12,7 +12,7 @@
     "dev:consulting": "next dev --port 3001 -c apps/consulting",
     "dev:investors": "next dev --port 3002 -c apps/investors",
     "build": "next build",
-    "build:consulting": "rm -rf src public .next && cp -r apps/consulting/src src && cp -r apps/consulting/public public && cp apps/consulting/next.config.ts next.config.ts && cp apps/consulting/postcss.config.mjs postcss.config.mjs && next build",
+    "build:consulting": "rm -rf src public .next && cp -r apps/consulting/src src && cp -r apps/consulting/public public && next build",
     "start": "next start",
     "lint": "next lint"
   },
