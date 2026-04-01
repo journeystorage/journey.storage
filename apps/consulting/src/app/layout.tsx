@@ -1,9 +1,35 @@
+import Script from 'next/script'
 import type { Metadata } from 'next'
+import { Lato } from 'next/font/google'
 import '@/styles/globals.css'
 
+const lato = Lato({
+  subsets: ['latin'],
+  weight: ['300', '400', '700', '900'],
+  style: ['normal', 'italic'],
+  variable: '--font-lato',
+  display: 'swap',
+})
+
+const GTM_ID = 'GTM-NL5KP8QJ'
+
 export const metadata: Metadata = {
-  title: 'Journey.Consulting™',
-  description: 'Self-storage consulting by Journey.Storage™',
+  title: 'Journey.Consulting™ — Fractional Acquisitions & Underwriting | Journey.Storage™',
+  description:
+    'Institutional-grade self-storage underwriting without hiring a full-time team. Direct access to $200M+ in transaction expertise. Monthly subscription, cancel anytime.',
+  metadataBase: new URL('https://consulting.journey.storage'),
+  openGraph: {
+    title: 'Journey.Consulting™ — Fractional Acquisitions & Underwriting',
+    description:
+      'Institutional-grade self-storage underwriting without hiring a full-time team. Direct access to $200M+ in transaction expertise.',
+    url: 'https://consulting.journey.storage',
+    siteName: 'Journey.Consulting™',
+    locale: 'en_US',
+    type: 'website',
+  },
+  icons: {
+    icon: '/images/brand/favicon.svg',
+  },
 }
 
 export default function RootLayout({
@@ -12,8 +38,25 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className={lato.variable}>
+      <Script id="gtm" strategy="afterInteractive">{`
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','${GTM_ID}');
+      `}</Script>
+      <body className="bg-black text-warm-white font-sans antialiased">
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+            height="0"
+            width="0"
+            style={{ display: 'none', visibility: 'hidden' }}
+          />
+        </noscript>
+        {children}
+      </body>
     </html>
   )
 }

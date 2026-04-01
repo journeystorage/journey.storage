@@ -1,10 +1,31 @@
+import Navbar from '@/components/layout/Navbar'
+import Hero from '@/components/sections/Hero'
+import Problem from '@/components/sections/Problem'
+import Solution from '@/components/sections/Solution'
+import HowItWorks from '@/components/sections/HowItWorks'
+import Pricing from '@/components/sections/Pricing'
+import Founder from '@/components/sections/Founder'
+import FAQ from '@/components/sections/FAQ'
+import FinalCTA from '@/components/sections/FinalCTA'
+import Footer from '@/components/sections/Footer'
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-black">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-white">Journey.Consulting™</h1>
-        <p className="mt-4 text-lg text-white/50">Coming soon.</p>
-      </div>
-    </main>
+    <>
+      <Navbar />
+      <main>
+        <Hero />
+        <Problem />
+        <Solution />
+        <div className="grain relative bg-black overflow-hidden">
+          <HowItWorks />
+          <Pricing />
+        </div>
+        <Founder />
+        <FinalCTA />
+        <FAQ />
+      </main>
+      <Footer />
+    </>
   )
 }
