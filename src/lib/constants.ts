@@ -31,21 +31,22 @@ export const externalUrls = {
   consulting: 'https://consulting.journey.storage',
 } as const
 
-// ─── Social Media URLs (placeholders until confirmed) ───
+// ─── Social Media URLs ───
 export const socialUrls = {
-  instagram: 'https://instagram.com/journey.storage',
-  linkedin: 'https://linkedin.com/company/journey-storage',
-  twitter: 'https://x.com/journeystorage',
+  instagram: 'https://www.instagram.com/storage.journey',
+  linkedin: 'https://www.linkedin.com/company/journey-storage%E2%84%A2',
+  facebook: 'https://www.facebook.com/people/JourneyStorage/61587719385923/',
 } as const
 
 // ─── Nav Configuration ───
 export const navLinks = [
-  { label: 'About', href: `#${sectionIds.about}` },
   { label: 'How it works', href: `#${sectionIds.howItWorks}` },
+  { label: 'Locations', href: `#${sectionIds.locations}` },
+  { label: 'About', href: `#${sectionIds.about}` },
 ] as const
 
 export const businessDropdownLinks = [
-  { label: 'Investors', href: externalUrls.investors, external: true },
+  { label: 'For investors', href: externalUrls.investors, external: true },
   { label: 'Consulting', href: externalUrls.consulting, external: true },
 ] as const
 

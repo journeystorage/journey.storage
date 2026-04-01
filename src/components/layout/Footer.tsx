@@ -20,10 +20,10 @@ function IconLinkedin({ size = 18 }: { size?: number }) {
     </svg>
   )
 }
-function IconX({ size = 18 }: { size?: number }) {
+function IconFacebook({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 4l6.5 8L4 20h2l5.5-6.8L16 20h4l-6.8-8.4L20 4h-2l-5.2 6.4L8 4H4z" />
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
     </svg>
   )
 }
@@ -46,7 +46,7 @@ const legalLinks = [
 const socialLinks = [
   { label: 'Instagram', href: socialUrls.instagram, Icon: IconInstagram },
   { label: 'LinkedIn', href: socialUrls.linkedin, Icon: IconLinkedin },
-  { label: 'X (Twitter)', href: socialUrls.twitter, Icon: IconX },
+  { label: 'Facebook', href: socialUrls.facebook, Icon: IconFacebook },
 ]
 
 export default function Footer() {

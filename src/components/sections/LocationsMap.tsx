@@ -54,7 +54,9 @@ export default function LocationsMap() {
 
   return (
     <>
-      <section ref={ref} id={sectionIds.locations} className="relative overflow-hidden bg-black pt-0 pb-20 lg:pt-0 lg:pb-28">
+      <section ref={ref} id={sectionIds.locations} className="relative overflow-hidden bg-black pt-0 pb-10 lg:pt-0 lg:pb-14">
+        <div className="relative mx-3 md:mx-6 lg:mx-10 rounded-[24px] md:rounded-[32px] bg-charcoal/40 pt-14 pb-14 lg:pt-16 lg:pb-20 overflow-hidden">
+
         {/* Ghost text — like BeJet map section */}
         <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 select-none" aria-hidden="true">
           <span className="text-[10rem] md:text-[16rem] lg:text-[24rem] font-black uppercase leading-none text-warm-white/[0.015] whitespace-nowrap">
@@ -68,8 +70,6 @@ export default function LocationsMap() {
         }} />
 
         <div className="relative z-10 mx-auto max-w-content px-5 md:px-8 lg:px-16">
-          {/* Thin divider — separates from Differentiators */}
-          <div className="mb-16 lg:mb-20 h-px bg-gradient-to-r from-transparent via-warm-white/[0.06] to-transparent" />
 
           <motion.div
             className="text-center"
@@ -85,13 +85,13 @@ export default function LocationsMap() {
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-warm-white leading-[0.95]">
               Finding home.
             </h2>
-            <p className="mx-auto mt-5 max-w-[440px] text-lg font-light leading-[1.8] text-warm-white/40">
+            <p className="mx-auto mt-3 max-w-[440px] text-lg font-light leading-[1.8] text-warm-white/40">
               We&apos;re building something new across America.<br className="hidden lg:block" /> Our first facilities open soon.
             </p>
           </motion.div>
 
           <motion.div
-            className="mx-auto mt-16 max-w-[850px]"
+            className="mx-auto mt-10 max-w-[850px]"
             initial={prefersReducedMotion ? undefined : { opacity: 0 }}
             animate={isInView ? { opacity: 1 } : undefined}
             transition={{ duration: 0.6, ease, delay: 0.3 }}
@@ -110,7 +110,7 @@ export default function LocationsMap() {
           </motion.div>
 
           <motion.div
-            className="mt-14 text-center"
+            className="mt-8 text-center"
             initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : undefined}
             transition={{ duration: 0.4, ease, delay: 0.7 }}
@@ -129,6 +129,7 @@ export default function LocationsMap() {
               </>
             )}
           </motion.div>
+        </div>
         </div>
       </section>
 

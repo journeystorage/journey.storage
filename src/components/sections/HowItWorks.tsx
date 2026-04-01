@@ -1,16 +1,17 @@
 'use client'
 
 import { useRef } from 'react'
-import { Search, ShieldCheck, FileText, DoorOpen, Smartphone } from 'lucide-react'
+import { Search, ShieldCheck, FileText, DoorOpen, Smartphone, LogOut } from 'lucide-react'
 import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { sectionIds } from '@/lib/constants'
 
 const steps = [
   { number: '01', title: 'Find your space', description: 'Browse available units and reserve online. No phone calls, no office visits.', Icon: Search },
   { number: '02', title: 'Verify in seconds', description: 'Quick digital identity verification. No paperwork, no waiting.', Icon: ShieldCheck },
-  { number: '03', title: 'Sign and get your key', description: 'Digital lease. Instant access code delivered to your phone.', Icon: FileText },
+  { number: '03', title: 'Sign and get your access', description: 'Digital lease. Instant access code delivered to your phone.', Icon: FileText },
   { number: '04', title: 'Arrive and move in', description: 'Gates open automatically. Your unit is ready. Any hour, any day.', Icon: DoorOpen },
   { number: '05', title: "You're in control", description: 'Manage everything from your phone. Pay, upgrade, or move out. Zero friction.', Icon: Smartphone },
+  { number: '06', title: 'Easy out', description: 'Empty your unit, snap a photo, and you\'re done. Access turns off instantly. No calls, no hassle.', Icon: LogOut },
 ]
 
 export default function HowItWorks() {
@@ -23,7 +24,7 @@ export default function HowItWorks() {
     <section ref={ref} id={sectionIds.howItWorks} className="grain relative overflow-hidden bg-black pt-28 pb-16 lg:pt-40 lg:pb-20">
       {/* Background watermark numbers — like Turkish Airlines giant numbers */}
       <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center gap-[5vw] overflow-hidden select-none" aria-hidden="true">
-        {['01', '02', '03', '04', '05'].map((n) => (
+        {['01', '02', '03', '04', '05', '06'].map((n) => (
           <span key={n} className="text-[10rem] md:text-[16rem] lg:text-[22rem] font-black text-warm-white/[0.015] leading-none">
             {n}
           </span>
@@ -66,7 +67,7 @@ export default function HowItWorks() {
             />
           </div>
 
-          <div className="relative z-10 grid grid-cols-5 gap-4">
+          <div className="relative z-10 grid grid-cols-6 gap-4">
             {steps.map((step, i) => (
               <motion.div
                 key={step.number}

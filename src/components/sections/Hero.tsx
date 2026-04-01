@@ -105,10 +105,12 @@ export default function Hero() {
             </motion.h1>
 
             <motion.p
-              className="mt-8 max-w-[440px] text-xl font-light leading-[1.7] text-warm-white/70"
+              className="mt-8 max-w-[440px] lg:max-w-[480px] text-xl leading-[1.7] text-warm-white/70"
               {...fadeUp(0.45)}
             >
-              A new kind of storage company. Built for people in motion,
+              A <strong className="font-semibold text-warm-white/90">new kind</strong> of storage company.
+              <br className="hidden lg:block" />
+              Built for <strong className="font-semibold text-warm-white/90">people in motion</strong>,
               not for boxes sitting still.
             </motion.p>
 

@@ -60,28 +60,28 @@
 
 ## 2.1 Definição do Negócio
 
-- [ ] Nome da empresa/marca
-- [ ] Segmento de atuação
-- [ ] Proposta de valor principal (o que resolve? para quem?)
-- [ ] Diferenciais competitivos (3 a 5 pontos)
-- [ ] Tom de voz da marca (formal, descontraído, técnico, acolhedor, premium…)
-- [ ] Público-alvo primário (idade, perfil, dores, desejos)
-- [ ] Público-alvo secundário (se houver)
+- [x] Nome da empresa/marca
+- [x] Segmento de atuação
+- [x] Proposta de valor principal (o que resolve? para quem?)
+- [x] Diferenciais competitivos (3 a 5 pontos)
+- [x] Tom de voz da marca (formal, descontraído, técnico, acolhedor, premium…)
+- [x] Público-alvo primário (idade, perfil, dores, desejos)
+- [x] Público-alvo secundário (se houver)
 
 ## 2.2 Objetivos do Site
 
-- [ ] Objetivo primário (gerar leads? vender? informar? agendar?)
-- [ ] Objetivo secundário
-- [ ] KPIs definidos (formulários enviados, cliques no WhatsApp, tempo na página…)
-- [ ] CTAs principais definidos (ex: "Solicite um orçamento", "Fale conosco")
+- [x] Objetivo primário (gerar leads? vender? informar? agendar?)
+- [x] Objetivo secundário
+- [x] KPIs definidos (formulários enviados, cliques no WhatsApp, tempo na página…)
+- [x] CTAs principais definidos (ex: "Solicite um orçamento", "Fale conosco")
 
 ## 2.3 Análise de Concorrência
 
-- [ ] Listar 3 a 5 sites concorrentes diretos
-- [ ] Anotar pontos fortes de cada um (design, conteúdo, UX)
-- [ ] Anotar pontos fracos
-- [ ] Listar 3 a 5 sites de **referência visual** (não precisam ser do mesmo segmento)
-- [ ] Salvar prints/links de seções específicas que agradaram → pasta [docs/references/](references/)
+- [x] Listar 3 a 5 sites concorrentes diretos
+- [x] Anotar pontos fortes de cada um (design, conteúdo, UX)
+- [x] Anotar pontos fracos
+- [x] Listar 3 a 5 sites de **referência visual** (não precisam ser do mesmo segmento)
+- [x] Salvar prints/links de seções específicas que agradaram → pasta [docs/references/](references/)
 
 > **Usando sites como referência de design:**
 >
@@ -108,7 +108,7 @@
 
 ## 2.4 Documento de Briefing Consolidado
 
-- [ ] Compilar todas as informações acima em [briefing.md](briefing.md)
+- [x] Compilar todas as informações acima em [briefing.md](briefing.md)
 
 > Ao iniciar o projeto, peça ao Claude Code:
 > ```
@@ -126,21 +126,21 @@
 
 ### Página Home
 
-- [ ] Headline principal (H1) — máximo 10 palavras, impacto imediato
-- [ ] Subheadline — expandir a promessa do H1 (1-2 frases)
-- [ ] Texto do CTA principal
-- [ ] Seção "O que fazemos" — 2 a 3 parágrafos curtos
-- [ ] Lista de serviços/soluções resumida (3 a 6 itens com mini-descrição)
-- [ ] Seção de prova social (depoimentos, números, logos de clientes)
-- [ ] Seção de diferenciais (3 a 4 cards)
-- [ ] Texto pré-footer (chamada final para ação)
+- [x] Headline principal (H1) — máximo 10 palavras, impacto imediato
+- [x] Subheadline — expandir a promessa do H1 (1-2 frases)
+- [x] Texto do CTA principal
+- [x] Seção "O que fazemos" — 2 a 3 parágrafos curtos
+- [x] Lista de serviços/soluções resumida (3 a 6 itens com mini-descrição)
+- [x] Seção de prova social (depoimentos, números, logos de clientes)
+- [x] Seção de diferenciais (3 a 4 cards)
+- [x] Texto pré-footer (chamada final para ação)
 
 ### Página Sobre / Quem Somos
 
-- [ ] História da empresa (narrativa envolvente, não cronológica)
-- [ ] Missão, Visão e Valores (se aplicável e relevante)
-- [ ] Equipe (nomes, cargos, mini-bios) — opcional
-- [ ] Números da empresa (anos de mercado, clientes atendidos, projetos)
+- [x] História da empresa (narrativa envolvente, não cronológica)
+- [x] Missão, Visão e Valores (se aplicável e relevante)
+- [x] Equipe (nomes, cargos, mini-bios) — opcional
+- [x] Números da empresa (anos de mercado, clientes atendidos, projetos)
 
 ### Página de Serviços
 
@@ -805,7 +805,7 @@ Use esta lista para acompanhar o progresso geral do projeto:
 
 - [x] Ambiente configurado (Node, VS Code, Git, Claude Code)
 - [x] Repositório criado no GitHub
-- [ ] Briefing documentado → [briefing.md](briefing.md)
+- [x] Briefing documentado → [briefing.md](briefing.md)
 - [ ] Conteúdo escrito (copys) → [content.md](content.md)
 - [ ] Imagens coletadas e organizadas → [image-map.md](image-map.md)
 - [ ] Arquitetura do site definida → [architecture.md](architecture.md)
@@ -855,3 +855,46 @@ Use esta lista para acompanhar o progresso geral do projeto:
 ---
 
 > **Lembre-se:** A qualidade do resultado é diretamente proporcional à qualidade das instruções. Quanto mais específico e detalhado você for com o Claude Code, melhor será o resultado. Iterar é o fluxo natural — peça ajustes, refinamentos e melhorias sem hesitar.
+
+1. Briefing & Strategy          ← Foundation. Everything builds on this.
+   WHO we are, WHO we serve, WHAT we want.
+   ✅ Done
+
+2. Architecture & Structure     ← Depends on: Briefing
+   HOW the site is organized. Tech stack, routes, domains.
+   ✅ Done
+
+3. Copy & Content Structure     ← Depends on: Briefing + Architecture
+   WHAT each page says. Pure text + element types + intent.
+   Content determines layout needs (not the other way around).
+   ✅ Done
+
+4. References & Moodboard       ← Depends on: Briefing + Content Structure
+   Visual inspiration. Research, not decisions.
+   Knowing the content helps curate relevant references
+   (you look for hero references knowing YOUR hero has X elements).
+   ✅ Done
+
+5. Design System                ← Depends on: Brand Manual + References
+   Brand manual + references → concrete rules.
+   Colors, typography, spacing, components, image treatment.
+   ✅ Done
+
+6. Page Design Spec             ← Depends on: Content + Design System + References
+   WHERE everything goes. Layout per section. Image placement.
+   Animation specs. Responsive behavior.
+   This is the merger: copy + design system + references = final page.
+   ✅ Done
+
+7. Image Map                    ← Depends on: Page Design Spec
+   WHAT images are needed, WHERE, what they depict, sourcing plan.
+   You can only define images after you know the layouts.
+   ✅ Done
+
+8. Development Guide            ← Depends on: Everything above
+   Implementation instructions for Claude Code.
+   File structure, component order, naming conventions, build sequence.
+   ✅ Done
+
+9. BUILD                        ← Claude Code receives all docs as context
+   Execute.

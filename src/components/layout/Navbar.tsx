@@ -112,8 +112,9 @@ export default function Navbar() {
               </button>
 
               {dropdownOpen && (
+                <div className="absolute top-full right-0 pt-2 min-w-[200px]">
                 <div
-                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 min-w-[180px] rounded-md bg-charcoal p-4 shadow-lg"
+                  className="rounded-xl border border-warm-white/[0.08] bg-black/95 backdrop-blur-xl p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
                   role="menu"
                 >
                   {businessDropdownLinks.map((link) => (
@@ -123,11 +124,13 @@ export default function Navbar() {
                       target="_blank"
                       rel="noopener noreferrer"
                       role="menuitem"
-                      className="block py-2 text-body-sm font-bold text-warm-white transition-opacity duration-150 hover:opacity-70"
+                      className="flex items-center justify-between rounded-lg px-3.5 py-2.5 text-body-sm font-bold text-warm-white/70 transition-colors duration-150 hover:bg-warm-white/[0.06] hover:text-warm-white"
                     >
                       {link.label}
+                      <span className="text-warm-white/20 text-xs">&rarr;</span>
                     </a>
                   ))}
+                </div>
                 </div>
               )}
             </div>
