@@ -9,6 +9,8 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "build:web": "turbo build --filter=@journey/web && cp -r apps/web/.next .next",
+    "build:consulting": "turbo build --filter=@journey/consulting && cp -r apps/consulting/.next .next",
     "lint": "turbo lint",
     "dev:web": "turbo dev --filter=@journey/web",
     "dev:consulting": "turbo dev --filter=@journey/consulting",
