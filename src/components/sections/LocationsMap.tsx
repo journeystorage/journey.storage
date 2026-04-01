@@ -24,6 +24,7 @@ const pins: { x: number; y: number; active?: boolean }[] = [
 const modalSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Please enter a valid email'),
+  message: z.string().optional(),
 })
 type ModalForm = z.infer<typeof modalSchema>
 
@@ -46,7 +47,7 @@ export default function LocationsMap() {
   const handleZipSubmit = (e: FormEvent) => { e.preventDefault(); if (zip.trim()) setShowModal(true) }
 
   const onModalSubmit = async (data: ModalForm) => {
-    try { await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: data.name, email: data.email, zip }) }) } catch { /* Phase 1 */ }
+    try { await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: data.name, email: data.email, zip, message: data.message }) }) } catch { /* Phase 1 */ }
     setShowModal(false); setSubmitted(true)
   }
 
@@ -146,6 +147,16 @@ export default function LocationsMap() {
               <form onSubmit={handleSubmit(onModalSubmit)} className="mt-6 flex flex-col gap-4">
                 <Input label="Name" placeholder="Your full name" required {...register('name')} error={errors.name?.message} />
                 <Input label="Email" type="email" placeholder="you@email.com" required {...register('email')} error={errors.email?.message} />
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="modal-message" className="text-body-sm font-bold text-black">Message</label>
+                  <textarea
+                    id="modal-message"
+                    rows={3}
+                    placeholder="Tell us who you are and why you'd like Journey in your city..."
+                    className="w-full rounded-sm px-4 py-3.5 text-body font-normal placeholder:text-stone transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-0 bg-white text-black border border-stone/30 focus:border-orange resize-none"
+                    {...register('message')}
+                  />
+                </div>
                 <Button type="submit" variant="primary" disabled={isSubmitting} className="mt-2 w-full">{isSubmitting ? 'Submitting...' : 'Notify me'}</Button>
               </form>
             </motion.div>

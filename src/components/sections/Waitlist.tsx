@@ -14,6 +14,7 @@ const waitlistSchema = z.object({
   email: z.string().email('Please enter a valid email'),
   zip: z.string().min(5, 'Please enter a valid ZIP code').max(10),
   phone: z.string().optional(),
+  message: z.string().optional(),
 })
 
 type WaitlistForm = z.infer<typeof waitlistSchema>
@@ -120,6 +121,16 @@ export default function Waitlist() {
                 <Input label="ZIP code" placeholder="90210" required onDark {...register('zip')} error={errors.zip?.message} />
                 <Input label="Phone" type="tel" placeholder="(555) 000-0000" onDark {...register('phone')} error={errors.phone?.message} />
                 <p className="-mt-2 text-caption text-warm-white/30">Optional, for SMS updates</p>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="waitlist-message" className="text-body-sm font-bold text-warm-white">Message</label>
+                  <textarea
+                    id="waitlist-message"
+                    rows={3}
+                    placeholder="Tell us who you are and why you'd like Journey in your city..."
+                    className="w-full rounded-sm px-4 py-3.5 text-body font-normal placeholder:text-stone transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-0 bg-white/[0.06] text-warm-white border border-stone/30 focus:border-orange resize-none"
+                    {...register('message')}
+                  />
+                </div>
                 <Button type="submit" variant="primary" disabled={isSubmitting} className="mt-3 w-full">
                   {isSubmitting ? 'Submitting...' : 'Join the waitlist'}
                 </Button>
