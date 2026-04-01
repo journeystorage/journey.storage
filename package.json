@@ -15,6 +15,7 @@
     "dev:investors": "turbo dev --filter=@journey/investors"
   },
   "devDependencies": {
+    "next": "^16.2.1",
     "turbo": "^2.5.0"
   }
 }
