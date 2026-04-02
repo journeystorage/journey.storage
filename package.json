@@ -13,7 +13,7 @@
     "dev:investors": "next dev --port 3002 -c apps/investors",
     "build": "next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "build:consulting": "rm -rf src public .next && cp -r apps/consulting/src src && cp -r apps/consulting/public public && cp apps/consulting/next.config.ts next.config.ts && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
-    "start": "node .next/standalone/server.js",
+    "start": "HOSTNAME=0.0.0.0 node .next/standalone/server.js",
     "lint": "next lint"
   },
   "dependencies": {

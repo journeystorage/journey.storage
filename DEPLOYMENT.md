@@ -31,37 +31,34 @@ Each app is deployed as a **separate Hostinger instance** from the same GitHub r
 
 ### Web (main site)
 
-| Field            | Value           |
-|------------------|-----------------|
-| Framework preset | Next.js         |
-| Branch           | main            |
-| Node version     | 22.x           |
-| Build command    | `npm run build` |
-| Output directory | `.next`         |
+| Field            | Value                                  |
+|------------------|----------------------------------------|
+| Install command  | `npm ci`                               |
+| Build command    | `npm run build`                        |
+| Start command    | `npm run start -- -p $PORT`            |
+| Node version     | 20                                     |
 
-How it works: `npm run build` runs `next build` at the root, generating `.next/` directly.
+How it works: `npm run build` runs `next build` with `output: 'standalone'`, then copies `public/` and `.next/static/` into `.next/standalone/`. The start command runs the standalone server (`node .next/standalone/server.js`) which is a single lightweight Node.js process — no worker spawning.
 
 ### Consulting
 
-| Field            | Value                      |
-|------------------|----------------------------|
-| Framework preset | Next.js                    |
-| Branch           | main                       |
-| Node version     | 22.x                      |
-| Build command    | `npm run build:consulting` |
-| Output directory | `.next`                    |
+| Field            | Value                                  |
+|------------------|----------------------------------------|
+| Install command  | `npm ci`                               |
+| Build command    | `npm run build:consulting`             |
+| Start command    | `npm run start -- -p $PORT`            |
+| Node version     | 20                                     |
 
-How it works: `build:consulting` replaces `src/` and `public/` at the root with consulting's files, then runs `next build`. This generates `.next/` at the root as Hostinger expects.
+How it works: `build:consulting` replaces `src/`, `public/`, and `next.config.ts` at the root with consulting's files, then runs `next build` with standalone output, then copies assets into `.next/standalone/`.
 
 ### Investors (when ready)
 
-| Field            | Value                     |
-|------------------|---------------------------|
-| Framework preset | Next.js                   |
-| Branch           | main                      |
-| Node version     | 22.x                     |
-| Build command    | `npm run build:investors` |
-| Output directory | `.next`                   |
+| Field            | Value                                  |
+|------------------|----------------------------------------|
+| Install command  | `npm ci`                               |
+| Build command    | `npm run build:investors`              |
+| Start command    | `npm run start -- -p $PORT`            |
+| Node version     | 20                                     |
 
 Note: `build:investors` script needs to be added to `package.json` following the same pattern as consulting.
 
@@ -87,10 +84,13 @@ Current recommendation: **accept shared deploys**. The rebuild is fast and produ
 Hostinger's Next.js preset expects `next.config.ts`, `src/`, `public/`, and `.next/` at the repository root. There is no option to change the root directory. Moving the web app to the root was the only way to achieve a clean deploy.
 
 ### Why consulting uses file replacement
-Since Hostinger always builds from the root, `build:consulting` temporarily replaces the root's `src/` and `public/` with consulting's files before running `next build`. Each Hostinger instance is an isolated clone, so this does not affect other instances.
+Since Hostinger always builds from the root, `build:consulting` temporarily replaces the root's `src/`, `public/`, and `next.config.ts` with consulting's files before running `next build`. Each Hostinger instance is an isolated clone, so this does not affect other instances.
+
+### Why standalone output
+Hostinger's shared hosting has a **120 process limit** shared across all sites on the plan. The default `next start` spawns multiple workers, which can easily exceed this limit with 2+ sites. `output: 'standalone'` generates a single `server.js` that runs as one process, keeping usage well below the limit.
 
 ### Node version
-Next.js 16.x requires Node.js >= 20.9.0. Use 22.x or higher.
+Next.js 16.x requires Node.js >= 20.9.0. Use Node 20 (Hostinger's recommended version for Next.js).
 
 ---
 
@@ -114,7 +114,7 @@ npm run dev:investors
 1. Create the app in `apps/<name>/` with its own `src/`, `public/`, `package.json`
 2. Add a build script to root `package.json`:
    ```
-   "build:<name>": "rm -rf src public .next && cp -r apps/<name>/src src && cp -r apps/<name>/public public && next build"
+   "build:<name>": "rm -rf src public .next && cp -r apps/<name>/src src && cp -r apps/<name>/public public && cp apps/<name>/next.config.ts next.config.ts && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static"
    ```
 3. Create a new Hostinger instance connected to the same GitHub repo
-4. Set build command to `npm run build:<name>`, output directory `.next`
+4. Set build command to `npm run build:<name>`, start command to `npm run start -- -p $PORT`
