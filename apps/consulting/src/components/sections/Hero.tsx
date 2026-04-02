@@ -1,27 +1,9 @@
-'use client'
-
-import { useRef } from 'react'
 import Image from 'next/image'
-import { motion, useReducedMotion } from 'framer-motion'
 import { CALENDAR_URL, sectionIds } from '@/lib/constants'
-import { scrollToSection } from '@/lib/utils'
 
 export default function Hero() {
-  const ref = useRef<HTMLElement>(null)
-  const prefersReducedMotion = useReducedMotion()
-  const ease = [0.22, 1, 0.36, 1] as const
-
-  const fadeUp = (delay: number) =>
-    prefersReducedMotion
-      ? {}
-      : {
-          initial: { opacity: 0, y: 30 } as const,
-          animate: { opacity: 1, y: 0 } as const,
-          transition: { duration: 0.7, ease, delay },
-        }
-
   return (
-    <section ref={ref} id={sectionIds.hero} className="relative min-h-[100vh] flex items-end overflow-hidden bg-black">
+    <section id={sectionIds.hero} className="relative min-h-[100vh] flex items-end overflow-hidden bg-black">
       {/* Background image */}
       <Image
         src="/images/hero/consulting-hero-bg.jpg"
@@ -42,29 +24,29 @@ export default function Hero() {
       <div className="grain absolute inset-0 pointer-events-none" />
 
       <div className="relative z-10 mx-auto w-full max-w-[var(--container-content)] px-5 md:px-8 lg:px-16 pt-40 pb-16 lg:pt-48 lg:pb-24">
-        <motion.div className="inline-flex items-center gap-2.5 mb-8 rounded-full border border-warm-white/[0.10] bg-black/40 backdrop-blur-md px-5 py-2.5" {...fadeUp(0)}>
+        <div className="hero-fade-up inline-flex items-center gap-2.5 mb-8 rounded-full border border-warm-white/[0.10] bg-black/40 backdrop-blur-md px-5 py-2.5">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-orange" />
           </span>
           <span className="text-label font-bold uppercase tracking-[0.2em] text-warm-white/70">Consulting division</span>
-        </motion.div>
+        </div>
 
-        <motion.h1
-          className="max-w-[820px] text-[2.75rem] md:text-[3.5rem] lg:text-[4.5rem] xl:text-[5rem] font-black leading-[0.95] text-warm-white"
-          {...fadeUp(0.15)}
+        <h1
+          className="hero-fade-up max-w-[820px] text-[2.75rem] md:text-[3.5rem] lg:text-[4.5rem] xl:text-[5rem] font-black leading-[0.95] text-warm-white"
+          style={{ animationDelay: '0.15s' }}
         >
           Your next deal deserves better than a spreadsheet and a gut&nbsp;feeling.
-        </motion.h1>
+        </h1>
 
-        <motion.p
-          className="mt-8 max-w-[580px] text-body leading-[1.75] text-warm-white/60"
-          {...fadeUp(0.3)}
+        <p
+          className="hero-fade-up mt-8 max-w-[580px] text-body leading-[1.75] text-warm-white/60"
+          style={{ animationDelay: '0.3s' }}
         >
           Journey.Consulting&trade; gives you institutional-grade self-storage underwriting,the same expertise behind <strong className="font-semibold text-warm-white/80">$200M+ in transactions</strong>,at a monthly rate, with no hiring friction. Cancel anytime.
-        </motion.p>
+        </p>
 
-        <motion.div className="mt-10 flex flex-wrap items-center gap-4" {...fadeUp(0.45)}>
+        <div className="hero-fade-up mt-10 flex flex-wrap items-center gap-4" style={{ animationDelay: '0.45s' }}>
           <a
             href={CALENDAR_URL}
             target="_blank"
@@ -73,13 +55,13 @@ export default function Hero() {
           >
             Schedule a call with Jonah
           </a>
-          <button
-            onClick={() => scrollToSection(sectionIds.howItWorks)}
-            className="inline-flex items-center gap-2 text-body-sm font-bold text-warm-white/50 transition-colors duration-150 hover:text-warm-white cursor-pointer"
+          <a
+            href={`#${sectionIds.howItWorks}`}
+            className="inline-flex items-center gap-2 text-body-sm font-bold text-warm-white/50 transition-colors duration-150 hover:text-warm-white"
           >
             See how it works <span className="text-orange">&darr;</span>
-          </button>
-        </motion.div>
+          </a>
+        </div>
       </div>
     </section>
   )
