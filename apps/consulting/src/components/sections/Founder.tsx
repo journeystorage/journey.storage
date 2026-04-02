@@ -34,7 +34,7 @@ export default function Founder() {
             <div className="relative w-48 h-48 lg:w-full lg:h-auto lg:aspect-[3/4] overflow-hidden rounded-2xl">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/images/team/home-jonah-portrait.jpg"
+                src="/images/team/home-jonah-portrait.webp"
                 alt="Jonah M. Hall"
                 className="w-full h-full object-cover object-top"
               />

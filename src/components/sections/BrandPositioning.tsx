@@ -16,7 +16,7 @@ export default function BrandPositioning() {
       {/* Full-bleed background image — the positioning photo IS the section */}
       <div className="absolute inset-0">
         <Image
-          src="/images/moments/home-positioning-bg.jpg"
+          src="/images/moments/home-positioning-bg.webp"
           alt="A visual metaphor for transition — a road, bridge, or open doorway"
           fill
           className="object-cover"

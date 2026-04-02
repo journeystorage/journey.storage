@@ -6,7 +6,7 @@ export default function Hero() {
     <section id={sectionIds.hero} className="relative min-h-[100vh] flex items-end overflow-hidden bg-black">
       {/* Background image */}
       <Image
-        src="/images/hero/consulting-hero-bg.jpg"
+        src="/images/hero/consulting-hero-bg.webp"
         alt=""
         fill
         className="object-cover object-center"

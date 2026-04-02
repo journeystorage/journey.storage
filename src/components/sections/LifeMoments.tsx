@@ -14,28 +14,28 @@ const themeColors = [
 
 const moments = [
   {
-    image: '/images/moments/home-moments-moving-v2.jpg',
+    image: '/images/moments/home-moments-moving-v2.webp',
     alt: 'A person packing belongings during a home move',
     question: 'Moving to a new home?',
     answer: "You're out before you're in. We hold the middle.",
     objectPosition: 'object-center',
   },
   {
-    image: '/images/moments/home-moments-newchapter-v2.jpg',
+    image: '/images/moments/home-moments-newchapter-v2.webp',
     alt: 'A person looking forward at a new beginning',
     question: 'Starting a new chapter?',
     answer: "New beginnings don't mean leaving everything behind.",
     objectPosition: 'object-top',
   },
   {
-    image: '/images/moments/home-moments-business-v2.jpg',
+    image: '/images/moments/home-moments-business-v2.webp',
     alt: 'A small business workspace overflowing with inventory',
     question: 'Business outgrowing its walls?',
     answer: "Your growth shouldn't wait for square footage.",
     objectPosition: 'object-center',
   },
   {
-    image: '/images/moments/home-moments-cityliving-v2.jpg',
+    image: '/images/moments/home-moments-cityliving-v2.webp',
     alt: 'A cozy but compact city apartment',
     question: 'Living in the city?',
     answer: "The extra room your apartment doesn't have.",

@@ -30,7 +30,7 @@ export default function FoundedBy() {
           >
             <div className="relative aspect-[3/4] w-full overflow-hidden rounded-tl-[4px] rounded-tr-[4px] rounded-br-[4px] rounded-bl-[24px] max-w-[280px]" style={{ aspectRatio: '3/4' }}>
               <Image
-                src="/images/team/home-jonah-portrait.jpg"
+                src="/images/team/home-jonah-portrait.webp"
                 alt="Jonah M. Hall, Founder of Journey.Storage™"
                 fill
                 className="object-cover"

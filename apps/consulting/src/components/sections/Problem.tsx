@@ -90,7 +90,7 @@ export default function Problem() {
               >
                 <div className="relative aspect-[3/4]">
                   <Image
-                    src="/images/hero/storage-door-v2.jpg"
+                    src="/images/hero/storage-door-v2.webp"
                     alt="Orange self-storage unit door — closed"
                     fill
                     className="object-cover"

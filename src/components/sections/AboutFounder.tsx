@@ -8,14 +8,14 @@ const founders = [
   {
     name: 'Jonah M. Hall',
     role: 'Founder & CEO',
-    image: '/images/team/home-jonah-portrait.jpg',
+    image: '/images/team/home-jonah-portrait.webp',
     alt: 'Jonah M. Hall, Founder of Journey.Storage',
     bio: 'Jonah has spent nearly a decade in self-storage, acquiring, building, and operating over $500M in assets across 26 facilities in 6 states. He left it all behind to start Journey.',
   },
   {
     name: 'Lyvia Hall',
     role: 'Co-founder & COO',
-    image: '/images/team/home-lyvia-portrait.jpg',
+    image: '/images/team/home-lyvia-portrait.webp',
     alt: 'Lyvia Hall, Co-founder of Journey.Storage',
     bio: 'Lyvia spent five years as Executive Director of a nationally scaling self-storage company, building the financial systems, reporting, and operational controls behind rapid growth. She joined Journey to make sure growth never outpaces discipline.',
   },
