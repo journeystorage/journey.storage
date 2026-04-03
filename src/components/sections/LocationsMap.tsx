@@ -12,13 +12,43 @@ import MapPin, { MapPinPulse } from '@/components/map/MapPin'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 
-const pins: { x: number; y: number; active?: boolean }[] = [
-  { x: 28, y: 62, active: true }, { x: 78, y: 48, active: true }, { x: 18, y: 38, active: true },
-  { x: 15, y: 30 }, { x: 22, y: 42 }, { x: 25, y: 50 }, { x: 32, y: 35 }, { x: 38, y: 45 },
-  { x: 42, y: 55 }, { x: 48, y: 38 }, { x: 52, y: 48 }, { x: 55, y: 32 }, { x: 60, y: 42 },
-  { x: 65, y: 52 }, { x: 72, y: 38 }, { x: 75, y: 30 }, { x: 80, y: 35 }, { x: 68, y: 58 },
-  { x: 35, y: 28 }, { x: 45, y: 28 },
-  { x: 52, y: 72, active: true }, { x: 56, y: 76 }, { x: 50, y: 78 }, { x: 58, y: 70 },
+type PinSize = 'sm' | 'md' | 'lg'
+const pins: { x: number; y: number; size: PinSize }[] = [
+  /* ── Large (active, pulsing) — 4 initial markets ── */
+  { x: 48, y: 66, size: 'lg' },  // Dallas–Fort Worth
+  { x: 75, y: 57, size: 'lg' },  // Charlotte / Carolinas
+  { x: 14, y: 15, size: 'lg' },  // Pacific Northwest
+  { x: 47, y: 56, size: 'lg' },  // Oklahoma City / Central
+  /* ── Medium — planned metro areas ── */
+  { x: 14, y: 43, size: 'md' },  // Northern California
+  { x: 16, y: 60, size: 'md' },  // Southern California
+  { x: 23, y: 35, size: 'md' },  // Salt Lake City
+  { x: 35, y: 40, size: 'md' },  // Denver
+  { x: 52, y: 42, size: 'md' },  // Kansas City
+  { x: 54, y: 19, size: 'md' },  // Minneapolis
+  { x: 64, y: 31, size: 'md' },  // Chicago area
+  { x: 70, y: 29, size: 'md' },  // Detroit / Great Lakes
+  { x: 71, y: 38, size: 'md' },  // Columbus / Ohio
+  { x: 65, y: 53, size: 'md' },  // Nashville / Tennessee
+  { x: 69, y: 63, size: 'md' },  // Atlanta / Georgia
+  { x: 80, y: 78, size: 'md' },  // Orlando / Florida
+  { x: 81, y: 42, size: 'md' },  // DC / Mid-Atlantic
+  { x: 85, y: 35, size: 'md' },  // NYC area
+  { x: 50, y: 77, size: 'md' },  // South Texas / Houston
+  { x: 30, y: 27, size: 'md' },  // Wyoming / Mountain West
+  /* ── Small (atmospheric texture) ── */
+  { x: 13, y: 22, size: 'sm' },  // Oregon
+  { x: 18, y: 38, size: 'sm' },  // Nevada
+  { x: 23, y: 64, size: 'sm' },  // Arizona
+  { x: 41, y: 44, size: 'sm' },  // Colorado–Kansas border
+  { x: 54, y: 32, size: 'sm' },  // Iowa / Nebraska
+  { x: 59, y: 44, size: 'sm' },  // Missouri
+  { x: 67, y: 45, size: 'sm' },  // Kentucky / Indiana
+  { x: 74, y: 33, size: 'sm' },  // Ohio
+  { x: 80, y: 48, size: 'sm' },  // Virginia
+  { x: 87, y: 30, size: 'sm' },  // New England
+  { x: 50, y: 52, size: 'sm' },  // Oklahoma
+  { x: 63, y: 65, size: 'sm' },  // Tennessee / Alabama
 ]
 
 const modalSchema = z.object({
@@ -58,12 +88,6 @@ export default function LocationsMap() {
       <section ref={ref} id={sectionIds.locations} className="relative overflow-hidden bg-black pt-0 pb-10 lg:pt-0 lg:pb-14">
         <div className="relative mx-3 md:mx-6 lg:mx-10 rounded-[24px] md:rounded-[32px] bg-charcoal/40 pt-14 pb-14 lg:pt-16 lg:pb-20 overflow-hidden">
 
-        {/* Ghost text — like BeJet map section */}
-        <div className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 select-none" aria-hidden="true">
-          <span className="text-[10rem] md:text-[16rem] lg:text-[24rem] font-black uppercase leading-none text-warm-white/[0.015] whitespace-nowrap">
-            USA
-          </span>
-        </div>
 
         {/* Radial glow */}
         <div className="pointer-events-none absolute inset-0 z-[1]" aria-hidden="true" style={{
@@ -97,16 +121,16 @@ export default function LocationsMap() {
             animate={isInView ? { opacity: 1 } : undefined}
             transition={{ duration: 0.6, ease, delay: 0.3 }}
           >
-            <div className="relative">
+            <div className="relative overflow-hidden">
               <USMap />
-              <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+              <div className="absolute inset-0 overflow-hidden">
                 {pins.map((pin, i) => (
-                  <MapPin key={i} x={pin.x} y={pin.y} active={pin.active} delay={0.5 + i * 0.05} isInView={isInView} />
+                  <MapPin key={i} x={pin.x} y={pin.y} size={pin.size} delay={0.5 + i * 0.05} isInView={isInView} />
                 ))}
-                {pins.filter(p => p.active).map((pin, i) => (
+                {pins.filter(p => p.size === 'lg').map((pin, i) => (
                   <MapPinPulse key={`p-${i}`} x={pin.x} y={pin.y} isInView={isInView} />
                 ))}
-              </svg>
+              </div>
             </div>
           </motion.div>
 

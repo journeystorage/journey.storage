@@ -6,12 +6,12 @@ import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { sectionIds } from '@/lib/constants'
 
 const steps = [
-  { number: '01', title: 'Find your space', description: 'Browse available units and reserve online. No phone calls, no office visits.', Icon: Search },
+  { number: '01', title: 'Find your space', description: 'Browse available spaces and rent online. No phone calls, no office visits.', Icon: Search },
   { number: '02', title: 'Verify in seconds', description: 'Quick digital identity verification. No paperwork, no waiting.', Icon: ShieldCheck },
   { number: '03', title: 'Sign and get your access', description: 'Digital lease. Instant access code delivered to your phone.', Icon: FileText },
-  { number: '04', title: 'Arrive and move in', description: 'Gates open automatically. Your unit is ready. Any hour, any day.', Icon: DoorOpen },
+  { number: '04', title: 'Arrive and move in', description: 'Gates open automatically. Your space is ready. Any hour, any day.', Icon: DoorOpen },
   { number: '05', title: "You're in control", description: 'Manage everything from your phone. Pay, upgrade, or move out. Zero friction.', Icon: Smartphone },
-  { number: '06', title: 'Easy out', description: 'Empty your unit, snap a photo, and you\'re done. Access turns off instantly. No calls, no hassle.', Icon: LogOut },
+  { number: '06', title: 'Easy out', description: 'Empty your space, snap a photo, and you\'re done. Access turns off instantly. No calls, no hassle.', Icon: LogOut },
 ]
 
 export default function HowItWorks() {

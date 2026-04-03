@@ -35,13 +35,8 @@ const companyLinks = [
   { label: 'Locations', action: () => scrollToSection(sectionIds.locations) },
 ]
 const businessLinks = [
-  { label: 'Investors', href: externalUrls.investors },
+  { label: 'Investing', href: externalUrls.investors },
   { label: 'Consulting', href: externalUrls.consulting },
-]
-const legalLinks = [
-  { label: 'Privacy policy', href: '/legal/privacy' },
-  { label: 'Terms of service', href: '/legal/terms' },
-  { label: 'Disclaimer', href: '/legal/disclaimer' },
 ]
 const socialLinks = [
   { label: 'Instagram', href: socialUrls.instagram, Icon: IconInstagram },
@@ -65,10 +60,10 @@ export default function Footer() {
     <footer className="relative border-t border-warm-white/[0.04] bg-black pt-20 pb-10">
       <div className="mx-auto max-w-content px-5 md:px-8 lg:px-16">
         {/* Top grid */}
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[30%_25%_20%_25%] lg:gap-8">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {/* Column 1 */}
           <div>
-            <Image src="/images/brand/logo-white.svg" alt="Journey.Storage™ logo" width={140} height={32} className="w-[140px]" style={{ height: 'auto' }} />
+            <Image src="/images/brand/logo-white-TM.svg" alt="Journey.Storage™ logo" width={140} height={32} className="w-[140px]" style={{ height: 'auto' }} />
             <p className="mt-3 text-body-sm font-light italic text-warm-white/30">
               Space to move on.
             </p>
@@ -119,20 +114,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 4 — Legal */}
-          <div>
-            <h3 className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50 mb-4">Legal</h3>
-            <ul>
-              {legalLinks.map((link) => (
-                <li key={link.label}>
-                  <a href={link.href}
-                    className="block py-1.5 text-body-sm text-warm-white/30 transition-colors duration-200 hover:text-warm-white">
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
 
         {/* Divider */}

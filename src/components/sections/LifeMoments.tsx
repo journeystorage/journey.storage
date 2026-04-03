@@ -5,11 +5,12 @@ import Image from 'next/image'
 import { motion, AnimatePresence, useReducedMotion, useInView } from 'framer-motion'
 import { sectionIds } from '@/lib/constants'
 
-const themeColors = [
-  { bg: 'bg-terracotta', dot: 'bg-terracotta', accent: '#D4956A' },
-  { bg: 'bg-sunlight', dot: 'bg-sunlight', accent: '#E8C547' },
-  { bg: 'bg-sage-green', dot: 'bg-sage-green', accent: '#7AAF6E' },
-  { bg: 'bg-sky-blue', dot: 'bg-sky-blue', accent: '#4A90D9' },
+/* ── Theme per moment ── */
+const themes = [
+  { accent: '#4A90D9', textOnBg: 'text-white', numOnBg: 'text-white/[0.08]', subOnBg: 'text-white/50' },
+  { accent: '#7AAF6E', textOnBg: 'text-white', numOnBg: 'text-white/[0.08]', subOnBg: 'text-white/50' },
+  { accent: '#E8C547', textOnBg: 'text-black', numOnBg: 'text-black/[0.06]', subOnBg: 'text-black/45' },
+  { accent: '#D4956A', textOnBg: 'text-white', numOnBg: 'text-white/[0.08]', subOnBg: 'text-white/50' },
 ]
 
 const moments = [
@@ -51,10 +52,13 @@ export default function LifeMoments() {
   const sectionRef = useRef<HTMLElement>(null)
   const isInView = useInView(sectionRef, { once: true, margin: '-80px' })
   const ease = [0.22, 1, 0.36, 1] as const
-  const theme = themeColors[active]
 
   const next = useCallback(() => {
     setActive((prev) => (prev + 1) % moments.length)
+  }, [])
+
+  const prev = useCallback(() => {
+    setActive((p) => (p - 1 + moments.length) % moments.length)
   }, [])
 
   useEffect(() => {
@@ -71,10 +75,6 @@ export default function LifeMoments() {
     }
   }
 
-  const prev = useCallback(() => {
-    setActive((p) => (p - 1 + moments.length) % moments.length)
-  }, [])
-
   // Swipe support
   const touchStart = useRef<{ x: number; y: number } | null>(null)
 
@@ -87,10 +87,8 @@ export default function LifeMoments() {
     const dx = e.changedTouches[0].clientX - touchStart.current.x
     const dy = e.changedTouches[0].clientY - touchStart.current.y
     touchStart.current = null
-    // Only trigger if horizontal swipe is dominant and exceeds threshold
     if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return
     if (dx < 0) { next() } else { prev() }
-    // Reset auto-play timer
     if (intervalRef.current) clearInterval(intervalRef.current)
     if (!paused && !prefersReducedMotion) {
       intervalRef.current = setInterval(next, 4000)
@@ -100,6 +98,15 @@ export default function LifeMoments() {
   const prevIdx = (active - 1 + moments.length) % moments.length
   const nextIdx = (active + 1) % moments.length
 
+  const anim = (delay: number) =>
+    prefersReducedMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y: 24 },
+          animate: isInView ? { opacity: 1, y: 0 } : undefined,
+          transition: { duration: 0.5, delay, ease },
+        }
+
   return (
     <section
       ref={sectionRef}
@@ -108,13 +115,11 @@ export default function LifeMoments() {
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      {/* Floating container */}
+      {/* Floating warm-white container */}
       <div
-        className="relative mx-3 md:mx-6 lg:mx-10 rounded-[24px] md:rounded-[32px] pt-20 pb-10 md:pt-24 md:pb-14 lg:pt-28 lg:pb-16 overflow-hidden"
+        className="relative mx-3 md:mx-6 lg:mx-10 rounded-[24px] md:rounded-[32px] pt-16 pb-12 md:pt-20 md:pb-16 lg:pt-24 lg:pb-20 overflow-hidden"
         style={{ backgroundColor: '#F5F0E8' }}
       >
-{/* Background kept solid warm-white — no gradient */}
-
         {/* Ghost watermark */}
         <div className="pointer-events-none absolute inset-x-0 top-4 md:top-2 lg:top-0 z-[1] select-none overflow-hidden flex justify-center" aria-hidden="true">
           <span className="text-[7rem] md:text-[12rem] lg:text-[17rem] font-black uppercase leading-none text-black/[0.03] whitespace-nowrap">
@@ -124,12 +129,7 @@ export default function LifeMoments() {
 
         <div className="relative z-[2] mx-auto max-w-content px-5 md:px-8 lg:px-16">
           {/* Header */}
-          <motion.div
-            className="text-center mb-14 lg:mb-18"
-            initial={prefersReducedMotion ? undefined : { opacity: 0, y: 24 }}
-            animate={isInView ? { opacity: 1, y: 0 } : undefined}
-            transition={{ duration: 0.6, ease }}
-          >
+          <motion.div className="text-center mb-10 lg:mb-14" {...anim(0)}>
             <div className="flex items-center justify-center gap-3 mb-5">
               <div className="h-px w-8 bg-orange" />
               <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">Life moments</span>
@@ -140,51 +140,142 @@ export default function LifeMoments() {
             </h2>
           </motion.div>
 
-          {/* Layout: text left + carousel right */}
-          <div className="lg:grid lg:grid-cols-[1fr_1.6fr] lg:gap-12 lg:items-center">
-            {/* Left: active moment text — desktop only */}
-            <div className="hidden lg:block py-6">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={active}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -16 }}
+          {/* ── Mobile / Tablet: horizontal collapse/expand cards ── */}
+          <div className="lg:hidden flex items-stretch gap-2 mb-6 h-[106px] md:h-[114px]">
+            {moments.map((moment, i) => {
+              const isActive = i === active
+              const theme = themes[i]
+              return (
+                <motion.button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  className="relative text-left rounded-[14px] md:rounded-[16px] cursor-pointer overflow-hidden transition-shadow duration-300"
+                  style={{ backgroundColor: isActive ? theme.accent : 'rgba(0,0,0,0.04)' }}
+                  animate={{ flex: isActive ? '1 1 0%' : '0 0 44px' }}
                   transition={{ duration: 0.4, ease }}
                 >
-                  <motion.div
-                    className={`h-1 w-10 rounded-full mb-5 ${theme.bg}`}
-                    layoutId="accent-bar"
-                    transition={{ duration: 0.4, ease }}
-                  />
-                  <p className="text-3xl xl:text-4xl font-black text-black leading-snug">
-                    {moments[active].question}
-                  </p>
-                  <p className="mt-4 text-lg leading-[1.7] text-stone">
-                    {moments[active].answer}
-                  </p>
-                </motion.div>
-              </AnimatePresence>
+                  {/* Ghost number — only on active */}
+                  {isActive && (
+                    <motion.span
+                      className={`absolute -right-1 -bottom-2 text-[4rem] md:text-[4.5rem] font-black leading-none select-none pointer-events-none ${theme.numOnBg}`}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.4, ease }}
+                      aria-hidden="true"
+                    >
+                      {String(i + 1).padStart(2, '0')}
+                    </motion.span>
+                  )}
 
-              <div className="mt-10 flex items-center gap-3">
-                {moments.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => goTo(i)}
-                    aria-label={`Go to slide ${i + 1}`}
-                    className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                      i === active
-                        ? `w-8 ${themeColors[i].dot}`
-                        : 'w-1.5 bg-black/15 hover:bg-black/30'
-                    }`}
-                  />
-                ))}
+                  {isActive ? (
+                    <motion.div
+                      className="relative z-[1] px-4 py-4 md:px-5 md:py-5"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3, delay: 0.15, ease }}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <div
+                          className="h-1.5 w-1.5 rounded-full flex-shrink-0"
+                          style={{
+                            backgroundColor: theme.textOnBg === 'text-white' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)',
+                          }}
+                        />
+                        <span className={`text-[0.55rem] md:text-[0.6rem] font-bold uppercase tracking-[0.25em] ${
+                          theme.textOnBg === 'text-white' ? 'text-white/40' : 'text-black/35'
+                        }`}>
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                      </div>
+                      <p className={`text-sm md:text-base font-black leading-snug ${theme.textOnBg}`}>
+                        {moment.question}
+                      </p>
+                    </motion.div>
+                  ) : (
+                    <div className="relative z-[1] flex items-center justify-center h-full">
+                      <span
+                        className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-black/20"
+                        style={{ writingMode: 'vertical-lr' }}
+                      >
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+                  )}
+                </motion.button>
+              )
+            })}
+          </div>
+
+          {/* ── Desktop: colored tabs left + carousel right ── */}
+          <div className="lg:grid lg:grid-cols-[1fr_1.5fr] lg:gap-10 xl:gap-14 lg:items-center">
+            {/* Left: numbered moment tabs */}
+            <div className="hidden lg:block">
+              <div className="flex flex-col gap-2">
+                {moments.map((moment, i) => {
+                  const isActive = i === active
+                  const theme = themes[i]
+                  return (
+                    <motion.button
+                      key={i}
+                      onClick={() => goTo(i)}
+                      className="group relative w-full text-left rounded-[16px] cursor-pointer overflow-hidden transition-shadow duration-300"
+                      style={{ backgroundColor: isActive ? theme.accent : 'transparent' }}
+                      {...anim(0.15 + i * 0.08)}
+                    >
+                      {/* Ghost watermark number — only on active */}
+                      {isActive && (
+                        <motion.span
+                          className={`absolute -right-3 -bottom-4 text-[5.5rem] font-black leading-none select-none pointer-events-none ${theme.numOnBg}`}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.4, ease }}
+                          aria-hidden="true"
+                        >
+                          {String(i + 1).padStart(2, '0')}
+                        </motion.span>
+                      )}
+
+                      <div className={`relative z-[1] transition-all duration-300 ${
+                        isActive ? 'py-6 px-8' : 'py-5 px-8 hover:bg-black/[0.04]'
+                      }`}>
+                        {/* Number + accent dot */}
+                        <div className="flex items-center gap-2.5 mb-2">
+                          <div
+                            className="h-2 w-2 rounded-full flex-shrink-0 transition-all duration-300"
+                            style={{
+                              backgroundColor: isActive
+                                ? (theme.textOnBg === 'text-white' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)')
+                                : theme.accent,
+                              transform: isActive ? 'scale(1)' : 'scale(0.6)',
+                              opacity: isActive ? 1 : 0.4,
+                            }}
+                          />
+                          <span className={`text-[0.6rem] font-bold uppercase tracking-[0.3em] transition-colors duration-300 ${
+                            isActive
+                              ? theme.textOnBg === 'text-white' ? 'text-white/40' : 'text-black/35'
+                              : 'text-black/20'
+                          }`}>
+                            {String(i + 1).padStart(2, '0')}
+                          </span>
+                        </div>
+
+                        {/* Question */}
+                        <p className={`text-xl font-black leading-snug transition-colors duration-300 ${
+                          isActive ? theme.textOnBg : 'text-black/35 group-hover:text-black/55'
+                        }`}>
+                          {moment.question}
+                        </p>
+
+                      </div>
+                    </motion.button>
+                  )
+                })}
               </div>
             </div>
 
             {/* Right: carousel */}
             <div
-              className="relative flex items-center justify-center h-[420px] md:h-[480px] lg:h-[560px] touch-pan-y"
+              className="relative flex items-center justify-center h-[420px] md:h-[480px] lg:h-[540px] touch-pan-y"
               onTouchStart={onTouchStart}
               onTouchEnd={onTouchEnd}
             >
@@ -207,7 +298,7 @@ export default function LifeMoments() {
                 return (
                   <motion.div
                     key={i}
-                    className="absolute w-[280px] md:w-[320px] lg:w-[360px] cursor-pointer"
+                    className="absolute w-[280px] md:w-[320px] lg:w-[350px] cursor-pointer"
                     style={{ zIndex: t.zIndex }}
                     animate={{
                       x: t.x,
@@ -228,18 +319,22 @@ export default function LifeMoments() {
                           alt={moment.alt}
                           fill
                           className={`object-cover ${moment.objectPosition}`}
-                          sizes="(max-width: 768px) 280px, (max-width: 1024px) 320px, 360px"
+                          sizes="(max-width: 768px) 280px, (max-width: 1024px) 320px, 350px"
                         />
                         <div
                           className={`absolute inset-0 transition-opacity duration-500 ${
-                            isCenter ? 'bg-black/5' : 'bg-black/35'
+                            isCenter ? 'bg-transparent' : 'bg-black/50'
                           }`}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                        <div className={`absolute inset-0 transition-opacity duration-500 ${
+                          isCenter
+                            ? 'bg-gradient-to-t from-black/80 via-black/25 to-transparent'
+                            : 'bg-gradient-to-t from-black/70 via-black/30 to-black/10'
+                        }`} />
                         {isCenter && (
                           <motion.div
                             className="absolute inset-0 mix-blend-soft-light"
-                            style={{ backgroundColor: themeColors[i].accent }}
+                            style={{ backgroundColor: themes[i].accent }}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 0.15 }}
                             transition={{ duration: 0.6 }}
@@ -247,44 +342,31 @@ export default function LifeMoments() {
                         )}
                       </div>
 
-                      <div className="absolute bottom-0 inset-x-0 p-5 md:p-6 z-10">
-                        <p className={`text-base md:text-lg font-bold leading-tight transition-opacity duration-300 ${
-                          isCenter ? 'text-warm-white' : 'text-warm-white/50'
-                        }`}>
-                          {moment.question}
-                        </p>
-                        {isCenter && (
-                          <motion.p
-                            className="mt-1.5 text-sm text-warm-white/70 leading-snug"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.4, delay: 0.2 }}
-                          >
+                      {/* Body text — only on center card */}
+                      {isCenter && (
+                        <motion.div
+                          className="absolute bottom-0 inset-x-0 z-10 px-5 pb-5 md:px-6 md:pb-6"
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.2, ease }}
+                        >
+                          <motion.div
+                            className="h-[2px] w-6 rounded-full mb-3"
+                            style={{ backgroundColor: themes[i].accent }}
+                            initial={{ scaleX: 0 }}
+                            animate={{ scaleX: 1 }}
+                            transition={{ duration: 0.4, delay: 0.35, ease }}
+                          />
+                          <p className="text-[0.8rem] md:text-[0.9rem] font-normal leading-relaxed tracking-[-0.01em] text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
                             {moment.answer}
-                          </motion.p>
-                        )}
-                      </div>
+                          </p>
+                        </motion.div>
+                      )}
                     </div>
                   </motion.div>
                 )
               })}
             </div>
-          </div>
-
-          {/* Dots — mobile only */}
-          <div className="mt-8 flex items-center justify-center gap-3 lg:hidden">
-            {moments.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => goTo(i)}
-                aria-label={`Go to slide ${i + 1}`}
-                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                  i === active
-                    ? `w-8 ${themeColors[i].dot}`
-                    : 'w-1.5 bg-black/15 hover:bg-black/30'
-                }`}
-              />
-            ))}
           </div>
         </div>
       </div>

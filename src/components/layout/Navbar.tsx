@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X, ChevronDown } from 'lucide-react'
-import { navLinks, businessDropdownLinks, sectionIds } from '@/lib/constants'
+import { navLinks, ecosystemDropdownLinks, sectionIds } from '@/lib/constants'
 import { scrollToSection } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 
@@ -15,6 +15,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [mobileEcoOpen, setMobileEcoOpen] = useState(false)
 
   // ── Scroll listener ──
   useEffect(() => {
@@ -76,7 +77,7 @@ export default function Navbar() {
             aria-label="Scroll to top"
           >
             <Image
-              src={isHome ? '/images/brand/logo-white.svg' : '/images/brand/logo-dark.svg'}
+              src={isHome ? '/images/brand/logo-white-TM.svg' : '/images/brand/logo-dark-TM.svg'}
               alt="Journey.Storage™ logo"
               width={180}
               height={40}
@@ -106,7 +107,7 @@ export default function Navbar() {
               Blog
             </span>
 
-            {/* Business dropdown */}
+            {/* Ecosystem dropdown */}
             <div
               className="relative"
               onMouseEnter={() => setDropdownOpen(true)}
@@ -118,7 +119,7 @@ export default function Navbar() {
                 aria-haspopup="true"
                 className={`flex items-center gap-1 text-body-sm font-bold transition-opacity duration-150 hover:opacity-70 cursor-pointer ${isHome ? 'text-warm-white' : 'text-black'}`}
               >
-                Business
+                Ecosystem
                 <ChevronDown
                   size={16}
                   className={`transition-transform duration-150 ${dropdownOpen ? 'rotate-180' : ''}`}
@@ -126,22 +127,26 @@ export default function Navbar() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute top-full right-0 pt-2 min-w-[200px]">
+                <div className="absolute top-full right-0 pt-2 min-w-[240px]">
                 <div
-                  className="rounded-xl border border-warm-white/[0.08] bg-black/95 backdrop-blur-xl p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+                  className="rounded-xl border border-warm-white/[0.08] bg-black/95 backdrop-blur-xl p-2 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
                   role="menu"
                 >
-                  {businessDropdownLinks.map((link) => (
+                  {ecosystemDropdownLinks.map((link) => (
                     <a
                       key={link.label}
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
                       role="menuitem"
-                      className="flex items-center justify-between rounded-lg px-3.5 py-2.5 text-body-sm font-bold text-warm-white/70 transition-colors duration-150 hover:bg-warm-white/[0.06] hover:text-warm-white"
+                      className="flex flex-col gap-0.5 rounded-lg px-4 py-3 transition-colors duration-150 hover:bg-warm-white/[0.06] group"
                     >
-                      {link.label}
-                      <span className="text-warm-white/20 text-xs">&rarr;</span>
+                      <span className="text-body-sm font-bold text-warm-white/80 group-hover:text-warm-white transition-colors duration-150">
+                        {link.label}
+                      </span>
+                      <span className="text-[0.7rem] text-warm-white/30 group-hover:text-warm-white/50 transition-colors duration-150">
+                        {link.description}
+                      </span>
                     </a>
                   ))}
                 </div>
@@ -164,10 +169,17 @@ export default function Navbar() {
           {/* ── Mobile hamburger ── */}
           <button
             onClick={() => setMobileOpen(true)}
-            className={`lg:hidden cursor-pointer ${isHome ? 'text-warm-white' : 'text-black'}`}
+            className={[
+              'lg:hidden cursor-pointer rounded-lg p-2 transition-all duration-300',
+              isHome
+                ? scrolled
+                  ? 'text-warm-white'
+                  : 'text-warm-white bg-black/40 backdrop-blur-sm'
+                : 'text-black',
+            ].join(' ')}
             aria-label="Open menu"
           >
-            <Menu size={24} />
+            <Menu size={22} />
           </button>
         </nav>
       </header>
@@ -175,57 +187,111 @@ export default function Navbar() {
       {/* ── Mobile overlay ── */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-[60] flex flex-col bg-black animate-[fadeIn_300ms_ease-out]"
+          className="fixed inset-0 z-[60] flex flex-col bg-black"
           role="dialog"
           aria-modal="true"
           aria-label="Mobile navigation"
         >
-          {/* Close button */}
-          <div className="flex h-[64px] items-center justify-end px-5">
+          {/* Subtle radial glow */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            aria-hidden="true"
+            style={{ background: 'radial-gradient(ellipse 80% 50% at 0% 30%, rgba(232,98,42,0.06), transparent)' }}
+          />
+
+          {/* Header: logo + close */}
+          <div className="relative z-10 flex h-[64px] items-center justify-between px-6">
+            <Image
+              src="/images/brand/logo-white-TM.svg"
+              alt="Journey.Storage™"
+              width={130}
+              height={30}
+              style={{ height: 'auto' }}
+            />
             <button
               onClick={() => setMobileOpen(false)}
-              className="text-warm-white cursor-pointer"
+              className="text-warm-white/60 hover:text-warm-white cursor-pointer transition-colors duration-150 rounded-lg p-1.5"
               aria-label="Close menu"
             >
-              <X size={24} />
+              <X size={22} />
             </button>
           </div>
 
-          {/* Links */}
-          <div className="flex flex-1 flex-col items-center justify-center gap-6">
-            {navLinks.map((link) => (
-              <button
-                key={link.label}
-                onClick={() => handleAnchor(link.href.replace('#', ''))}
-                className="text-h3 font-bold text-warm-white cursor-pointer"
-              >
-                {link.label}
-              </button>
-            ))}
+          {/* Links — left-aligned, numbered */}
+          <div className="relative z-10 flex flex-1 flex-col justify-center px-8 -mt-8">
+            <nav className="flex flex-col gap-1">
+              {navLinks.map((link, i) => (
+                <button
+                  key={link.label}
+                  onClick={() => handleAnchor(link.href.replace('#', ''))}
+                  className="group flex items-baseline gap-3 py-2.5 cursor-pointer text-left"
+                  style={{ animationDelay: `${i * 50}ms` }}
+                >
+                  <span className="text-[0.6rem] font-bold tabular-nums tracking-[0.2em] text-orange/60 group-hover:text-orange transition-colors duration-150">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-[1.7rem] font-black text-warm-white group-hover:text-orange transition-colors duration-150 leading-tight">
+                    {link.label}
+                  </span>
+                </button>
+              ))}
 
-            <span
-              className="text-h3 font-bold text-warm-white/40 cursor-default"
-              title="Coming soon"
-            >
-              Blog
-            </span>
+              {/* Blog — disabled */}
+              <div className="flex items-baseline gap-3 py-2.5">
+                <span className="text-[0.6rem] font-bold tabular-nums tracking-[0.2em] text-warm-white/15">
+                  {String(navLinks.length + 1).padStart(2, '0')}
+                </span>
+                <span className="text-[1.7rem] font-black text-warm-white/20 leading-tight" title="Coming soon">
+                  Blog
+                </span>
+              </div>
 
-            {/* Business links inline */}
-            {businessDropdownLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-h3 font-bold text-warm-white"
-              >
-                {link.label}
-              </a>
-            ))}
+              {/* Separator */}
+              <div className="my-2 h-px w-12 bg-warm-white/10" />
+
+              {/* Ecosystem accordion */}
+              <div>
+                <button
+                  onClick={() => setMobileEcoOpen((v) => !v)}
+                  className="group flex items-center gap-2.5 py-2.5 cursor-pointer"
+                >
+                  <span className="text-[0.6rem] font-bold tabular-nums tracking-[0.2em] text-orange/60">
+                    {String(navLinks.length + 2).padStart(2, '0')}
+                  </span>
+                  <span className="text-[1.7rem] font-black text-warm-white group-hover:text-orange transition-colors duration-150 leading-tight">
+                    Ecosystem
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className={`text-warm-white/40 transition-transform duration-200 ${mobileEcoOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {mobileEcoOpen && (
+                  <div className="ml-[1.85rem] flex flex-col gap-3 pt-1 pb-2">
+                    {ecosystemDropdownLinks.map((link) => (
+                      <a
+                        key={link.label}
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group/sub flex flex-col gap-0.5"
+                      >
+                        <span className="text-base font-bold text-warm-white/50 group-hover/sub:text-warm-white transition-colors duration-150">
+                          {link.label}
+                        </span>
+                        <span className="text-[0.7rem] text-warm-white/25 group-hover/sub:text-warm-white/40 transition-colors duration-150">
+                          {link.description}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </nav>
           </div>
 
           {/* CTA at bottom */}
-          <div className="px-5 pb-8">
+          <div className="relative z-10 px-8 pb-8">
             <Button
               variant="primary"
               onClick={() => handleAnchor(sectionIds.waitlist)}

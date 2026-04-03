@@ -18,10 +18,16 @@ export const sectionIds = {
   hero: 'hero',
   lifeMoments: 'life-moments',
   about: 'about',
+  problem: 'problem',
+  solution: 'solution',
   howItWorks: 'how-it-works',
   differentiators: 'differentiators',
+  pricing: 'pricing',
   locations: 'locations',
   foundedBy: 'founded-by',
+  founder: 'founder',
+  faq: 'faq',
+  cta: 'cta',
   waitlist: 'waitlist',
 } as const
 
@@ -29,7 +35,10 @@ export const sectionIds = {
 export const externalUrls = {
   investors: 'https://direct.journey.storage',
   consulting: 'https://consulting.journey.storage',
+  mainSite: 'https://journey.storage',
 } as const
+
+export const CALENDAR_URL = 'https://consulting.journey.storage/#contact' as const
 
 // ─── Social Media URLs ───
 export const socialUrls = {
@@ -40,14 +49,14 @@ export const socialUrls = {
 
 // ─── Nav Configuration ───
 export const navLinks = [
-  { label: 'How it works', href: `#${sectionIds.howItWorks}` },
+  { label: 'Spaces', href: `#${sectionIds.howItWorks}` },
   { label: 'Locations', href: `#${sectionIds.locations}` },
   { label: 'About', href: `#${sectionIds.about}` },
 ] as const
 
-export const businessDropdownLinks = [
-  { label: 'For investors', href: externalUrls.investors, external: true },
-  { label: 'Consulting', href: externalUrls.consulting, external: true },
+export const ecosystemDropdownLinks = [
+  { label: 'Investing', description: 'Direct investment platform', href: externalUrls.investors, external: true },
+  { label: 'Advisory', description: 'Consulting & operations', href: externalUrls.consulting, external: true },
 ] as const
 
 // ─── Layout ───

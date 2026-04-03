@@ -3,12 +3,11 @@
 import { useRef } from 'react'
 import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { sectionIds } from '@/lib/constants'
-import { ArrowRight } from 'lucide-react'
 
 const cards = [
   {
-    hook: "We don't auction your life.",
-    body: "Missed a payment? We'll work with you. Empathy is the policy.",
+    hook: "Storage shouldn't feel like storage.",
+    body: "Every detail, redesigned. The access. The experience. The respect.",
     color: 'bg-orange',
     number: '01',
   },
@@ -20,13 +19,13 @@ const cards = [
   },
   {
     hook: 'Talk to a real person.',
-    body: "Not a chatbot. Someone who understands your moment and knows how to help.",
+    body: "Not a chatbot. Someone who understands your moment and how to help.",
     color: 'bg-charcoal',
     number: '03',
   },
   {
     hook: 'Smart, safe, always open.',
-    body: "24/7 access. Smart locks. Climate control. Trust made physical.",
+    body: "Smart access. Digital locks. Trust made physical.",
     color: 'bg-sand',
     textDark: true,
     number: '04',
@@ -81,14 +80,11 @@ export default function Differentiators() {
                 {card.number}
               </span>
 
-              {/* Top: number + arrow */}
-              <div className="flex items-center justify-between relative z-10">
+              {/* Top: number */}
+              <div className="relative z-10">
                 <span className={`text-[0.6rem] font-bold uppercase tracking-[0.3em] ${card.textDark ? 'text-black/40' : 'text-warm-white/50'}`}>
                   {card.number}
                 </span>
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full ${card.textDark ? 'bg-black/10' : 'bg-warm-white/10'} transition-transform duration-300 group-hover:translate-x-1`}>
-                  <ArrowRight size={14} className={card.textDark ? 'text-black/60' : 'text-warm-white/70'} />
-                </div>
               </div>
 
               {/* Bottom: text */}

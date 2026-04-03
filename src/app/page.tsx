@@ -7,6 +7,7 @@ import HowItWorks from '@/components/sections/HowItWorks'
 import Differentiators from '@/components/sections/Differentiators'
 import LocationsMap from '@/components/sections/LocationsMap'
 import AboutFounder from '@/components/sections/AboutFounder'
+import FAQ from '@/components/sections/FAQ'
 import Waitlist from '@/components/sections/Waitlist'
 
 export default function Home() {
@@ -21,6 +22,7 @@ export default function Home() {
         <Differentiators />
         <LocationsMap />
         <AboutFounder />
+        <FAQ />
         <Waitlist />
       </main>
       <Footer />
