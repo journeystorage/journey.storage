@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="mx-auto max-w-[var(--container-content)] px-5 md:px-8 lg:px-16">
         <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
           <div className="flex flex-col items-center gap-3 md:items-start">
-            <Image src="/images/brand/logo-white.svg" alt="Journey.Storage™ logo" width={140} height={32} className="w-[120px]" style={{ height: 'auto' }} />
+            <Image src="/images/brand/logo-white-TM.svg" alt="Journey.Storage™ logo" width={140} height={32} className="w-[120px]" style={{ height: 'auto' }} />
             <p className="text-caption text-warm-white/25 text-center md:text-left">
               Journey.Consulting&trade; &middot;<br />
               A Journey.Storage&trade; division

@@ -52,7 +52,7 @@ export default function Navbar() {
             aria-label="Scroll to top"
           >
             <Image
-              src="/images/brand/logo-white.svg"
+              src="/images/brand/logo-white-TM.svg"
               alt="Journey.Storage™ logo"
               width={160}
               height={36}
@@ -85,40 +85,73 @@ export default function Navbar() {
 
           <button
             onClick={() => setMobileOpen(true)}
-            className="lg:hidden text-warm-white cursor-pointer"
+            className={[
+              'lg:hidden cursor-pointer rounded-lg p-2 transition-all duration-300',
+              scrolled
+                ? 'text-warm-white'
+                : 'text-warm-white bg-black/40 backdrop-blur-sm',
+            ].join(' ')}
             aria-label="Open menu"
           >
-            <Menu size={24} />
+            <Menu size={22} />
           </button>
         </nav>
       </header>
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-[60] flex flex-col bg-black animate-[fadeIn_300ms_ease-out]" role="dialog" aria-modal="true">
-          <div className="flex h-[64px] items-center justify-end px-5">
-            <button onClick={() => setMobileOpen(false)} className="text-warm-white cursor-pointer" aria-label="Close menu">
-              <X size={24} />
+        <div className="fixed inset-0 z-[60] flex flex-col bg-black" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+          {/* Subtle radial glow */}
+          <div
+            className="pointer-events-none absolute inset-0"
+            aria-hidden="true"
+            style={{ background: 'radial-gradient(ellipse 80% 50% at 0% 30%, rgba(232,98,42,0.06), transparent)' }}
+          />
+
+          {/* Header: logo + close */}
+          <div className="relative z-10 flex h-[64px] items-center justify-between px-6">
+            <Image
+              src="/images/brand/logo-white-TM.svg"
+              alt="Journey.Storage™"
+              width={120}
+              height={28}
+              style={{ height: 'auto' }}
+            />
+            <button
+              onClick={() => setMobileOpen(false)}
+              className="text-warm-white/60 hover:text-warm-white cursor-pointer transition-colors duration-150 rounded-lg p-1.5"
+              aria-label="Close menu"
+            >
+              <X size={22} />
             </button>
           </div>
 
-          <div className="flex flex-1 flex-col items-center justify-center gap-6">
-            {links.map((link) => (
-              <button
-                key={link.label}
-                onClick={() => handleNav(link.id)}
-                className="text-2xl font-bold text-warm-white cursor-pointer"
-              >
-                {link.label}
-              </button>
-            ))}
+          {/* Links — left-aligned, numbered */}
+          <div className="relative z-10 flex flex-1 flex-col justify-center px-8 -mt-8">
+            <nav className="flex flex-col gap-1">
+              {links.map((link, i) => (
+                <button
+                  key={link.label}
+                  onClick={() => handleNav(link.id)}
+                  className="group flex items-baseline gap-3 py-2.5 cursor-pointer text-left"
+                >
+                  <span className="text-[0.6rem] font-bold tabular-nums tracking-[0.2em] text-orange/60 group-hover:text-orange transition-colors duration-150">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className="text-[1.7rem] font-black text-warm-white group-hover:text-orange transition-colors duration-150 leading-tight">
+                    {link.label}
+                  </span>
+                </button>
+              ))}
+            </nav>
           </div>
 
-          <div className="px-5 pb-8">
+          {/* CTA at bottom */}
+          <div className="relative z-10 px-8 pb-8">
             <a
               href={CALENDAR_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="block w-full rounded-sm bg-orange py-4 text-center text-body-sm font-bold text-warm-white"
+              className="block w-full rounded-sm bg-orange py-4 text-center text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99]"
             >
               Schedule a call
             </a>
