@@ -34,11 +34,11 @@ export const sectionIds = {
 // ─── External URLs ───
 export const externalUrls = {
   investors: 'https://direct.journey.storage',
-  consulting: 'https://consulting.journey.storage',
+  consulting: 'https://advisory.journey.storage',
   mainSite: 'https://journey.storage',
 } as const
 
-export const CALENDAR_URL = 'https://consulting.journey.storage/#contact' as const
+export const CALENDAR_URL = 'https://advisory.journey.storage/#contact' as const
 
 // ─── Social Media URLs ───
 export const socialUrls = {

@@ -10,7 +10,7 @@ Journey's web presence consists of three properties under one domain, each servi
 ```
 journey.storage .................. Consumer-facing brand (landing page + blog)
 direct.journey.storage ........... Investor relations (Journey.Direct™)
-consulting.journey.storage ....... Consulting services (Journey.Consulting™)
+advisory.journey.storage ....... Consulting services (Journey.Consulting™)
 ```
 
 Each property is a **single-page landing** with anchor-linked navigation. The main site also includes a `/blog` route for SEO content. This structure reflects the company's early stage — delivering a complete, immersive experience per audience without hollow sub-pages.
@@ -31,7 +31,7 @@ Each property is a **single-page landing** with anchor-linked navigation. The ma
 **Structure:** Single scrollable landing page. Anchor-linked nav. Gated section for deal details.
 **Mode:** Energy dominant. Data-forward.
 
-### consulting.journey.storage — Consulting
+### advisory.journey.storage — Consulting
 **Audience:** Self-storage investors and operators needing underwriting expertise.
 **Goal:** Call bookings with Jonah.
 **Structure:** Single scrollable landing page. Anchor-linked nav. Conversion-focused.
@@ -41,7 +41,7 @@ Each property is a **single-page landing** with anchor-linked navigation. The ma
 
 ## Navigation Philosophy
 
-- **Main site nav** shows only key topics: About, How It Works, Blog, Business. "About" and "How It Works" anchor-scroll to their sections. "Blog" navigates to `/blog`. "Business" is a dropdown linking to subdomains (Investors → direct.journey.storage, Consulting → consulting.journey.storage).
+- **Main site nav** shows only key topics: About, How It Works, Blog, Business. "About" and "How It Works" anchor-scroll to their sections. "Blog" navigates to `/blog`. "Business" is a dropdown linking to subdomains (Investors → direct.journey.storage, Consulting → advisory.journey.storage).
 - **Subdomain navs** scroll to sections within their respective landing pages. Each includes a link back to the main site.
 - **CTAs adapt per property:** "Join the Waitlist" (main), "Schedule a Call" (invest), "Book a Call" (consulting). Always visible in nav.
 
@@ -52,7 +52,7 @@ Each property is a **single-page landing** with anchor-linked navigation. The ma
 ### Phase 1: Launch (Now)
 - [ ] journey.storage — landing page + blog structure (2–3 seed articles)
 - [ ] direct.journey.storage — investor landing page
-- [ ] consulting.journey.storage — consulting landing page
+- [ ] advisory.journey.storage — consulting landing page
 - [ ] Legal pages (privacy, terms, disclaimer)
 
 ### Phase 2: Pre-Opening
@@ -76,7 +76,7 @@ Each property is a **single-page landing** with anchor-linked navigation. The ma
 |----------|-----------|----------|--------|
 | journey.storage | Comfort → Energy | Inspirational, human | High |
 | direct.journey.storage | Energy | Authoritative, data-driven | Medium |
-| consulting.journey.storage | Energy | Direct, pain-point-first | Medium |
+| advisory.journey.storage | Energy | Direct, pain-point-first | Medium |
 
 ### What Journey NEVER says on the site
 (from brand manual — enforced across all properties):
@@ -135,7 +135,7 @@ Journey operates as three distinct web properties under one domain, each serving
 ```
 journey.storage ................ Consumer-facing brand (main site)
 direct.journey.storage ......... Investor relations (Journey.Direct™)
-consulting.journey.storage ..... Consulting services (Journey.Consulting™)
+advisory.journey.storage ..... Consulting services (Journey.Consulting™)
 ```
 
 ### Routing logic
@@ -144,7 +144,7 @@ consulting.journey.storage ..... Consulting services (Journey.Consulting™)
 |----------|------|-----------|
 | `journey.storage` | Single-page landing + blog | One scrollable landing page with anchor-linked nav. Blog as the only sub-page route (`/blog`, `/blog/[slug]`). |
 | `direct.journey.storage` | Single-page landing | One scrollable landing page. Anchor-linked nav. No sub-pages. |
-| `consulting.journey.storage` | Single-page landing | One scrollable landing page. Anchor-linked nav. No sub-pages. |
+| `advisory.journey.storage` | Single-page landing | One scrollable landing page. Anchor-linked nav. No sub-pages. |
 
 ### Rationale
 The company is in early stage. Multiple sub-pages with limited content would feel hollow and undermine the premium brand perception. A single, well-crafted landing page per property delivers a complete, immersive experience without dead ends. As the company scales, pages can be split out from sections naturally.
@@ -183,7 +183,7 @@ direct.journey.storage
     ├── #contact
     └── (footer with legal disclaimer)
 
-consulting.journey.storage
+advisory.journey.storage
 └── / .......................... Consulting landing page (scrollable sections, anchor-linked nav)
     ├── #hero
     ├── #why-it-matters
@@ -216,7 +216,7 @@ consulting.journey.storage
 |------|-----|-----------|-----------------|
 | Investor Landing | `/` | Journey.Direct™ — Invest in Self-Storage | 1.0 |
 
-### consulting.journey.storage
+### advisory.journey.storage
 
 | Page | URL | Page Title | Sitemap Priority |
 |------|-----|-----------|-----------------|
@@ -231,7 +231,7 @@ consulting.journey.storage
 ```
 [LOGO: Journey.storage™]     About · How It Works · Blog · Business ▾     [CTA: Join the Waitlist]
                                                           ├── Investors → direct.journey.storage
-                                                          └── Consulting → consulting.journey.storage
+                                                          └── Consulting → advisory.journey.storage
 ```
 
 - Nav shows only key topics — not a link for every landing page section.
@@ -250,7 +250,7 @@ consulting.journey.storage
 - Link back to main site: journey.storage.
 - Mobile: Same fullscreen overlay pattern.
 
-### consulting.journey.storage — Nav
+### advisory.journey.storage — Nav
 
 ```
 [LOGO: Journey.Consulting™ or Journey.storage™ + "Consulting" badge]     [anchor links]     [CTA: Book a Call]
@@ -292,7 +292,7 @@ consulting.journey.storage
 | Google Analytics 4 | Traffic, attribution, conversion tracking | All three properties |
 | Google Tag Manager | Centralized tag management | All three properties |
 | Google Search Console | SEO monitoring, indexing, Core Web Vitals | All three properties (registered separately per subdomain) |
-| Calendly (or Cal.com) | Call scheduling | direct.journey.storage, consulting.journey.storage |
+| Calendly (or Cal.com) | Call scheduling | direct.journey.storage, advisory.journey.storage |
 | Resend (or SendGrid) | Transactional email (waitlist confirmation, investor inquiry autoresponders) | journey.storage, direct.journey.storage |
 | Meta Pixel | Paid social attribution, audience building | All three properties |
 | Vercel Analytics | Real-user performance metrics | All three properties |
@@ -320,7 +320,7 @@ consulting.journey.storage
 - `WebSite` — on journey.storage (with SearchAction for future site search)
 - `LocalBusiness` — added per-facility once locations open
 - `Article` — on each blog post
-- `Service` — on consulting.journey.storage
+- `Service` — on advisory.journey.storage
 
 **Subdomain SEO notes:**
 - Each subdomain is registered separately in Google Search Console.
@@ -383,7 +383,7 @@ journey-storage/
 ├── apps/
 │   ├── main/          ← journey.storage (consumer site + blog)
 │   ├── direct/        ← direct.journey.storage (investor landing)
-│   └── consulting/    ← consulting.journey.storage (consulting landing)
+│   └── consulting/    ← advisory.journey.storage (consulting landing)
 │
 ├── packages/
 │   └── ui/            ← Shared components, design tokens, utilities

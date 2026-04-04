@@ -16,7 +16,7 @@
 | About | Nav link | Scrolls to About section |
 | How It Works | Nav link | Scrolls to How It Works section |
 | Blog | Nav link | Navigates to /blog |
-| Business ▾ | Dropdown | "Investors" → direct.journey.storage · "Consulting" → consulting.journey.storage |
+| Business ▾ | Dropdown | "Investors" → direct.journey.storage · "Consulting" → advisory.journey.storage |
 | Join the Waitlist | CTA button | Scrolls to Waitlist section |
 
 ---
@@ -179,7 +179,7 @@
 > **Body:** Jonah M. Hall has spent nearly a decade in self-storage — acquiring, building, and operating over $200M in assets across 17 facilities. He left it all behind to start Journey: a company built on the belief that storage should serve people, not the other way around. 
 >
 > **Link 1:** Learn more about our investment platform → `links to direct.journey.storage`
-> **Link 2:** Explore our consulting division → `links to consulting.journey.storage`
+> **Link 2:** Explore our consulting division → `links to advisory.journey.storage`
 
 ---
 
@@ -221,7 +221,7 @@
 >
 > **Column 2 — Company:** About · How It Works · Blog · Locations
 >
-> **Column 3 — Business:** Investors (→ direct.journey.storage) · Consulting (→ consulting.journey.storage)
+> **Column 3 — Business:** Investors (→ direct.journey.storage) · Consulting (→ advisory.journey.storage)
 >
 > **Column 4 — Legal:** Privacy Policy · Terms of Service · Disclaimer
 >

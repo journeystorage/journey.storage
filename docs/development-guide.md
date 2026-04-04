@@ -13,9 +13,9 @@
 **DO NOT build yet (Phase 2):**
 - ❌ /blog and /blog/[slug] — blog pages
 - ❌ direct.journey.storage — investor landing page
-- ❌ consulting.journey.storage — consulting landing page
+- ❌ advisory.journey.storage — consulting landing page
 
-Phase 2 items should not have routes, components, or placeholder pages created. They do not exist yet. The nav links for Blog should point to `#` with a `coming soon` tooltip or simply be omitted from nav until Phase 2. The Business dropdown links (Investors, Consulting) should point to their future subdomain URLs (direct.journey.storage, consulting.journey.storage) — they will resolve when those sites are built.
+Phase 2 items should not have routes, components, or placeholder pages created. They do not exist yet. The nav links for Blog should point to `#` with a `coming soon` tooltip or simply be omitted from nav until Phase 2. The Business dropdown links (Investors, Consulting) should point to their future subdomain URLs (direct.journey.storage, advisory.journey.storage) — they will resolve when those sites are built.
 
 ---
 
@@ -146,7 +146,7 @@ Build in this exact order. Complete each step before moving to the next.
 1. Create src/lib/constants.ts with:
    - Brand colors object
    - Section IDs: 'hero', 'life-moments', 'about', 'how-it-works', 'differentiators', 'locations', 'founded-by', 'waitlist'
-   - External URLs: direct.journey.storage, consulting.journey.storage
+   - External URLs: direct.journey.storage, advisory.journey.storage
    - Social media URLs (placeholder until confirmed)
 
 2. Create src/app/layout.tsx:
@@ -270,7 +270,7 @@ src/app/page.tsx imports all sections in order:
 
 ### Nav Behavior
 - Blog link: points to `#` for Phase 1 (blog not built yet). Add `title="Coming soon"` attribute. OR omit Blog from nav entirely until Phase 2 — your choice.
-- Business dropdown: "Investors" links to `https://direct.journey.storage`, "Consulting" links to `https://consulting.journey.storage`. These are external links. They won't resolve until Phase 2 — that's fine. The nav structure is correct now.
+- Business dropdown: "Investors" links to `https://direct.journey.storage`, "Consulting" links to `https://advisory.journey.storage`. These are external links. They won't resolve until Phase 2 — that's fine. The nav structure is correct now.
 
 ### What NOT to Build
 - No blog routes or components
@@ -417,7 +417,7 @@ Phase 2B: Investor Landing Page
 - Content from platform deck + content doc (to be created)
 
 Phase 2C: Consulting Landing Page
-- Set up consulting.journey.storage subdomain in Vercel
+- Set up advisory.journey.storage subdomain in Vercel
 - Build single-page landing (same stack, shared design system)
 - Content from consulting one-pager + content doc (to be created)
 ```

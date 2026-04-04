@@ -17,12 +17,12 @@ export const metadata: Metadata = {
   title: 'Journey.Advisory™ — Fractional Acquisitions & Advisory | Journey.Storage™',
   description:
     'Institutional-grade self-storage advisory without hiring a full-time team. Direct access to $200M+ in transaction expertise. Monthly subscription, cancel anytime.',
-  metadataBase: new URL('https://consulting.journey.storage'),
+  metadataBase: new URL('https://advisory.journey.storage'),
   openGraph: {
     title: 'Journey.Advisory™ — Fractional Acquisitions & Advisory',
     description:
       'Institutional-grade self-storage advisory without hiring a full-time team. Direct access to $200M+ in transaction expertise.',
-    url: 'https://consulting.journey.storage',
+    url: 'https://advisory.journey.storage',
     siteName: 'Journey.Advisory™',
     locale: 'en_US',
     type: 'website',
