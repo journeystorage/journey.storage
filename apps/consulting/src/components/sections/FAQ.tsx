@@ -8,19 +8,19 @@ import { sectionIds } from '@/lib/constants'
 const faqs = [
   {
     q: 'What exactly do I get in an "underwriting analysis"?',
-    a: 'A full financial model built from the actual rent roll and operating data, not a broker\u2019s rosy pro forma. Revenue projections, expense assumptions, yield analysis, scenario modeling, and a walkthrough call so you understand every number and can make a decision with confidence.',
+    a: 'A full set of projections based on an actual rent roll and operating data, not a broker\u2019s rosy pro forma. Revenue projections, expense assumptions, yield analysis, scenario modeling, and a walkthrough call so you understand every number and can make a decision with confidence.',
   },
   {
     q: 'Do I need to be an experienced investor to use this?',
-    a: 'No. Whether you\u2019re evaluating your first self-storage deal or your fiftieth, the underwriting adapts to where you are. The point is to give you the analytical clarity that normally requires years of industry-specific experience.',
+    a: 'No. Whether you\u2019re evaluating your first self-storage deal or your fiftieth, our team will adapt to where you are. The point is to give you the analytical clarity that normally requires years of industry-specific experience.',
   },
   {
     q: 'Can I bring you a deal that\u2019s time-sensitive?',
     a: 'Yes, especially at the Pursuit and Command tiers, which include priority response. Self-storage deals move fast. So do we.',
   },
   {
-    q: 'What if I need help beyond underwriting, due diligence, financing, closing?',
-    a: 'The Command tier includes full transaction coordination. For Scout and Pursuit subscribers, single-project engagements and retainer + success fee structures are available on request.',
+    q: 'What if I need help beyond underwriting and feasibility?',
+    a: 'The Command tier includes full transaction coordination, operational support and more. For Scout and Pursuit subscribers, single-project engagements and retainer + success fee structures are available on request.',
   },
   {
     q: 'Is there a long-term commitment?',

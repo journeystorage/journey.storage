@@ -47,7 +47,7 @@ export default function FinalCTA() {
           </motion.h2>
 
           <motion.p className="mt-5 mx-auto max-w-[480px] text-body leading-[1.75] text-warm-white/45" {...anim(0.2)}>
-            No sales team. No intake form. A direct conversation about your deals, your market, and whether Journey.Consulting&trade; is the right fit for you.
+            No sales team. No intake form. A direct conversation about your deals, your market, and whether Journey.Advisory&trade; is the right fit for you.
           </motion.p>
 
           <motion.div className="mt-10" {...anim(0.3)}>

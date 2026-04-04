@@ -29,37 +29,35 @@ export default function Hero() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-orange" />
           </span>
-          <span className="text-label font-bold uppercase tracking-[0.2em] text-warm-white/70">Consulting division</span>
+          <span className="flex flex-col leading-tight">
+            <span className="text-[0.9rem] font-black tracking-[0.08em] text-warm-white/90">JOURNEY.<span className="font-light">ADVISORY</span>&trade;</span>
+            <span className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-warm-white/40">Consulting &amp; Operations</span>
+          </span>
         </div>
 
         <h1
-          className="hero-fade-up max-w-[820px] text-[2.75rem] md:text-[3.5rem] lg:text-[4.5rem] xl:text-[5rem] font-black leading-[0.95] text-warm-white"
+          className="hero-fade-up max-w-[820px] text-[2.35rem] md:text-[3.5rem] lg:text-[4.5rem] xl:text-[5rem] font-black leading-[0.95] text-warm-white"
           style={{ animationDelay: '0.15s' }}
         >
-          Your next deal deserves better than a spreadsheet and a gut&nbsp;feeling.
+          <span className="hidden md:inline">Your next deal deserves better<br />than a spreadsheet<br />and a gut&nbsp;feeling.</span>
+          <span className="md:hidden">Your next deal<br />deserves better<br />than a spreadsheet<br />and a gut&nbsp;feeling.</span>
         </h1>
 
         <p
-          className="hero-fade-up mt-8 max-w-[580px] text-body leading-[1.75] text-warm-white/60"
+          className="hero-fade-up mt-6 max-w-[580px] md:max-w-[520px] text-base md:text-lg leading-[1.7] text-warm-white/70"
           style={{ animationDelay: '0.3s' }}
         >
-          Journey.Consulting&trade; gives you institutional-grade self-storage underwriting,the same expertise behind <strong className="font-semibold text-warm-white/80">$200M+ in transactions</strong>,at a monthly rate, with no hiring friction. Cancel anytime.
+          Journey.Advisory&trade; gives you institutional-grade self-storage expertise, the same expertise behind <strong className="font-semibold text-warm-white/80">$200M+ in transactions</strong>, at a monthly rate, with no hiring friction. Cancel anytime.
         </p>
 
-        <div className="hero-fade-up mt-10 flex flex-wrap items-center gap-4" style={{ animationDelay: '0.45s' }}>
+        <div className="hero-fade-up mt-8 flex flex-wrap items-center gap-4" style={{ animationDelay: '0.45s' }}>
           <a
             href={CALENDAR_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center rounded-sm bg-orange px-7 py-4 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
-            Schedule a call with Jonah
-          </a>
-          <a
-            href={`#${sectionIds.howItWorks}`}
-            className="inline-flex items-center gap-2 text-body-sm font-bold text-warm-white/50 transition-colors duration-150 hover:text-warm-white"
-          >
-            See how it works <span className="text-orange">&darr;</span>
+            Get Started
           </a>
         </div>
       </div>

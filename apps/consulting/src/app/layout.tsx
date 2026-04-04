@@ -14,16 +14,16 @@ const lato = Lato({
 const GTM_ID = 'GTM-NL5KP8QJ'
 
 export const metadata: Metadata = {
-  title: 'Journey.Consulting™ — Fractional Acquisitions & Underwriting | Journey.Storage™',
+  title: 'Journey.Advisory™ — Fractional Acquisitions & Advisory | Journey.Storage™',
   description:
-    'Institutional-grade self-storage underwriting without hiring a full-time team. Direct access to $200M+ in transaction expertise. Monthly subscription, cancel anytime.',
+    'Institutional-grade self-storage advisory without hiring a full-time team. Direct access to $200M+ in transaction expertise. Monthly subscription, cancel anytime.',
   metadataBase: new URL('https://consulting.journey.storage'),
   openGraph: {
-    title: 'Journey.Consulting™ — Fractional Acquisitions & Underwriting',
+    title: 'Journey.Advisory™ — Fractional Acquisitions & Advisory',
     description:
-      'Institutional-grade self-storage underwriting without hiring a full-time team. Direct access to $200M+ in transaction expertise.',
+      'Institutional-grade self-storage advisory without hiring a full-time team. Direct access to $200M+ in transaction expertise.',
     url: 'https://consulting.journey.storage',
-    siteName: 'Journey.Consulting™',
+    siteName: 'Journey.Advisory™',
     locale: 'en_US',
     type: 'website',
   },

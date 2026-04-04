@@ -1,25 +1,19 @@
 'use client'
 
 import { useRef } from 'react'
-import { Phone, Layers, Send } from 'lucide-react'
+import { Layers, Send } from 'lucide-react'
 import { motion, useInView, useReducedMotion } from 'framer-motion'
-import { sectionIds } from '@/lib/constants'
+import { CALENDAR_URL, sectionIds } from '@/lib/constants'
 
 const steps = [
   {
     number: '01',
-    title: 'Talk to Jonah.',
-    description: 'Book a 30-minute call. No sales team, no qualification process. You\u2019ll speak directly with Jonah about your deals, your market, and what kind of support makes sense.',
-    Icon: Phone,
-  },
-  {
-    number: '02',
     title: 'Choose your level of access.',
     description: 'Pick the tier that matches your deal flow, from a few analyses a month to unlimited access as an extension of your team.',
     Icon: Layers,
   },
   {
-    number: '03',
+    number: '02',
     title: 'Send us your deals.',
     description: 'Forward the OM, the rent roll, the broker\u2019s assumptions. We send back institutional-grade underwriting you can make decisions on, and a call to walk through every number.',
     Icon: Send,
@@ -55,11 +49,11 @@ export default function HowItWorks() {
         >
           <div className="flex items-center justify-center gap-3 mb-5">
             <div className="h-px w-8 bg-orange" />
-            <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">Three steps</span>
+            <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">Two steps</span>
             <div className="h-px w-8 bg-orange" />
           </div>
           <h2 className="text-h1 font-black text-warm-white leading-[1.0]">
-            From first call to first analysis,fast.
+            Simple by design.
           </h2>
         </motion.div>
 
@@ -76,7 +70,7 @@ export default function HowItWorks() {
             />
           </div>
 
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-12">
+          <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-12 max-w-[680px] mx-auto">
             {steps.map((step, i) => (
               <motion.div
                 key={step.number}
@@ -103,6 +97,11 @@ export default function HowItWorks() {
               </motion.div>
             ))}
           </div>
+
+          {/* Asterisk footnote */}
+          <p className="mt-10 text-center text-caption text-warm-white/25">
+            *Need guidance selecting your level? <a href={CALENDAR_URL} target="_blank" rel="noopener noreferrer" className="text-orange/60 hover:text-orange transition-colors duration-150">Schedule a call</a> with our team.
+          </p>
         </div>
       </div>
     </section>

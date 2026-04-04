@@ -1,4 +1,3 @@
-import { resolve } from 'path'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
@@ -7,9 +6,6 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: __dirname,
   images: {
     unoptimized: true,
-  },
-  turbopack: {
-    root: resolve(__dirname, '..', '..'),
   },
 }
 

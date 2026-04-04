@@ -51,19 +51,19 @@ export default function Founder() {
             </motion.div>
 
             <motion.h2 className="text-h2 font-black leading-snug text-black" {...anim(0.15)}>
-              Jonah M. Hall built this from inside the industry,not from above it.
+              Jonah M. Hall built this from inside the industry, not from above it.
             </motion.h2>
 
             <motion.p className="mt-6 text-body leading-[1.8] text-charcoal" {...anim(0.25)}>
-              In under a decade, Jonah has served in nearly every capacity in self-storage,acquisitions, development, construction, facility operations, property management, asset management, investor relations, capital raising, and deal structuring.
+              In under a decade, Jonah has served in nearly every capacity in self-storage, acquisitions, development, construction, facility operations, property management, asset management, investor relations, capital raising, and deal structuring.
             </motion.p>
 
             <motion.p className="mt-4 text-body leading-[1.8] text-charcoal" {...anim(0.35)}>
-              He co-founded Smartlock Self Storage&reg; and scaled it from inception to ~$70M+ in assets under management across 17 locations in three states, pioneering the autonomous customer journey. He then served as President &amp; Chief Investment Officer at Cedar Creek Capital&reg;, where he transformed a team of seventy into a high-performing operation of fifty-four,cutting nearly $1M in payroll while repositioning over $150M in existing assets and acquiring $60M in new ones.
+              He co-founded Smartlock Self Storage&reg; and scaled it from inception to ~$70M+ in assets under management across 17 locations in three states, pioneering the autonomous customer journey. He then served as President &amp; Chief Investment Officer at Cedar Creek Capital&reg;, where he transformed a team of seventy into a high-performing operation of fifty-four, cutting nearly $1M in payroll while repositioning over $150M in existing assets and acquiring $60M in new ones.
             </motion.p>
 
             <motion.p className="mt-4 text-body leading-[1.8] text-charcoal" {...anim(0.45)}>
-              In January 2026, Jonah exited both ventures to build the Journey.Storage&trade; ecosystem with a clean slate. <strong className="font-bold text-black">Journey.Consulting&trade; is where that experience becomes yours.</strong>
+              In January 2026, Jonah exited both ventures to build the Journey.Storage&trade; ecosystem with a clean slate. <strong className="font-bold text-black">Journey.Advisory&trade; is where that experience becomes yours.</strong>
             </motion.p>
           </div>
         </div>

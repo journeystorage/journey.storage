@@ -7,9 +7,9 @@ import { CALENDAR_URL, sectionIds } from '@/lib/constants'
 import { scrollToSection } from '@/lib/utils'
 
 const links = [
-  { label: 'How it works', id: sectionIds.howItWorks },
+  { label: 'Why Journey', id: sectionIds.problem },
+  { label: 'Services', id: sectionIds.solution },
   { label: 'Pricing', id: sectionIds.pricing },
-  { label: 'About', id: sectionIds.founder },
   { label: 'FAQ', id: sectionIds.faq },
 ]
 
@@ -79,7 +79,7 @@ export default function Navbar() {
               rel="noopener noreferrer"
               className="rounded-sm bg-orange px-5 py-2.5 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]"
             >
-              Schedule a call
+              Get Started
             </a>
           </div>
 
@@ -153,7 +153,7 @@ export default function Navbar() {
               rel="noopener noreferrer"
               className="block w-full rounded-sm bg-orange py-4 text-center text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99]"
             >
-              Schedule a call
+              Get Started
             </a>
           </div>
         </div>

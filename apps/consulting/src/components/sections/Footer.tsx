@@ -11,14 +11,13 @@ export default function Footer() {
           <div className="flex flex-col items-center gap-3 md:items-start">
             <Image src="/images/brand/logo-white-TM.svg" alt="Journey.Storage™ logo" width={140} height={32} className="w-[120px]" style={{ height: 'auto' }} />
             <p className="text-caption text-warm-white/25 text-center md:text-left">
-              Journey.Consulting&trade; &middot;<br />
+              Journey.Advisory&trade; &middot;<br />
               A Journey.Storage&trade; division
             </p>
           </div>
 
           <div className="flex flex-col items-center gap-1 md:items-end text-caption text-warm-white/25">
             <p>Dallas, TX &middot; <a href={externalUrls.mainSite} className="transition-colors duration-150 hover:text-warm-white/50">journey.storage</a></p>
-            <p><a href="mailto:jonah@journey.storage" className="transition-colors duration-150 hover:text-warm-white/50">jonah@journey.storage</a></p>
           </div>
         </div>
 

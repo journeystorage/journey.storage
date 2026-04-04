@@ -1,48 +1,61 @@
 'use client'
 
-import { useRef, useCallback, useEffect } from 'react'
+import { useRef, useCallback, useEffect, useState } from 'react'
 import { motion, useInView, useReducedMotion } from 'framer-motion'
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Check, Layers, Send } from 'lucide-react'
 import { CALENDAR_URL, sectionIds } from '@/lib/constants'
 
 const tiers = [
   {
     name: 'Scout',
     badge: null,
-    tagline: 'Entry access \u00b7 For the selective investor',
-    description: 'You\u2019re exploring the market or evaluating a small number of opportunities each month. You need expert eyes on the numbers before committing capital.',
+    price: '$7,500',
+    tier: 'Entry access',
+    description: 'Expert eyes on your next deal. Institutional-grade feasibility without the full-time hire.',
+    forWho: 'For the selective investor',
     features: [
       'Up to 3 complete underwriting analyses per month',
       'Institutional-grade financial modeling & yield projections',
       'Feasibility review and market viability assessment',
-      'Video call to discuss findings, strategy, and next steps',
+      'Buy-box definition and target market mapping',
+      'Video call to walk through findings and strategy',
+      'Direct access to Journey\u2019s team',
     ],
+    cta: 'Get started',
   },
   {
     name: 'Pursuit',
     badge: 'Most popular',
-    tagline: 'Active access \u00b7 For the active acquirer',
-    description: 'You\u2019re in acquisition mode. Multiple opportunities are in front of you simultaneously, and you need consistent, high-velocity underwriting support.',
+    price: '$15,000',
+    tier: 'Active access',
+    description: 'Feasibility for what\u2019s next. Advisory for what you already own. One subscription, both covered.',
+    forWho: 'For the acquirer',
     features: [
-      'Up to 10 complete analyses and feasibility studies per month',
-      'In-depth underwriting with scenario modeling',
+      'Up to 10 complete underwriting analyses and feasibility studies',
       'Deal sourcing support once your buy-box is defined',
-      'Unlimited video calls to discuss deals and strategy',
-      'Priority response, day or night',
+      'Operational review and revenue optimization for active facilities',
+      'Technology, marketing, and lease-up advisory',
+      'Financing strategy: debt structuring, lender positioning, refi timing',
+      'Unlimited video calls and priority response, day or night',
     ],
+    cta: 'Get started',
   },
   {
     name: 'Command',
     badge: null,
-    tagline: 'Full access \u00b7 For the portfolio builder',
-    description: 'You\u2019re a family office or a serious capital allocator. You want the full consulting capability functioning as an extension of your team.',
+    price: null,
+    tier: 'Full access',
+    description: 'Journey\u2019s full capability embedded in your team. Feasibility, advisory, execution. No limits.',
+    forWho: 'For the portfolio builder',
     features: [
       'Unlimited analyses, underwriting, and feasibility studies',
-      'Full transaction coordination and due diligence management',
-      'Financing coordination and vendor oversight',
+      'Full advisory: operations, financing, marketing, and tech stack',
+      'Transaction coordination and due diligence management',
       'Site inspection, audit support, and closing mechanics',
-      'Direct line to Jonah, treated as in-house resource',
+      'Direct line to Journey\u2019s team, treated as in-house resource',
+      'Single-project and success fee structures available',
     ],
+    cta: 'Schedule a call',
   },
 ]
 
@@ -52,6 +65,7 @@ export default function Pricing() {
   const isInView = useInView(ref, { once: true, margin: '-60px' })
   const prefersReducedMotion = useReducedMotion()
   const ease = [0.22, 1, 0.36, 1] as const
+  const [activeIndex, setActiveIndex] = useState(1)
 
   // Scroll to Pursuit (index 1) on mount — mobile only
   useEffect(() => {
@@ -59,7 +73,6 @@ export default function Pricing() {
     if (!el) return
     const isMobile = window.innerWidth < 768
     if (!isMobile) return
-    // Wait for layout to settle
     requestAnimationFrame(() => {
       const firstCard = el.firstElementChild as HTMLElement | null
       if (!firstCard) return
@@ -69,57 +82,89 @@ export default function Pricing() {
     })
   }, [])
 
-  const scroll = useCallback((direction: 'left' | 'right') => {
+  // Track scroll position to update active dot
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const onScroll = () => {
+      const firstCard = el.firstElementChild as HTMLElement | null
+      if (!firstCard) return
+      const cardWidth = firstCard.offsetWidth
+      const gap = 16
+      const index = Math.round(el.scrollLeft / (cardWidth + gap))
+      setActiveIndex(Math.min(Math.max(index, 0), tiers.length - 1))
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const scrollTo = useCallback((index: number) => {
     if (!scrollRef.current) return
-    const cardWidth = (scrollRef.current.firstElementChild as HTMLElement)?.offsetWidth ?? 300
+    const firstCard = scrollRef.current.firstElementChild as HTMLElement | null
+    if (!firstCard) return
+    const cardWidth = firstCard.offsetWidth
     const gap = 16
-    scrollRef.current.scrollBy({
-      left: direction === 'right' ? cardWidth + gap : -(cardWidth + gap),
+    scrollRef.current.scrollTo({
+      left: index * (cardWidth + gap),
       behavior: 'smooth',
     })
   }, [])
 
   return (
     <section ref={ref} id={sectionIds.pricing} className="relative overflow-hidden bg-black pt-12 pb-24 lg:pt-16 lg:pb-32">
+      {/* Ghost divider line */}
+      <div className="absolute top-0 inset-x-0 z-10 flex justify-center" aria-hidden="true">
+        <div className="h-px w-full max-w-[var(--container-content)] mx-5 md:mx-8 lg:mx-16 bg-gradient-to-r from-transparent via-orange/20 to-transparent" />
+      </div>
+
       <div className="pointer-events-none absolute inset-0 z-[1]" aria-hidden="true" style={{
         background: 'radial-gradient(ellipse 60% 50% at 50% 30%, rgba(232,98,42,0.04), transparent)',
       }} />
 
       <div className="relative z-10 mx-auto max-w-[var(--container-content)] px-5 md:px-8 lg:px-16">
         <motion.div
-          className="text-center mb-16 lg:mb-20"
+          className="text-center mb-12 lg:mb-16"
           initial={prefersReducedMotion ? undefined : { opacity: 0, y: 24 }}
           animate={isInView ? { opacity: 1, y: 0 } : undefined}
           transition={{ duration: 0.6, ease }}
         >
           <div className="flex items-center justify-center gap-3 mb-5">
             <div className="h-px w-8 bg-orange" />
-            <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">Levels of access</span>
+            <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">Choose your level</span>
             <div className="h-px w-8 bg-orange" />
           </div>
           <h2 className="text-h2 font-black text-warm-white leading-snug">
-            One model. Three levels. No lock-in.
+            Choose your level of&nbsp;access.
           </h2>
+
+          {/* Compact two-step indicator */}
+          <div className="mt-8 flex items-center justify-center gap-3 md:gap-4">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-warm-white/[0.08] bg-warm-white/[0.03]">
+                <Layers size={14} className="text-orange" strokeWidth={2} />
+              </div>
+              <div className="text-left">
+                <span className="block text-[0.55rem] font-bold uppercase tracking-[0.25em] text-orange">01</span>
+                <span className="block text-[0.75rem] font-bold text-warm-white/70">Choose your level</span>
+              </div>
+            </div>
+
+            <div className="h-px w-6 md:w-10 bg-warm-white/10" />
+
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-warm-white/[0.08] bg-warm-white/[0.03]">
+                <Send size={14} className="text-orange" strokeWidth={2} />
+              </div>
+              <div className="text-left">
+                <span className="block text-[0.55rem] font-bold uppercase tracking-[0.25em] text-orange">02</span>
+                <span className="block text-[0.75rem] font-bold text-warm-white/70">Send us your deals</span>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
-        {/* Carousel wrapper with side arrows (mobile) / Grid (desktop) */}
+        {/* Carousel wrapper / Grid (desktop) */}
         <div className="relative">
-          {/* Side arrows — mobile only */}
-          <button
-            onClick={() => scroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/70 backdrop-blur-sm border border-warm-white/[0.10] text-warm-white/50 active:scale-90 cursor-pointer md:hidden"
-            aria-label="Previous plan"
-          >
-            <ChevronLeft size={16} strokeWidth={2} />
-          </button>
-          <button
-            onClick={() => scroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-black/70 backdrop-blur-sm border border-warm-white/[0.10] text-warm-white/50 active:scale-90 cursor-pointer md:hidden"
-            aria-label="Next plan"
-          >
-            <ChevronRight size={16} strokeWidth={2} />
-          </button>
-
           <div
             ref={scrollRef}
             className="flex md:grid md:grid-cols-3 gap-4 md:gap-6 lg:gap-8 overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none -mx-5 px-5 md:mx-0 md:px-0 pt-4 pb-2 md:pt-0 md:pb-0"
@@ -146,8 +191,19 @@ export default function Pricing() {
                   )}
 
                   <h3 className="text-2xl font-black text-warm-white">{tier.name}</h3>
-                  <p className="mt-1 text-caption uppercase tracking-[0.1em] text-orange">{tier.tagline}</p>
-                  <p className="mt-4 text-body-sm leading-[1.7] text-warm-white/40">{tier.description}</p>
+                  <p className="mt-1 text-caption uppercase tracking-[0.1em] text-orange">{tier.tier}</p>
+                  <p className="mt-2 text-caption text-warm-white/25">{tier.forWho}</p>
+                  <div className="mt-3 h-px w-full bg-warm-white/[0.06]" />
+                  {tier.price ? (
+                    <p className="mt-4 text-3xl font-black text-warm-white">
+                      {tier.price}<span className="text-base font-bold text-warm-white/40">/month</span>
+                    </p>
+                  ) : (
+                    <p className="mt-4 text-3xl font-black text-warm-white/30">
+                      Let&apos;s talk
+                    </p>
+                  )}
+                  <p className="mt-3 text-[0.8rem] leading-[1.6] text-warm-white/40">{tier.description}</p>
 
                   <ul className="mt-6 flex-1 space-y-3">
                     {tier.features.map((feature) => (
@@ -158,9 +214,8 @@ export default function Pricing() {
                     ))}
                   </ul>
 
-                  <p className="mt-6 text-caption text-warm-white/25 leading-relaxed">
-                    Monthly subscription.<br />
-                    Cancel with 30 days&apos; notice.
+                  <p className="mt-6 text-[0.65rem] text-warm-white/20 leading-relaxed">
+                    Monthly subscription. Cancel with 30 days&apos; notice.
                   </p>
 
                   <a
@@ -173,11 +228,32 @@ export default function Pricing() {
                         : 'border border-warm-white/[0.1] text-warm-white hover:border-warm-white/20'
                     }`}
                   >
-                    Schedule a call
+                    {tier.cta} <span>&rarr;</span>
                   </a>
                 </motion.div>
               )
             })}
+          </div>
+
+          {/* Dot indicators — mobile only */}
+          <div className="flex items-center justify-center gap-2 mt-6 md:hidden">
+            {tiers.map((tier, i) => (
+              <button
+                key={tier.name}
+                onClick={() => scrollTo(i)}
+                className="group flex items-center gap-1.5 cursor-pointer py-1"
+                aria-label={`Go to ${tier.name}`}
+              >
+                <span
+                  className="block rounded-full transition-all duration-300"
+                  style={{
+                    width: i === activeIndex ? 24 : 6,
+                    height: 6,
+                    backgroundColor: i === activeIndex ? '#E8622A' : 'rgba(245,240,232,0.15)',
+                  }}
+                />
+              </button>
+            ))}
           </div>
         </div>
       </div>

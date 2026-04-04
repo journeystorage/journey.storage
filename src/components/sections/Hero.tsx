@@ -36,7 +36,7 @@ export default function Hero() {
     <section id={sectionIds.hero} className="grain relative h-screen min-h-[700px] overflow-hidden bg-black">
       <motion.div className="absolute inset-0 lg:!transform-none" style={parallaxStyle}>
         <Image
-          src="/images/hero/home-hero-bg.webp"
+          src="/images/hero/home-hero-bg-v2.webp"
           alt="A woman standing at the threshold between her apartment and a modern storage facility"
           fill
           className="object-cover object-center lg:scale-125 lg:object-[center_15%]"
