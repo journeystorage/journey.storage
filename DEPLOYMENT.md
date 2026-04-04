@@ -35,13 +35,11 @@ Each app is deployed as a **separate Hostinger instance** from the same GitHub r
 |--------------------|--------------------|
 | Framework preset   | Next.js            |
 | Branch             | main               |
-| Node version       | 22.x               |
+| Node version       | 20.x               |
 | Build command      | `npm run build`    |
 | Output directory   | `.next`            |
 
-**How it works:** Hostinger runs `npm run build` (which is `next build`) and then serves using its own internal `next start`. The root `next.config.ts` has **no** `output: 'standalone'` — it uses standard Next.js output. Hostinger's Framework preset handles serving automatically.
-
-> **WARNING:** The root `next.config.ts` must NOT have `output: 'standalone'`. The Framework preset mode does not use the `"start"` script from package.json — it runs its own `next start` internally and expects standard `.next/` output.
+**How it works:** `npm run build` runs `next build` with `output: 'standalone'`, then copies `public/` and `.next/static/` into `.next/standalone/`. Hostinger's Next.js preset detects the standalone output and serves via `node .next/standalone/server.js` automatically — single process, no worker spawning.
 
 ### Consulting
 
@@ -82,7 +80,7 @@ These files control deployment. Changing them incorrectly **will break productio
 
 | File | Purpose | Safe to edit? |
 |------|---------|---------------|
-| `next.config.ts` (root) | Main site Next.js config | **NO** — must NOT have `output: 'standalone'` |
+| `next.config.ts` (root) | Main site Next.js config (has standalone) | **NO** — must keep `output: 'standalone'` and `outputFileTracingRoot` |
 | `apps/consulting/next.config.ts` | Consulting config (has standalone) | Only if you understand the build:consulting flow |
 | `package.json` `"build"` script | Main site build | **NO** — must be plain `next build` |
 | `package.json` `"build:consulting"` script | Consulting build | Only if you understand the file replacement flow |
@@ -109,7 +107,7 @@ Hostinger's shared hosting has a **120 process limit** shared across all sites o
 - **Consulting** uses `output: 'standalone'` + Custom preset with explicit Start command → single process
 - **Main site** uses Framework preset which runs its own `next start` → multiple workers
 
-**Future improvement:** Switch the main site to Custom preset with standalone to reduce process count. This requires changing the Hostinger settings from "Next.js" preset to "Custom" preset with Start command: `npm run start -- -p $PORT`, and adding `output: 'standalone'` to the root `next.config.ts`.
+Both sites now use standalone mode, keeping total process count well below the 120 limit.
 
 ### Process limit strategy
 Current average: ~90-96 of 120. To reduce:
@@ -156,10 +154,11 @@ npm run dev:investors
 
 ## Changelog
 
-### 2026-04-04 — Post-incident review
-- **Incident:** 21 commits over several hours trying to fix deploy after design changes. Root cause: `next.config.ts` was modified to add `output: 'standalone'` but the Hostinger main site uses Framework preset which ignores the `"start"` script and expects standard `.next/` output. Additionally, 1.1GB of screenshots were accidentally committed via `git add -A`.
-- **Resolution:** Reverted to `a1f592b` (last working state), re-applied design changes cleanly, flushed CDN cache.
-- **Changes to this doc:** Rewrote to reflect actual Hostinger configuration (Framework preset for main, Custom for consulting). Added Critical Files table, Post-Deploy Checklist, CDN cache instructions, and process limit strategy. Clarified the asymmetry between main site and consulting deploy modes.
+### 2026-04-04 — Standalone migration complete + post-incident review
+- **Main site migrated to standalone** — both sites now run as single process. Process count dropped from ~90-96 to ~13.
+- **Incident (2026-04-03):** 21 commits over several hours trying to fix deploy after design changes. Root causes: CDN cache serving stale assets, 1.1GB of screenshots accidentally committed via `git add -A`, and multiple config changes without understanding the full deploy flow.
+- **Resolution:** Reverted to `a1f592b`, re-applied design changes cleanly, flushed CDN cache, then migrated main site to standalone.
+- **Changes to this doc:** Full rewrite with Critical Files table, Post-Deploy Checklist, CDN cache instructions, process limit strategy, and changelog.
 
 ### 2026-04-02 — Initial standalone migration (a1f592b)
 - Added `output: 'standalone'` to consulting config
