@@ -78,8 +78,10 @@ export default function Solution() {
                 <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">Here&apos;s what replacing guesswork looks like</span>
                 <div className="h-px w-8 bg-orange" />
               </div>
-              <h2 className="text-h2 md:text-h1 font-black leading-[1.08] md:leading-[1.0] text-warm-white max-w-[700px] mx-auto">
-                The output of an entire self storage team, without building any of&nbsp;it.
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.95] text-warm-white max-w-[700px] mx-auto">
+                A full team&apos;s output,
+                <br />
+                <span className="font-light text-warm-white/30">without building&nbsp;one.</span>
               </h2>
             </motion.div>
 

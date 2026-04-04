@@ -6,6 +6,18 @@ Log interno de alterações de design, arquitetura e funcionalidades.
 
 ## 2026-04-04
 
+### Consulting — Copy das headlines condensada (padrão 2 linhas)
+- Todas as section headlines agora seguem o padrão: 1 linha bold + 1 linha thin
+- Problem: "Most investors enter self-storage with capital and conviction. / What they don't have is the expertise." → "Capital isn't enough. / Expertise is."
+- Solution: "The output of an entire self storage team, / without building any of it." → "A full team's output, / without building one."
+- Pricing label: "Choose your level" → "Pricing" (eliminada redundância com headline)
+- Pricing headline mantida: "Choose your level / of access."
+
+### Consulting — Tipografia das headlines alinhada com main site
+- Todas as h2 de seção: `text-3xl md:text-4xl lg:text-5xl` → `text-4xl md:text-5xl lg:text-6xl`
+- Seções afetadas: Problem, Solution, Pricing, FAQ
+- Agora idêntico ao main site (`text-4xl/5xl/6xl font-black leading-[0.95]`)
+
 ### Main site — Hero background atualizado
 - Imagem substituída: `home-hero-bg.webp` → `home-hero-bg-v2.webp`
 - Nova imagem convertida de JPG para WebP (qualidade máxima, ~1.3MB)

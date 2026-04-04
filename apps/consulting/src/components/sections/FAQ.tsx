@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { motion, useInView, useReducedMotion, AnimatePresence } from 'framer-motion'
-import { ChevronDown } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { sectionIds } from '@/lib/constants'
 
 const faqs = [
@@ -28,22 +28,26 @@ const faqs = [
   },
 ]
 
-function AccordionItem({ q, a, open, onToggle }: { q: string; a: string; open: boolean; onToggle: () => void }) {
+function AccordionItem({ item, isOpen, onToggle }: { item: typeof faqs[number]; isOpen: boolean; onToggle: () => void }) {
   return (
-    <div className="border-b border-black/[0.08]">
+    <div className="border-b border-black/[0.06]">
       <button
         onClick={onToggle}
-        className="flex w-full items-center justify-between gap-4 py-6 text-left cursor-pointer"
-        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-4 py-6 text-left cursor-pointer group"
+        aria-expanded={isOpen}
       >
-        <span className="text-body font-bold text-black">{q}</span>
-        <ChevronDown
-          size={18}
-          className={`shrink-0 text-stone transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-        />
+        <span className={`text-base md:text-lg font-bold transition-colors duration-200 ${isOpen ? 'text-black' : 'text-black/60 group-hover:text-black/80'}`}>
+          {item.q}
+        </span>
+        <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors duration-200 ${isOpen ? 'bg-orange' : 'bg-black/[0.04] group-hover:bg-black/[0.08]'}`}>
+          <Plus
+            size={14}
+            className={`transition-transform duration-300 ${isOpen ? 'rotate-45 text-warm-white' : 'text-black/40'}`}
+          />
+        </div>
       </button>
       <AnimatePresence initial={false}>
-        {open && (
+        {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -51,8 +55,8 @@ function AccordionItem({ q, a, open, onToggle }: { q: string; a: string; open: b
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            <p className="pb-6 text-body-sm leading-[1.75] text-charcoal max-w-[640px]">
-              {a}
+            <p className="pb-6 text-body-sm leading-[1.7] text-charcoal max-w-[600px]">
+              {item.a}
             </p>
           </motion.div>
         )}
@@ -69,7 +73,7 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   return (
-    <section ref={ref} id={sectionIds.faq} className="relative overflow-hidden bg-warm-white py-16 lg:py-20">
+    <section ref={ref} id={sectionIds.faq} className="relative overflow-hidden bg-warm-white py-20 lg:py-28">
       <div className="relative z-10 mx-auto max-w-[var(--container-content)] px-5 md:px-8 lg:px-16">
         <motion.div
           className="text-center mb-14 lg:mb-16"
@@ -79,11 +83,13 @@ export default function FAQ() {
         >
           <div className="flex items-center justify-center gap-3 mb-5">
             <div className="h-px w-8 bg-orange" />
-            <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">Common questions</span>
+            <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">FAQ</span>
             <div className="h-px w-8 bg-orange" />
           </div>
-          <h2 className="text-h2 font-black text-black leading-snug">
-            What you probably want to know.
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-black leading-[0.95]">
+            Questions?
+            <br />
+            <span className="font-light text-black/30">Answered.</span>
           </h2>
         </motion.div>
 
@@ -96,9 +102,8 @@ export default function FAQ() {
           {faqs.map((faq, i) => (
             <AccordionItem
               key={i}
-              q={faq.q}
-              a={faq.a}
-              open={openIndex === i}
+              item={faq}
+              isOpen={openIndex === i}
               onToggle={() => setOpenIndex(openIndex === i ? null : i)}
             />
           ))}

@@ -130,11 +130,13 @@ export default function Pricing() {
         >
           <div className="flex items-center justify-center gap-3 mb-5">
             <div className="h-px w-8 bg-orange" />
-            <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">Choose your level</span>
+            <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">Pricing</span>
             <div className="h-px w-8 bg-orange" />
           </div>
-          <h2 className="text-h2 font-black text-warm-white leading-snug">
-            Choose your level of&nbsp;access.
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-warm-white leading-[0.95]">
+            Choose your level
+            <br />
+            <span className="font-light text-warm-white/30">of&nbsp;access.</span>
           </h2>
 
           {/* Compact two-step indicator */}

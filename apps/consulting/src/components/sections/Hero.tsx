@@ -3,7 +3,7 @@ import { CALENDAR_URL, sectionIds } from '@/lib/constants'
 
 export default function Hero() {
   return (
-    <section id={sectionIds.hero} className="relative min-h-[100vh] flex items-end overflow-hidden bg-black">
+    <section id={sectionIds.hero} className="relative h-screen min-h-[700px] flex items-end lg:items-center overflow-hidden bg-black">
       {/* Background image */}
       <Image
         src="/images/hero/consulting-hero-bg.webp"
@@ -23,7 +23,7 @@ export default function Hero() {
       {/* Grain */}
       <div className="grain absolute inset-0 pointer-events-none" />
 
-      <div className="relative z-10 mx-auto w-full max-w-[var(--container-content)] px-5 md:px-8 lg:px-16 pt-40 pb-16 lg:pt-48 lg:pb-24">
+      <div className="relative z-10 mx-auto w-full max-w-[var(--container-content)] px-5 md:px-8 lg:px-16 pb-[14vh] lg:pb-0">
         <div className="hero-fade-up inline-flex items-center gap-2.5 mb-8 rounded-full border border-warm-white/[0.10] bg-black/40 backdrop-blur-md px-5 py-2.5">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange opacity-60" />
@@ -52,9 +52,7 @@ export default function Hero() {
 
         <div className="hero-fade-up mt-8 flex flex-wrap items-center gap-4" style={{ animationDelay: '0.45s' }}>
           <a
-            href={CALENDAR_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`#${sectionIds.pricing}`}
             className="inline-flex items-center justify-center rounded-sm bg-orange px-7 py-4 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             Get Started

@@ -48,15 +48,15 @@ export default function Navbar() {
         <nav className="mx-auto flex h-[64px] max-w-[var(--container-content)] items-center justify-between px-5 lg:h-[72px] lg:px-16" aria-label="Main navigation">
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="relative block cursor-pointer"
+            className="relative block min-w-[140px] lg:min-w-[180px] cursor-pointer"
             aria-label="Scroll to top"
           >
             <Image
               src="/images/brand/logo-white-TM.svg"
               alt="Journey.Storage™ logo"
-              width={160}
-              height={36}
-              className="w-[120px] lg:w-[160px]"
+              width={180}
+              height={40}
+              className="w-[140px] lg:w-[180px]"
               style={{ height: 'auto' }}
               priority
             />
@@ -72,16 +72,14 @@ export default function Navbar() {
                 {link.label}
               </button>
             ))}
-
-            <a
-              href={CALENDAR_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-sm bg-orange px-5 py-2.5 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Get Started
-            </a>
           </div>
+
+          <button
+            onClick={() => handleNav(sectionIds.pricing)}
+            className="hidden lg:inline-flex rounded-sm bg-orange px-5 py-2.5 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          >
+            Get Started
+          </button>
 
           <button
             onClick={() => setMobileOpen(true)}
@@ -112,8 +110,8 @@ export default function Navbar() {
             <Image
               src="/images/brand/logo-white-TM.svg"
               alt="Journey.Storage™"
-              width={120}
-              height={28}
+              width={140}
+              height={32}
               style={{ height: 'auto' }}
             />
             <button
@@ -147,14 +145,12 @@ export default function Navbar() {
 
           {/* CTA at bottom */}
           <div className="relative z-10 px-8 pb-8">
-            <a
-              href={CALENDAR_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full rounded-sm bg-orange py-4 text-center text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99]"
+            <button
+              onClick={() => { handleNav(sectionIds.pricing); setMobileOpen(false) }}
+              className="block w-full rounded-sm bg-orange py-4 text-center text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
             >
               Get Started
-            </a>
+            </button>
           </div>
         </div>
       )}

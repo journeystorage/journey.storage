@@ -68,10 +68,11 @@ export default function Problem() {
               <div className="h-px w-8 bg-orange" />
             </div>
 
-            <h2 className="text-h1 font-black leading-[1.08] text-black max-w-[720px] mx-auto">
-              Most investors enter self-storage with capital and conviction.{' '}
-              <span className="text-orange">
-                What they don&apos;t have is the&nbsp;expertise.
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-[0.95] text-black max-w-[720px] mx-auto">
+              Capital isn&apos;t enough.
+              <br />
+              <span className="font-light text-black/30">
+                Expertise&nbsp;is.
               </span>
             </h2>
           </motion.div>
