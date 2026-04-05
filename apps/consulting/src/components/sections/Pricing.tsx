@@ -22,6 +22,7 @@ const tiers = [
       'Direct access to Journey\u2019s team',
     ],
     cta: 'Get started',
+    href: 'https://buy.stripe.com/3cI14oaMr6jk6Mh8ll0sU00',
   },
   {
     name: 'Pursuit',
@@ -39,6 +40,7 @@ const tiers = [
       'Unlimited video calls and priority response, day or night',
     ],
     cta: 'Get started',
+    href: 'https://buy.stripe.com/aFa7sM07N0Z08UpcBB0sU02',
   },
   {
     name: 'Command',
@@ -56,6 +58,7 @@ const tiers = [
       'Single-project and success fee structures available',
     ],
     cta: 'Schedule a call',
+    href: CALENDAR_URL,
   },
 ]
 
@@ -221,7 +224,7 @@ export default function Pricing() {
                   </p>
 
                   <a
-                    href={CALENDAR_URL}
+                    href={tier.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={`mt-6 block w-full rounded-sm py-3.5 text-center text-body-sm font-bold transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99] ${

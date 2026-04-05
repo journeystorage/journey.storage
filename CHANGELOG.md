@@ -4,6 +4,22 @@ Log interno de alterações de design, arquitetura e funcionalidades.
 
 ---
 
+## 2026-04-05
+
+### Main site — Hero background atualizado (v2-box)
+- Imagem substituída: `home-hero-bg-v2.webp` → `home-hero-bg-v2-box.webp`
+- Nova imagem com caixas branded Journey.Storage visíveis na composição
+- Convertida de JPG para WebP (near-lossless, 1920x1072, ~1.3MB)
+- Posicionamento preservado em todos os viewports — mesmas classes CSS
+
+### Consulting — Pricing CTAs com Stripe checkout
+- Scout e Pursuit agora apontam para links de pagamento Stripe
+- Scout: `buy.stripe.com/...0sU00` | Pursuit: `buy.stripe.com/...0sU02`
+- Command mantém link do Google Calendar (Schedule a call)
+- Refatorado: cada tier agora tem campo `href` próprio em vez de `CALENDAR_URL` fixo
+
+---
+
 ## 2026-04-04
 
 ### Consulting — Copy das headlines condensada (padrão 2 linhas)
