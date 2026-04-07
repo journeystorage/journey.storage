@@ -1,10 +1,25 @@
+'use client'
+
+import { useState, useCallback } from 'react'
+import Navbar from '@/components/layout/Navbar'
+import ComingSoonHero from '@/components/sections/ComingSoonHero'
+import LeadCaptureModal from '@/components/ui/LeadCaptureModal'
+import { CALENDAR_URL } from '@/lib/constants'
+
 export default function Home() {
+  const [modalOpen, setModalOpen] = useState(false)
+  const openModal = useCallback(() => setModalOpen(true), [])
+  const closeModal = useCallback(() => setModalOpen(false), [])
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-black">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-white">Journey.Direct™</h1>
-        <p className="mt-4 text-lg text-white/50">Coming soon.</p>
-      </div>
+    <main>
+      <Navbar onBookCall={openModal} />
+      <ComingSoonHero onBookCall={openModal} />
+      <LeadCaptureModal
+        open={modalOpen}
+        onClose={closeModal}
+        redirectUrl={CALENDAR_URL}
+      />
     </main>
   )
 }
