@@ -77,7 +77,7 @@ export default function LocationsMap() {
   const handleZipSubmit = (e: FormEvent) => { e.preventDefault(); if (zip.trim()) setShowModal(true) }
 
   const onModalSubmit = async (data: ModalForm) => {
-    try { await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: data.name, email: data.email, zip, message: data.message }) }) } catch { /* Phase 1 */ }
+    try { await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ form_source: 'website-location', name: data.name, email: data.email, zip, message: data.message }) }) } catch { /* Phase 1 */ }
     setShowModal(false); setSubmitted(true)
   }
 

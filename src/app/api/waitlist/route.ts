@@ -1,16 +1,25 @@
 import { NextResponse } from 'next/server'
 
+const WEBHOOK_URL = process.env.LEAD_WEBHOOK_URL || ''
+
 export async function POST(request: Request) {
   const data = await request.json()
 
-  // Phase 1: log to console. Email service integration is Phase 2.
-  console.log('[Waitlist Signup]', {
-    name: data.name,
-    email: data.email,
-    zip: data.zip,
-    phone: data.phone || null,
-    timestamp: new Date().toISOString(),
-  })
+  if (!WEBHOOK_URL) {
+    console.warn('[Lead] LEAD_WEBHOOK_URL not set — payload not forwarded:', data)
+    return NextResponse.json({ success: true, forwarded: false })
+  }
 
-  return NextResponse.json({ success: true })
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    const body = await res.json().catch(() => ({}))
+    return NextResponse.json({ success: true, forwarded: true, ...body })
+  } catch (err) {
+    console.error('[Lead] Webhook forward failed:', err)
+    return NextResponse.json({ success: false, error: 'forward_failed' }, { status: 502 })
+  }
 }

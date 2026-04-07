@@ -63,7 +63,7 @@ export default function Waitlist() {
       await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ form_source: 'website-waitlist', ...data }),
       })
     } catch { /* Phase 1 */ }
     setSubmitted(true)

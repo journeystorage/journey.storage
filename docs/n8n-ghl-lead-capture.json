@@ -1,0 +1,501 @@
+{
+  "name": "Journey — Website Lead Capture → GHL",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "journey-lead",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "https://journey.storage,https://advisory.journey.storage"
+        }
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 400],
+      "webhookId": "journey-lead"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": false },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.form_source }}",
+                    "rightValue": "website-waitlist",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputLabel": "Waitlist"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.form_source }}",
+                    "rightValue": "website-location",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputLabel": "Location Notify"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.form_source }}",
+                    "rightValue": "website-newsletter",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputLabel": "Newsletter"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.form_source }}",
+                    "rightValue": "consulting-scout",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputLabel": "Consulting → Scout"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.form_source }}",
+                    "rightValue": "consulting-pursuit",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputLabel": "Consulting → Pursuit"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": false },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.form_source }}",
+                    "rightValue": "consulting-booking",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputLabel": "Consulting → Booking"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Route by Form",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [260, 400]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "id": "tag", "name": "tag", "value": "website-waitlist", "type": "string" },
+            { "id": "source_label", "name": "source_label", "value": "Main Site — Waitlist", "type": "string" },
+            { "id": "firstName", "name": "firstName", "value": "={{ $json.name ? $json.name.split(' ')[0] : '' }}", "type": "string" },
+            { "id": "lastName", "name": "lastName", "value": "={{ $json.name ? $json.name.split(' ').slice(1).join(' ') : '' }}", "type": "string" },
+            { "id": "email", "name": "email", "value": "={{ $json.email }}", "type": "string" },
+            { "id": "phone", "name": "phone", "value": "={{ $json.phone || '' }}", "type": "string" },
+            { "id": "postalCode", "name": "postalCode", "value": "={{ $json.zip || '' }}", "type": "string" },
+            { "id": "message", "name": "message", "value": "={{ $json.message || '' }}", "type": "string" }
+          ]
+        },
+        "options": { "includeBinary": false }
+      },
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "name": "Set: Waitlist",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [540, 60]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "id": "tag", "name": "tag", "value": "website-location-notify", "type": "string" },
+            { "id": "source_label", "name": "source_label", "value": "Main Site — Location Notify", "type": "string" },
+            { "id": "firstName", "name": "firstName", "value": "={{ $json.name ? $json.name.split(' ')[0] : '' }}", "type": "string" },
+            { "id": "lastName", "name": "lastName", "value": "={{ $json.name ? $json.name.split(' ').slice(1).join(' ') : '' }}", "type": "string" },
+            { "id": "email", "name": "email", "value": "={{ $json.email }}", "type": "string" },
+            { "id": "phone", "name": "phone", "value": "", "type": "string" },
+            { "id": "postalCode", "name": "postalCode", "value": "={{ $json.zip || '' }}", "type": "string" },
+            { "id": "message", "name": "message", "value": "={{ $json.message || '' }}", "type": "string" }
+          ]
+        },
+        "options": { "includeBinary": false }
+      },
+      "id": "a1b2c3d4-0004-4000-8000-000000000004",
+      "name": "Set: Location",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [540, 200]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "id": "tag", "name": "tag", "value": "website-newsletter", "type": "string" },
+            { "id": "source_label", "name": "source_label", "value": "Main Site — Newsletter", "type": "string" },
+            { "id": "firstName", "name": "firstName", "value": "", "type": "string" },
+            { "id": "lastName", "name": "lastName", "value": "", "type": "string" },
+            { "id": "email", "name": "email", "value": "={{ $json.email }}", "type": "string" },
+            { "id": "phone", "name": "phone", "value": "", "type": "string" },
+            { "id": "postalCode", "name": "postalCode", "value": "", "type": "string" },
+            { "id": "message", "name": "message", "value": "", "type": "string" }
+          ]
+        },
+        "options": { "includeBinary": false }
+      },
+      "id": "a1b2c3d4-0005-4000-8000-000000000005",
+      "name": "Set: Newsletter",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [540, 340]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "id": "tag", "name": "tag", "value": "consulting-scout", "type": "string" },
+            { "id": "source_label", "name": "source_label", "value": "Consulting — Scout Pre-Checkout", "type": "string" },
+            { "id": "tier_interest", "name": "tier_interest", "value": "Scout ($7,500/mo)", "type": "string" },
+            { "id": "redirect_url", "name": "redirect_url", "value": "https://buy.stripe.com/3cI14oaMr6jk6Mh8ll0sU00", "type": "string" },
+            { "id": "firstName", "name": "firstName", "value": "={{ $json.name ? $json.name.split(' ')[0] : '' }}", "type": "string" },
+            { "id": "lastName", "name": "lastName", "value": "={{ $json.name ? $json.name.split(' ').slice(1).join(' ') : '' }}", "type": "string" },
+            { "id": "email", "name": "email", "value": "={{ $json.email }}", "type": "string" },
+            { "id": "phone", "name": "phone", "value": "={{ $json.phone || '' }}", "type": "string" },
+            { "id": "postalCode", "name": "postalCode", "value": "", "type": "string" },
+            { "id": "company", "name": "company", "value": "={{ $json.company || '' }}", "type": "string" },
+            { "id": "facilities", "name": "facilities", "value": "={{ $json.facilities || '' }}", "type": "string" },
+            { "id": "message", "name": "message", "value": "={{ $json.message || '' }}", "type": "string" }
+          ]
+        },
+        "options": { "includeBinary": false }
+      },
+      "id": "a1b2c3d4-0006-4000-8000-000000000006",
+      "name": "Set: Scout",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [540, 480]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "id": "tag", "name": "tag", "value": "consulting-pursuit", "type": "string" },
+            { "id": "source_label", "name": "source_label", "value": "Consulting — Pursuit Pre-Checkout", "type": "string" },
+            { "id": "tier_interest", "name": "tier_interest", "value": "Pursuit ($15,000/mo)", "type": "string" },
+            { "id": "redirect_url", "name": "redirect_url", "value": "https://buy.stripe.com/aFa7sM07N0Z08UpcBB0sU02", "type": "string" },
+            { "id": "firstName", "name": "firstName", "value": "={{ $json.name ? $json.name.split(' ')[0] : '' }}", "type": "string" },
+            { "id": "lastName", "name": "lastName", "value": "={{ $json.name ? $json.name.split(' ').slice(1).join(' ') : '' }}", "type": "string" },
+            { "id": "email", "name": "email", "value": "={{ $json.email }}", "type": "string" },
+            { "id": "phone", "name": "phone", "value": "={{ $json.phone || '' }}", "type": "string" },
+            { "id": "postalCode", "name": "postalCode", "value": "", "type": "string" },
+            { "id": "company", "name": "company", "value": "={{ $json.company || '' }}", "type": "string" },
+            { "id": "facilities", "name": "facilities", "value": "={{ $json.facilities || '' }}", "type": "string" },
+            { "id": "message", "name": "message", "value": "={{ $json.message || '' }}", "type": "string" }
+          ]
+        },
+        "options": { "includeBinary": false }
+      },
+      "id": "a1b2c3d4-0007-4000-8000-000000000007",
+      "name": "Set: Pursuit",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [540, 620]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            { "id": "tag", "name": "tag", "value": "consulting-booking", "type": "string" },
+            { "id": "source_label", "name": "source_label", "value": "Consulting — Pre-Booking Call", "type": "string" },
+            { "id": "tier_interest", "name": "tier_interest", "value": "Command (Custom)", "type": "string" },
+            { "id": "redirect_url", "name": "redirect_url", "value": "={{ $json.redirect_url || '' }}", "type": "string" },
+            { "id": "firstName", "name": "firstName", "value": "={{ $json.name ? $json.name.split(' ')[0] : '' }}", "type": "string" },
+            { "id": "lastName", "name": "lastName", "value": "={{ $json.name ? $json.name.split(' ').slice(1).join(' ') : '' }}", "type": "string" },
+            { "id": "email", "name": "email", "value": "={{ $json.email }}", "type": "string" },
+            { "id": "phone", "name": "phone", "value": "={{ $json.phone || '' }}", "type": "string" },
+            { "id": "postalCode", "name": "postalCode", "value": "", "type": "string" },
+            { "id": "company", "name": "company", "value": "={{ $json.company || '' }}", "type": "string" },
+            { "id": "facilities", "name": "facilities", "value": "={{ $json.facilities || '' }}", "type": "string" },
+            { "id": "message", "name": "message", "value": "={{ $json.message || '' }}", "type": "string" }
+          ]
+        },
+        "options": { "includeBinary": false }
+      },
+      "id": "a1b2c3d4-0008-4000-8000-000000000008",
+      "name": "Set: Booking",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [540, 760]
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "lookup",
+        "filters": {
+          "email": "={{ $json.email }}"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0009-4000-8000-000000000009",
+      "name": "GHL: Lookup Contact",
+      "type": "n8n-nodes-base.highLevel",
+      "typeVersion": 1,
+      "position": [820, 400],
+      "credentials": {
+        "highLevelOAuth2Api": {
+          "id": "CONFIGURE_ME",
+          "name": "GHL OAuth2"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "notEmpty" }
+            }
+          ]
+        }
+      },
+      "id": "a1b2c3d4-0010-4000-8000-000000000010",
+      "name": "Contact Exists?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1060, 400]
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "update",
+        "contactId": "={{ $('GHL: Lookup Contact').item.json.id }}",
+        "updateFields": {
+          "firstName": "={{ $json.firstName }}",
+          "lastName": "={{ $json.lastName }}",
+          "phone": "={{ $json.phone }}",
+          "postalCode": "={{ $json.postalCode }}",
+          "tags": "={{ $json.tag }}",
+          "source": "={{ $json.source_label }}"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0011-4000-8000-000000000011",
+      "name": "GHL: Update Contact",
+      "type": "n8n-nodes-base.highLevel",
+      "typeVersion": 1,
+      "position": [1320, 280],
+      "credentials": {
+        "highLevelOAuth2Api": {
+          "id": "CONFIGURE_ME",
+          "name": "GHL OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "create",
+        "email": "={{ $json.email }}",
+        "additionalFields": {
+          "firstName": "={{ $json.firstName }}",
+          "lastName": "={{ $json.lastName }}",
+          "phone": "={{ $json.phone }}",
+          "postalCode": "={{ $json.postalCode }}",
+          "tags": "={{ $json.tag }}",
+          "source": "={{ $json.source_label }}"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0012-4000-8000-000000000012",
+      "name": "GHL: Create Contact",
+      "type": "n8n-nodes-base.highLevel",
+      "typeVersion": 1,
+      "position": [1320, 520],
+      "credentials": {
+        "highLevelOAuth2Api": {
+          "id": "CONFIGURE_ME",
+          "name": "GHL OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        },
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, contact_id: $json.id || $json.contactId || 'created', redirect_url: $json.redirect_url || null }) }}"
+      },
+      "id": "a1b2c3d4-0013-4000-8000-000000000013",
+      "name": "Response: Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1580, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          { "node": "Route by Form", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Route by Form": {
+      "main": [
+        [
+          { "node": "Set: Waitlist", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "Set: Location", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "Set: Newsletter", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "Set: Scout", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "Set: Pursuit", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "Set: Booking", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Set: Waitlist": {
+      "main": [
+        [
+          { "node": "GHL: Lookup Contact", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Set: Location": {
+      "main": [
+        [
+          { "node": "GHL: Lookup Contact", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Set: Newsletter": {
+      "main": [
+        [
+          { "node": "GHL: Lookup Contact", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Set: Scout": {
+      "main": [
+        [
+          { "node": "GHL: Lookup Contact", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Set: Pursuit": {
+      "main": [
+        [
+          { "node": "GHL: Lookup Contact", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Set: Booking": {
+      "main": [
+        [
+          { "node": "GHL: Lookup Contact", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "GHL: Lookup Contact": {
+      "main": [
+        [
+          { "node": "Contact Exists?", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Contact Exists?": {
+      "main": [
+        [
+          { "node": "GHL: Update Contact", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "GHL: Create Contact", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "GHL: Update Contact": {
+      "main": [
+        [
+          { "node": "Response: Success", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "GHL: Create Contact": {
+      "main": [
+        [
+          { "node": "Response: Success", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {},
+  "tags": [
+    { "name": "journey", "id": "1" },
+    { "name": "leads", "id": "2" },
+    { "name": "ghl", "id": "3" }
+  ]
+}

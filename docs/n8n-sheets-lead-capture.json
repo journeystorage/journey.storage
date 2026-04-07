@@ -1,0 +1,130 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "journey-lead",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "https://journey.storage,https://advisory.journey.storage"
+        }
+      },
+      "id": "bf938157-575a-4f4a-9ada-72593e627847",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-1264, 688],
+      "webhookId": "journey-lead"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1o3XqV6jN4tPom3y4QS1vFMbC79kCKCcZ4JzwpXyYoMg",
+          "mode": "list",
+          "cachedResultName": "journey-leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1o3XqV6jN4tPom3y4QS1vFMbC79kCKCcZ4JzwpXyYoMg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1o3XqV6jN4tPom3y4QS1vFMbC79kCKCcZ4JzwpXyYoMg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $now.toISO() }}",
+            "form_source": "={{ $json.body.form_source || '' }}",
+            "source_label": "={{ ({ 'website-waitlist':'Main Site — Waitlist','website-location':'Main Site — Location Notify','website-newsletter':'Main Site — Newsletter','consulting-scout':'Consulting — Scout Pre-Checkout','consulting-pursuit':'Consulting — Pursuit Pre-Checkout','consulting-booking':'Consulting — Pre-Booking Call','investors-booking':'Investors — Pre-Booking Call' })[$json.body.form_source] || $json.body.form_source }}",
+            "site": "={{ ($json.body.form_source || '').startsWith('consulting') ? 'advisory.journey.storage' : ($json.body.form_source || '').startsWith('investors') ? 'direct.journey.storage' : 'journey.storage' }}",
+            "name": "={{ $json.body.name || '' }}",
+            "first_name": "={{ $json.body.name ? $json.body.name.trim().split(' ')[0] : '' }}",
+            "last_name": "={{ $json.body.name ? $json.body.name.trim().split(' ').slice(1).join(' ') : '' }}",
+            "email": "={{ $json.body.email || '' }}",
+            "phone": "={{ $json.body.phone || '' }}",
+            "company": "={{ $json.body.company || '' }}",
+            "zip": "={{ $json.body.zip || '' }}",
+            "facilities": "={{ $json.body.facilities || '' }}",
+            "tier_interest": "={{ ({ 'consulting-scout':'Scout ($7,500/mo)','consulting-pursuit':'Pursuit ($15,000/mo)','consulting-booking':'Command (Custom)' })[$json.body.form_source] || '' }}",
+            "message": "={{ $json.body.message || '' }}",
+            "redirect_url": "={{ ({ 'consulting-scout':'https://buy.stripe.com/3cI14oaMr6jk6Mh8ll0sU00','consulting-pursuit':'https://buy.stripe.com/aFa7sM07N0Z08UpcBB0sU02' })[$json.body.form_source] || $json.body.redirect_url || '' }}",
+            "status": "new",
+            "notes": ""
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "timestamp", "displayName": "timestamp", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "form_source", "displayName": "form_source", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "source_label", "displayName": "source_label", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "site", "displayName": "site", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "name", "displayName": "name", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "first_name", "displayName": "first_name", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "last_name", "displayName": "last_name", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "email", "displayName": "email", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "phone", "displayName": "phone", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "company", "displayName": "company", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "zip", "displayName": "zip", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "facilities", "displayName": "facilities", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "tier_interest", "displayName": "tier_interest", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "message", "displayName": "message", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "redirect_url", "displayName": "redirect_url", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "status", "displayName": "status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "notes", "displayName": "notes", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [-880, 688],
+      "id": "c3e1c90a-6938-47ec-9219-8b4e95f966c3",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Ci9GTctvGHrXP6MI",
+          "name": "VSHUB - Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, redirect_url: ({ 'consulting-scout':'https://buy.stripe.com/3cI14oaMr6jk6Mh8ll0sU00','consulting-pursuit':'https://buy.stripe.com/aFa7sM07N0Z08UpcBB0sU02' })[$('Webhook').item.json.body.form_source] || $('Webhook').item.json.body.redirect_url || null }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "17a8d9dd-7d31-4b54-8213-73fa5a95f720",
+      "name": "Response: Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-560, 688]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          { "node": "Append row in sheet", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          { "node": "Response: Success", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1b3fc0816e0e39f8c5259340346c7327d28932b79126143276dac016e9574c3e"
+  }
+}

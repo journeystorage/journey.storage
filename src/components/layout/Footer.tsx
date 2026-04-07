@@ -48,12 +48,18 @@ export default function Footer() {
   const [emailSubmitted, setEmailSubmitted] = useState(false)
   const emailRef = useRef<HTMLInputElement>(null)
 
-  const handleSubscribe = (e: FormEvent) => {
+  const handleSubscribe = async (e: FormEvent) => {
     e.preventDefault()
-    if (emailRef.current?.value) {
-      console.log('Footer subscribe:', emailRef.current.value)
-      setEmailSubmitted(true)
-    }
+    const email = emailRef.current?.value
+    if (!email) return
+    try {
+      await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ form_source: 'website-newsletter', email }),
+      })
+    } catch { /* non-blocking */ }
+    setEmailSubmitted(true)
   }
 
   return (

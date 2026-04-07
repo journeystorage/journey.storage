@@ -1,0 +1,2 @@
+timestamp,form_source,source_label,site,name,first_name,last_name,email,phone,company,zip,facilities,tier_interest,message,redirect_url,status,notes
+2026-04-07T12:00:00Z,consulting-scout,Consulting — Scout Pre-Checkout,advisory.journey.storage,Thomaz Test,Thomaz,Test,test@journey.storage,(555) 000-0000,Journey Storage Test,,,Scout ($7;500/mo),,https://buy.stripe.com/3cI14oaMr6jk6Mh8ll0sU00,new,Sample row — delete before going live
