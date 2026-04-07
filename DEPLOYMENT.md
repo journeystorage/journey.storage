@@ -56,9 +56,20 @@ Each app is deployed as a **separate Hostinger instance** from the same GitHub r
 
 > **IMPORTANT:** Consulting uses **Custom** preset (not "Next.js" preset) because it needs an explicit Start command to run the standalone server. The "Next.js" preset ignores the `"start"` script.
 
-### Investors (when ready)
+### Investors
 
-Follow the same pattern as consulting: Custom preset with explicit Start command.
+| Field              | Value                      |
+|--------------------|----------------------------|
+| Framework preset   | Custom                     |
+| Branch             | main                       |
+| Node version       | 20                         |
+| Install command    | `npm ci`                   |
+| Build command      | `npm run build:investors`  |
+| Start command      | `npm run start -- -p $PORT`|
+
+**How it works:** identical to consulting. `build:investors` replaces `src/`, `public/`, and `next.config.ts` at the root with investors' files (which include `output: 'standalone'`), then runs `next build`, then copies `public/` and `.next/static/` into `.next/standalone/`. The start command runs `node .next/standalone/server.js` — single lightweight process.
+
+> **IMPORTANT:** Investors uses **Custom** preset (not "Next.js" preset) because it needs an explicit Start command to run the standalone server. Same rationale as consulting.
 
 ---
 
@@ -84,6 +95,8 @@ These files control deployment. Changing them incorrectly **will break productio
 | `apps/consulting/next.config.ts` | Consulting config (has standalone) | Only if you understand the build:consulting flow |
 | `package.json` `"build"` script | Main site build | **NO** — must be plain `next build` |
 | `package.json` `"build:consulting"` script | Consulting build | Only if you understand the file replacement flow |
+| `package.json` `"build:investors"` script | Investors build | Only if you understand the file replacement flow |
+| `apps/investors/next.config.ts` | Investors config (has standalone) | Only if you understand the build:investors flow |
 | `package.json` `"start"` script | Used by consulting only | **NO** — main site ignores this (Framework preset) |
 | `turbo.json` | Turborepo config | Avoid changes — affects workspace detection |
 | `.gitignore` | Must include `screenshots/` | Ensure screenshots/ stays ignored |
@@ -105,9 +118,10 @@ Since Hostinger always builds from the root, `build:consulting` temporarily repl
 Hostinger's shared hosting has a **120 process limit** shared across all sites on the plan. The default `next start` spawns multiple workers. With 2 sites, processes can spike to 90-100+.
 
 - **Consulting** uses `output: 'standalone'` + Custom preset with explicit Start command → single process
-- **Main site** uses Framework preset which runs its own `next start` → multiple workers
+- **Investors** uses `output: 'standalone'` + Custom preset with explicit Start command → single process
+- **Main site** uses standalone via Framework preset (Next.js preset detects it automatically) → single process
 
-Both sites now use standalone mode, keeping total process count well below the 120 limit.
+All three sites now use standalone mode, keeping total process count well below the 120 limit.
 
 ### Process limit strategy
 Current average: ~90-96 of 120. To reduce:
@@ -153,6 +167,13 @@ npm run dev:investors
 ---
 
 ## Changelog
+
+### 2026-04-07 — Investors site standalone build ready
+- Added `output: 'standalone'` + `outputFileTracingRoot: __dirname` + `images.unoptimized: true` to `apps/investors/next.config.ts`
+- Added `build:investors` script to root `package.json` (mirrors `build:consulting` file-replacement pattern)
+- Validated locally: `npm run build:investors` produces `.next/standalone/server.js` that boots and serves HTTP 200 with the rendered hero
+- Hostinger setup: create third instance, Custom preset, build `npm run build:investors`, start `npm run start -- -p $PORT`
+- Note: dev server must be run via `npm run dev:investors` (root, uses `--webpack`) — Turbopack dev is incompatible with `outputFileTracingRoot`
 
 ### 2026-04-04 — Standalone migration complete + post-incident review
 - **Main site migrated to standalone** — both sites now run as single process. Process count dropped from ~90-96 to ~13.
