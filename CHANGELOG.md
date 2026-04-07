@@ -4,6 +4,89 @@ Log interno de alterações de design, arquitetura e funcionalidades.
 
 ---
 
+## 2026-04-07
+
+### Lead capture pipeline — n8n + Google Sheets (todos os 3 sites)
+- **Arquitetura** unificada: 1 webhook único (`https://webhook.vayloh.top/webhook/journey-lead`) recebe leads de 7 origens distintas via campo `form_source`:
+  - `website-waitlist`, `website-location`, `website-newsletter` (main)
+  - `consulting-scout`, `consulting-pursuit`, `consulting-booking` (advisory)
+  - `investors-booking` (direct)
+- **n8n workflow simplificado** ([docs/n8n-sheets-lead-capture.json](docs/n8n-sheets-lead-capture.json)) — 3 nodes apenas: `Webhook → Append row in sheet → Response`. Toda lógica de derivação (`source_label`, `site`, `tier_interest`, `redirect_url`, `first_name`/`last_name`) acontece dentro do próprio node Sheets via dicionários inline (`({...})[$json.body.form_source]`). Substitui versão anterior com 9 nodes (Switch + 6 Sets) que estava perdendo dados por inconsistência de namespace.
+- **Google Sheets** como destino único — coluna por coluna mapeada do payload. Permite filtrar leads por origem direto na planilha. GHL fica pra fase posterior.
+- **GTM** — `apps/consulting/src/app/layout.tsx`: container atualizado de `GTM-NL5KP8QJ` para `GTM-54GBZ4GW`.
+- **Modal de captura no consulting** ([apps/consulting/src/components/ui/LeadCaptureModal.tsx](apps/consulting/src/components/ui/LeadCaptureModal.tsx)) — react-hook-form + zod, mesmo design do modal de Location do main site (warm-white card, accent orange, asymmetric border-radius). Disparado por todos os CTAs do Pricing (Scout/Pursuit/Command) e do FinalCTA. Captura nome/email/phone/company antes de redirecionar pro Stripe ou Google Calendar.
+- **API route `/api/waitlist`** ([src/app/api/waitlist/route.ts](src/app/api/waitlist/route.ts)) — agora faz proxy server-side do payload pro webhook do n8n (env `LEAD_WEBHOOK_URL`), evitando CORS no main site. Mantida pra uso futuro (validação, rate limit, banco).
+- **Formulários do main site** ([Waitlist.tsx](src/components/sections/Waitlist.tsx), [LocationsMap.tsx](src/components/sections/LocationsMap.tsx), [Footer.tsx](src/components/layout/Footer.tsx)) — todos enviam `form_source` correto pro `/api/waitlist`. Newsletter do footer agora dispara HTTP (antes era só `console.log`).
+- **CORS no n8n**: `allowedOrigins` do node Webhook lista os 3 sites em produção + os 3 localhosts pra dev.
+- **Env vars**: `LEAD_WEBHOOK_URL` (server-side, main) e `NEXT_PUBLIC_LEAD_WEBHOOK_URL` (browser, consulting/investors) consolidadas no [.env.local](.env.local) da raiz.
+- **Fix script `dev:investors`**: `next dev --port 3002 -c apps/investors` (flag `-c` inválida) → `next dev apps/investors --port 3002 --webpack`. Servidor não subia.
+
+### Investors (Journey.Direct™) — Hero polish (iteração 6 — bg, agrupamento timer, full-bleed)
+- **BG image enquadramento**: `object-position: 50% 62%` + `contrast 1.05` — alinha o ponto de fuga do corredor com o centro horizontal da página, elimina céu escuro no topo que parecia "borda preta".
+- **Hero altura**: volta para `min-h-screen` (corrige fundo preto visível abaixo do hero em mobile/tablet causado pelo `min-h-[88vh]` anterior). Paddings reduzidos (`pt-[100px]/pb-[72px]`, lg `110/80`) para manter compacidade.
+- **Labels do timer agrupadas com os números**: removida separação subline-no-meio. Labels agora vivem em grid 4-col idêntica, **diretamente** abaixo dos números (`mt-1`), dentro do mesmo wrapper relativo. Associação visual clara.
+- **Wrapper do timer único**: `relative flex flex-col max-w-[1120px] mx-auto` envolve números + labels; headline absolute restrita à altura da banda dos números (não mais `inset-0`).
+- **Cada cell do grid agora é `flex items-center justify-center`** (em vez de `text-center` direto no span) — força centralização geométrica robusta independente de letter-spacing.
+- **Headline sem ponto final** (`Built by operators`) — remove peso visual à direita.
+- **Gaps maiores** (`gap-10/14/20/28/32`) — números respiram, marcadores `dd hh mm ss` não parecem "apertados".
+- **`html { background-color: black }`** em [globals.css](apps/investors/src/styles/globals.css) — garante consistência. Removido `scrollbar-gutter: stable both-edges` que reservava ~30px de gutter laterais (visíveis como "bordas pretas" no desktop, fazendo o BG não tocar as bordas).
+
+### Investors (Journey.Direct™) — Hero polish (iteração 5 — proporções e alinhamento)
+- **Altura do hero reduzida**: `min-h-screen` → `min-h-[88vh]`, padding `pt-[120px]/pb-[100px]` → `pt-[110px]/pb-[96px]` (lg `120/104`). Remove ar excessivo.
+- **Centralização do timer**: wrapper dos números e das labels agora compartilha `mx-auto max-w-[1100px]` (antes herdavam o `max-w-[1400px]` do container externo). Headline absolute, números e labels alinham no mesmo eixo central.
+- **Gaps da grid do timer reduzidos** (`gap-8/12/16/24/32` → `gap-6/10/14/20/24`) — números mais coesos como bloco.
+- **Labels do timer maiores e mais próximas dos números**: `clamp(0.7rem,1.1vw,1rem)` → `clamp(0.8rem,1.4vw,1.15rem)`, opacidade `0.30` → `0.35`. Gap subline→labels reduzido (`mt-10` subline + `mt-8` labels → `mt-6` + `mt-4`).
+- **CTA**: `transition-all` → `transition-colors` (regra do CLAUDE.md), `mt-12` → `mt-10`.
+
+### Investors (Journey.Direct™) — Hero refinement (iteração 4 — nova ordem vertical + segunda fonte)
+- **Nova ordem vertical do foreground** (top → bottom):
+  1. Eyebrow pill (`JOURNEY.DIRECT™ · Investment Platform`)
+  2. Stay tuned + Launching · April 13, 2026
+  3. **Timer numbers + Headline** (mesma linha horizontal — números absolute centered atrás, headline anchor no centro do flex)
+  4. Subline (`A direct investment platform for self-storage is on the way.`)
+  5. Labels row (DAYS / HOURS / MINUTES / SECONDS — grid 4-col, alinha visualmente com as colunas dos números acima)
+  6. CTA outline (`Book a call →`) + accredited disclaimer
+- **Decoupling labels ↔ números**: labels saíram do bloco do timer (eram empilhados na mesma coluna `flex-col items-center`) e foram pra própria row no foreground stack, abaixo da subline. Mantém o alinhamento por coluna via `grid grid-cols-4` com mesmo `gap` responsivo.
+- **Tipografia do timer**: Lato Black → **IBM Plex Mono 700** (`var(--font-mono)`). Adicionado `IBM_Plex_Mono` via `next/font/google` em [layout.tsx](apps/investors/src/app/layout.tsx) (weights 300/500/700). Razão: Lato Black no número competia com Lato Black na headline — Plex Mono 700 traz vibe ticker/financial-data, contraste tipográfico claro sem brigar. Labels também usam Plex Mono pra manter a unidade visual do timer.
+- **Padding** das duas stacks: `pt-[88px] pb-12 gap-7` (top) e `pt-12 pb-[88px] gap-7` (bottom) — flex-1 simétrico mantém o headline no centro vertical real do section.
+
+### Investors (Journey.Direct™) — Hero refinement (iteração 3 — simplificada)
+- **Timer estrutura simplificada**: voltei pro pattern original da referência — números + labels empilhados na mesma coluna `flex-col items-center`, single absolute layer centralizada, sem translateY hacks ou layers separadas. Cada coluna do grid contém o número (clamp 4.5/18vw/18rem) e a label diretamente abaixo (clamp 0.75/1.6vw/1.5rem) com gap responsivo (mt-3/4/6).
+- **Foreground stack** mantido com `flex-1 above + headline anchor + flex-1 below` — headline fica no centro vertical real do section, alinhado com o eixo central do timer.
+- **Padding subline/CTA**: `pt-9 gap-9` no below-stack (36px breathable) com `gap-4` interno do CTA cluster.
+- **Launch date** atualizado: `April 27, 2026` → `April 13, 2026` em [constants.ts](apps/investors/src/lib/constants.ts) (`LAUNCH_DATE_ISO = '2026-04-13T05:00:00.000Z'` — 00:00 America/Chicago) e no display da launching strip.
+
+### Investors (Journey.Direct™) — Refinamento do hero (iteração 2)
+- **Headline single-line**: `Built by / operators.` (2 linhas) → `Built by operators.` (1 linha) com `whitespace-nowrap` + `clamp(2.1rem, 8.4vw, 8.4rem)` — fica entre top/bottom dos números do timer (igual à referência)
+- **Container do hero**: `max-w-820px` → `max-w-1100px` pra acomodar o headline single-line
+- **Labels do timer maiores**: `clamp(0.55rem, 1.1vw, 1rem)` → `clamp(0.85rem, 2vw, 1.875rem)` (DAYS / HOURS / MINUTES / SECONDS agora bem legíveis)
+- **Numbers e labels separados em layers independentes** — antes colidiam com o subline + launching strip no mobile/tablet:
+  - Números: layer absolute centralizado (atrás do headline)
+  - Labels: layer absolute na bottom da section (`bottom-16 lg:bottom-20`), alinhados em grid de 4 colunas com os números
+- **Background image substituído**: `consulting-meeting.webp` (placeholder) → `direct-hero-bg.png` (fornecido pelo usuário, 6.5MB) convertido pra WebP via sharp (`quality: 90, effort: 6`) → `577KB` (2816×1364). Mesma treatment grayscale + dark overlays
+- **Footer copyright** completo: `© Journey.Storage™ 2026` → `© 2026 Journey.Storage™. All rights reserved. Privileged & confidential.` — caption normal weight (não uppercase) pra contraste com a tag `Direct · 001` à direita
+
+### Investors (Journey.Direct™) — Coming soon page (primeira versão)
+- Substituído o placeholder mínimo (`Journey.Direct™ / Coming soon.`) por uma página completa com identidade da marca
+- **Layout** inspirado em referência fornecida: B&W background + countdown timer GIANTE como watermark + headline central
+- **Navbar:** logo + dropdown Ecosystem (Storage / Advisory / Direct — com Direct marcado como `Here`) + CTA `Book a call`
+- **Hero** (`ComingSoonHero.tsx`):
+  - Eyebrow pill `JOURNEY.DIRECT™ · Investment Platform` (espelhando o pattern do hero do Advisory)
+  - Strip `— Stay tuned —`
+  - Headline gigante `Built by operators.` (Lato Black, clamp `3rem → 8.5rem`)
+  - Subline italic `A direct investment platform for self-storage is on the way.`
+  - Strip `Launching · April 27, 2026 · 00:00 CT`
+  - CTA outline `Book a call →` (abre `LeadCaptureModal`)
+  - Footer marks `© Journey.Storage™ 2026` / `Direct · 001`
+- **Countdown timer** ao vivo (atualiza a cada 1s) — target `2026-04-27T00:00 America/Chicago` (`LAUNCH_DATE_ISO` em `constants.ts`)
+- **Background:** `consulting-meeting.webp` copiada como `investors-hero-bg.webp`, tratada com `grayscale(100%) contrast(0.95) brightness(0.32)` + 4 layers de overlay (gradient, vignette, orange wash, grain)
+- **LeadCaptureModal** simplificado (vanilla React, sem framer-motion / react-hook-form / zod) — captura nome/email/phone/company antes de redirecionar pro Google Calendar
+- **Setup do app:** `globals.css` agora completo com tokens da marca + grain; `layout.tsx` com Lato (300/400/700/900 normal+italic) e metadata SEO; `lib/constants.ts` com `CALENDAR_URL`, `LAUNCH_DATE_ISO`, `ecosystemDropdownLinks`
+- Assets copiados pra `apps/investors/public/images/{brand,hero}/`
+- **Ainda pendente:** swap da hero image se quisermos algo mais investidor-themed; configurar `NEXT_PUBLIC_LEAD_WEBHOOK_URL` no env; eventualmente migrar pra standalone build (próximo deploy)
+
+---
+
 ## 2026-04-05
 
 ### Main site — Hero background atualizado (v2-box)
