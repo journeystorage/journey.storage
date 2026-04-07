@@ -1,14 +1,16 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { CALENDAR_URL, sectionIds } from '@/lib/constants'
+import LeadCaptureModal from '@/components/ui/LeadCaptureModal'
 
 export default function FinalCTA() {
   const ref = useRef<HTMLElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-60px' })
   const prefersReducedMotion = useReducedMotion()
   const ease = [0.22, 1, 0.36, 1] as const
+  const [showModal, setShowModal] = useState(false)
 
   const anim = (delay: number) =>
     prefersReducedMotion
@@ -51,14 +53,12 @@ export default function FinalCTA() {
           </motion.p>
 
           <motion.div className="mt-10" {...anim(0.3)}>
-            <a
-              href={CALENDAR_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-sm bg-orange px-8 py-4 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]"
+            <button
+              onClick={() => setShowModal(true)}
+              className="inline-flex items-center gap-2 rounded-sm bg-orange px-8 py-4 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               Schedule a call <span>&rarr;</span>
-            </a>
+            </button>
           </motion.div>
 
           <motion.p className="mt-5 text-caption text-warm-white/25" {...anim(0.4)}>
@@ -66,6 +66,15 @@ export default function FinalCTA() {
           </motion.p>
         </div>
       </div>
+
+      <LeadCaptureModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        formSource="consulting-booking"
+        tierName="Book a call"
+        tierDetail="Command — Custom"
+        redirectUrl={CALENDAR_URL}
+      />
     </section>
   )
 }

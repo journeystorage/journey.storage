@@ -11,7 +11,7 @@ const lato = Lato({
   display: 'swap',
 })
 
-const GTM_ID = 'GTM-NL5KP8QJ'
+const GTM_ID = 'GTM-54GBZ4GW'
 
 export const metadata: Metadata = {
   title: 'Journey.Advisory™ — Fractional Acquisitions & Advisory | Journey.Storage™',

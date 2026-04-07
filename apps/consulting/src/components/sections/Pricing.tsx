@@ -4,6 +4,7 @@ import { useRef, useCallback, useEffect, useState } from 'react'
 import { motion, useInView, useReducedMotion } from 'framer-motion'
 import { Check, Layers, Send } from 'lucide-react'
 import { CALENDAR_URL, sectionIds } from '@/lib/constants'
+import LeadCaptureModal, { type FormSource } from '@/components/ui/LeadCaptureModal'
 
 const tiers = [
   {
@@ -23,6 +24,8 @@ const tiers = [
     ],
     cta: 'Get started',
     href: 'https://buy.stripe.com/3cI14oaMr6jk6Mh8ll0sU00',
+    formSource: 'consulting-scout' as FormSource,
+    tierDetail: 'Scout — $7,500/mo',
   },
   {
     name: 'Pursuit',
@@ -41,6 +44,8 @@ const tiers = [
     ],
     cta: 'Get started',
     href: 'https://buy.stripe.com/aFa7sM07N0Z08UpcBB0sU02',
+    formSource: 'consulting-pursuit' as FormSource,
+    tierDetail: 'Pursuit — $15,000/mo',
   },
   {
     name: 'Command',
@@ -59,6 +64,8 @@ const tiers = [
     ],
     cta: 'Schedule a call',
     href: CALENDAR_URL,
+    formSource: 'consulting-booking' as FormSource,
+    tierDetail: 'Command — Custom',
   },
 ]
 
@@ -69,6 +76,7 @@ export default function Pricing() {
   const prefersReducedMotion = useReducedMotion()
   const ease = [0.22, 1, 0.36, 1] as const
   const [activeIndex, setActiveIndex] = useState(1)
+  const [modalTier, setModalTier] = useState<typeof tiers[number] | null>(null)
 
   // Scroll to Pursuit (index 1) on mount — mobile only
   useEffect(() => {
@@ -223,18 +231,16 @@ export default function Pricing() {
                     Monthly subscription. Cancel with 30 days&apos; notice.
                   </p>
 
-                  <a
-                    href={tier.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`mt-6 block w-full rounded-sm py-3.5 text-center text-body-sm font-bold transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99] ${
+                  <button
+                    onClick={() => setModalTier(tier)}
+                    className={`mt-6 block w-full rounded-sm py-3.5 text-center text-body-sm font-bold transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99] cursor-pointer ${
                       isPopular
                         ? 'bg-orange text-warm-white'
                         : 'border border-warm-white/[0.1] text-warm-white hover:border-warm-white/20'
                     }`}
                   >
                     {tier.cta} <span>&rarr;</span>
-                  </a>
+                  </button>
                 </motion.div>
               )
             })}
@@ -262,6 +268,15 @@ export default function Pricing() {
           </div>
         </div>
       </div>
+
+      <LeadCaptureModal
+        open={modalTier !== null}
+        onClose={() => setModalTier(null)}
+        formSource={modalTier?.formSource ?? 'consulting-scout'}
+        tierName={modalTier?.name ?? ''}
+        tierDetail={modalTier?.tierDetail ?? ''}
+        redirectUrl={modalTier?.href ?? ''}
+      />
     </section>
   )
 }
