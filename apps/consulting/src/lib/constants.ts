@@ -32,7 +32,7 @@ export const ecosystemDropdownLinks = [
   },
   {
     label: 'Direct',
-    description: 'Investment platform — coming soon',
+    description: 'Investment platform',
     href: externalUrls.investors,
   },
 ] as const

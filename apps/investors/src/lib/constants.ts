@@ -25,7 +25,7 @@ export const ecosystemDropdownLinks = [
   },
   {
     label: 'Direct',
-    description: 'Investment platform — coming soon',
+    description: 'Investment platform',
     href: externalUrls.direct,
     current: true,
   },
