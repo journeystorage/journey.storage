@@ -127,28 +127,56 @@ export default function Navbar() {
               </button>
 
               {dropdownOpen && (
-                <div className="absolute top-full right-0 pt-2 min-w-[240px]">
+                <div className="absolute top-full right-0 pt-2 min-w-[260px]">
                 <div
                   className="rounded-xl border border-warm-white/[0.08] bg-black/95 backdrop-blur-xl p-2 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
                   role="menu"
                 >
-                  {ecosystemDropdownLinks.map((link) => (
-                    <a
-                      key={link.label}
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      role="menuitem"
-                      className="flex flex-col gap-0.5 rounded-lg px-4 py-3 transition-colors duration-150 hover:bg-warm-white/[0.06] group"
-                    >
-                      <span className="text-body-sm font-bold text-warm-white/80 group-hover:text-warm-white transition-colors duration-150">
-                        {link.label}
-                      </span>
-                      <span className="text-[0.7rem] text-warm-white/30 group-hover:text-warm-white/50 transition-colors duration-150">
-                        {link.description}
-                      </span>
-                    </a>
-                  ))}
+                  {ecosystemDropdownLinks.map((link) => {
+                    const isCurrent = 'current' in link && link.current
+                    return (
+                      <a
+                        key={link.label}
+                        href={link.href}
+                        target={isCurrent ? undefined : '_blank'}
+                        rel={isCurrent ? undefined : 'noopener noreferrer'}
+                        role="menuitem"
+                        aria-current={isCurrent ? 'page' : undefined}
+                        className={[
+                          'flex items-start justify-between gap-3 rounded-lg px-4 py-3 transition-colors duration-150 group',
+                          isCurrent ? 'bg-orange/[0.08]' : 'hover:bg-warm-white/[0.06]',
+                        ].join(' ')}
+                      >
+                        <div className="flex flex-col gap-0.5">
+                          <span
+                            className={[
+                              'text-body-sm font-bold transition-colors duration-150',
+                              isCurrent
+                                ? 'text-orange'
+                                : 'text-warm-white/80 group-hover:text-warm-white',
+                            ].join(' ')}
+                          >
+                            {link.label}
+                          </span>
+                          <span
+                            className={[
+                              'text-[0.7rem] transition-colors duration-150',
+                              isCurrent
+                                ? 'text-orange/60'
+                                : 'text-warm-white/30 group-hover:text-warm-white/50',
+                            ].join(' ')}
+                          >
+                            {link.description}
+                          </span>
+                        </div>
+                        {isCurrent && (
+                          <span className="mt-1 text-[0.55rem] font-bold uppercase tracking-[0.18em] text-orange">
+                            Here
+                          </span>
+                        )}
+                      </a>
+                    )
+                  })}
                 </div>
                 </div>
               )}
@@ -268,22 +296,45 @@ export default function Navbar() {
                 </button>
                 {mobileEcoOpen && (
                   <div className="ml-[1.85rem] flex flex-col gap-3 pt-1 pb-2">
-                    {ecosystemDropdownLinks.map((link) => (
-                      <a
-                        key={link.label}
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group/sub flex flex-col gap-0.5"
-                      >
-                        <span className="text-base font-bold text-warm-white/50 group-hover/sub:text-warm-white transition-colors duration-150">
-                          {link.label}
-                        </span>
-                        <span className="text-[0.7rem] text-warm-white/25 group-hover/sub:text-warm-white/40 transition-colors duration-150">
-                          {link.description}
-                        </span>
-                      </a>
-                    ))}
+                    {ecosystemDropdownLinks.map((link) => {
+                      const isCurrent = 'current' in link && link.current
+                      return (
+                        <a
+                          key={link.label}
+                          href={link.href}
+                          target={isCurrent ? undefined : '_blank'}
+                          rel={isCurrent ? undefined : 'noopener noreferrer'}
+                          aria-current={isCurrent ? 'page' : undefined}
+                          className="group/sub flex flex-col gap-0.5"
+                        >
+                          <span
+                            className={[
+                              'text-base font-bold transition-colors duration-150',
+                              isCurrent
+                                ? 'text-orange'
+                                : 'text-warm-white/50 group-hover/sub:text-warm-white',
+                            ].join(' ')}
+                          >
+                            {link.label}
+                            {isCurrent && (
+                              <span className="ml-2 text-[0.55rem] uppercase tracking-[0.18em] text-orange/70">
+                                · Here
+                              </span>
+                            )}
+                          </span>
+                          <span
+                            className={[
+                              'text-[0.7rem] transition-colors duration-150',
+                              isCurrent
+                                ? 'text-orange/50'
+                                : 'text-warm-white/25 group-hover/sub:text-warm-white/40',
+                            ].join(' ')}
+                          >
+                            {link.description}
+                          </span>
+                        </a>
+                      )
+                    })}
                   </div>
                 )}
               </div>

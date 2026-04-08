@@ -55,8 +55,9 @@ export const navLinks = [
 ] as const
 
 export const ecosystemDropdownLinks = [
-  { label: 'Investing', description: 'Direct investment platform', href: externalUrls.investors, external: true },
-  { label: 'Advisory', description: 'Consulting & operations', href: externalUrls.consulting, external: true },
+  { label: 'Storage', description: 'Self-storage built for life in motion', href: externalUrls.mainSite, current: true },
+  { label: 'Advisory', description: 'Consulting & operations', href: externalUrls.consulting },
+  { label: 'Direct', description: 'Investment platform — coming soon', href: externalUrls.investors },
 ] as const
 
 // ─── Layout ───
