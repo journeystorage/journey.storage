@@ -148,3 +148,5 @@ vite.config.ts.timestamp-*
 
 # Screenshots (dev only)
 screenshots/
+
+# Social posts moved to /Users/thomazsa/journey.content-ops/posts/
