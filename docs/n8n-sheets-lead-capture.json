@@ -6,7 +6,7 @@
         "path": "journey-lead",
         "responseMode": "responseNode",
         "options": {
-          "allowedOrigins": "https://journey.storage,https://advisory.journey.storage"
+          "allowedOrigins": "http://localhost:3000,http://localhost:3001,http://localhost:3002,https://journey.storage,https://advisory.journey.storage,https://direct.journey.storage"
         }
       },
       "id": "bf938157-575a-4f4a-9ada-72593e627847",
