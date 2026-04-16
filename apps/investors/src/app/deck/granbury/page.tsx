@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import DeckNav from './DeckNav'
-import AcquisitionsMap from './AcquisitionsMap'
+import AcquisitionsMapClient from './AcquisitionsMapClient'
 
 export const metadata: Metadata = {
   title: 'Journey.Direct™ — Granbury Platform Overview',
@@ -209,7 +209,7 @@ function SlideOperator() {
         </h2>
         <p className="text-body-sm font-bold text-orange mb-6">Impact &amp; Excellence; Mediocre won&apos;t Suffice</p>
 
-        <div className="grid gap-6 lg:grid-cols-[220px_1fr_1fr]">
+        <div className="grid gap-6 md:grid-cols-[200px_1fr] lg:grid-cols-[220px_1fr_1fr]">
           {/* LEFT — Jonah */}
           <div>
             <div className="relative h-[180px] w-[180px] overflow-hidden rounded-2xl bg-charcoal mb-4">
@@ -254,7 +254,7 @@ function SlideOperator() {
           {/* RIGHT — Map + Proof bar (bigger) */}
           <div className="overflow-hidden rounded-xl border border-warm-white/[0.06] flex flex-col">
             <div className="relative flex-1 min-h-[220px] bg-[#181818]">
-              <AcquisitionsMap />
+              <AcquisitionsMapClient />
             </div>
             <div className="flex items-center justify-around bg-charcoal/50 px-4 py-2.5 border-t border-warm-white/[0.06]">
               <div className="text-center">
@@ -885,12 +885,12 @@ function SlidePropertyDetails() {
         </p>
 
         {/* Photos — hero, asymmetric grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 mb-5">
-          <div className="relative col-span-2 lg:col-span-3 lg:row-span-2 overflow-hidden rounded-xl">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-5">
+          <div className="relative col-span-2 md:row-span-2 lg:col-span-3 lg:row-span-2 aspect-[16/10] md:aspect-auto overflow-hidden rounded-xl">
             <Image src="/images/deals/granbury/granbury-1.jpg" alt="Granbury aerial view" fill className="object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
           </div>
-          <div className="relative col-span-2 lg:col-span-3 aspect-[16/7] overflow-hidden rounded-xl">
+          <div className="relative col-span-2 md:col-span-1 lg:col-span-3 aspect-[16/7] md:aspect-[4/3] lg:aspect-[16/7] overflow-hidden rounded-xl">
             <Image src="/images/deals/granbury/granbury-5.jpg" alt="Granbury drive-up units perspective" fill className="object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
             <div className="absolute left-3 bottom-3 rounded-sm bg-warm-white/10 backdrop-blur-sm px-2.5 py-1 text-[0.6rem] font-bold text-warm-white/70">Drive-Up Units</div>
@@ -981,7 +981,7 @@ function SlideMarketOverview() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <div className="grid gap-6 md:grid-cols-[1fr_1fr]">
           {/* Left — full data, organized */}
           <div className="space-y-4">
             <div>
@@ -1009,7 +1009,7 @@ function SlideMarketOverview() {
           </div>
 
           {/* Right — satellite map */}
-          <div className="relative aspect-square max-h-[440px] overflow-hidden rounded-2xl">
+          <div className="relative aspect-[4/3] md:aspect-square md:max-h-[350px] lg:max-h-[440px] overflow-hidden rounded-2xl">
             <Image src="/images/deals/granbury/granbury-map-satellite.png" alt="Granbury, TX — Satellite map with property locations and drive times" fill className="object-cover" />
             <div className="absolute bottom-3 right-3 rounded-md bg-black/70 backdrop-blur-sm px-3 py-1.5 border border-warm-white/[0.08]">
               <span className="text-[0.65rem] font-bold tracking-[0.08em] text-orange">⊙</span>
@@ -1055,7 +1055,7 @@ function SlideCompetition() {
 
   return (
     <section className="deck-page grain relative flex min-h-dvh lg:h-dvh lg:min-h-0 lg:snap-start flex-col overflow-hidden bg-black">
-      <div className="relative z-10 flex-1 min-h-0 flex flex-col mx-auto w-full max-w-[1200px] min-w-0 px-5 py-6 md:px-8 lg:px-12 lg:py-8 lg:overflow-y-auto">
+      <div className="relative z-10 flex-1 min-h-0 flex flex-col mx-auto w-full max-w-[1200px] min-w-0 px-5 py-6 md:px-8 lg:px-12 lg:py-8 md:overflow-y-auto">
         <div className="flex items-start justify-between mb-4">
           <SectionLabel>Competitive Landscape</SectionLabel>
           <Logo />
