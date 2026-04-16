@@ -150,3 +150,15 @@ vite.config.ts.timestamp-*
 screenshots/
 
 # Social posts moved to /Users/thomazsa/journey.content-ops/posts/
+
+# macOS
+.DS_Store
+
+# Reference docs (PDFs, copywriting guides — heavy, local-only)
+docs/journey.direct/
+
+# Local utility scripts (deck export, testing, screenshots)
+scripts/export-deck-pdf.mjs
+scripts/extract-pdf-pages*.mjs
+scripts/screenshot-deck-pages.mjs
+scripts/test-deck-*.py
