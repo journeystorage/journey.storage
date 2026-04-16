@@ -129,6 +129,17 @@ Current average: ~90-96 of 120. To reduce:
 2. Monitor via Hostinger → Hosting Plan → Resources Usage → Max Processes
 3. If hitting limits: consider upgrading plan or moving to VPS
 
+### ⚠ Deploy can cause 503 across all sites
+Every `git push` triggers 3 simultaneous deploys (one per Hostinger instance). The build phase spawns enough processes to temporarily exceed the 120 limit, causing **all sites to go 503** until processes stabilize.
+
+**If this happens:**
+1. Go to **Hosting Plan → Resources Usage** — confirm Max Processes is at/above 120
+2. Click **"Stop running processes"** to kill stuck build processes
+3. Restart each site **one at a time** — wait for one to come up before restarting the next
+4. Do NOT restart all three simultaneously or it will spike again
+
+This is a known limitation of Hostinger shared hosting. Consider migrating to Vercel or a VPS to eliminate this issue.
+
 ### Node version
 - Main site: Node 22.x (Framework preset default)
 - Consulting: Node 20 (Custom preset)
