@@ -1,0 +1,539 @@
+Feedback do Jonah sobre o pitch deck [Journey.Direct](http://Journey.Direct) — Granbury. Cada seção abaixo é uma página do deck com os action items específicos.
+
+---
+
+## General
+
+- [ ]  Watch vertical (side) margins across all pages
+- [ ]  Larger fonts needed throughout — **minimum 12pt** for print (older audience, recurring feedback)
+- [ ]  Use vertical space better — paper is taller than screen, reduce blank space at top/bottom
+
+---
+
+## Page 1 — Cover
+
+- [x]  Stacked: JOURNEY.DIRECT™ / *Platform* (orange italic), Page 7 style, increased lateral padding
+
+---
+
+## Page 2 — The Opportunity
+
+- [x]  Rename: section label changed to **"The Platform"**
+- [x]  Rethink content — reframed: platform is the vehicle, deals are the opportunity
+- [x]  Headline rewritten: "Invest alongside the operator. Not through a fund. Not through a REIT. *Directly.*"
+- [x]  Benefit cards reframed: operator-led, operations not speculation, aligned incentives
+- [x]  Closing line: "Journey.Direct is the platform. The deals are the opportunity."
+
+---
+
+## Page 3 — The Operator
+
+- [x]  Add section about the **team's** experience — proof bar: $200M+ | 30 facilities · 6 states | 18+ Yrs
+- [x]  Add map of all locations — React Simple Maps component with proof bar integrated below
+- [x]  Expand the "Decisive Divestiture" — full text: President and CIO, mutual releases, covenants, ® symbols
+- [x]  Fix duplicate bolded info — removed from credential list, kept in proof bar
+- [x]  Capabilities as tag chips (orange border accent) instead of 2-col bullet grid
+- [x]  Jonah photo enlarged (180px) as visual anchor
+- [x]  3-column layout: Profile | Context + Capabilities + Divestiture | Map + Proof
+
+---
+
+## Page 4 — The Market
+
+- [x]  Rename to **"Self Storage's Inflection Point"**
+- [x]  "The Market" + "The Opportunity" absorbed into single compact paragraph
+- [x]  "The Execution" added as punchline with orange border
+- [x]  Supply data as hero: declining number pills with proportional accent bars + integrated chart-table hybrid (line chart with aligned data table below)
+
+---
+
+## Page 5 — Operational Edge
+
+- [x]  **Full rewrite** — renamed to "Storage Without the Friction"
+- [x]  Tagline hero: "Frictionless Commerce at 11:00pm on a Weekday" — orange italic, prominent
+- [x]  "Our competitors close at 5 PM. We never close." — punchline below tagline
+- [x]  "Eliminate payroll" → softened to "Decreased payroll costs"
+- [x]  Customer journey (5 steps) on left + Value chain ("Why It Matters") on right
+- [x]  Value chain flow: customer wins → revenue wins → **investor wins** (orange elevated)
+
+---
+
+## Page 6 — Growth Thesis
+
+- [x]  Content validated — all correct per copywriting doc
+- [x]  Polish: Value-Add Math as hero equation ($5M → $8M = +$3M), larger numbers, Buy Box + UW Inputs as supporting text
+
+---
+
+## Page 7 — Deal Cover
+
+- [x]  Change "An" to **"Current"** Investment Opportunity
+- [x]  Zoom in on photos to reduce visible rurality
+- [x]  Typography matching Page 1: centered, eyebrow "— current deal —", h1, subtitle with dots, pill
+- [x]  Rounded container + grain overlay + orange accent line (matching Page 1)
+
+---
+
+# DEAL SLIDES — Design Review
+
+> **Design principles to apply (same as Pages 1-6):**
+> - What is the HERO of this slide? What should the investor see first?
+> - Sublines/eyebrows that bring LIFE to the page (like "— the —" on P1, pills on P4)
+> - Elevate the payoff, not just list info equally
+> - Font size pass for older audience (min 12pt equivalent)
+
+---
+
+## Page 8 — Disclaimer
+
+- [x]  Fill the page (0.85rem, wider layout, more paragraph spacing)
+- [ ]  **Design pass**: identify if any visual element can break the text wall (subtle divider? section label?)
+
+---
+
+## Page 9 — Current Opportunity
+
+- [x]  Rename heading, remove "which is"
+- [x]  **Design pass**: deal metrics as scannable strip (773 Units | 126K NRSF | $85/NRSF | $96 all-in | ~15% below) in framed zone
+- [x]  Addresses as metadata (#1 #2 #3 tying to Page 12 map pins)
+- [x]  **+$7.36M as hero punchline** — full width, large, isolated at bottom
+- [x]  "Results" elevated vs "We Will" via punchline separation
+
+---
+
+## Page 10 — Investment Summary
+
+- [x]  Rename label, de-emphasize Sponsor Fees
+- [x]  **Hero returns**: 25% IRR | 2.5x MOIC | 8.8% YOC — orange, large, top of slide
+- [x]  **Term sheet layout** — structured table (label → value), visually distinct from P9's narrative flow
+
+---
+
+## Page 11 — Property Details
+
+- [x]  Remove "took a dip", add office photo, "recent expansion" tags
+- [x]  **Photos as hero** — asymmetric grid, aerial dominant, 5 photos (added granbury-5.jpg)
+- [x]  **Data as support strip** — stats in compact bottom bar, not competing with photos
+
+---
+
+## Page 12 — Market Overview
+
+- [x]  Google Maps satellite with 5mi radius + "5 mi radius" label
+- [x]  **Hero stats**: 0 (new supply since 2005, orange) | 22K cars/day | 3.1% pop growth | $91K HHI
+- [x]  Full data preserved (Population & Income, Demand Drivers, Nearby Growth)
+- [x]  Nearby Growth as tags/chips — scannable
+
+---
+
+## Page 13 — Competition
+
+- [x]  **Full redesign** — grade distribution as hero (1 A | 5 B | 5 C | 3 D/F) with insight text
+- [x]  14 competitors as scannable table (# | Name | Facility grade | Web grade | Note)
+- [x]  **Dark mode map** via Google Maps Static API — 3 orange Journey pins + 14 varied-color competitor pins
+- [x]  Map as geographic context alongside table, with legend overlay
+
+---
+
+## Page 14 — Sources & Uses
+
+- [x]  Uses summarized (Acquisition Costs + Reserves & Fees)
+- [x]  **Return metrics as two-row cards** — 3 hero (orange: Levered IRR, Equity Multiple, YOC) + 4 secondary (neutral)
+- [x]  Labels readable — no legibility sacrifice for design
+
+---
+
+## Page 15 — Projections
+
+- [x]  Asterisk "Expected Case"
+- [x]  **Font bump**: table 0.85rem, headers 0.7rem, more row padding
+- [x]  **NOI row highlighted** — orange accent background + font-black values
+
+---
+
+## Page 16 — Returns
+
+- [x]  **Expected Case as hero** — full width, orange accent, 202.62% CoC as hero number
+- [x]  Upside/Downside side by side below, compact — context, not protagonist
+- [x]  Each scenario shows final CoC in header for quick scan
+
+---
+
+## Page 17 — Contact
+
+- [x]  "What Happens Next" + contact info, fully redesigned
+- [x]  QR code inserted
+- [x]  Rounded container + grain overlay (matching P1/P7)
+
+---
+
+> **Note:** Changes apply to both the interactive deck (`/deck/granbury`) and the print version (`/deck/granbury/print`). Print version must be re-exported after changes.
+
+---
+
+# FINAL PASS
+
+## Font Size Optimization
+
+- [x]  Two font size passes: surgical bumps (0.05-0.1rem per element) + targeted readability fixes on P3, P5, P6, P12, P13
+- [x]  Opacity minimum pass: no readable text below /50, body text /55-/70, labels /50+
+- [x]  Sublabel bump: stat sublabels 0.6→0.7rem, table headers 0.65→0.7rem, proof bar labels 0.5→0.6rem
+- [x]  P1/P7 sublines: font-light→font-normal, opacity /50→/60, brand /65→/75
+- [x]  P3 QR code added (full bio & team)
+- [x]  P12 map: container aspect-square + scale(1.25) zoom to fit circle
+
+## Mobile Optimization
+
+- [x]  P1: H1 clamp min reduced (3rem→2.2rem) to fit 375px
+- [x]  P4: Pills flex-wrap
+- [x]  P9: Metrics strip flex-wrap, dividers hidden on mobile, font sizes responsive
+- [x]  P11: Data strip flex-wrap, dot separators hidden on mobile
+- [x]  P13: Grade distribution + insight stacked vertically on mobile, table scrollable
+- [x]  P15/P16: Tables scroll horizontally (expected for financial data)
+- [x]  Playwright audit: all critical overflows resolved
+
+### Mobile Pass 2 (Apr 16, 2026)
+
+- [x]  P1/P7: Hero content vertically centered — grain container missing `flex flex-col`, content was stuck at top
+- [x]  P1/P7: Mobile container with `p-3` + `rounded-2xl` (matching desktop's padded/rounded treatment)
+- [x]  P7: Darker overlay on mobile (`from-black/70 via-black/40 to-black/80`) for text contrast over zoomed photo
+- [x]  P17: Removed `flex-1` from "Next Steps" child on mobile — was expanding vertically and preventing `justify-center`
+- [x]  P9: Metrics row `overflow-hidden` was clipping "~15% below replacement" — replaced flex with `grid-cols-3` on mobile
+- [x]  P11: Property data strip restructured — `grid-cols-4` for stats + cap rate on separate line on mobile
+- [x]  P13: Competition map invisible (0px height) — Image fill inside div with no height. Fixed with `aspect-[4/3]` on mobile
+- [x]  P14: Secondary metrics `grid-cols-4` too cramped (~90px/cell) — changed to `grid-cols-2` on mobile
+- [x]  Page dividers: Solid 3px orange line (no gradient, no black bar background)
+
+## Print Version
+
+- [ ]  Propagate ALL design changes from web to `/deck/granbury/print`
+- [ ]  Print uses inline styles (no Tailwind) — translate each change
+- [ ]  Test PDF export via Puppeteer
+
+## Print Button Restyle
+
+- [x]  Current button too large — reduce to icon-only
+- [x]  Fixed position top-right corner
+- [x]  Subtle, doesn't compete with content
+
+## Fix Next.js Errors
+
+- [x]  Resolve all build warnings and errors
+- [x]  Clean up unused variables (`QRPlaceholder`, `mathSteps`, `structureTerms`)
+- [x]  Verify clean `next build` with no errors
+
+## Tablet Optimization
+
+- [ ]  Audit all 17 slides at tablet viewport (768px / 1024px) with webapp-testing
+- [ ]  Fix layout issues specific to tablet breakpoint
+
+## Deploy
+
+- [ ]  Deploy investors site to production
+- [ ]  Verify live deck at production URL
+
+
+
+
+# revision call transcription 
+
+```
+Apr 14, 2026
+Meeting Apr 14, 2026 at 09:06 CDT - Transcript
+00:00:00
+ 
+Thomaz Sa: There
+Jonah Hall: What's that?
+Thomaz Sa: are
+Jonah Hall: Hey, can you hear me?
+Thomaz Sa: here. Can you hear me? Can you see me?
+Jonah Hall: I can. Yeah. One second.
+Thomaz Sa: Okay.
+Jonah Hall: I don't think my camera's working for some reason. Privacy switch.
+Thomaz Sa: Okay.
+Jonah Hall: Yeah, my camera's not working, but I can see
+Thomaz Sa: I I need to see you.
+Jonah Hall: you.
+Thomaz Sa: If I don't see, I can understand what I hear.
+Jonah Hall: It says my camera is blocked. That's interesting. I've noticed the slow login. It wasn't working.
+Thomaz Sa: Is it the browser?
+Jonah Hall: No, it's been doing this for a few days now that I think about it.
+Thomaz Sa: Okay. Okay.
+Jonah Hall: That's
+Thomaz Sa: Okay. No problem. Let's go on.
+Jonah Hall: fine.
+Thomaz Sa: Let me show you and see your first
+Jonah Hall: Okay.
+Thomaz Sa: impressions.
+Jonah Hall: Cool.
+Thomaz Sa: There are still some details we need to work on, but I need to check with you the overall view if it's a good direction, if you need to check something about the structure.
+ 
+ 
+00:03:23
+ 
+Thomaz Sa: Okay.
+Jonah Hall: Thank you.
+Thomaz Sa: And just to tell you before I present this is a online version responsively you can see it from
+Jonah Hall: Mhm.
+Thomaz Sa: desktop and from mobile.
+Jonah Hall: Okay. Very
+Thomaz Sa: So if you mobile version it
+Jonah Hall: cool.
+Thomaz Sa: adapts and here we have a button for print version. Okay. So it it gets adapted for print.
+Jonah Hall: Very
+Thomaz Sa: Okay.
+Jonah Hall: cool.
+Thomaz Sa: And we we can work on a light version too, a light theme.
+Jonah Hall: Oh, well for printing on white paper or something. Yeah,
+Thomaz Sa: Yes.
+Jonah Hall: gotcha. Okay. No, this this looks good.
+Thomaz Sa: Okay. So, let's go. This is the first page. Second page. An opportunity for accredited investors to access operator le self storage investments. Just to make an introduction for the presentation before talking about authority.
+Jonah Hall: Mhm.
+Thomaz Sa: Here's your page. There's a placeholder here for QR code
+Jonah Hall: Mhm.
+Thomaz Sa: reflection point.
+ 
+ 
+00:05:09
+ 
+Jonah Hall: Okay.
+Thomaz Sa: Here's the one. I think it got most chanded at
+Jonah Hall: Yeah, it did.
+Thomaz Sa: Canva. I'm bring back here. Here is a comment of you. need to go through this all together and do a better job of explaining our operational advantage to audience who don't who don't yet know who we are.
+Jonah Hall: Mhm.
+Thomaz Sa: So
+Jonah Hall: I think um overall this is probably good. I don't want to say eliminate payroll because uh sometimes we won't eliminate we will just lower make it less
+Thomaz Sa: Mhm.
+Jonah Hall: um something more like you know um uh
+Thomaz Sa: Mhm.
+Jonah Hall: increase profitability by you know decreasing payroll or something. Um, and then the the line on the Canva that says our operational
+Thomaz Sa: Okay.
+Jonah Hall: philosophy. I don't want to lose that because I think that is the one sentence description of why we do what we do. Frictionless commerce at 11 p.m. on a weekday. It doesn't have to say exactly like that, but that that line is important because uh many markets we go to our competitors cannot rent units at all after 5:00 p.m.
+ 
+ 
+00:06:56
+ 
+Jonah Hall: and we can't because of the technology. And so I think in summary,
+Thomaz Sa: Mhm.
+Jonah Hall: that one sentence gets that point across. So, I don't know if it just needs to be a tagline at the bottom of the page or or what. Do you know what I'm talking about?
+Thomaz Sa: Where is here?
+Jonah Hall: It's the second sentence at the top. Second from the top. Yeah. That that concept uh I can spend the
+Thomaz Sa: Okay.
+Jonah Hall: whole time on the slide talking about that one sentence and let them read the rest.
+Thomaz Sa: Mhm.
+Jonah Hall: And so I usually want to keep that sentence in place. Uh Can
+Thomaz Sa: Okay.
+Jonah Hall: you the the one we're looking at now, is there a way for me to see it or only if you log into Can like will a link work? If I wanted to review every word a little closer, the one we're looking at now,
+Thomaz Sa: Sorry,
+Jonah Hall: can I open this link or only only you?
+ 
+ 
+00:07:56
+ 
+Jonah Hall: Because it's in a program.
+Thomaz Sa: it's locally. I need to deploy it first to send you for you to open.
+Jonah Hall: or send me the PDF since that's how I would since that's how
+Thomaz Sa: Yeah, it works too.
+Jonah Hall: I would uh see it uh with an investor.
+Thomaz Sa: Yeah, it's faster. Okay, no
+Jonah Hall: Okay. Revenue, customer experience,
+Thomaz Sa: problem.
+Jonah Hall: occupancy. Okay. I would need to look closer, but it looks good. It's beautiful. I just need to make sure it's it says everything I need to
+Thomaz Sa: Nice.
+Jonah Hall: say.
+Thomaz Sa: Okay,
+Jonah Hall: That looks way better. Okay.
+Thomaz Sa: I send it to you and you can do a a deeper review on numbers text. Okay,
+Jonah Hall: Okay.
+Thomaz Sa: here we go to investment opportunity disclaimer demands
+Jonah Hall: Mhm.
+Thomaz Sa: here opportunity.
+Jonah Hall: Mhm. Very good.
+Thomaz Sa: Invest summary is better here.
+Jonah Hall: Mhm.
+Thomaz Sa: Check this.
+Jonah Hall: Yes. Agreed.
+ 
+ 
+00:09:44
+ 
+Jonah Hall: A little
+Thomaz Sa: Yeah,
+Jonah Hall: cleaner.
+Thomaz Sa: more scannable too. So I'll make the same improvements
+Jonah Hall: Okay.
+Thomaz Sa: here.
+Jonah Hall: Okay. It's
+Thomaz Sa: property details.
+Jonah Hall: good.
+Thomaz Sa: The expansion tag needs to be at this photo.
+Jonah Hall: No, no,
+Thomaz Sa: No.
+Jonah Hall: only only the bottom two photos. The top photo is old. Uh the older facility.
+Thomaz Sa: Okay.
+Jonah Hall: The bottom two are the same facility.
+Thomaz Sa: Mhm.
+Jonah Hall: Uh the new one, the third one probably.
+Thomaz Sa: It It's good to have the same tag here. Okay.
+Jonah Hall: And maybe instead of expansion, recent expansion, so they know it's it's completed. It's not something we're going to do. It's something that's already done. Because some people will think it's a construction like we're going to go expand
+Thomaz Sa: Mhm. Most recent expansion or just recent expansion.
+Jonah Hall: that recent expansion. Yeah.
+Thomaz Sa: Okay,
+Jonah Hall: Yeah.
+Thomaz Sa: fine.
+Jonah Hall: Cost. Yeah, this looks good.
+ 
+ 
+00:11:01
+ 
+Jonah Hall: Map. Okay, one thing on this slide with when you do the map, can you do the the measurement of the scale of the map? Can you add like a like Google has a a little ruler at the bottom that says, you know, one inch equals one mile or something because I showed this to an investor the other day and he he didn't know Granberry. He's never heard of Granberry and he's like, "Is the map, you know, a little town or is the map like a third of the state? I don't know what I'm looking at." And so I want to fix that by adding a a scale at the bottom of the
+Thomaz Sa: Okay.
+Jonah Hall: map.
+Thomaz Sa: Just go here and add a comment. I think it's
+Jonah Hall: Okay.
+Thomaz Sa: possible.
+Jonah Hall: And do you know if you print are the font the font size how big is it? It's hard to tell in this screen share. Is it going to be easily readable for an older person with bad vision or is it going to be a little bit small when we go to print
+ 
+ 
+00:12:23
+ 
+Thomaz Sa: When I go to print it,
+Jonah Hall: it?
+Thomaz Sa: I'm working on it to make sure it's readable.
+Jonah Hall: Okay.
+Thomaz Sa: So,
+Jonah Hall: I think Yeah,
+Thomaz Sa: it's like it's like 12 the
+Jonah Hall: I think if there's any way to make it a little bigger when we print it,
+Thomaz Sa: size.
+Jonah Hall: I think it's better because I got multiple people who
+Thomaz Sa: Yeah.
+Jonah Hall: were skipping quickly the pages because they were like, "Ah, it's too small. I just want the main they only read on a mission and they move on." And that's the only concern I have is that it would be too small.
+Thomaz Sa: I I think one mission is still kind of small but it's a great volume of text. So if you increase size I don't know how it will
+Jonah Hall: Can you increase by making it
+Thomaz Sa: work
+Jonah Hall: taller because there's a lot of blank space at the top and at
+Thomaz Sa: taller okay
+Jonah Hall: the bottom on paper.
+Thomaz Sa: give more space between lines.
+Jonah Hall: Yeah.
+ 
+ 
+00:13:27
+ 
+Jonah Hall: And that way the font can go up maybe one notch,
+Thomaz Sa: Yes.
+Jonah Hall: one one increment because you stretch because paper is
+Thomaz Sa: Yeah.
+Jonah Hall: not like a screen. Paper is
+Thomaz Sa: Mhm.
+Jonah Hall: taller.
+Thomaz Sa: Okay.
+Jonah Hall: All of this looks very good though as far as design layout. It's very cool.
+Thomaz Sa: Okay.
+Jonah Hall: Is this um
+Thomaz Sa: Nice. This one I think it's small.
+Jonah Hall: Yeah, a a lot feels small to me, but I'm also looking not on full-size screen. I'm on my laptop and it's small right now.
+Thomaz Sa: Disclaimer, I don't mind about
+Jonah Hall: So,
+Thomaz Sa: it.
+Jonah Hall: I think the smallest font in the whole presentation should be 12 if possible.
+Thomaz Sa: Mhm.
+Jonah Hall: And we can be bigger for taglines and and headlines,
+Thomaz Sa: Yeah.
+Jonah Hall: but 12 very small.
+Thomaz Sa: This one is all here. It's very small
+Jonah Hall: Yeah.
+Thomaz Sa: too.
+Jonah Hall: If we need to make the competition analysis two pages, we could do that.
+ 
+ 
+00:14:46
+ 
+Jonah Hall: You can make it one for one for uh or just split
+Thomaz Sa: Okay.
+Jonah Hall: it split into two pages if if it makes it easier to fit.
+Thomaz Sa: One to seven and then 8 8 to 14.
+Jonah Hall: Yeah. And then the map can be two different maps, one for each Yeah.
+Thomaz Sa: Okay. So, here is just a placeholder we add later the picture competition and
+Jonah Hall: Mhm.
+Thomaz Sa: analysis. So you got the idea sources and
+Jonah Hall: Mhm.
+Thomaz Sa: uses.
+Jonah Hall: Looks very good.
+Thomaz Sa: Nice.
+Jonah Hall: Better than the screenshots from the from the Excel.
+Thomaz Sa: Yeah.
+Jonah Hall: Mhm.
+Thomaz Sa: Analyze the pro projections. Here is just one thing I need to talk with you is take a look at total expenses. It's collapsed for just one line and
+Jonah Hall: Mhm.
+Thomaz Sa: in the original one various
+Jonah Hall: Ah, see it's okay.
+Thomaz Sa: sublines.
+Jonah Hall: I think for this presentation uh it can be less like this and then if they want more information I can
+ 
+ 
+00:16:17
+ 
+Thomaz Sa: Yeah, I I think that too.
+Jonah Hall: provide.
+Thomaz Sa: Okay, nice.
+Jonah Hall: Yes. Very good. Clean. Yeah. Looks good. And it'll be cool that it can be displayed uh on a phone or a tablet or
+Thomaz Sa: Yeah,
+Jonah Hall: whatever.
+Thomaz Sa: we can the phone
+Jonah Hall: Yeah. Very
+Thomaz Sa: version.
+Jonah Hall: cool. Yes. Very good. Let let me send send me the PDF so that I can work on uh the
+Thomaz Sa: Okay.
+Jonah Hall: language and keep keep making any small tweaks and then I'll send you
+Thomaz Sa: Yeah,
+Jonah Hall: notes.
+Thomaz Sa: I send you I send you right after this meeting. Let me ask you just one more thing
+Jonah Hall: Sure.
+Thomaz Sa: after this slide.
+Jonah Hall: Mhm.
+Thomaz Sa: Do do you think we can add some more text about I know like uh getting people ready to a pitch.
+Jonah Hall: Yeah. Or or how to invest next steps.
+Thomaz Sa: Yeah, I need this.
+ 
+ 
+00:17:50
+ 
+Jonah Hall: Uh if there there is a hold on I will send you there's a page in the one second here. Here. Here. Page like 70. Um, yeah, something like this, but make it more simple presentation style, But I'm going to send you a screenshot. There's this is from the actual documents with the investors. And it looks like
+Thomaz Sa: Mhm.
+Jonah Hall: Oops. It looks like this.
+Thomaz Sa: Nice.
+Jonah Hall: That's that's in the actual documents the investors sign and it's how to do so in the presentation we could say you know next steps
+Thomaz Sa: Next steps.
+Jonah Hall: uh get a you know uh if you have questions reach out to Jonah or schedule a call uh if you're ready to invest you know here here are the next steps something like that it doesn't need to be that much detail Well, it can be more of a simple next steps page. I think that would be good. Did you have something different in mind than next steps?
+Thomaz Sa: Okay,
+Jonah Hall: Were you thinking something else?
+Thomaz Sa: I let you know send you the PDF version.
+Jonah Hall: Okay.
+Thomaz Sa: I'll work on font
+Jonah Hall: Yeah, I think it just needs to be bigger.
+Thomaz Sa: size.
+Jonah Hall: That's going to be my main concern. I I will pitch a lot of older people and they need to be able to read it very
+Thomaz Sa: Mhm.
+Jonah Hall: easily or it's going to be uh a problem. That was that was feedback I I get all the time which is why the original
+Thomaz Sa: Yeah.
+Jonah Hall: presentation was on larger paper because I was trying to help people with
+Thomaz Sa: Yeah.
+Jonah Hall: this.
+Thomaz Sa: Okay. Okay. Let me work on this.
+Jonah Hall: Okay, perfect. Thank you.
+Thomaz Sa: Okay.
+Jonah Hall: Looks great.
+Thomaz Sa: Thank you.
+Jonah Hall: Appreciate it.
+Thomaz Sa: Talk later.
+Jonah Hall: Talk soon.
+Thomaz Sa: Nice.
+ 
+ 
+Transcription ended after 00:21:05
+
+
+This editable transcript was computer generated and might contain errors. People can also change the text after it was created.
+```

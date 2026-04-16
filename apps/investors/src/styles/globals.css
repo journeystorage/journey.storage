@@ -53,6 +53,8 @@ body {
   background-color: var(--color-black);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 *:focus-visible {
@@ -103,5 +105,23 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ── Deck: Print — minimal (PDF generated via /deck/granbury/print) ── */
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .grain::before {
+    display: none !important;
+  }
+
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }
