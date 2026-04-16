@@ -805,7 +805,7 @@ function SlideInvestmentSummary() {
         </h2>
 
         {/* Hero metrics — the numbers that sell the deal */}
-        <div className="grid grid-cols-2 gap-3 lg:flex lg:items-center lg:gap-6 mb-6 border-y border-warm-white/[0.06] py-4">
+        <div className="flex flex-wrap items-center gap-4 lg:gap-6 mb-6 border-y border-warm-white/[0.06] py-4">
           <div>
             <div className="font-mono font-black text-orange leading-none" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontVariantNumeric: 'tabular-nums' }}>25% IRR</div>
             <div className="mt-1 text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50">Targeted · Project-level</div>
@@ -959,7 +959,7 @@ function SlideMarketOverview() {
         </h2>
 
         {/* Hero stats — the numbers that matter */}
-        <div className="grid grid-cols-2 gap-3 lg:flex lg:items-center lg:gap-6 mb-6 border-y border-warm-white/[0.06] py-4">
+        <div className="flex flex-wrap items-center gap-4 lg:gap-6 mb-6 border-y border-warm-white/[0.06] py-4">
           <div>
             <div className="font-mono font-black text-orange leading-none text-2xl" style={{ fontVariantNumeric: 'tabular-nums' }}>0</div>
             <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">New supply since 2005</div>
@@ -1009,8 +1009,8 @@ function SlideMarketOverview() {
           </div>
 
           {/* Right — satellite map */}
-          <div className="relative aspect-square overflow-hidden rounded-2xl will-change-transform">
-            <Image src="/images/deals/granbury/granbury-map-satellite.png" alt="Granbury, TX — Satellite map with property locations and drive times" fill className="object-cover" style={{ transform: 'scale(1.25)' }} />
+          <div className="relative aspect-square max-h-[440px] overflow-hidden rounded-2xl">
+            <Image src="/images/deals/granbury/granbury-map-satellite.png" alt="Granbury, TX — Satellite map with property locations and drive times" fill className="object-cover" />
             <div className="absolute bottom-3 right-3 rounded-md bg-black/70 backdrop-blur-sm px-3 py-1.5 border border-warm-white/[0.08]">
               <span className="text-[0.65rem] font-bold tracking-[0.08em] text-orange">⊙</span>
               <span className="ml-1.5 text-[0.65rem] font-bold tracking-[0.08em] text-warm-white/60">5 mi radius</span>
@@ -1055,7 +1055,7 @@ function SlideCompetition() {
 
   return (
     <section className="deck-page grain relative flex min-h-dvh lg:h-dvh lg:min-h-0 lg:snap-start flex-col overflow-hidden bg-black">
-      <div className="relative z-10 flex-1 flex flex-col mx-auto w-full max-w-[1200px] min-w-0 px-5 py-6 md:px-8 lg:px-12 lg:py-8">
+      <div className="relative z-10 flex-1 min-h-0 flex flex-col mx-auto w-full max-w-[1200px] min-w-0 px-5 py-6 md:px-8 lg:px-12 lg:py-8 lg:overflow-y-auto">
         <div className="flex items-start justify-between mb-4">
           <SectionLabel>Competitive Landscape</SectionLabel>
           <Logo />
@@ -1072,8 +1072,8 @@ function SlideCompetition() {
           const cCount = grades.filter(g => g.startsWith('C')).length
           const dfCount = grades.filter(g => g.startsWith('D') || g.startsWith('F') || g === 'NO').length
           return (
-            <div className="mb-6 border-y border-warm-white/[0.06] py-4">
-              <div className="flex items-center gap-4 lg:gap-5 mb-4 lg:mb-0">
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-5 mb-6 border-y border-warm-white/[0.06] py-4">
+              <div className="flex items-center gap-4 lg:gap-5 shrink-0">
                 <div className="text-center">
                   <div className="font-mono font-black text-orange text-2xl leading-none">{aCount}</div>
                   <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">A Grade</div>
