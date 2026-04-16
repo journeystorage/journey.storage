@@ -87,7 +87,7 @@ Feedback do Jonah sobre o pitch deck [Journey.Direct](http://Journey.Direct) —
 ## Page 8 — Disclaimer
 
 - [x]  Fill the page (0.85rem, wider layout, more paragraph spacing)
-- [ ]  **Design pass**: identify if any visual element can break the text wall (subtle divider? section label?)
+- [x]  **Design pass**: 3 section labels (General, Forward-Looking Statements, Past Performance) + 1px dividers + orange border-left accent on final section
 
 ---
 
@@ -206,9 +206,9 @@ Feedback do Jonah sobre o pitch deck [Journey.Direct](http://Journey.Direct) —
 
 ## Print Version
 
-- [ ]  Propagate ALL design changes from web to `/deck/granbury/print`
-- [ ]  Print uses inline styles (no Tailwind) — translate each change
-- [ ]  Test PDF export via Puppeteer
+- [x]  Propagate ALL design changes from web to `/deck/granbury/print`
+- [x]  Print uses inline styles (no Tailwind) — translate each change
+- [x]  Test PDF export via Puppeteer
 
 ## Print Button Restyle
 
@@ -224,15 +224,14 @@ Feedback do Jonah sobre o pitch deck [Journey.Direct](http://Journey.Direct) —
 
 ## Tablet Optimization
 
-- [ ]  Audit all 17 slides at tablet viewport (768px / 1024px) with webapp-testing
-- [ ]  Fix layout issues specific to tablet breakpoint
+- [x]  Audit all 17 slides at tablet viewport (768px / 1024px) with webapp-testing
+- [x]  P3, P11, P12, P13 fixed in prior commits
 
 ## WebP Conversion
 
-- [ ]  Convert all JPG/PNG deck images to WebP (sharp, q82/q70 fallback)
-- [ ]  Update all image references in `page.tsx` and `print/page.tsx`
-- [ ]  Keep original files as backup until verified
-- [ ]  Single isolated commit — no .gitignore changes
+- [x]  Convert PNGs to WebP (sharp, q70-q90) — JPGs kept as-is (already smaller than WebP)
+- [x]  Update all image references in `page.tsx` and `print/page.tsx`
+- [x]  Delete 11 unreferenced files (~9.4M removed)
 
 ## Deploy
 

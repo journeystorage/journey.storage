@@ -224,7 +224,7 @@ function SlideOperator() {
             </ul>
             <div className="mt-3 hidden lg:flex items-center gap-2">
               <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
-                <Image src="/images/other/qr-code.png" alt="QR code — team & full bio" fill className="object-contain" />
+                <Image src="/images/other/qr-code.webp" alt="QR code — team & full bio" fill className="object-contain" />
               </div>
               <span className="text-[0.65rem] text-warm-white/40 leading-tight">Full bio<br />&amp; team</span>
             </div>
@@ -667,29 +667,43 @@ function SlideDisclaimer() {
   return (
     <section className="deck-page grain relative flex min-h-dvh lg:h-dvh lg:min-h-0 lg:snap-start flex-col overflow-hidden bg-black">
       <div className="relative z-10 flex-1 flex flex-col justify-center mx-auto w-full max-w-[1200px] min-w-0 px-5 py-8 md:px-8 lg:px-12 lg:py-0">
-        <div className="flex items-start justify-between mb-10">
+        <div className="flex items-start justify-between mb-6">
           <div />
           <Logo />
         </div>
-        <h2 className="font-black leading-[0.95] tracking-[-0.02em] text-warm-white mb-8" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
+        <h2 className="font-black leading-[0.95] tracking-[-0.02em] text-warm-white mb-5" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
           Disclaimer
         </h2>
-        <div className="text-[0.85rem] leading-[1.9] text-warm-white/50">
-          <p className="mb-5">
+        <div className="text-[0.85rem] leading-[1.8] lg:leading-[1.7] text-warm-white/50">
+          {/* Section 1 — General */}
+          <p className="mb-1 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-orange/50">General</p>
+          <p className="mb-4">
             This contains privileged and confidential information and unauthorized use of this information in any manner is strictly prohibited. This is for informational purposes and not intended to be a general solicitation or a securities offering of any kind. The information contained herein is from sources believed to be reliable, however no representation by Journey.Direct&trade; (&ldquo;JD&rdquo;), nor by Journey.Storage&trade; (&ldquo;JS&rdquo;), either expressed or implied, is made as to the accuracy of any information and all investors should conduct their own research to determine the accuracy of any statements made.
           </p>
           <p className="mb-5">
             Neither JD (nor JS), nor their representatives, officers, employees, affiliates, sub-contractors or vendors provide tax, legal or investment advice. Nothing in this document is intended to be or should be construed as such advice. The SEC has not passed upon the merits of or given its approval to the securities, the terms of the offering, or the accuracy or completeness of any offering materials.
           </p>
-          <p className="mb-5">
-            Potential investors and other readers are also cautioned that these forward-looking statements are predictions only based on current information, assumptions and expectations that are inherently subject to risks and uncertainties that could cause future events or results to differ materially from those set forth or implied by such forward looking statements. These forward-looking statements can be identified by the use of forward-looking terminology, such as &ldquo;may,&rdquo; &ldquo;will,&rdquo; &ldquo;seek,&rdquo; &ldquo;should,&rdquo; &ldquo;expect,&rdquo; &ldquo;anticipate,&rdquo; &ldquo;project,&rdquo; &ldquo;estimate,&rdquo; &ldquo;intend,&rdquo; &ldquo;continue,&rdquo; or &ldquo;believe&rdquo; or the negatives thereof or other variations thereon or comparable terminology.
-          </p>
-          <p className="mb-5">
-            This further contains several future financial projections and forecasts. These estimated projections are based on numerous assumptions and hypothetical scenarios and JD (and JS) explicitly make no representation or warranty of any kind with respect to any financial projection or forecast.
-          </p>
-          <p>
-            <strong className="text-warm-white/70">Past performance does not guarantee future results.</strong> Current performance may be lower or higher than the performance data presented. All return examples provided are based on assumptions and expectations in light of currently available information, industry trends and comparisons to competitor&apos;s financials. Therefore, actual performance may, and most likely will, substantially differ from these projections and no guarantee is presented or implied as to the accuracy of specific forecasts, projections or predictive statements contained herein. JD (and JS) further make no representations or warranties that any investor will, or is likely to, achieve profits similar to those shown herein.
-          </p>
+
+          {/* Section 2 — Forward-Looking Statements */}
+          <div className="border-t border-warm-white/[0.06] pt-4 mb-4">
+            <p className="mb-1 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-orange/50">Forward-Looking Statements</p>
+            <p className="mb-4">
+              Potential investors and other readers are also cautioned that these forward-looking statements are predictions only based on current information, assumptions and expectations that are inherently subject to risks and uncertainties that could cause future events or results to differ materially from those set forth or implied by such forward looking statements. These forward-looking statements can be identified by the use of forward-looking terminology, such as &ldquo;may,&rdquo; &ldquo;will,&rdquo; &ldquo;seek,&rdquo; &ldquo;should,&rdquo; &ldquo;expect,&rdquo; &ldquo;anticipate,&rdquo; &ldquo;project,&rdquo; &ldquo;estimate,&rdquo; &ldquo;intend,&rdquo; &ldquo;continue,&rdquo; or &ldquo;believe&rdquo; or the negatives thereof or other variations thereon or comparable terminology.
+            </p>
+            <p>
+              This further contains several future financial projections and forecasts. These estimated projections are based on numerous assumptions and hypothetical scenarios and JD (and JS) explicitly make no representation or warranty of any kind with respect to any financial projection or forecast.
+            </p>
+          </div>
+
+          {/* Section 3 — Past Performance */}
+          <div className="border-t border-warm-white/[0.06] pt-4">
+            <p className="mb-1 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-orange/50">Past Performance</p>
+            <div className="border-l-2 border-orange/30 pl-4">
+              <p>
+                <strong className="text-warm-white/70">Past performance does not guarantee future results.</strong> Current performance may be lower or higher than the performance data presented. All return examples provided are based on assumptions and expectations in light of currently available information, industry trends and comparisons to competitor&apos;s financials. Therefore, actual performance may, and most likely will, substantially differ from these projections and no guarantee is presented or implied as to the accuracy of specific forecasts, projections or predictive statements contained herein. JD (and JS) further make no representations or warranties that any investor will, or is likely to, achieve profits similar to those shown herein.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
       <PageFooter />
@@ -1010,7 +1024,7 @@ function SlideMarketOverview() {
 
           {/* Right — satellite map */}
           <div className="relative aspect-[4/3] md:aspect-square md:max-h-[350px] lg:max-h-[440px] overflow-hidden rounded-2xl">
-            <Image src="/images/deals/granbury/granbury-map-satellite.png" alt="Granbury, TX — Satellite map with property locations and drive times" fill className="object-cover" />
+            <Image src="/images/deals/granbury/granbury-map-satellite.webp" alt="Granbury, TX — Satellite map with property locations and drive times" fill className="object-cover" />
             <div className="absolute bottom-3 right-3 rounded-md bg-black/70 backdrop-blur-sm px-3 py-1.5 border border-warm-white/[0.08]">
               <span className="text-[0.65rem] font-bold tracking-[0.08em] text-orange">⊙</span>
               <span className="ml-1.5 text-[0.65rem] font-bold tracking-[0.08em] text-warm-white/60">5 mi radius</span>
@@ -1131,7 +1145,7 @@ function SlideCompetition() {
 
           {/* Map — geographic context */}
           <div className="relative aspect-[4/3] lg:aspect-auto overflow-hidden rounded-2xl border border-warm-white/[0.06]">
-            <Image src="/images/map/comp-map-dark.png" alt="Competition map — Granbury area" fill className="object-cover" />
+            <Image src="/images/map/comp-map-dark.webp" alt="Competition map — Granbury area" fill className="object-cover" />
             <div className="absolute bottom-3 left-3 flex items-center gap-3 rounded-md bg-black/70 backdrop-blur-sm px-3 py-1.5 border border-warm-white/[0.08]">
               <span className="flex items-center gap-1.5 text-[0.6rem] font-bold text-orange"><span className="inline-block w-2 h-2 rounded-full bg-orange" />Journey</span>
               <span className="flex items-center gap-1.5 text-[0.6rem] font-bold text-warm-white/40"><span className="inline-block w-2 h-2 rounded-full bg-stone" />Competitors</span>
@@ -1512,7 +1526,7 @@ function SlideContact() {
             </div>
             <div className="mt-6 flex items-center gap-3">
               <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg">
-                <Image src="/images/other/qr-code.png" alt="QR code — direct.journey.storage" fill className="object-contain" />
+                <Image src="/images/other/qr-code.webp" alt="QR code — direct.journey.storage" fill className="object-contain" />
               </div>
               <span className="text-[0.8rem] text-warm-white/55">Or scan here</span>
             </div>

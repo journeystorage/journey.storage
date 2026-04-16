@@ -4,6 +4,26 @@ Log interno de alterações de design, arquitetura e funcionalidades.
 
 ---
 
+## 2026-04-16
+
+### Print deck — font size sync com versão web
+- **Escopo**: `apps/investors/src/app/deck/granbury/print/page.tsx` — todos os 17 slides
+- **Motivação**: tipografia do print estava ~10-15% menor que a versão web em todas as categorias
+- **Mudanças principais**:
+  - H2 default: 2.1rem → 2.2rem; overrides individuais de 2.0-2.1rem → 2.15-2.3rem
+  - Body text: 0.72-0.78rem → 0.82-0.88rem
+  - Table data (P15, P16): 0.72-0.75rem → 0.82-0.85rem
+  - Table headers: 0.58-0.62rem → 0.65-0.7rem
+  - Stat labels: 0.5-0.52rem → 0.58-0.65rem
+  - Stat numbers: 1.1-1.6rem → 1.2-1.7rem
+  - Equation numbers P6: 3rem → 3.5rem
+  - Grid gaps: 24px → 32px em vários slides
+  - Cell padding: 3-4px → 5-6px
+- **Nota**: se as fontes ficarem grandes demais no papel, reverter o commit que contém esta mudança. Root font-size permanece `19px`
+- `.gitignore`: adicionado `*.pdf` para não trackear PDFs exportados
+
+---
+
 ## 2026-04-07
 
 ### Lead capture pipeline — n8n + Google Sheets (todos os 3 sites)
