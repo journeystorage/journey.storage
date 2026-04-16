@@ -227,6 +227,13 @@ Feedback do Jonah sobre o pitch deck [Journey.Direct](http://Journey.Direct) —
 - [ ]  Audit all 17 slides at tablet viewport (768px / 1024px) with webapp-testing
 - [ ]  Fix layout issues specific to tablet breakpoint
 
+## WebP Conversion
+
+- [ ]  Convert all JPG/PNG deck images to WebP (sharp, q82/q70 fallback)
+- [ ]  Update all image references in `page.tsx` and `print/page.tsx`
+- [ ]  Keep original files as backup until verified
+- [ ]  Single isolated commit — no .gitignore changes
+
 ## Deploy
 
 - [ ]  Deploy investors site to production
