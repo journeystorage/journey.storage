@@ -21,13 +21,13 @@ const plexMono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Journey.Direct™ — Coming soon | Journey.Storage™',
+  title: 'Journey.Direct™ — Direct investment in self-storage | Journey.Storage™',
   description:
-    'Built by operators. A direct investment platform for self-storage, on the way. Stay tuned.',
+    'Operator-led direct investment in self-storage. Value-add acquisitions in high-demand U.S. markets. For accredited investors. Part of the Journey.Storage ecosystem.',
   metadataBase: new URL('https://direct.journey.storage'),
   openGraph: {
-    title: 'Journey.Direct™ — Coming soon',
-    description: 'Built by operators. A direct investment platform for self-storage, on the way.',
+    title: 'Journey.Direct™ — Direct investment in self-storage',
+    description: 'Operator-led direct investment in self-storage. Value-add acquisitions in high-demand U.S. markets. For accredited investors.',
     url: 'https://direct.journey.storage',
     siteName: 'Journey.Direct™',
     locale: 'en_US',
