@@ -95,7 +95,7 @@ export default function LeadCaptureModal({
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm px-5"
+      className="fixed inset-0 z-[70] flex items-start md:items-center justify-center overflow-y-auto bg-black/70 backdrop-blur-sm px-5 py-10"
       role="dialog"
       aria-modal="true"
       aria-label="Book a call"
@@ -103,7 +103,7 @@ export default function LeadCaptureModal({
       style={{ animation: 'fadeIn 0.3s ease-out' }}
     >
       <div
-        className="relative w-full max-w-[440px] rounded-tl-[24px] rounded-tr-[4px] rounded-br-[4px] rounded-bl-[4px] bg-warm-white p-8 md:p-10"
+        className="relative w-full max-w-[440px] shrink-0 rounded-tl-[24px] rounded-tr-[4px] rounded-br-[4px] rounded-bl-[4px] bg-warm-white p-8 md:p-10"
         onClick={(e) => e.stopPropagation()}
       >
         <button
