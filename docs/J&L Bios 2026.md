@@ -7,7 +7,7 @@ Visionary Strategist | Portfolio Architect | Servant Leader | Empire Builder
 
 Born and raised in Rio de Janeiro, Brazil, Lyvia’s relentless drive was forged on the tennis court. Earning a collegiate tennis scholarship, she graduated with degrees in Business Administration and Management from Dallas Baptist University, translating her fierce competitive focus directly into the corporate arena. Grounded in an abundance mindset and a deep dedication to faith, she builds systems designed to sustain long-term, generational wealth.
 
-Her operational expertise and financial acumen were honed through rigorous leadership roles, including serving as Financial Controller of RREAF/Gravitas Management and the director of finance for previous storage ventures, including Smartlock Self Storage. In these capacities, she directed critical financial operations—managing complex acquisitions, month-end closings, and intercompany reconciliations—overseeing complex transactions in real estate, securities, and alternative assets and providing the foundational controls necessary to support a scaling $70M+ self-storage portfolio across seventeen (17) locations in three states.
+Her operational expertise and financial acumen were honed through rigorous leadership roles, including serving as Financial Controller of a multifamily and hospitality private equity firm and the director of finance for previous storage ventures, including Smartlock Self Storage®. In these capacities, she directed critical financial operations—managing complex acquisitions, month-end closings, and intercompany reconciliations—overseeing complex transactions in real estate, securities, and alternative assets and providing the foundational controls necessary to support a scaling $70M+ self-storage portfolio across seventeen (17) locations in three states.
 
 When the time came to pivot, Lyvia masterminded the complex divestiture from legacy operations. She executed the critical settlement agreements and mutual releases that secured the family's assets, severing legacy ties and establishing total operational sovereignty for their current empire.
 
@@ -30,7 +30,7 @@ He took an asset manager role with a family office in Garland, TX in 2016, where
 
 His career took off in 2020, when he co-founded Smartlock Self Storage® and rapidly scaled it from a startup to a vertically integrated staff of eighteen; and from inception to \~$70M+ in AUM across seventeen (17) locations in three states, pioneering self-service and the autonomous customer journey. Jonah resigned from day-to-day operations in 2024 when it became clear the partnership would not continue.
 
-In 2024, Jonah partnered with Cedar Creek Capital®, joining as President & Chief Investment Officer.  Originally brought in to reposition the portfolio, overhaul operations and implement the autonomous customer journey, Jonah quickly recognized the need for leadership. In under two years, Jonah transformed a dysfunctional team of seventy into a higher performing team of fifty-four, cutting nearly $1M in payroll and creating even more capacity, all while exiting or repositioning over \~$150M in existing assets and acquiring $60M in new assets.
+In 2024, Jonah partnered with Cedar Creek Capital®, joining as President & Chief Investment Officer. Originally brought in to reposition the portfolio, overhaul operations and implement the autonomous customer journey, Jonah quickly recognized the need for leadership. In under two years, Jonah transformed a dysfunctional team of seventy into a higher performing team of fifty-four, cutting nearly $1M in payroll and creating even more capacity, all while exiting or repositioning over \~$150M in existing assets and acquiring $60M in new assets.
 
 As a Missouri native, he loves his Kansas City Chiefs and you’ll often see him sporting his Jersey on Red Friday, game day or after a big win. He resides in Dallas, TX and spends all of his non-working hours with his two young entrepreneurs-in-training, Elisa (9) and Braden (7).
 
@@ -47,16 +47,16 @@ Co-Founder & President
 Over the last 12+ years, Lyvia has overseen complex, multi-entity structures, spanning 50+ entities, driving strategy, discipline, and performance across:
 
 **TAG CHIPS**  
-**Capital Allocation**  
-**Liquidity Management**  
-**Cash Flow Optimization**  
-**Investor Reporting**  
-**Lender Relations**  
+**Financial Execution**  
+**Asset Management**  
+**Accounting Controls**  
+**Corporate Structure**  
 **Treasury Management**  
-**Banking Strategy**   
-**Refinance Execution**  
-**Intercompany Structuring**  
-**Tax Strategy**
+**Tax Strategy**  
+**Internal Operations**  
+**HR & Compliance**  
+**Investor Reporting**  
+**Lender Relations**
 
 # Jonah Pitch Deck Bio
 
@@ -81,4 +81,3 @@ A decade into the industry, Jonah has served in almost every capacity, wearing t
 **Technology Implementation**  
 **Deal Structuring**  
 **Property Management**
-

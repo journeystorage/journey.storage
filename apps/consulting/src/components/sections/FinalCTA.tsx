@@ -72,7 +72,7 @@ export default function FinalCTA() {
         onClose={() => setShowModal(false)}
         formSource="consulting-booking"
         tierName="Book a call"
-        tierDetail="Command — Custom"
+        tierDetail="Command"
         redirectUrl={CALENDAR_URL}
       />
     </section>

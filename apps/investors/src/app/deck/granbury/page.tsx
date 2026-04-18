@@ -1,6 +1,8 @@
+import React from 'react'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import DeckNav from './DeckNav'
+import PrintTrigger from './PrintTrigger'
 import AcquisitionsMapClient from './AcquisitionsMapClient'
 
 export const metadata: Metadata = {
@@ -9,7 +11,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-const TOTAL_PAGES = 17
+const TOTAL_PAGES = 18
 
 /* ─── Shared sub-components ─── */
 
@@ -25,7 +27,7 @@ function PageFooter() {
 
 function PageDivider() {
   return (
-    <div className="lg:hidden h-[3px] bg-orange/40" />
+    <div className="lg:hidden print:hidden h-[3px] bg-orange/40" />
   )
 }
 
@@ -70,20 +72,21 @@ function GhostText({ children, className = '' }: { children: React.ReactNode; cl
 
 function SlideCover() {
   return (
-    <section className="deck-page relative flex min-h-dvh lg:h-dvh lg:min-h-0 lg:snap-start flex-col overflow-hidden bg-[#111]">
+    <section className="deck-page relative flex min-h-dvh lg:h-dvh lg:min-h-0 lg:snap-start flex-col overflow-hidden bg-[#181818]">
       {/* Padded container — smaller on mobile, larger on desktop */}
       <div className="relative z-10 flex flex-1 flex-col p-3 lg:p-8">
-        <div className="grain relative flex flex-1 flex-col overflow-hidden rounded-2xl lg:rounded-3xl">
+        <div className="grain relative flex flex-1 flex-col overflow-hidden rounded-2xl lg:rounded-3xl border border-orange/20">
           <Image
-            src="/images/hero/direct-hero-bg.webp"
+            src="/images/hero/direct-hero-bg-v2.webp"
             alt=""
             fill
             priority
             sizes="100vw"
             className="object-cover"
-            style={{ filter: 'grayscale(30%) contrast(1.15) brightness(0.45) sepia(0.1)', objectPosition: '50% 62%' }}
+            style={{ filter: 'grayscale(30%) contrast(1.15) brightness(0.55) sepia(0.1)', objectPosition: '50% 62%' }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
+          <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,0,0,0.5), rgba(0,0,0,0.15))' }} />
+          <div className="absolute inset-0 bg-black/25" />
           <div className="absolute inset-0 mix-blend-overlay" style={{ background: 'radial-gradient(ellipse 55% 50% at 50% 45%, rgba(232,98,42,0.1), transparent)' }} />
 
           {/* Logo */}
@@ -97,8 +100,11 @@ function SlideCover() {
             <h1 className="uppercase leading-[0.88] tracking-[-0.03em] text-warm-white" style={{ fontSize: 'clamp(2.2rem, 9vw, 8rem)' }}>
               <span className="font-black">Journey</span><span className="font-light">.Direct<span className="text-[0.4em] align-super">&trade;</span></span>
             </h1>
-            <p className="mt-4 lg:mt-7 text-sm md:text-lg lg:text-xl font-normal tracking-[0.02em] text-warm-white/60">
-              Investment Platform&ensp;·&ensp;<span className="font-bold text-warm-white/75">Journey</span><span className="text-warm-white/75">.Storage&trade;</span> Ecosystem
+            <p className="mt-4 lg:mt-7 text-base md:text-lg lg:text-xl leading-[1.7] text-warm-white/80">
+              Investment Platform
+            </p>
+            <p className="mt-1 lg:mt-2 text-sm md:text-base leading-[1.7] text-warm-white/50">
+              A part of the <span className="font-semibold text-warm-white/80">Journey</span><span className="text-warm-white/80">.Storage&trade;</span> Ecosystem
             </p>
             <div className="mt-4 lg:mt-6 inline-flex items-center gap-2 rounded-full border border-warm-white/[0.08] bg-warm-white/[0.03] backdrop-blur-sm px-4 py-1.5">
               <span className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50">Est. 2026</span>
@@ -131,7 +137,7 @@ function SlideOpportunity() {
     },
     {
       title: 'Aligned incentives',
-      desc: 'The sponsor co-invests in every deal. Same risk, same upside.',
+      desc: 'Journey.Direct\u2122 co-invests in every deal, and guarantees debt, as needed.',
     },
   ]
 
@@ -149,17 +155,24 @@ function SlideOpportunity() {
         </div>
 
         {/* Headline — the moment */}
-        <h2 className="font-black leading-[1.1] tracking-[-0.02em] text-warm-white mb-4" style={{ fontSize: 'clamp(2.2rem, 4.5vw, 3.5rem)' }}>
+        <h2 className="font-black leading-[1.1] tracking-[-0.02em] text-warm-white mb-1" style={{ fontSize: 'clamp(2.2rem, 4.5vw, 3.5rem)' }}>
           Invest alongside the operator.<br />
           <span className="text-warm-white/45">Not through a fund.</span><br />
           <span className="text-warm-white/45">Not through a REIT.</span><br />
           <span className="text-orange italic font-light">Directly.</span>
         </h2>
-
-        {/* Closing line — elevated, not buried */}
-        <p className="text-body leading-[1.7] text-warm-white/55 mb-10 max-w-[600px]">
-          Journey.Direct is the platform. The deals are the opportunity.
+        <p className="text-sm md:text-base leading-[1.7] text-warm-white/40 mb-8">
+          with <span className="font-semibold text-warm-white/60">Journey</span><span className="text-warm-white/60">.Storage&trade;</span>
         </p>
+
+        {/* Closing line — 3 statements as scannable strip */}
+        <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-0 mb-10">
+          <p className="text-[0.95rem] leading-[1.6] text-warm-white/70"><span className="font-bold text-warm-white">Journey.Direct&trade;</span> is the platform.</p>
+          <span className="hidden md:block mx-4 h-4 w-px bg-warm-white/15" />
+          <p className="text-[0.95rem] leading-[1.6] text-warm-white/70"><span className="font-bold text-orange">Self storage</span> is the opportunity.</p>
+          <span className="hidden md:block mx-4 h-4 w-px bg-warm-white/15" />
+          <p className="text-[0.95rem] leading-[1.6] text-warm-white/70"><span className="font-bold text-warm-white">Journey.Storage&trade;</span> is the operator.</p>
+        </div>
 
         {/* Benefits — three clean columns, no cards */}
         <div className="grid gap-8 lg:grid-cols-3 border-t border-warm-white/[0.06] pt-8">
@@ -179,17 +192,12 @@ function SlideOpportunity() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 3 — THE OPERATOR
+   PAGE 3 — THE OPERATORS (two-person bio)
    ═══════════════════════════════════════════════════════ */
 
 function SlideOperator() {
-  const capabilities = [
-    'Acquisitions', 'Asset Management',
-    'Development', 'Investor Relations',
-    'Construction', 'Capital Raising',
-    'Facility Operations', 'Deal Structuring',
-    'Property Management',
-  ]
+  const jonahTags = ['Acquisitions', 'Asset Management', 'Development', 'Investor Relations', 'Construction', 'Capital Raising', 'Facility Operations', 'Technology Implementation', 'Deal Structuring', 'Property Management']
+  const lyviaTags = ['Financial Execution', 'Asset Management', 'Accounting Controls', 'Corporate Structure', 'Treasury Management', 'Tax Strategy', 'Internal Operations', 'HR & Compliance', 'Investor Reporting', 'Lender Relations']
 
   return (
     <section className="deck-page grain relative flex min-h-dvh lg:h-dvh lg:min-h-0 lg:snap-start flex-col overflow-hidden bg-black">
@@ -198,8 +206,7 @@ function SlideOperator() {
       </GhostText>
 
       <div className="relative z-10 flex-1 flex flex-col justify-center mx-auto w-full max-w-[1200px] min-w-0 px-5 py-8 md:px-8 lg:px-12 lg:py-0">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-6 lg:mb-10">
+        <div className="flex items-start justify-between mb-6">
           <SectionLabel>Leadership</SectionLabel>
           <Logo />
         </div>
@@ -209,69 +216,83 @@ function SlideOperator() {
         </h2>
         <p className="text-body-sm font-bold text-orange mb-6">Impact &amp; Excellence; Mediocre won&apos;t Suffice</p>
 
-        <div className="grid gap-6 md:grid-cols-[200px_1fr] lg:grid-cols-[220px_1fr_1fr]">
-          {/* LEFT — Jonah */}
-          <div>
-            <div className="relative h-[180px] w-[180px] overflow-hidden rounded-2xl bg-charcoal mb-4">
-              <Image src="/images/team/home-jonah-portrait.webp" alt="Jonah M. Hall" fill className="object-cover object-top" />
-            </div>
-            <h3 className="text-xl font-black text-warm-white mb-1">Jonah M. Hall</h3>
-            <ul className="space-y-0.5 text-[0.9rem] leading-[1.65] text-warm-white/70">
-              <li><span className="text-orange mr-1.5">•</span>Deep Industry Relationships</li>
-              <li><span className="text-orange mr-1.5">•</span>Proven Team Building</li>
-              <li><span className="text-orange mr-1.5">•</span>Operational Mastery</li>
-              <li><span className="text-orange mr-1.5">•</span>Transactional Prowess</li>
-            </ul>
-            <div className="mt-3 hidden lg:flex items-center gap-2">
-              <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg">
-                <Image src="/images/other/qr-code.webp" alt="QR code — team & full bio" fill className="object-contain" />
+        {/* TWO CREDENTIAL CARDS */}
+        <div className="grid gap-5 lg:grid-cols-2">
+          {/* JONAH CARD */}
+          <div className="rounded-xl border border-warm-white/[0.06] bg-warm-white/[0.02] overflow-hidden">
+            <div className="flex items-start gap-4 p-4 pb-2">
+              <div className="relative h-[110px] w-[110px] shrink-0 overflow-hidden rounded-xl bg-charcoal" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+                <Image src="/images/team/home-jonah-portrait.webp" alt="Jonah M. Hall" fill className="object-cover object-top" />
               </div>
-              <span className="text-[0.65rem] text-warm-white/40 leading-tight">Full bio<br />&amp; team</span>
+              <div className="pt-1">
+                <h3 className="text-xl font-black text-warm-white leading-tight">Jonah M. Hall</h3>
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-orange mt-1 mb-2">Co-Founder &amp; CEO</p>
+                <ul className="space-y-0 text-[0.85rem] leading-[1.5] text-warm-white/60">
+                  <li><span className="text-orange mr-1">•</span>Deep Industry Relationships</li>
+                  <li><span className="text-orange mr-1">•</span>Organizational Restructuring &amp; Team Building</li>
+                  <li><span className="text-orange mr-1">•</span>Storage Operational Mastery</li>
+                  <li><span className="text-orange mr-1">•</span>Real Estate Transactional Prowess</li>
+                </ul>
+              </div>
             </div>
-          </div>
-
-          {/* CENTER — Capabilities bar + Context + Divestiture */}
-          <div className="flex flex-col">
-            <p className="text-[0.95rem] leading-[1.7] text-warm-white/70 mb-3">
-              In under a decade in the industry, Jonah has served in almost every capacity, wearing the hats and running point directly, as well as building teams, systems and critical infrastructure around:
-            </p>
-            <div className="flex flex-wrap gap-2 mb-5">
-              {capabilities.map((c, i) => (
-                <span key={i} className="rounded-md bg-warm-white/[0.05] border border-orange/20 px-3 py-1 text-[0.85rem] text-warm-white/65">
-                  {c}
-                </span>
-              ))}
-            </div>
-
-            <div className="border-l-2 border-orange/40 pl-5 mt-auto">
-              <h4 className="text-[0.7rem] font-bold uppercase tracking-[0.1em] text-warm-white/70 mb-1">A Decisive Divestiture</h4>
-              <p className="text-[0.88rem] leading-[1.75] text-warm-white/60">
-                In January 2026, Jonah M. Hall successfully exited his previous venture, <em className="text-warm-white/70">Smartlock Self Storage&reg;</em>, and walked away from his active principal position as President and Chief Investment Officer at another industry giant, <em className="text-warm-white/70">Cedar Creek Capital&reg;</em> — a calculated maneuver to sever ties with legacy infrastructure and non-compete encumbrances, eliminate go-forward liability through full mutual releases and covenants not to sue, reclaiming sovereignty and clearing the path for the Ecosystem.
+            <div className="px-4 pb-2">
+              <p className="text-[0.88rem] leading-[1.6] text-warm-white/50 mb-2">
+                A decade into the industry, Jonah has served in almost every capacity, wearing the hats and running point directly, as well as building the teams, systems and critical infrastructure around:
               </p>
             </div>
+            <div className="flex flex-wrap gap-1.5 px-4 pb-3 border-t border-warm-white/[0.04] pt-2.5">
+              {jonahTags.map((t, i) => (
+                <span key={i} className="rounded bg-warm-white/[0.04] border border-orange/10 px-2 py-0.5 text-[0.75rem] text-warm-white/45">{t}</span>
+              ))}
+            </div>
           </div>
 
-          {/* RIGHT — Map + Proof bar (bigger) */}
-          <div className="overflow-hidden rounded-xl border border-warm-white/[0.06] flex flex-col">
-            <div className="relative flex-1 min-h-[220px] bg-[#181818]">
-              <AcquisitionsMapClient />
-            </div>
-            <div className="flex items-center justify-around bg-charcoal/50 px-4 py-2.5 border-t border-warm-white/[0.06]">
-              <div className="text-center">
-                <div className="text-xl font-black leading-none text-warm-white">$200M<span className="text-orange">+</span></div>
-                <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-warm-white/50">Acquired</div>
+          {/* LYVIA CARD */}
+          <div className="rounded-xl border border-warm-white/[0.06] bg-warm-white/[0.02] overflow-hidden">
+            <div className="flex items-start gap-4 p-4 pb-2">
+              <div className="relative h-[110px] w-[110px] shrink-0 overflow-hidden rounded-xl bg-charcoal" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+                <Image src="/images/team/home-lyvia-portrait.webp" alt="Lyvia Hall" fill className="object-cover object-top" />
               </div>
-              <div className="h-6 w-px bg-warm-white/[0.08]" />
-              <div className="text-center">
-                <div className="text-xl font-black leading-none text-warm-white">30</div>
-                <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-warm-white/50">Facilities · 6 states</div>
-              </div>
-              <div className="h-6 w-px bg-warm-white/[0.08]" />
-              <div className="text-center">
-                <div className="text-xl font-black leading-none text-warm-white">18<span className="text-orange">+</span> Yrs</div>
-                <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-warm-white/50">Experience</div>
+              <div className="pt-1">
+                <h3 className="text-xl font-black text-warm-white leading-tight">Lyvia Hall</h3>
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-orange mt-1 mb-2">Co-Founder &amp; President</p>
+                <ul className="space-y-0 text-[0.85rem] leading-[1.5] text-warm-white/60">
+                  <li><span className="text-orange mr-1">•</span>Chief-Level Financial Leadership</li>
+                  <li><span className="text-orange mr-1">•</span>Portfolio-Level Operational Strategy</li>
+                  <li><span className="text-orange mr-1">•</span>Organizational Process Design</li>
+                  <li><span className="text-orange mr-1">•</span>Scalable Infrastructure Optimization</li>
+                </ul>
               </div>
             </div>
+            <div className="px-4 pb-2">
+              <p className="text-[0.88rem] leading-[1.6] text-warm-white/50 mb-2">
+                Over the last 12+ years, Lyvia has overseen complex, multi-entity structures, spanning 50+ entities, driving strategy, discipline, and performance across:
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-1.5 px-4 pb-3 border-t border-warm-white/[0.04] pt-2.5">
+              {lyviaTags.map((t, i) => (
+                <span key={i} className="rounded bg-warm-white/[0.04] border border-orange/10 px-2 py-0.5 text-[0.75rem] text-warm-white/45">{t}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* CTA — button on web, QR on print */}
+        <div className="mt-3 flex items-center gap-4">
+          <a
+            href="https://direct.journey.storage/#team"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg border border-orange/25 bg-orange/[0.06] px-4 py-2 text-[0.75rem] font-bold text-orange transition-colors hover:bg-orange/[0.12] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange active:bg-orange/[0.18] print:hidden"
+          >
+            Full bios &amp; team
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M17 7H7M17 7v10" /></svg>
+          </a>
+          <div className="hidden print:flex items-center gap-2.5">
+            <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded">
+              <Image src="/images/other/qr-code.webp" alt="QR code" fill className="object-contain" />
+            </div>
+            <span className="text-[0.62rem] text-warm-white/30">Full bios at <span className="text-warm-white/50 font-semibold">direct.journey.storage</span></span>
           </div>
         </div>
       </div>
@@ -282,7 +303,61 @@ function SlideOperator() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 4 — THE STORAGE INFLECTION POINT
+   PAGE 4 — THE TEAM (map + track record + divestiture)
+   ═══════════════════════════════════════════════════════ */
+
+function SlideTeam() {
+  return (
+    <section className="deck-page grain relative flex min-h-dvh lg:h-dvh lg:min-h-0 lg:snap-start flex-col overflow-hidden bg-black">
+      <div className="relative z-10 flex-1 flex flex-col justify-center mx-auto w-full max-w-[1200px] min-w-0 px-5 py-8 md:px-8 lg:px-12 lg:py-0">
+        <div className="flex items-start justify-between mb-6">
+          <SectionLabel>Track Record</SectionLabel>
+          <Logo />
+        </div>
+
+        <h2 className="font-black leading-[0.95] tracking-[-0.02em] text-warm-white mb-5" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
+          Built on <span className="text-orange italic font-light">Experience.</span>
+        </h2>
+
+        {/* MAP with proof numbers integrated */}
+        <div className="relative overflow-hidden rounded-xl border border-warm-white/[0.06] bg-[#181818] mb-5">
+          <div className="relative h-[280px] lg:h-[360px]">
+            <AcquisitionsMapClient />
+          </div>
+          <div className="flex items-center justify-around bg-gradient-to-r from-charcoal/80 via-charcoal/60 to-charcoal/80 px-6 py-2.5 border-t border-warm-white/[0.06]">
+            <div className="text-center">
+              <div className="font-mono font-black text-warm-white leading-none text-xl lg:text-2xl" style={{ fontVariantNumeric: 'tabular-nums' }}>$200M<span className="text-orange">+</span></div>
+              <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-warm-white/50">Acquired, developed &amp; redeveloped</div>
+            </div>
+            <div className="h-7 w-px bg-warm-white/[0.08]" />
+            <div className="text-center">
+              <div className="font-mono font-black text-warm-white leading-none text-xl lg:text-2xl" style={{ fontVariantNumeric: 'tabular-nums' }}>30<span className="text-orange">+</span></div>
+              <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-warm-white/50">Facilities · 6 states</div>
+            </div>
+            <div className="h-7 w-px bg-warm-white/[0.08]" />
+            <div className="text-center">
+              <div className="font-mono font-black text-warm-white leading-none text-xl lg:text-2xl" style={{ fontVariantNumeric: 'tabular-nums' }}>18<span className="text-orange">+</span> Yrs</div>
+              <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.18em] text-warm-white/50">Experience</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Divestiture */}
+        <div className="border-l-2 border-orange/40 pl-5">
+          <h4 className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-warm-white/60 mb-1">A Decisive Divestiture</h4>
+          <p className="text-[0.9rem] leading-[1.7] text-warm-white/55">
+            In January 2026, the Journey.Storage&trade; team successfully exited their previous venture, <em className="text-warm-white/65">Smartlock Self Storage&reg;</em>, and walked away from active principal positions at another industry giant, <em className="text-warm-white/65">Cedar Creek Capital&reg;</em>. A calculated maneuver to sever ties with legacy infrastructure and non-compete encumbrances, eliminate go-forward liability through full mutual releases and covenants not to sue, reclaiming sovereignty and clearing the path for the Ecosystem.
+          </p>
+        </div>
+      </div>
+
+      <PageFooter />
+    </section>
+  )
+}
+
+/* ═══════════════════════════════════════════════════════
+   PAGE 5 — THE STORAGE INFLECTION POINT
    ═══════════════════════════════════════════════════════ */
 
 function SlideMarket() {
@@ -321,7 +396,7 @@ function SlideMarket() {
                 <div className="font-mono font-black text-warm-white leading-none" style={{ fontSize: `clamp(0.9rem, ${1.8 - i * 0.08}vw, ${1.8 - i * 0.08}rem)`, opacity: 0.95 - i * 0.07 }}>
                   {d.total}
                 </div>
-                <div className="text-[0.55rem] font-bold text-warm-white/25 mt-1">{d.year}</div>
+                <div className="text-[0.6rem] font-bold text-warm-white/25 mt-1">{d.year}</div>
                 {/* Proportional accent bar */}
                 <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-warm-white/[0.03]">
                   <div className="h-full bg-orange rounded-full" style={{ width: `${pct}%`, opacity: 0.5 + (pct / 100) * 0.5 }} />
@@ -329,7 +404,7 @@ function SlideMarket() {
               </div>
             )
           })}
-          <span className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-orange ml-2 mb-2">total<br />new supply</span>
+          <span className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-orange ml-2 mb-2">annual<br />new supply</span>
         </div>
 
         {/* HERO — Integrated chart + data table (single SVG) */}
@@ -419,23 +494,34 @@ function SlideMarket() {
                   <span className="flex items-center gap-2 text-[0.75rem] text-warm-white/50"><span className="inline-block w-5 h-[2px] bg-warm-white/30" />New Build</span>
                   <span className="flex items-center gap-2 text-[0.75rem] text-warm-white/25"><span className="inline-block w-5 h-[1.5px] border-t border-dashed border-warm-white/25" />Expansion</span>
                 </div>
-                <span className="flex items-center gap-2 text-[0.75rem] font-bold text-orange"><span className="inline-block w-5 h-[3px] bg-orange rounded-full" />Total New Supply · Nationwide</span>
+                <span className="flex items-center gap-2 text-[0.75rem] font-bold text-orange"><span className="inline-block w-5 h-[3px] bg-orange rounded-full" />Annual New Supply · Nationwide</span>
               </div>
             </div>
           )
         })()}
 
-        {/* Bottom — Market context + Execution punchline */}
-        <div className="grid gap-8 lg:grid-cols-[1fr_auto]">
+        {/* Bottom — Golden Age + Portfolio Thesis */}
+        <div className="grid gap-5 lg:grid-cols-[1fr_auto] items-start">
           <div>
-            <p className="text-body leading-[1.7] text-warm-white/60">
-              <strong className="text-warm-white/80">REITs</strong> dominate ~40% through scale. The remaining ~60% are fragmented <strong className="text-warm-white/80">Mom-and-Pop operators</strong> on legacy practices. Demand stays resilient — driven by the &ldquo;4 Ds&rdquo;: <strong className="text-orange">Death</strong>, <strong className="text-orange">Divorce</strong>, <strong className="text-orange">Downsizing</strong>, <strong className="text-orange">Dislocation</strong>. But the easy money has been made. As operators retire, supply thins. The window is now.
-            </p>
+            <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-orange/60 mb-2">The Golden Age</p>
+            <div className="grid gap-3 lg:grid-cols-2 mb-0">
+              <div className="rounded-lg border border-warm-white/[0.06] bg-warm-white/[0.02] p-3">
+                <p className="text-[0.85rem] leading-[1.6] text-warm-white/55">
+                  <strong className="text-warm-white/75">Non-overdeveloped markets:</strong> operators can push revenue without new competition diluting demand.
+                </p>
+              </div>
+              <div className="rounded-lg border border-warm-white/[0.06] bg-warm-white/[0.02] p-3">
+                <p className="text-[0.85rem] leading-[1.6] text-warm-white/55">
+                  <strong className="text-warm-white/75">Heavily built markets:</strong> natural demand is catching up. Absorption is outpacing new deliveries for the first time in years.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center">
-            <div className="border-l-2 border-orange pl-5">
-              <p className="text-body font-bold leading-[1.5] text-warm-white max-w-[320px]">
-                We acquire below replacement cost and transform with REIT-level technology — without REIT-level overhead.
+          <div className="flex items-start">
+            <div className="border-l-2 border-orange pl-4 max-w-[260px]">
+              <div className="font-mono font-black text-orange leading-none text-2xl mb-1" style={{ fontVariantNumeric: 'tabular-nums' }}>20%+</div>
+              <p className="text-[0.85rem] leading-[1.55] text-warm-white/55">
+                <strong className="text-warm-white/75">Value premium.</strong>{' '}Regional portfolios attract institutional buyers at compressed cap rates. Selling at a 5% cap vs. 6% cap is a 20% difference. The long game: 8&ndash;10 year exit at scale.
               </p>
             </div>
           </div>
@@ -448,16 +534,15 @@ function SlideMarket() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 5 — STORAGE WITHOUT THE FRICTION
+   PAGE 6 — STORAGE WITHOUT THE FRICTION
    ═══════════════════════════════════════════════════════ */
 
 function SlideOperations() {
   const journey = [
     { num: '01', title: 'Find your space', desc: 'Browse and rent online. No phone calls, no office visits.' },
-    { num: '02', title: 'Verify in seconds', desc: 'Digital identity verification. No paperwork.' },
-    { num: '03', title: 'Sign and access', desc: 'Digital lease. Instant access code to your phone.' },
-    { num: '04', title: 'Arrive and move in', desc: 'Gates open automatically. Any hour, any day.' },
-    { num: '05', title: 'You\'re in control', desc: 'Manage, pay, upgrade, or move out from your phone.' },
+    { num: '02', title: 'Agree and access', desc: 'Clickwrap agreements. Instant tap to access.' },
+    { num: '03', title: 'Arrive and move in', desc: 'Gates open automatically. Any hour, any day.' },
+    { num: '04', title: 'You\'re in control', desc: 'Manage, pay, upgrade, or move out from your phone.' },
   ]
 
   return (
@@ -513,11 +598,11 @@ function SlideOperations() {
               </div>
               <div className="border-l-2 border-warm-white/10 pl-4">
                 <h4 className="text-[0.95rem] font-bold text-warm-white">Revenue wins</h4>
-                <p className="text-[0.9rem] leading-[1.6] text-warm-white/50">Decreased payroll costs. Data-driven pricing. Higher occupancy from 24/7 availability.</p>
+                <p className="text-[0.9rem] leading-[1.6] text-warm-white/50">Decreased payroll costs. Data-driven pricing. Higher occupancy.</p>
               </div>
               <div className="border-l-2 border-orange pl-4">
                 <h4 className="text-[0.95rem] font-bold text-orange">The investor wins</h4>
-                <p className="text-[0.9rem] leading-[1.6] text-warm-white/55">Higher NOI. Stronger returns. A defensible operational moat that compounds over time.</p>
+                <p className="text-[0.9rem] leading-[1.6] text-warm-white/55">Higher NOI. Stronger returns. An operational moat that compounds over time.</p>
               </div>
             </div>
           </div>
@@ -530,15 +615,15 @@ function SlideOperations() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 6 — GROWTH THESIS
+   PAGE 7 — GROWTH THESIS
    ═══════════════════════════════════════════════════════ */
 
 function SlideGrowthThesis() {
   const buyBox = [
-    { label: 'Market Characteristics', desc: 'Tier 1-3 markets with favorable supply/demand metrics.' },
-    { label: 'Demographics', desc: 'Min. 30k people in trade area, positive pop. growth and min. HHI of $60k.' },
-    { label: 'Demand', desc: 'Areas indicating strong demand, with manual verifications of pricing & occupancy.' },
-    { label: 'Business Friendliness', desc: 'Markets that highlight technology efficiencies and avoid landlord-hurdles.' },
+    { label: 'Market Characteristics', desc: 'Tier 1-3 markets. Favorable supply/demand metrics.' },
+    { label: 'Demographics', desc: 'Min. 30k trade-area population. Positive growth. Min. $60k HHI.' },
+    { label: 'Demand', desc: 'Strong demand areas. Verified pricing and occupancy.' },
+    { label: 'Business Friendliness', desc: 'Markets highlighting tech efficiencies and avoiding regulatory-hurdles.' },
   ]
 
   return (
@@ -574,7 +659,7 @@ function SlideGrowthThesis() {
           </div>
         </div>
         <p className="text-center text-body-sm text-warm-white/55 mb-10 max-w-[650px] mx-auto">
-          A facility purchased at a 6% Cap Rate ($300k NOI). Decrease payroll by $80k/year, raise rents 18%. NOI grows to $480k. At the same 6% Cap Rate, it&apos;s worth $8M. <strong className="text-warm-white/65">No speculation. Pure operational value.</strong>
+          A facility purchased at a 6% cap rate ($300k NOI). Payroll decreases by $80k/year. Rents increase by 18%. NOI grows to $480k. At the same cap rate, it&apos;s now worth $8M. <strong className="text-warm-white/65">No speculation. Pure operational value.</strong>
         </p>
 
         {/* Supporting — Buy Box + UW Inputs side by side */}
@@ -594,11 +679,10 @@ function SlideGrowthThesis() {
             <h3 className="mb-3 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-warm-white/55">Key Underwriting Inputs / Value-Add Execution(s)</h3>
             <div className="space-y-2">
               {[
-                { label: 'Projection Models', desc: 'A decade of storage-specific underwriting experience.' },
-                { label: 'Onboarding Cap-Ex', desc: '$200-500k set aside to ensure tech/brand standards.' },
-                { label: 'Financing', desc: '55-65% LTC at competitive rates, sized IO periods w/o prepayment penalties.' },
-                { label: 'Conservative Outlook', desc: '24-48 month physical lease-up to 85-90% occupancy, then property-specific revenue stabilization through ECRI\'s (existing customer rental increases).' },
-                { label: 'Data Analytics', desc: 'Direct investment in and continued adoption of the best in technology the industry has to offer.' },
+                { label: 'Projection Models', desc: '10+ years of storage-specific model refinement.' },
+                { label: 'Onboarding Cap-Ex', desc: '$250-500k deployed up-front to ensure tech/brand standards.' },
+                { label: 'Financing', desc: '55-65% LTC. Competitive rates. Sized IO periods. No prepayment penalties.' },
+                { label: 'Data Analytics', desc: 'Direct investment in, and continued adoption of, the best in technology the industry has to offer.' },
               ].map((u, i) => (
                 <div key={i} className="flex gap-2 text-[0.9rem] leading-[1.6]">
                   <span className="text-orange shrink-0">•</span>
@@ -616,7 +700,7 @@ function SlideGrowthThesis() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 7 — DEAL COVER (Granbury)
+   PAGE 8 — DEAL COVER (Granbury)
    ═══════════════════════════════════════════════════════ */
 
 function SlideDealCover() {
@@ -660,7 +744,7 @@ function SlideDealCover() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 8 — DISCLAIMER
+   PAGE 9 — DISCLAIMER
    ═══════════════════════════════════════════════════════ */
 
 function SlideDisclaimer() {
@@ -700,7 +784,7 @@ function SlideDisclaimer() {
             <p className="mb-1 text-[0.6rem] font-bold uppercase tracking-[0.2em] text-orange/50">Past Performance</p>
             <div className="border-l-2 border-orange/30 pl-4">
               <p>
-                <strong className="text-warm-white/70">Past performance does not guarantee future results.</strong> Current performance may be lower or higher than the performance data presented. All return examples provided are based on assumptions and expectations in light of currently available information, industry trends and comparisons to competitor&apos;s financials. Therefore, actual performance may, and most likely will, substantially differ from these projections and no guarantee is presented or implied as to the accuracy of specific forecasts, projections or predictive statements contained herein. JD (and JS) further make no representations or warranties that any investor will, or is likely to, achieve profits similar to those shown herein.
+                <strong className="text-warm-white/70">Past performance does not guarantee future results.</strong>{' '}Current performance may be lower or higher than the performance data presented. All return examples provided are based on assumptions and expectations in light of currently available information, industry trends and comparisons to competitor&apos;s financials. Therefore, actual performance may, and most likely will, substantially differ from these projections and no guarantee is presented or implied as to the accuracy of specific forecasts, projections or predictive statements contained herein. JD (and JS) further make no representations or warranties that any investor will, or is likely to, achieve profits similar to those shown herein.
               </p>
             </div>
           </div>
@@ -712,7 +796,7 @@ function SlideDisclaimer() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 9 — CURRENT OPPORTUNITY
+   PAGE 10 — CURRENT OPPORTUNITY
    ═══════════════════════════════════════════════════════ */
 
 function SlideCurrentOpportunity() {
@@ -735,7 +819,7 @@ function SlideCurrentOpportunity() {
             <div className="h-4 w-px bg-warm-white/[0.1] hidden lg:block" />
             <div><span className="text-base lg:text-lg font-black text-warm-white">126K</span> <span className="text-[0.9rem] leading-[1.6] text-warm-white/50">NRSF</span></div>
             <div className="h-4 w-px bg-warm-white/[0.1] hidden lg:block" />
-            <div><span className="text-base lg:text-lg font-black text-orange">$85</span><span className="text-[0.9rem] leading-[1.6] text-warm-white/50">/NRSF</span></div>
+            <div><span className="text-base lg:text-lg font-black text-orange">$85</span><span className="text-[0.9rem] leading-[1.6] text-warm-white/50">/NRSF purchase price</span></div>
             <div className="h-4 w-px bg-warm-white/[0.1] hidden lg:block" />
             <div><span className="text-base lg:text-lg font-black text-orange">$96</span><span className="text-[0.9rem] leading-[1.6] text-warm-white/50">/NRSF all-in</span></div>
             <div className="h-4 w-px bg-warm-white/[0.1] hidden lg:block" />
@@ -759,9 +843,9 @@ function SlideCurrentOpportunity() {
             <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.15em] text-warm-white">We Will:</h3>
             <ul className="space-y-3">
               {[
-                'Immediately implement additional ancillary revenue sources increasing topline revenue by ~$50k/yr.',
-                'Increase occupancy from 70% to ~90% over the first 24 months.',
-                'Increase in-place rates from ~$.87/SF to ~$1.02/SF through calculated ECRI\'s from month 18-36.',
+                'Implement addtl. ancillary revenue sources, increasing topline revenue by ~$50k/yr (immediately).',
+                'Increase occupancy from 70% to ~90% (over the first 24 months).',
+                'Increase in-place rates from ~$.87/SF to ~$1.02/SF through calculated ECRI\'s (from month 18-36).',
               ].map((item, i) => (
                 <li key={i} className="flex gap-3 text-[0.9rem] leading-[1.6] text-warm-white/60">
                   <span className="mt-0.5 text-orange font-bold">{String(i + 1).padStart(2, '0')}</span>
@@ -793,7 +877,7 @@ function SlideCurrentOpportunity() {
           </div>
           <div>
             <p className="text-body font-bold text-warm-white">in value created</p>
-            <p className="text-body-sm text-warm-white/55">NOI grows by $460k over 60 months at a 6.25% Cap Rate</p>
+            <p className="text-body-sm text-warm-white/55">NOI grows by $460k over 60 months</p>
           </div>
         </div>
       </div>
@@ -803,7 +887,7 @@ function SlideCurrentOpportunity() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 10 — INVESTMENT SUMMARY
+   PAGE 11 — INVESTMENT SUMMARY
    ═══════════════════════════════════════════════════════ */
 
 function SlideInvestmentSummary() {
@@ -821,17 +905,17 @@ function SlideInvestmentSummary() {
         {/* Hero metrics — the numbers that sell the deal */}
         <div className="flex flex-wrap items-center gap-4 lg:gap-6 mb-6 border-y border-warm-white/[0.06] py-4">
           <div>
-            <div className="font-mono font-black text-orange leading-none" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontVariantNumeric: 'tabular-nums' }}>25% IRR</div>
+            <div className="font-mono font-black text-orange leading-none" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontVariantNumeric: 'tabular-nums' }}>26% IRR</div>
             <div className="mt-1 text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50">Targeted · Project-level</div>
           </div>
           <div className="h-10 w-px bg-warm-white/[0.08] hidden lg:block" />
           <div>
-            <div className="font-mono font-black text-orange leading-none" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontVariantNumeric: 'tabular-nums' }}>2.5x MOIC</div>
+            <div className="font-mono font-black text-orange leading-none" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontVariantNumeric: 'tabular-nums' }}>2.56x MOIC</div>
             <div className="mt-1 text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50">Equity Multiple</div>
           </div>
           <div className="h-10 w-px bg-warm-white/[0.08] hidden lg:block" />
           <div>
-            <div className="font-mono font-black text-warm-white leading-none" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontVariantNumeric: 'tabular-nums' }}>8.8% YOC</div>
+            <div className="font-mono font-black text-warm-white leading-none" style={{ fontSize: 'clamp(1.5rem, 3vw, 2.2rem)', fontVariantNumeric: 'tabular-nums' }}>8.9% YOC</div>
             <div className="mt-1 text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50">Stabilized Yield on Cost</div>
           </div>
         </div>
@@ -841,15 +925,15 @@ function SlideInvestmentSummary() {
           <table className="w-full text-[0.95rem]">
             <tbody>
               {[
-                { label: 'Equity Raise', value: '$4,560,000', detail: "Inclusive of Sponsor's Co-Invest (3%)" },
-                { label: 'Financing', value: '~$7,560,000 (~63% LTC)' },
-                { label: 'Total Project Cost', value: '~$12,120,000' },
-                { label: 'Sponsor(s)', value: 'Journey.Direct, LLC ("JD")' },
-                { label: 'Management', value: 'Journey.Management, LLC ("JM")', detail: 'Under the Journey.Storage™ brand' },
-                { label: 'Strategy', value: 'Value Add: Lease Up, Revenue Optimization, Expense Reduction via Automation' },
+                { label: 'Equity Raise', value: '$4,550,000', detail: "Inclusive of Sponsor's Co-Invest (3%)" },
+                { label: 'Financing', value: '~$7,650,000 (~63% LTC)' },
+                { label: 'Total Project Cost', value: '~$12,200,000' },
+                { label: 'Sponsor(s)', value: 'Journey.Direct\u2122, LLC ("JD")' },
+                { label: 'Management', value: 'Journey.Management\u2122, LLC ("JM")', detail: 'Under the Journey.Storage\u2122 brand' },
+                { label: 'Value Add Strategy', value: 'Lease Up, Revenue Optimization, Expense Reduction via Automation' },
                 { label: 'Waterfall', value: "Return of Equity first, then 70/30 in favor of LP's" },
-                { label: 'Hold Period', value: '5 Years +/-', detail: 'Expected cash-out refinance near Month 36 (returning ~70% of equity)' },
                 { label: 'Sponsor Fees', value: '3% Acquisition (one-time); 6% Development (one-time); 2% Asset Management (ongoing)' },
+                { label: 'Hold Period', value: '5 Years +/-', detail: 'Expected cash-out refinance near Month 36 (returning ~70% of equity)' },
               ].map((t, i) => (
                 <tr key={i} className="border-b border-warm-white/[0.05]">
                   <td className="py-2.5 pr-6 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-orange w-[140px] align-top">{t.label}</td>
@@ -864,12 +948,12 @@ function SlideInvestmentSummary() {
           {/* Badges */}
           <div className="flex flex-col gap-4 justify-start">
             <div className="rounded-2xl bg-orange px-6 py-5 text-center">
-              <div className="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-warm-white/70 mb-1">Ask about</div>
-              <div className="text-xl font-black leading-tight text-warm-white">accelerated<br />&ldquo;bonus&rdquo;<br />depreciation</div>
+              <div className="text-[1.1rem] font-black leading-tight text-warm-white mb-2">We do cost segregation.</div>
+              <div className="text-[0.85rem] leading-[1.4] text-warm-white/75">Ask about accelerated<br />&ldquo;bonus&rdquo; depreciation</div>
             </div>
             <div className="rounded-xl border border-orange/40 px-5 py-3 text-center">
               <div className="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-warm-white/50 mb-1">Investment Window</div>
-              <div className="text-sm font-bold text-orange">Until May 8, 2026</div>
+              <div className="text-sm font-bold text-orange">Until May 15, 2026</div>
             </div>
           </div>
         </div>
@@ -880,7 +964,7 @@ function SlideInvestmentSummary() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 11 — PROPERTY DETAILS
+   PAGE 12 — PROPERTY DETAILS
    ═══════════════════════════════════════════════════════ */
 
 function SlidePropertyDetails() {
@@ -895,7 +979,7 @@ function SlidePropertyDetails() {
           Property Details
         </h2>
         <p className="text-body-sm text-warm-white/55 mb-6">
-          A recent expansion added capacity in mid-2025. Lease-up has been excellent.
+          Properties were built in 2005 and have been kept in pristine condition. A recent expansion added capacity in mid-2025. Lease-up has been excellent.
         </p>
 
         {/* Photos — hero, asymmetric grid */}
@@ -943,12 +1027,6 @@ function SlidePropertyDetails() {
             <span className="text-warm-white/10 hidden lg:inline">·</span>
             <span><strong className="font-black text-warm-white">9</strong> <span className="text-warm-white/50">Office Suites</span></span>
           </div>
-          <div className="text-[0.9rem] leading-[1.6] text-warm-white/55 lg:hidden">
-            <span className="text-orange font-bold">5.95%</span> Cap Rate · <span className="text-warm-white font-bold">$85/NRSF</span> <span className="text-warm-white/50">below replacement</span>
-          </div>
-          <div className="hidden lg:flex lg:items-center lg:justify-end text-[0.9rem] leading-[1.6] text-warm-white/55">
-            <span className="text-orange font-bold">5.95%</span> Cap Rate · <span className="text-warm-white font-bold">$85/NRSF</span> <span className="text-warm-white/50">below replacement</span>
-          </div>
         </div>
       </div>
       <PageFooter />
@@ -957,7 +1035,7 @@ function SlidePropertyDetails() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 12 — MARKET OVERVIEW
+   PAGE 13 — MARKET OVERVIEW
    ═══════════════════════════════════════════════════════ */
 
 function SlideMarketOverview() {
@@ -972,38 +1050,32 @@ function SlideMarketOverview() {
           Market Overview
         </h2>
 
-        {/* Hero stats — the numbers that matter */}
-        <div className="flex flex-wrap items-center gap-4 lg:gap-6 mb-6 border-y border-warm-white/[0.06] py-4">
-          <div>
-            <div className="font-mono font-black text-orange leading-none text-2xl" style={{ fontVariantNumeric: 'tabular-nums' }}>0</div>
-            <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">New supply since 2005</div>
-          </div>
-          <div className="h-10 w-px bg-warm-white/[0.08] hidden lg:block" />
-          <div>
-            <div className="font-mono font-black text-warm-white leading-none text-2xl" style={{ fontVariantNumeric: 'tabular-nums' }}>22K</div>
-            <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">Cars/day on Hwy 377</div>
-          </div>
-          <div className="h-10 w-px bg-warm-white/[0.08] hidden lg:block" />
-          <div>
-            <div className="font-mono font-black text-warm-white leading-none text-2xl" style={{ fontVariantNumeric: 'tabular-nums' }}>3.1%</div>
-            <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">Pop. growth (10 min)</div>
-          </div>
-          <div className="h-10 w-px bg-warm-white/[0.08] hidden lg:block" />
-          <div>
-            <div className="font-mono font-black text-warm-white leading-none text-2xl" style={{ fontVariantNumeric: 'tabular-nums' }}>$91K</div>
-            <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">Median HHI</div>
-          </div>
-        </div>
-
         <div className="grid gap-6 md:grid-cols-[1fr_1fr]">
-          {/* Left — full data, organized */}
-          <div className="space-y-4">
+          {/* Left — stats + data */}
+          <div className="flex flex-col gap-4">
+            {/* Hero stats */}
+            <div className="flex flex-wrap items-center gap-4 border-y border-warm-white/[0.06] py-3">
+              <div>
+                <div className="font-mono font-black text-orange leading-none text-2xl" style={{ fontVariantNumeric: 'tabular-nums' }}>0</div>
+                <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">New supply since 2005</div>
+              </div>
+              <div className="h-10 w-px bg-warm-white/[0.08]" />
+              <div>
+                <div className="font-mono font-black text-warm-white leading-none text-2xl" style={{ fontVariantNumeric: 'tabular-nums' }}>22K</div>
+                <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">Cars/day on Hwy 377</div>
+              </div>
+              <div className="h-10 w-px bg-warm-white/[0.08]" />
+              <div>
+                <div className="font-mono font-black text-warm-white leading-none text-2xl" style={{ fontVariantNumeric: 'tabular-nums' }}>3.1%</div>
+                <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">Pop. growth</div>
+              </div>
+            </div>
+
             <div>
               <p className="text-[0.75rem] font-bold uppercase tracking-[0.15em] text-warm-white/50 mb-2">Population &amp; Income</p>
               <ul className="space-y-1 text-[0.9rem] leading-[1.65] text-warm-white/70">
                 <li>Median HHI of <strong className="text-warm-white/80">$91k</strong> / Avg. HHI of <strong className="text-warm-white/80">$112k</strong></li>
-                <li>16k people in 10mins, w/ higher daytime population</li>
-                <li><strong className="text-orange">3.1%</strong> population growth projected in 10 mins</li>
+                <li>16k people in trade area, w/ higher daytime population</li>
               </ul>
             </div>
             <div>
@@ -1022,8 +1094,8 @@ function SlideMarketOverview() {
             </div>
           </div>
 
-          {/* Right — satellite map */}
-          <div className="relative aspect-[4/3] md:aspect-square md:max-h-[350px] lg:max-h-[440px] overflow-hidden rounded-2xl">
+          {/* Right — satellite map, 1:1 */}
+          <div className="relative aspect-square overflow-hidden rounded-2xl">
             <Image src="/images/deals/granbury/granbury-map-satellite.webp" alt="Granbury, TX — Satellite map with property locations and drive times" fill className="object-cover" />
             <div className="absolute bottom-3 right-3 rounded-md bg-black/70 backdrop-blur-sm px-3 py-1.5 border border-warm-white/[0.08]">
               <span className="text-[0.65rem] font-bold tracking-[0.08em] text-orange">⊙</span>
@@ -1038,117 +1110,128 @@ function SlideMarketOverview() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 13 — COMPETITION ANALYSIS
+   PAGE 14 — COMPETITION ANALYSIS
    ═══════════════════════════════════════════════════════ */
 
 function SlideCompetition() {
+  /* Sorted by grade: A → B → C → D/F */
   const competitors = [
-    { name: 'Champion Storage', grade: 'B+', web: 'F', note: 'No Online Rentals' },
-    { name: 'DONE Storage', grade: 'C', web: 'C', note: 'Low Vacancy' },
-    { name: 'Lake Granbury Lock & Leave', grade: 'B', web: 'NO', note: 'Very Small Location' },
-    { name: 'KO Storage', grade: 'B-', web: 'B-', note: 'Basic Automations' },
-    { name: 'Landmark Storage', grade: 'F', web: 'C', note: 'Very Rough Facility' },
     { name: 'Store House Storage', grade: 'A+', web: 'B+', note: '3-Story Climate' },
+    { name: 'Champion Storage', grade: 'B+', web: 'F', note: 'No Online Rentals' },
     { name: 'GuardBox Storage', grade: 'B+', web: 'A-', note: 'Location Limited' },
-    { name: 'AAA Self Storage', grade: 'C', web: 'C', note: 'Low Vacancy' },
-    { name: 'Lancrow Self Storage', grade: 'D+', web: 'C', note: 'Low Vacancy' },
-    { name: 'U-Loc-It Storage', grade: 'C+', web: 'B-', note: 'Few Sizes Offered' },
-    { name: 'A&E Storage', grade: 'C', web: 'B-', note: 'Waiting Lists' },
-    { name: 'Acton Discount Storage', grade: 'D', web: 'C-', note: 'All Gravel/Grass' },
+    { name: 'Lake Granbury Lock & Leave', grade: 'B', web: 'N/A', note: 'Very Small Location' },
     { name: 'Walnut Creek Storage', grade: 'B', web: 'A-', note: 'Waiting Lists' },
+    { name: 'KO Storage', grade: 'B-', web: 'B-', note: 'Basic Automations' },
+    { name: 'U-Loc-It Storage', grade: 'C+', web: 'B-', note: 'Few Sizes Offered' },
+    { name: 'DONE Storage', grade: 'C', web: 'C', note: 'Low Vacancy' },
+    { name: 'AAA Self Storage', grade: 'C', web: 'C', note: 'Low Vacancy' },
+    { name: 'A&E Storage', grade: 'C', web: 'B-', note: 'Waiting Lists' },
     { name: 'Thrifty Self Storage', grade: 'C', web: 'C', note: 'Low Vacancy' },
+    { name: 'Lancrow Self Storage', grade: 'D+', web: 'C', note: 'Low Vacancy' },
+    { name: 'Acton Discount Storage', grade: 'D', web: 'C-', note: 'All Gravel/Grass' },
+    { name: 'Landmark Storage', grade: 'F', web: 'C', note: 'Very Rough Facility' },
   ]
 
-  function gradeColor(g: string) {
-    if (g.startsWith('A')) return 'text-orange'
-    if (g.startsWith('B')) return 'text-warm-white/70'
-    if (g.startsWith('C')) return 'text-stone'
-    if (g === 'NO') return 'text-error-red'
-    return 'text-warm-white/30' // D, F
+  const gc = (g: string) => {
+    if (g.startsWith('A')) return { color: '#34D399', bg: 'rgba(52,211,153,0.12)' }
+    if (g.startsWith('B')) return { color: '#60A5FA', bg: 'rgba(96,165,250,0.12)' }
+    if (g.startsWith('C')) return { color: '#FBBF24', bg: 'rgba(251,191,36,0.12)' }
+    if (g === 'N/A') return { color: '#F87171', bg: 'rgba(248,113,113,0.12)' }
+    return { color: '#F87171', bg: 'rgba(248,113,113,0.12)' }
   }
+
+  const grades = competitors.map(c => c.grade)
+  const aCount = grades.filter(g => g.startsWith('A')).length
+  const bCount = grades.filter(g => g.startsWith('B')).length
+  const cCount = grades.filter(g => g.startsWith('C')).length
+  const dfCount = grades.filter(g => g.startsWith('D') || g.startsWith('F')).length
 
   return (
     <section className="deck-page grain relative flex min-h-dvh lg:h-dvh lg:min-h-0 lg:snap-start flex-col overflow-hidden bg-black">
-      <div className="relative z-10 flex-1 min-h-0 flex flex-col mx-auto w-full max-w-[1200px] min-w-0 px-5 py-6 md:px-8 lg:px-12 lg:py-8 md:overflow-y-auto">
+      <div className="relative z-10 flex-1 min-h-0 flex flex-col justify-center mx-auto w-full max-w-[1200px] min-w-0 px-5 py-6 md:px-8 lg:px-12">
         <div className="flex items-start justify-between mb-4">
           <SectionLabel>Competitive Landscape</SectionLabel>
           <Logo />
         </div>
-        <h2 className="font-black leading-[0.95] tracking-[-0.02em] text-warm-white mb-3" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
-          Competition Analysis
-        </h2>
-
-        {/* Hero insight — the pattern */}
-        {(() => {
-          const grades = competitors.map(c => c.grade)
-          const aCount = grades.filter(g => g.startsWith('A')).length
-          const bCount = grades.filter(g => g.startsWith('B')).length
-          const cCount = grades.filter(g => g.startsWith('C')).length
-          const dfCount = grades.filter(g => g.startsWith('D') || g.startsWith('F') || g === 'NO').length
-          return (
-            <div className="flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-5 mb-6 border-y border-warm-white/[0.06] py-4">
-              <div className="flex items-center gap-4 lg:gap-5 shrink-0">
-                <div className="text-center">
-                  <div className="font-mono font-black text-orange text-2xl leading-none">{aCount}</div>
-                  <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">A Grade</div>
-                </div>
-                <div className="h-8 w-px bg-warm-white/[0.08]" />
-                <div className="text-center">
-                  <div className="font-mono font-black text-warm-white/60 text-2xl leading-none">{bCount}</div>
-                  <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">B Grade</div>
-                </div>
-                <div className="h-8 w-px bg-warm-white/[0.08]" />
-                <div className="text-center">
-                  <div className="font-mono font-black text-warm-white/30 text-2xl leading-none">{cCount}</div>
-                  <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">C Grade</div>
-                </div>
-                <div className="h-8 w-px bg-warm-white/[0.08]" />
-                <div className="text-center">
-                  <div className="font-mono font-black text-warm-white/20 text-2xl leading-none">{dfCount}</div>
-                  <div className="mt-1 text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">D/F Grade</div>
-                </div>
+        <div className="flex items-end justify-between mb-3">
+          <h2 className="font-black leading-[0.95] tracking-[-0.02em] text-warm-white" style={{ fontSize: 'clamp(2rem, 4vw, 2.8rem)' }}>
+            Competition Analysis
+          </h2>
+          <div className="flex items-baseline gap-3 pb-0.5">
+            {[
+              { count: aCount, label: 'A', color: '#34D399' },
+              { count: bCount, label: 'B', color: '#60A5FA' },
+              { count: cCount, label: 'C', color: '#FBBF24' },
+              { count: dfCount, label: 'D/F', color: '#F87171' },
+            ].map((g, i) => (
+              <div key={i} className="flex items-baseline gap-1">
+                <span className="font-mono font-black text-lg leading-none" style={{ color: g.color }}>{g.count}</span>
+                <span className="text-[0.65rem] font-bold uppercase tracking-[0.08em] text-warm-white/30">{g.label}</span>
               </div>
-              <div className="border-l-2 border-orange pl-4">
-                <p className="text-body-sm font-bold text-warm-white">Most competitors lack basic technology, security, or online presence.</p>
-                <p className="text-[0.8rem] text-warm-white/55">Journey enters with A+ operations against a market that can&apos;t compete after 5 PM.</p>
-              </div>
-            </div>
-          )
-        })()}
-
-        {/* Map + Table side by side */}
-        <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        <div className="overflow-x-auto">
-        <table className="w-full min-w-[500px] text-[0.9rem] leading-[1.6]">
-          <thead>
-            <tr className="border-b border-warm-white/[0.08]">
-              <th className="py-2 pr-3 text-left text-[0.7rem] font-bold uppercase tracking-[0.12em] text-warm-white/50">#</th>
-              <th className="py-2 pr-3 text-left text-[0.7rem] font-bold uppercase tracking-[0.12em] text-warm-white/50">Competitor</th>
-              <th className="py-2 px-3 text-center text-[0.7rem] font-bold uppercase tracking-[0.12em] text-warm-white/50">Facility</th>
-              <th className="py-2 px-3 text-center text-[0.7rem] font-bold uppercase tracking-[0.12em] text-warm-white/50">Website</th>
-              <th className="py-2 pl-3 text-left text-[0.7rem] font-bold uppercase tracking-[0.12em] text-warm-white/50">Note</th>
-            </tr>
-          </thead>
-          <tbody>
-            {competitors.map((c, i) => (
-              <tr key={i} className="border-b border-warm-white/[0.03]">
-                <td className="py-1.5 pr-3 font-mono text-orange/50 font-bold">{String(i + 1).padStart(2, '0')}</td>
-                <td className="py-1.5 pr-3 font-bold text-warm-white/70">{c.name}</td>
-                <td className={`py-1.5 px-3 text-center font-bold ${gradeColor(c.grade)}`}>{c.grade}</td>
-                <td className={`py-1.5 px-3 text-center font-bold ${gradeColor(c.web)}`}>{c.web}</td>
-                <td className="py-1.5 pl-3 text-warm-white/50">{c.note}</td>
-              </tr>
             ))}
-          </tbody>
-        </table>
+          </div>
         </div>
 
-          {/* Map — geographic context */}
-          <div className="relative aspect-[4/3] lg:aspect-auto overflow-hidden rounded-2xl border border-warm-white/[0.06]">
+        {/* Grade distribution bar + insight */}
+        <div className="mb-4">
+          <div className="flex h-1.5 rounded-full overflow-hidden mb-2.5">
+            <div className="rounded-l-full" style={{ flex: aCount, background: '#34D399' }} />
+            <div style={{ flex: bCount, background: '#60A5FA' }} />
+            <div style={{ flex: cCount, background: '#FBBF24' }} />
+            <div className="rounded-r-full" style={{ flex: dfCount, background: '#F87171' }} />
+          </div>
+          <p className="text-[0.9rem] font-bold text-warm-white/80 leading-snug">14 competitors. Only <span style={{ color: '#34D399' }}>1</span> rated A.</p>
+          <p className="text-[0.8rem] text-warm-white/40 mt-0.5">Journey enters with A+ operations against a market that can&apos;t compete after 5 PM.</p>
+        </div>
+
+        {/* Table + Map — balanced split */}
+        <div className="grid gap-5 lg:grid-cols-[1fr_1fr]">
+          {/* Left — table with grade tags + web column */}
+          <div>
+            <table className="w-full text-[0.85rem]">
+              <thead>
+                <tr className="border-b border-warm-white/[0.08]">
+                  <th className="py-1.5 pr-1 text-left text-[0.65rem] font-bold uppercase tracking-[0.12em] text-warm-white/35">Facility</th>
+                  <th className="py-1.5 px-1 text-center text-[0.65rem] font-bold uppercase tracking-[0.12em] text-warm-white/35 w-10">Web</th>
+                  <th className="py-1.5 pl-1 text-left text-[0.65rem] font-bold uppercase tracking-[0.12em] text-warm-white/35">Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                {competitors.map((c, i) => {
+                  const g = gc(c.grade)
+                  const w = gc(c.web)
+                  return (
+                    <tr key={i} className="border-b border-warm-white/[0.03]">
+                      <td className="py-[5px] pr-1">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="inline-flex items-center justify-center rounded text-[0.6rem] font-bold leading-none shrink-0 px-1 py-0.5" style={{ background: g.bg, color: g.color, minWidth: 24 }}>{c.grade}</span>
+                          <span className="text-warm-white/65">{c.name}</span>
+                        </span>
+                      </td>
+                      <td className="py-[5px] px-1 text-center font-bold" style={{ color: w.color }}>{c.web}</td>
+                      <td className="py-[5px] pl-1 text-warm-white/30 text-[0.75rem]">{c.note}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Right — map (stretches to match table height) */}
+          <div className="relative overflow-hidden rounded-2xl border border-warm-white/[0.06]">
             <Image src="/images/map/comp-map-dark.webp" alt="Competition map — Granbury area" fill className="object-cover" />
-            <div className="absolute bottom-3 left-3 flex items-center gap-3 rounded-md bg-black/70 backdrop-blur-sm px-3 py-1.5 border border-warm-white/[0.08]">
-              <span className="flex items-center gap-1.5 text-[0.6rem] font-bold text-orange"><span className="inline-block w-2 h-2 rounded-full bg-orange" />Journey</span>
-              <span className="flex items-center gap-1.5 text-[0.6rem] font-bold text-warm-white/40"><span className="inline-block w-2 h-2 rounded-full bg-stone" />Competitors</span>
+            <div className="absolute bottom-3 left-3 flex items-center gap-2.5 rounded-lg bg-black/75 backdrop-blur-sm px-3 py-1.5 border border-warm-white/[0.08]">
+              {[
+                { label: 'Journey', color: '#E8622A' },
+                { label: 'A', color: '#34D399' },
+                { label: 'B', color: '#60A5FA' },
+                { label: 'C', color: '#FBBF24' },
+                { label: 'D/F', color: '#F87171' },
+              ].map((l, i) => (
+                <span key={i} className="flex items-center gap-1 text-[0.55rem] font-bold" style={{ color: l.color }}>
+                  <span className="inline-block w-2 h-2 rounded-full" style={{ background: l.color }} />{l.label}
+                </span>
+              ))}
             </div>
           </div>
         </div>
@@ -1159,7 +1242,7 @@ function SlideCompetition() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 14 — SOURCES & USES
+   PAGE 15 — SOURCES & USES
    ═══════════════════════════════════════════════════════ */
 
 function SlideSourcesUses() {
@@ -1181,9 +1264,9 @@ function SlideSourcesUses() {
             {/* Hero row — 3 key metrics */}
             <div className="grid grid-cols-3 gap-3 mb-3 font-mono" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {[
-                { label: 'Levered IRR', value: '24.98%' },
-                { label: 'Project-Level Equity Multiple', value: '2.51x' },
-                { label: 'Yield on Cost at Sale', value: '8.8%' },
+                { label: 'Levered IRR', value: '26%' },
+                { label: 'MOIC', value: '2.56x' },
+                { label: 'YOC', value: '8.9%' },
               ].map((m, i) => (
                 <div key={i} className="text-center py-4 rounded-xl border border-orange/20" style={{ background: 'rgba(232,98,42,0.05)' }}>
                   <div className="text-2xl font-black leading-none text-orange">{m.value}</div>
@@ -1194,10 +1277,10 @@ function SlideSourcesUses() {
             {/* Secondary row — 4 supporting metrics */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 font-mono" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {[
-                { label: 'Unlevered IRR', value: '14.20%' },
-                { label: 'Levered CoC (Hold)', value: '11.02%' },
-                { label: 'Unlevered CoC (Hold)', value: '6.50%' },
-                { label: 'Dev. Spread at Sale', value: '2.5%' },
+                { label: 'Unlevered IRR', value: '14.7%' },
+                { label: 'Levered CoC', value: '11.6%' },
+                { label: 'Unlevered CoC', value: '6.6%' },
+                { label: 'Dev. Spread', value: '2.6%+' },
               ].map((m, i) => (
                 <div key={i} className="text-center py-3 rounded-lg border border-warm-white/[0.06]">
                   <div className="text-lg font-black leading-none text-warm-white/70">{m.value}</div>
@@ -1216,9 +1299,9 @@ function SlideSourcesUses() {
                 </thead>
                 <tbody className="font-mono" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {[
-                    ['Acquisition Loan Proceeds', '$7,560,000'],
-                    ['LP Equity', '$4,420,484'],
-                    ['GP Equity', '$136,716'],
+                    ['Acquisition Loan Proceeds', '$7,650,000'],
+                    ['LP Equity', '$4,413,500'],
+                    ['GP Equity', '$136,500'],
                   ].map(([label, val], i) => (
                     <tr key={i} className="border-b border-warm-white/[0.06]">
                       <td className="py-1.5 pr-2 font-sans text-[0.9rem] leading-[1.6] text-warm-white/55">{label}</td>
@@ -1227,7 +1310,7 @@ function SlideSourcesUses() {
                   ))}
                   <tr className="border-t border-warm-white/[0.15]">
                     <td className="py-1.5 pr-2 font-sans text-[0.8rem] font-bold text-warm-white">Total</td>
-                    <td className="py-1.5 text-right font-bold text-warm-white">$12,117,200</td>
+                    <td className="py-1.5 text-right font-bold text-warm-white">$12,200,000</td>
                   </tr>
                 </tbody>
               </table>
@@ -1237,21 +1320,24 @@ function SlideSourcesUses() {
             <div>
               <table className="w-full text-[0.8rem]">
                 <thead>
-                  <tr><th colSpan={2} className="bg-orange px-3 py-2 text-left text-[0.7rem] font-bold uppercase tracking-[0.1em] text-warm-white rounded-t-lg">Uses (at Close)</th></tr>
+                  <tr><th colSpan={3} className="bg-orange px-3 py-2 text-left text-[0.7rem] font-bold uppercase tracking-[0.1em] text-warm-white rounded-t-lg">Uses (at Close)</th></tr>
                 </thead>
                 <tbody className="font-mono" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {[
-                    ['Acquisition Costs', '$11,286,000'],
-                    ['Reserves & Fees', '$831,200'],
-                  ].map(([label, val], i) => (
+                    ['Acquisition & Closing Costs', '$10,962,000', '89.86%'],
+                    ['Technology Stack & Capex', '$683,000', '5.60%'],
+                    ['Working Capital and Sponsor, Lender & 3rd Party Fees', '$555,000', '4.54%'],
+                  ].map(([label, val, pct], i) => (
                     <tr key={i} className="border-b border-warm-white/[0.06]">
-                      <td className="py-1.5 pr-2 font-sans text-[0.9rem] leading-[1.6] text-warm-white/55">{label}</td>
-                      <td className="py-1.5 text-right text-warm-white">{val}</td>
+                      <td className="py-1.5 pr-2 font-sans text-[0.85rem] leading-[1.5] text-warm-white/55">{label}</td>
+                      <td className="py-1.5 text-right text-warm-white whitespace-nowrap">{val}</td>
+                      <td className="py-1.5 pl-2 text-right text-warm-white/30 text-[0.75rem] whitespace-nowrap">{pct}</td>
                     </tr>
                   ))}
                   <tr className="border-t border-warm-white/[0.15]">
                     <td className="py-1.5 pr-2 font-sans text-[0.8rem] font-bold text-warm-white">Total</td>
-                    <td className="py-1.5 text-right font-bold text-warm-white">$12,117,200</td>
+                    <td className="py-1.5 text-right font-bold text-warm-white">$12,200,000</td>
+                    <td className="py-1.5 pl-2 text-right text-warm-white/30 text-[0.75rem]">100%</td>
                   </tr>
                 </tbody>
               </table>
@@ -1265,25 +1351,25 @@ function SlideSourcesUses() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 15 — ANNUALIZED PROJECTIONS
+   PAGE 16 — ANNUALIZED PROJECTIONS
    ═══════════════════════════════════════════════════════ */
 
 function SlideProjections() {
   const rows = [
-    { label: 'Rental Income', indent: true, values: ['$944,852', '$1,145,895', '$1,332,639', '$1,372,618', '$1,413,797'] },
-    { label: 'Ancillary Income', indent: true, values: ['$55,192', '$63,077', '$70,961', '$70,961', '$70,961'] },
-    { label: 'Fee & Other Income', indent: true, values: ['$31,733', '$36,709', '$39,244', '$40,234', '$41,253'] },
-    { label: 'Bad Debt', indent: true, values: ['($9,449)', '($11,459)', '($13,326)', '($13,726)', '($14,138)'] },
-    { label: 'Discounts', indent: true, values: ['($37,104)', '($37,104)', '($27,828)', '($27,828)', '($27,828)'] },
-    { label: 'Effective Gross Income', bold: true, values: ['$985,225', '$1,197,118', '$1,401,690', '$1,442,259', '$1,484,045'] },
+    { label: 'Rental Income', indent: true, values: ['$946,566', '$1,153,252', '$1,341,930', '$1,382,188', '$1,423,654'] },
+    { label: 'Ancillary Income', indent: true, values: ['$67,602', '$77,259', '$86,916', '$86,916', '$86,916'] },
+    { label: 'Fee & Other Income', indent: true, values: ['$31,949', '$37,064', '$39,604', '$40,600', '$41,626'] },
+    { label: 'Bad Debt', indent: true, values: ['($9,466)', '($11,533)', '($13,419)', '($13,822)', '($14,237)'] },
+    { label: 'Discounts', indent: true, values: ['($37,872)', '($37,872)', '($28,404)', '($28,404)', '($28,404)'] },
+    { label: 'Effective Gross Income', bold: true, values: ['$998,779', '$1,218,171', '$1,426,627', '$1,467,479', '$1,509,556'] },
     { label: '', spacer: true, values: ['', '', '', '', ''] },
-    { label: 'Total Expenses', bold: true, values: ['($352,056)', '($376,130)', '($399,737)', '($409,719)', '($419,958)'] },
+    { label: 'Total Expenses', bold: true, values: ['($357,580)', '($382,393)', '($406,439)', '($416,560)', '($426,942)'] },
     { label: '', spacer: true, values: ['', '', '', '', ''] },
-    { label: 'Net Operating Income', bold: true, highlight: true, values: ['$633,169', '$820,988', '$1,001,953', '$1,032,540', '$1,064,087'] },
+    { label: 'Net Operating Income', bold: true, highlight: true, values: ['$641,199', '$835,777', '$1,020,188', '$1,050,919', '$1,082,614'] },
     { label: '', spacer: true, values: ['', '', '', '', ''] },
-    { label: 'Yield on Cost', metric: true, values: ['5.23%', '6.78%', '8.27%', '8.52%', '8.78%'] },
-    { label: 'Debt Service Coverage', metric: true, values: ['1.34x', '1.37x', '1.67x', '1.63x', '1.3x'] },
-    { label: 'Cash on Cash', metric: true, values: ['0.00%', '4.36%', '8.24%', '26.78%', '15.72%'] },
+    { label: 'Yield on Cost', metric: true, values: ['5.26%', '6.85%', '8.36%', '8.61%', '8.87%'] },
+    { label: 'Debt Service Coverage', metric: true, values: ['1.33x', '1.73x', '1.68x', '1.63x', '1.3x'] },
+    { label: 'Cash on Cash', metric: true, values: ['0.00%', '7.24%', '8.42%', '26.60%', '15.59%'] },
   ]
 
   const years = [
@@ -1345,7 +1431,7 @@ function SlideProjections() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 16 — INVESTOR RETURN PROJECTIONS
+   PAGE 17 — INVESTOR RETURN PROJECTIONS
    ═══════════════════════════════════════════════════════ */
 
 function SlideReturns() {
@@ -1354,22 +1440,22 @@ function SlideReturns() {
       name: 'Upside Case',
       color: 'border-[#7AAF6E]/20 bg-[#7AAF6E]/[0.03]',
       labelBg: 'bg-[#7AAF6E]',
-      returns: ['$21,246', '$72,603', '$850,537', '$66,114', '$1,448,089'],
-      coc: ['2.12%', '9.38%', '94.44%', '101.05%', '245.86%'],
+      returns: ['$21,790', '$73,419', '$851,352', '$65,461', '$1,448,279'],
+      coc: ['2.18%', '9.52%', '94.66%', '101.20%', '246.03%'],
     },
     {
       name: 'Expected Case',
       color: 'border-orange/25 bg-orange/[0.04]',
       labelBg: 'bg-orange',
-      returns: ['$20,494', '$69,422', '$749,819', '$80,085', '$1,106,370'],
-      coc: ['2.05%', '8.99%', '83.97%', '91.98%', '202.62%'],
+      returns: ['$21,038', '$70,237', '$750,634', '$80,085', '$1,105,887'],
+      coc: ['2.10%', '9.13%', '84.19%', '92.20%', '202.79%'],
     },
     {
       name: 'Downside Case',
       color: 'border-warm-white/[0.08] bg-warm-white/[0.02]',
       labelBg: 'bg-stone',
-      returns: ['$19,739', '$66,256', '$651,442', '$76,779', '$848,873'],
-      coc: ['1.97%', '8.60%', '73.74%', '81.42%', '166.31%'],
+      returns: ['$20,238', '$67,072', '$652,257', '$76,779', '$848,316'],
+      coc: ['2.03%', '8.74%', '73.96%', '81.64%', '166.47%'],
     },
   ]
 
@@ -1392,7 +1478,7 @@ function SlideReturns() {
           <div className="flex items-center justify-between mb-4">
             <span className="rounded px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-warm-white bg-orange">Expected Case</span>
             <div className="text-right">
-              <div className="font-mono font-black text-orange text-2xl leading-none" style={{ fontVariantNumeric: 'tabular-nums' }}>202.62%</div>
+              <div className="font-mono font-black text-orange text-2xl leading-none" style={{ fontVariantNumeric: 'tabular-nums' }}>202.79%</div>
               <div className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-warm-white/50 mt-1">Cumulative CoC · Year 5</div>
             </div>
           </div>
@@ -1468,14 +1554,21 @@ function SlideReturns() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   PAGE 17 — CONTACT / CLOSE
+   PAGE 18 — CONTACT / CLOSE
    ═══════════════════════════════════════════════════════ */
 
 function SlideContact() {
+  const steps = [
+    { num: '1', title: 'Schedule a call with our team', sub: null },
+    { num: '2', title: 'Review the offering documents', sub: null },
+    { num: '3', title: 'Submit your investment commitment', sub: 'Reserve your allocation by completing the subscription process.' },
+    { num: '4', title: 'Fund your investment', sub: 'Once approved, you will receive wire/ACH instructions. Funding must occur prior to the closing date to finalize your position.' },
+  ]
+
   return (
     <section className="deck-page grain relative flex min-h-dvh lg:h-dvh lg:min-h-0 lg:snap-start flex-col overflow-hidden bg-black">
       <div className="absolute inset-0">
-        <Image src="/images/hero/direct-hero-bg.webp" alt="" fill sizes="100vw" className="object-cover" style={{ filter: 'grayscale(30%) contrast(1.1) brightness(0.4) sepia(0.1)', objectPosition: '50% 62%' }} />
+        <Image src="/images/hero/direct-hero-bg-v2.webp" alt="" fill sizes="100vw" className="object-cover" style={{ filter: 'grayscale(30%) contrast(1.1) brightness(0.4) sepia(0.1)', objectPosition: '50% 62%' }} />
       </div>
       <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/80" />
       <div className="absolute inset-0 mix-blend-overlay" style={{ background: 'radial-gradient(ellipse 55% 50% at 50% 45%, rgba(232,98,42,0.08), transparent)' }} />
@@ -1483,23 +1576,28 @@ function SlideContact() {
       <div className="relative z-10 flex flex-1 flex-col px-5 py-8 md:px-8 md:py-10 lg:px-16 lg:py-14">
         <div className="flex items-start justify-end"><Logo /></div>
 
-        <div className="flex flex-1 flex-col lg:flex-row lg:items-center lg:gap-20 justify-center">
+        <div className="flex flex-1 flex-col lg:flex-row lg:items-center lg:gap-16 justify-center">
           {/* Left — Next Steps */}
-          <div className="lg:flex-1 lg:max-w-[520px]">
+          <div className="lg:flex-1 lg:max-w-[560px]">
             <h2 className="font-black uppercase leading-[0.92] tracking-[-0.03em] text-warm-white mb-8" style={{ fontSize: 'clamp(2rem, 4.5vw, 3.5rem)' }}>
               What Happens<br />
               <span className="font-light italic normal-case text-orange">Next</span>
             </h2>
+
             <div className="space-y-4">
-              <p className="text-body lg:text-lg leading-[1.7] text-warm-white/70">
-                The deal has been presented. The numbers speak.
-              </p>
-              <p className="text-body lg:text-lg leading-[1.7] text-warm-white/70">
-                If it resonates, the next step is simple. Review the documents with your advisors and let&apos;s go from there.
-              </p>
+              {steps.map((s) => (
+                <div key={s.num} className="flex gap-4">
+                  <span className="font-mono font-black text-orange text-lg leading-none pt-0.5 shrink-0">{s.num}.</span>
+                  <div>
+                    <p className="text-[0.95rem] font-bold uppercase tracking-[0.06em] text-warm-white leading-snug">{s.title}</p>
+                    {s.sub && <p className="text-[0.8rem] text-warm-white/45 mt-1 leading-[1.5]">{s.sub}</p>}
+                  </div>
+                </div>
+              ))}
             </div>
+
             <div className="mt-8 inline-flex w-fit items-center rounded-sm bg-orange px-5 py-2.5">
-              <span className="text-[0.75rem] font-bold tracking-[0.1em] uppercase text-warm-white">Accepting subscriptions until May 8, 2026</span>
+              <span className="text-[0.75rem] font-bold tracking-[0.1em] uppercase text-warm-white">Accepting subscriptions until May 15, 2026</span>
             </div>
           </div>
 
@@ -1524,11 +1622,24 @@ function SlideContact() {
               </div>
               <span className="text-body text-warm-white/80">jonah@journey.storage</span>
             </div>
-            <div className="mt-6 flex items-center gap-3">
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg">
-                <Image src="/images/other/qr-code.webp" alt="QR code — direct.journey.storage" fill className="object-contain" />
+
+            {/* CTA button (web) / QR (print) */}
+            <div className="mt-4">
+              <a
+                href="https://direct.journey.storage/#team"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg border border-orange/25 bg-orange/[0.06] px-4 py-2.5 text-[0.8rem] font-bold text-orange transition-colors hover:bg-orange/[0.12] focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange active:bg-orange/[0.18] print:hidden"
+              >
+                Full bios &amp; team
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7M17 7H7M17 7v10" /></svg>
+              </a>
+              <div className="hidden print:flex items-center gap-3 mt-2">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-lg">
+                  <Image src="/images/other/qr-code.webp" alt="QR code — direct.journey.storage" fill className="object-contain" />
+                </div>
+                <span className="text-[0.7rem] text-warm-white/40">Or scan here</span>
               </div>
-              <span className="text-[0.8rem] text-warm-white/55">Or scan here</span>
             </div>
           </div>
         </div>
@@ -1542,46 +1653,44 @@ function SlideContact() {
    MAIN PAGE — Assembles all slides
    ═══════════════════════════════════════════════════════ */
 
-export default function GranburyDeck() {
+/* All slides in order — single source of truth */
+const SLIDES = [
+  SlideCover, SlideOpportunity, SlideOperator, SlideTeam,
+  SlideMarket, SlideOperations, SlideGrowthThesis,
+  SlideDealCover, SlideDisclaimer, SlideCurrentOpportunity,
+  SlideInvestmentSummary, SlidePropertyDetails, SlideMarketOverview,
+  SlideCompetition, SlideSourcesUses, SlideProjections,
+  SlideReturns, SlideContact,
+]
+
+export default async function GranburyDeck({ searchParams }: { searchParams: Promise<{ mode?: string }> }) {
+  const params = await searchParams
+  const isPrint = params.mode === 'print'
+
+  if (isPrint) {
+    return (
+      <>
+        <div className="deck-print">
+          {SLIDES.map((Slide, i) => (
+            <div key={i} className="deck-print-page">
+              <Slide />
+            </div>
+          ))}
+        </div>
+        <PrintTrigger />
+      </>
+    )
+  }
+
   return (
     <>
       <main className="deck overflow-x-hidden lg:h-dvh lg:snap-y lg:snap-mandatory lg:overflow-y-auto scroll-smooth">
-        {/* Platform Section (Reusable) */}
-        <SlideCover />
-        <PageDivider />
-        <SlideOpportunity />
-        <PageDivider />
-        <SlideOperator />
-        <PageDivider />
-        <SlideMarket />
-        <PageDivider />
-        <SlideOperations />
-        <PageDivider />
-        <SlideGrowthThesis />
-        <PageDivider />
-
-        {/* Deal Section (Granbury-specific) */}
-        <SlideDealCover />
-        <PageDivider />
-        <SlideDisclaimer />
-        <PageDivider />
-        <SlideCurrentOpportunity />
-        <PageDivider />
-        <SlideInvestmentSummary />
-        <PageDivider />
-        <SlidePropertyDetails />
-        <PageDivider />
-        <SlideMarketOverview />
-        <PageDivider />
-        <SlideCompetition />
-        <PageDivider />
-        <SlideSourcesUses />
-        <PageDivider />
-        <SlideProjections />
-        <PageDivider />
-        <SlideReturns />
-        <PageDivider />
-        <SlideContact />
+        {SLIDES.map((Slide, i) => (
+          <React.Fragment key={i}>
+            {i > 0 && <PageDivider />}
+            <Slide />
+          </React.Fragment>
+        ))}
       </main>
       <DeckNav totalPages={TOTAL_PAGES} />
     </>

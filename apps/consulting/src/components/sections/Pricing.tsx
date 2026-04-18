@@ -10,7 +10,6 @@ const tiers = [
   {
     name: 'Scout',
     badge: null,
-    price: '$7,500',
     tier: 'Entry access',
     description: 'Expert eyes on your next deal. Institutional-grade feasibility without the full-time hire.',
     forWho: 'For the selective investor',
@@ -22,15 +21,14 @@ const tiers = [
       'Video call to walk through findings and strategy',
       'Direct access to Journey\u2019s team',
     ],
-    cta: 'Get started',
-    href: 'https://buy.stripe.com/3cI14oaMr6jk6Mh8ll0sU00',
+    cta: 'Schedule a call',
+    href: CALENDAR_URL,
     formSource: 'consulting-scout' as FormSource,
-    tierDetail: 'Scout — $7,500/mo',
+    tierDetail: 'Scout',
   },
   {
     name: 'Pursuit',
     badge: 'Most popular',
-    price: '$15,000',
     tier: 'Active access',
     description: 'Feasibility for what\u2019s next. Advisory for what you already own. One subscription, both covered.',
     forWho: 'For the acquirer',
@@ -42,15 +40,14 @@ const tiers = [
       'Financing strategy: debt structuring, lender positioning, refi timing',
       'Unlimited video calls and priority response, day or night',
     ],
-    cta: 'Get started',
-    href: 'https://buy.stripe.com/aFa7sM07N0Z08UpcBB0sU02',
+    cta: 'Schedule a call',
+    href: CALENDAR_URL,
     formSource: 'consulting-pursuit' as FormSource,
-    tierDetail: 'Pursuit — $15,000/mo',
+    tierDetail: 'Pursuit',
   },
   {
     name: 'Command',
     badge: null,
-    price: null,
     tier: 'Full access',
     description: 'Journey\u2019s full capability embedded in your team. Feasibility, advisory, execution. No limits.',
     forWho: 'For the portfolio builder',
@@ -65,7 +62,7 @@ const tiers = [
     cta: 'Schedule a call',
     href: CALENDAR_URL,
     formSource: 'consulting-booking' as FormSource,
-    tierDetail: 'Command — Custom',
+    tierDetail: 'Command',
   },
 ]
 
@@ -207,16 +204,7 @@ export default function Pricing() {
                   <p className="mt-1 text-caption uppercase tracking-[0.1em] text-orange">{tier.tier}</p>
                   <p className="mt-2 text-caption text-warm-white/25">{tier.forWho}</p>
                   <div className="mt-3 h-px w-full bg-warm-white/[0.06]" />
-                  {tier.price ? (
-                    <p className="mt-4 text-3xl font-black text-warm-white">
-                      {tier.price}<span className="text-base font-bold text-warm-white/40">/month</span>
-                    </p>
-                  ) : (
-                    <p className="mt-4 text-3xl font-black text-warm-white/30">
-                      Let&apos;s talk
-                    </p>
-                  )}
-                  <p className="mt-3 text-[0.8rem] leading-[1.6] text-warm-white/40">{tier.description}</p>
+                  <p className="mt-4 text-[0.8rem] leading-[1.6] text-warm-white/40">{tier.description}</p>
 
                   <ul className="mt-6 flex-1 space-y-3">
                     {tier.features.map((feature) => (

@@ -142,7 +142,43 @@ body {
   overflow: hidden;
 }
 
-/* ── Deck: Print — minimal (PDF generated via /deck/granbury/print) ── */
+/* ── Deck: Print Mode (?mode=print) ── */
+
+/* Print-mode screen layout — forces A4 landscape sizing BEFORE print dialog */
+.deck-print {
+  width: 297mm;
+  margin: 0 auto;
+  background: black;
+  overflow: hidden;
+}
+
+.deck-print-page {
+  width: 297mm;
+  height: 210mm;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* In deck-print mode, mirror @media print visibility rules */
+.deck-print .print\:hidden {
+  display: none !important;
+}
+
+.deck-print .print\:flex {
+  display: flex !important;
+}
+
+/* Override deck-page inside print wrapper to fill the fixed container */
+.deck-print-page .deck-page {
+  width: 297mm !important;
+  height: 210mm !important;
+  min-height: 210mm !important;
+  max-height: 210mm !important;
+  min-block-size: unset !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
 
 @media print {
   * {
@@ -157,5 +193,56 @@ body {
   *, *::before, *::after {
     animation: none !important;
     transition: none !important;
+  }
+
+  @page {
+    size: 297mm 210mm;
+    margin: 0;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .deck-print {
+    width: 297mm !important;
+  }
+
+  .deck-print-page {
+    width: 297mm !important;
+    height: 210mm !important;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    overflow: hidden !important;
+  }
+
+  .deck-print-page .deck-page {
+    width: 297mm !important;
+    height: 210mm !important;
+    min-height: 210mm !important;
+    max-height: 210mm !important;
+    min-block-size: unset !important;
+  }
+
+  .deck-print-page:last-child {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  .deck-page:last-of-type {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  /* Hide page dividers between slides */
+  .deck > [class*="divider"],
+  .deck > hr {
+    display: none !important;
+    height: 0 !important;
+    page-break-after: avoid;
+    break-after: avoid;
   }
 }

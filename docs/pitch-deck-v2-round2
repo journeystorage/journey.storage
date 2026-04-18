@@ -1,0 +1,197 @@
+Pitch Deck v2 — Round 2 (Jonah's Feedback, Apr 17 2026)
+Source: docs/journey.direct/Granbury Deck (Web Version) Feedback.pdf
+Bios: docs/J&L Bios 2026.md
+Strategy: docs/journey.direct/market-thesis-strategy.md
+
+Changes apply to BOTH web (/deck/granbury) and print (/deck/granbury/print).
+
+---
+
+## Structural Change
+
+- [x]  Split P3 into P3 (bio only) + NEW P4 (map + divestiture) — deck goes from 17 to 18 pages
+- [x]  SlideTeam added to assembly; renumber happens naturally (18 slides total now)
+
+---
+
+## Page 1 — Cover
+
+- [x]  Center "Investment Platform" on its own line
+- [x]  Line 2: "A part of the Journey.Storage™ Ecosystem" — styled matching website hero (warm-white/80, font-semibold brand)
+
+---
+
+## Page 2 — The Platform
+
+- [x]  "Directly." restored as solo punch; "with Journey.Storage™" as subline below
+- [x]  Closing line as 3 scannable statements with dividers: Journey.Direct™ | Self storage | Journey.Storage™
+- [x]  Aligned incentives: "Journey.Direct™ co-invests in every deal, and guarantees debt, as needed."
+- [x]  P1 cover contrast fix: bg-[#181818] + border-orange/20 + brightness(0.55) + bg-black/25 overlay
+
+---
+
+## Page 3 — The Operators (bio only — map moves to P4)
+
+- [x]  Remove map + proof bar + divestiture section (moved to P4)
+- [x]  Two-person layout: Jonah (left) + Lyvia (right) — photo 100px + name/title + bullets + intro + tags
+- [x]  Used PITCH DECK bios from docs/J&L Bios 2026.md:
+
+      JONAH M. HALL — Co-Founder & CEO
+      Bullets: Deep Industry Relationships | Organizational Restructuring & Team Building | Storage Operational Mastery | Real Estate Transactional Prowess
+      Intro: "A decade into the industry, Jonah has served in almost every capacity..."
+      Tags: Acquisitions, Asset Management, Development, Investor Relations, Construction, Capital Raising, Facility Operations, Technology Implementation, Deal Structuring, Property Management
+
+      LYVIA HALL — Co-Founder & President
+      Bullets: Chief-Level Financial Leadership | Portfolio-Level Operational Strategy | Organizational Process Design | Scalable Infrastructure Optimization
+      Intro: "Over the last 12+ years, Lyvia has overseen complex, multi-entity structures, spanning 50+ entities..."
+      Tags: Capital Allocation, Liquidity Management, Cash Flow Optimization, Investor Reporting, Lender Relations, Treasury Management, Banking Strategy, Refinance Execution, Intercompany Structuring, Tax Strategy
+
+- [x]  QR + CTA: "Full bios & team at direct.journey.storage"
+- [x]  Lyvia portrait: apps/investors/public/images/team/home-lyvia-portrait.webp
+
+---
+
+## NEW Page 4 — The Team (map + divestiture)
+
+- [x]  Map + proof bar + divestiture relocated from old P3 into new SlideTeam component
+- [x]  Divestiture rewritten — "the Journey.Storage™ team" instead of "Jonah M. Hall"
+- [x]  Proof bar: "Acquired, developed & redeveloped"
+- [x]  Proof bar: "30+"
+- [x]  Added to main assembly between SlideOperator and SlideMarket
+
+---
+
+## Page 5 (was 4) — Market / Inflection Point
+
+NARRATIVE CHANGE — see docs/journey.direct/market-thesis-strategy.md
+
+Current state: shows supply decline data but stops at "the window is now" — setup without payoff.
+
+- [x]  Supply decline data preserved (pills + chart-table)
+- [x]  "Golden Age" framing: two cards — non-overdeveloped (push revenue) + heavily built (demand catching up)
+- [x]  Portfolio Thesis: 20%+ hero number, compressed cap rate exit, 8-10 year timeline
+- [x]  Execution punchline replaced with Golden Age + Portfolio Thesis as bottom zone
+
+---
+
+## Page 6 (was 5) — Operations
+
+- [x]  Deleted step "02" (Verify in seconds)
+- [x]  Step 03 → "Agree and access / Clickwrap agreements. Instant tap to access."
+- [x]  Renumbered: 01, 02, 03, 04
+- [x]  Deleted "from 24/7 availability" under "Revenue wins"
+- [x]  "A defensible" → "An" operational moat
+
+---
+
+## Page 7 (was 6) — Growth Thesis
+
+- [x]  Description rewritten — fragment sentences per Jonah's wording
+- [x]  Buy Box rewritten — shorter fragments
+- [x]  UW Inputs rewritten — "Conservative Outlook" removed, Cap-Ex $250-500k, Financing as fragments, Projection Models 10+ years
+
+---
+
+## Page 8 (was 7) — Deal Cover
+
+- [x]  No changes — "looks great"
+
+---
+
+## Page 9 (was 8) — Disclaimer
+
+- [x]  Added space after bold "Past performance..." via {' '}
+
+---
+
+## Page 10 (was 9) — Current Opportunity
+
+- [x]  "$85/NRSF purchase price" in metrics strip
+- [x]  "We Will" rewritten — consistent tense with parenthetical timing
+- [x]  Deleted "at a 6.25% Cap Rate" from punchline
+
+---
+
+## Page 11 (was 10) — Investment Summary
+
+- [x]  Hero returns: 26% IRR | 2.56x MOIC | 8.9% YOC
+- [x]  Numbers: $4,550,000 / $7,650,000 / $12,200,000 + ™ on brand names
+- [x]  "Value Add Strategy" as label
+- [x]  Sponsor Fees above Hold Period
+- [x]  "We do cost segregation →" in orange box
+- [x]  Deadline: May 15, 2026
+
+---
+
+## Page 12 (was 11) — Property Details
+
+- [x]  Added "Properties were built in 2005..." before existing text
+- [x]  Deleted "5.95% Cap Rate" and "$85/NRSF below replacement" from data strip
+
+---
+
+## Page 13 (was 12) — Market Overview
+
+- [x]  Removed "$91K Median HHI" from hero stats
+- [x]  Removed "(10 min)" from Pop. growth label
+- [x]  Removed "in 10mins" from 16k people line → "in trade area"
+- [x]  Removed duplicate "3.1% population growth..." line
+- [x]  Stack tag chips higher → give map more vertical space — hero stats moved into left column, map 1:1 aspect fills right column
+
+---
+
+## Page 14 (was 13) — Competition
+
+- [x]  Color-code facility NAMES via grade tags (A=green, B=blue, C=amber, D/F=red) + uniform typography
+- [x]  Rebuilt competition map via Google Maps Static API with distinct grade-colored pins + Journey pins on top layer
+- [x]  Sorted competitors by grade (A→B→C→D/F), added distribution bar viz, restored Web column
+- [x]  Balanced 1fr|1fr grid layout, table & map same height, fits MacBook Air 13" viewport (820px)
+
+---
+
+## Page 15 (was 14) — Sources & Uses
+
+- [x]  Hero metrics (orange): 26% Levered IRR | 2.56x MOIC | 8.9% YOC
+- [x]  Secondary metrics: 14.7% Unlevered IRR | 11.6% Levered CoC | 6.6% Unlevered CoC | 2.6%+ Dev Spread
+- [x]  Sources: $7,650,000 Acquisition Loan | $4,413,500 LP Equity | $136,500 GP Equity | $12,200,000 Total
+- [x]  Uses (3 lines — matches PPM):
+      $10,962,000 — Acquisition & Closing Costs (89.86%)
+      $683,000 — Technology Stack & Capex (5.60%)
+      $555,000 — Working Capital and Sponsor, Lender & 3rd Party Fees (4.54%)
+      $12,200,000 — Total (100%)
+
+---
+
+## Page 16 (was 15) — Projections
+
+- [x]  All projection numbers updated to match Jonah's fresh numbers from feedback PDF
+
+---
+
+## Page 17 (was 16) — Returns
+
+- [x]  All three scenarios (Upside/Expected/Downside) updated with fresh numbers from feedback PDF
+- [x]  Hero CoC updated: 202.79% Expected, 246.03% Upside, 166.47% Downside
+
+---
+
+## Page 18 (was 17) — Contact / Next Steps
+
+- [x]  Replace current prose with numbered NEXT STEPS format (4 steps, no portal step)
+- [x]  Keep contact info (phone, website, email) + swapped QR for button on web (QR kept for print)
+- [x]  Deadline badge updated to May 15, 2026
+
+---
+
+## Global — ™ Audit
+
+- [x]  ™ audit complete — all mentions of Journey.Direct, Journey.Storage, and Journey.Management include ™ across all 18 web slides
+
+---
+
+## Dependencies — Status
+
+1. Bios: RESOLVED — docs/J&L Bios 2026.md has both pitch deck bios
+2. Feedback images: RESOLVED — all data extracted from PDF
+3. Market narrative: RESOLVED — strategy in docs/journey.direct/market-thesis-strategy.md
+4. RESOLVED: Lyvia portrait at apps/investors/public/images/team/home-lyvia-portrait.webp

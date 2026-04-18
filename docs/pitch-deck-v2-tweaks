@@ -4,9 +4,9 @@ Feedback do Jonah sobre o pitch deck [Journey.Direct](http://Journey.Direct) —
 
 ## General
 
-- [ ]  Watch vertical (side) margins across all pages
-- [ ]  Larger fonts needed throughout — **minimum 12pt** for print (older audience, recurring feedback)
-- [ ]  Use vertical space better — paper is taller than screen, reduce blank space at top/bottom
+- [x]  Watch vertical (side) margins across all pages
+- [x]  Larger fonts needed throughout — **minimum 12pt** for print (older audience, recurring feedback)
+- [x]  Use vertical space better — paper is taller than screen, reduce blank space at top/bottom
 
 ---
 
@@ -235,8 +235,8 @@ Feedback do Jonah sobre o pitch deck [Journey.Direct](http://Journey.Direct) —
 
 ## Deploy
 
-- [ ]  Deploy investors site to production
-- [ ]  Verify live deck at production URL
+- [x]  Deploy investors site to production
+- [x]  Verify live deck at production URL
 
 
 
