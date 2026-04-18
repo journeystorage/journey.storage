@@ -54,7 +54,7 @@ export default function MarketThesis() {
                 className="font-black leading-[0.95] tracking-[-0.03em] text-warm-white mb-8"
                 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}
               >
-                The golden age of self-storage{' '}
+                A new golden age of self-storage{' '}
                 <br className="hidden lg:block" />
                 is starting.
               </h2>

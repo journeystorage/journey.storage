@@ -57,8 +57,7 @@ export default function Opportunities({ onBookCall }: OpportunitiesProps) {
                 alt="Granbury self-storage facility, 773 units across 17 buildings"
                 fill
                 sizes="(max-width: 1024px) 100vw, 40vw"
-                className="object-cover"
-                style={{ objectPosition: '50% 70%', transform: 'scale(1.4)' }}
+                className="object-cover scale-[1.4] object-[50%_70%] lg:object-[50%_30%]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/40" />
               <div className="absolute inset-0 mix-blend-multiply" style={{ background: 'rgba(232,98,42,0.08)' }} />

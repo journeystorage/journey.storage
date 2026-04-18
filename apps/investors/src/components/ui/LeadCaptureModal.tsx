@@ -52,6 +52,8 @@ export default function LeadCaptureModal({
       email: String(formData.get('email') || '').trim(),
       phone: String(formData.get('phone') || '').trim(),
       company: String(formData.get('company') || '').trim(),
+      accredited_investor: String(formData.get('accredited_investor') || '').trim(),
+      sms_opt_in: formData.get('sms_opt_in') === 'on',
     }
 
     // Minimal client-side validation
@@ -155,6 +157,46 @@ export default function LeadCaptureModal({
             name="company"
             placeholder="Your company or fund name"
           />
+
+          {/* Accredited investor dropdown */}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="field-accredited" className="text-body-sm font-bold text-black">
+              Are you an accredited investor?
+              <span className="text-orange ml-1" aria-hidden="true">*</span>
+            </label>
+            <select
+              id="field-accredited"
+              name="accredited_investor"
+              required
+              defaultValue=""
+              className="w-full rounded-sm px-4 py-3.5 text-body font-normal bg-white text-black border border-stone/30 focus:border-orange transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-0 appearance-none cursor-pointer"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 16px center',
+              }}
+            >
+              <option value="" disabled>Please select</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+              <option value="not_sure">Not sure</option>
+            </select>
+          </div>
+
+          {/* SMS opt-in checkbox */}
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="checkbox"
+              name="sms_opt_in"
+              className="mt-1 h-4 w-4 shrink-0 rounded border-stone/30 accent-orange cursor-pointer"
+            />
+            <span className="text-[0.7rem] leading-[1.5] text-stone/70">
+              I agree to receive occasional texts about new investment
+              opportunities and updates from Journey.Direct&trade;. Message and
+              data rates may apply. Approx. 4 messages/month.
+              Reply STOP at any time.
+            </span>
+          </label>
 
           <button
             type="submit"

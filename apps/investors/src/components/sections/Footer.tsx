@@ -55,18 +55,9 @@ export default function Footer() {
               Contact
             </h4>
             <div className="flex flex-col gap-2">
-              <a
-                href="mailto:jonah@journey.storage"
-                className="text-body-sm text-stone hover:text-warm-white transition-colors duration-150"
-              >
-                jonah@journey.storage
-              </a>
-              <a
-                href="tel:+14178482425"
-                className="text-body-sm text-stone hover:text-warm-white transition-colors duration-150"
-              >
-                (417) 848-2425
-              </a>
+              <span className="text-body-sm text-stone">
+                Dallas, TX
+              </span>
             </div>
           </div>
         </div>

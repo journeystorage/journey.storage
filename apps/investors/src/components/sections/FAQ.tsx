@@ -6,24 +6,24 @@ import ScrollReveal from '@/components/ui/ScrollReveal'
 
 const faqs = [
   {
-    q: 'What is Journey.Direct?',
-    a: 'Journey.Direct is the investment platform within the Journey.Storage ecosystem. We structure direct investment opportunities in self-storage assets \u2014 acquired, operated, and managed by our team. Investors participate as limited partners in individual deals.',
+    q: 'What is Journey.Direct\u2122?',
+    a: 'Journey.Direct\u2122 is the investment platform within the Journey.Storage\u2122 ecosystem. We structure direct investment opportunities in self-storage assets \u2014 acquired, operated, and managed by our team. Investors participate as limited partners in individual deals.',
   },
   {
     q: 'Who can invest?',
-    a: 'Journey.Direct offerings are available to accredited investors as defined by SEC regulations. During our introductory call, we\u2019ll confirm eligibility and walk you through the verification process.',
+    a: 'Journey.Direct\u2122 offerings are available to accredited investors as defined by SEC regulations. During our introductory call, we\u2019ll confirm eligibility and walk you through the verification process.',
   },
   {
     q: 'What type of deals do you focus on?',
     a: 'Value-add acquisitions in Tier 1-3 U.S. markets. We target existing facilities that are underperforming due to outdated operations, poor revenue management, or lack of technology adoption. We buy below replacement cost and execute a defined operational improvement plan.',
   },
   {
-    q: 'How is Journey.Direct different from a REIT or syndication?',
+    q: 'How is Journey.Direct\u2122 different from a REIT or syndication?',
     a: 'We are operators first. The team acquiring and managing your investment is the same team that runs the facilities day-to-day. There\u2019s no separation between the investment side and the operational side. This alignment means we catch problems early, move faster on value-add initiatives, and maintain tighter cost control than passive sponsors.',
   },
   {
     q: 'What is the typical hold period?',
-    a: 'Our targeted hold period is approximately five years, though this varies by deal. We typically pursue a cash-out refinance midway through the hold to return a portion of invested capital while retaining upside.',
+    a: 'Our targeted hold period is approximately 5\u20137 years, though this varies by deal. We typically pursue a cash-out refinance midway through the hold to return a majority, if not all, of invested capital while retaining upside.',
   },
   {
     q: 'What returns can I expect?',

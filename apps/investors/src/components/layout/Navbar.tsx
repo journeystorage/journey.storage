@@ -8,7 +8,7 @@ import { ecosystemDropdownLinks } from '@/lib/constants'
 const sectionLinks = [
   { label: 'Market', href: '#market' },
   { label: 'Strategy', href: '#strategy' },
-  { label: 'Team', href: '#leadership' },
+  { label: 'Team', href: '#team' },
   { label: 'Deals', href: '#opportunities' },
 ]
 

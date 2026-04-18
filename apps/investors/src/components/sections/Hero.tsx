@@ -12,7 +12,7 @@ export default function Hero({ onBookCall }: HeroProps) {
       {/* ── Background image (COLOR with premium overlay system) ── */}
       <div className="absolute inset-0">
         <Image
-          src="/images/hero/direct-hero-bg.webp"
+          src="/images/hero/direct-hero-bg-v2.webp"
           alt=""
           fill
           priority
@@ -63,7 +63,7 @@ export default function Hero({ onBookCall }: HeroProps) {
           className="hero-fade-up mt-8 lg:mt-10 font-black leading-[0.88] tracking-[-0.045em] text-warm-white"
           style={{ animationDelay: '0.14s', fontSize: 'clamp(2.8rem, 8.5vw, 7rem)' }}
         >
-          Direct access to<br />self-storage.
+          Direct access to<br />self-storage
         </h1>
 
         {/* Subheadline */}
@@ -82,7 +82,7 @@ export default function Hero({ onBookCall }: HeroProps) {
           className="hero-fade-up group mt-10 lg:mt-12 inline-flex items-center gap-3 rounded-sm border border-warm-white/20 bg-warm-white/[0.04] backdrop-blur-sm px-10 py-4 text-body-sm font-bold uppercase tracking-[0.18em] text-warm-white transition-colors duration-200 hover:border-orange hover:bg-orange/[0.08] hover:text-orange"
           style={{ animationDelay: '0.30s' }}
         >
-          See the deal
+          Explore the platform
           <span className="transition-transform duration-200 group-hover:translate-y-0.5">&darr;</span>
         </a>
 

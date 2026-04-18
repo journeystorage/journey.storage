@@ -54,13 +54,7 @@ export default function FinalCTA({ onBookCall }: FinalCTAProps) {
 
         <ScrollReveal delay={240}>
           <p className="mt-6 text-body-sm text-warm-white/40">
-            Or reach out directly:{' '}
-            <a
-              href="mailto:jonah@journey.storage"
-              className="text-warm-white/60 hover:text-orange transition-colors duration-200 underline underline-offset-2"
-            >
-              jonah@journey.storage
-            </a>
+            For accredited investors.
           </p>
         </ScrollReveal>
       </div>
