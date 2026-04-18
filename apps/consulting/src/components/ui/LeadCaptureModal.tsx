@@ -172,12 +172,7 @@ export default function LeadCaptureModal({
                 disabled={isSubmitting}
                 className="mt-2 w-full rounded-sm bg-orange py-3.5 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
-                {isSubmitting
-                  ? 'Submitting...'
-                  : isBooking
-                    ? 'Continue to booking \u2192'
-                    : 'Continue to checkout \u2192'
-                }
+                {isSubmitting ? 'Submitting...' : 'Continue to booking \u2192'}
               </button>
             </form>
 
