@@ -85,9 +85,7 @@ export default function Leadership() {
               </p>
 
               <p className="mt-5 text-body leading-[1.7] text-charcoal/80">
-                A decade into the industry, Jonah has served in almost every capacity,
-                wearing the hats and running point directly, as well as building the
-                teams, systems and critical infrastructure around:
+                A decade of building self-storage operations from scratch. Every role, every seat, every stage of the value chain.
               </p>
 
               {/* Expand full bio */}
@@ -150,7 +148,7 @@ export default function Leadership() {
                 fill
                 sizes="(max-width: 1024px) 100vw, 40vw"
                 className="object-cover"
-                style={{ objectPosition: '50% 20%' }}
+                style={{ objectPosition: '50% 5%' }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
             </div>
@@ -168,9 +166,7 @@ export default function Leadership() {
               </p>
 
               <p className="mt-5 text-body leading-[1.7] text-charcoal/80">
-                Over the last 12+ years, Lyvia has overseen complex, multi-entity
-                structures, spanning 50+ entities, driving strategy, discipline, and
-                performance across:
+                Over 12 years directing financial operations across 50+ entities. From portfolio-level capital strategy to the controls that keep it all running.
               </p>
 
               {/* Expand full bio */}
