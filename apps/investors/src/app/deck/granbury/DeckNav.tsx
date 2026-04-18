@@ -22,9 +22,8 @@ function DownloadButton() {
       setState('done')
       setTimeout(() => setState('idle'), 3000)
     } catch {
-      // API unavailable (production) — fallback to browser print
-      window.print()
-      setState('idle')
+      // API unavailable (production) — redirect to print mode layout, which auto-triggers print
+      window.location.href = '/deck/granbury?mode=print'
     }
   }
 
