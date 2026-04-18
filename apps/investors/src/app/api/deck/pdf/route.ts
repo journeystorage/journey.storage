@@ -47,7 +47,7 @@ export async function GET() {
     const today = new Date().toISOString().slice(0, 10)
     const filename = `Journey.Direct_Granbury_Deck_${today}.pdf`
 
-    return new NextResponse(pdf, {
+    return new NextResponse(Buffer.from(pdf), {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${filename}"`,
