@@ -433,7 +433,8 @@ function SlideMarket() {
           const rowY = (row: number) => chartH + 8 + row * 24
 
           return (
-            <div className="mb-5 overflow-x-auto">
+            <div className="mb-5">
+              <div className="mb-2 overflow-x-auto">
               <svg viewBox={`0 0 ${w} ${h}`} className="w-full" style={{ maxHeight: '340px', minWidth: '600px' }}>
                 <defs>
                   <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
@@ -487,14 +488,14 @@ function SlideMarket() {
                   <line key={row} x1={padL - 20} y1={rowY(row) + 12} x2={w - padR + 10} y2={rowY(row) + 12} stroke="rgba(245,240,232,0.03)" strokeWidth="1" />
                 ))}
               </svg>
-
-              {/* Legend */}
-              <div className="flex justify-between items-center mt-1">
-                <div className="flex items-center gap-5">
-                  <span className="flex items-center gap-2 text-[0.75rem] text-warm-white/50"><span className="inline-block w-5 h-[2px] bg-warm-white/30" />New Build</span>
-                  <span className="flex items-center gap-2 text-[0.75rem] text-warm-white/25"><span className="inline-block w-5 h-[1.5px] border-t border-dashed border-warm-white/25" />Expansion</span>
-                </div>
-                <span className="flex items-center gap-2 text-[0.75rem] font-bold text-orange"><span className="inline-block w-5 h-[3px] bg-orange rounded-full" />Annual New Supply · Nationwide</span>
+            </div>
+            {/* Legend — outside scroll area */}
+            <div className="flex flex-wrap justify-between items-center mb-3">
+              <div className="flex items-center gap-5">
+                <span className="flex items-center gap-2 text-[0.75rem] text-warm-white/50"><span className="inline-block w-5 h-[2px] bg-warm-white/30" />New Build</span>
+                <span className="flex items-center gap-2 text-[0.75rem] text-warm-white/25"><span className="inline-block w-5 h-[1.5px] border-t border-dashed border-warm-white/25" />Expansion</span>
+              </div>
+              <span className="flex items-center gap-2 text-[0.75rem] font-bold text-orange"><span className="inline-block w-5 h-[3px] bg-orange rounded-full" />Annual New Supply · Nationwide</span>
               </div>
             </div>
           )
@@ -1149,15 +1150,15 @@ function SlideCompetition() {
   return (
     <section className="deck-page grain relative flex min-h-dvh lg:h-dvh lg:min-h-0 lg:snap-start flex-col overflow-hidden bg-black">
       <div className="relative z-10 flex-1 min-h-0 flex flex-col justify-center mx-auto w-full max-w-[1200px] min-w-0 px-5 py-6 md:px-8 lg:px-12">
-        <div className="flex items-start justify-between mb-4">
+        <div className="flex items-start justify-between mb-4 gap-4">
           <SectionLabel>Competitive Landscape</SectionLabel>
           <Logo />
         </div>
-        <div className="flex items-end justify-between mb-3">
-          <h2 className="font-black leading-[0.95] tracking-[-0.02em] text-warm-white" style={{ fontSize: 'clamp(2rem, 4vw, 2.8rem)' }}>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-3 gap-2">
+          <h2 className="font-black leading-[0.95] tracking-[-0.02em] text-warm-white" style={{ fontSize: 'clamp(1.6rem, 4vw, 2.8rem)' }}>
             Competition Analysis
           </h2>
-          <div className="flex items-baseline gap-3 pb-0.5">
+          <div className="flex items-baseline gap-3 pb-0.5 shrink-0">
             {[
               { count: aCount, label: 'A', color: '#34D399' },
               { count: bCount, label: 'B', color: '#60A5FA' },
@@ -1217,8 +1218,8 @@ function SlideCompetition() {
             </table>
           </div>
 
-          {/* Right — map (stretches to match table height) */}
-          <div className="relative overflow-hidden rounded-2xl border border-warm-white/[0.06]">
+          {/* Right — map (stretches to match table height on desktop, aspect-square on mobile) */}
+          <div className="relative aspect-square lg:aspect-auto overflow-hidden rounded-2xl border border-warm-white/[0.06]">
             <Image src="/images/map/comp-map-dark.webp" alt="Competition map — Granbury area" fill className="object-cover" />
             <div className="absolute bottom-3 left-3 flex items-center gap-2.5 rounded-lg bg-black/75 backdrop-blur-sm px-3 py-1.5 border border-warm-white/[0.08]">
               {[
@@ -1574,7 +1575,7 @@ function SlideContact() {
       <div className="absolute inset-0 mix-blend-overlay" style={{ background: 'radial-gradient(ellipse 55% 50% at 50% 45%, rgba(232,98,42,0.08), transparent)' }} />
 
       <div className="relative z-10 flex flex-1 flex-col px-5 py-8 md:px-8 md:py-10 lg:px-16 lg:py-14">
-        <div className="flex items-start justify-end"><Logo /></div>
+        <div className="flex items-start justify-end mb-6 lg:mb-0"><Logo /></div>
 
         <div className="flex flex-1 flex-col lg:flex-row lg:items-center lg:gap-16 justify-center">
           {/* Left — Next Steps */}
