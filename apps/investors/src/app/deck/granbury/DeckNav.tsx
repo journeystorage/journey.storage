@@ -2,63 +2,104 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 
-function DownloadButton() {
-  const [state, setState] = useState<'idle' | 'loading' | 'done'>('idle')
 
-  const handleDownload = async () => {
-    if (state === 'loading') return
-    setState('loading')
-    try {
-      const res = await fetch('/api/deck/pdf')
-      if (!res.ok) throw new Error('Failed')
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      const today = new Date().toISOString().slice(0, 10)
-      a.href = url
-      a.download = `Journey.Direct_Granbury_Deck_${today}.pdf`
-      a.click()
-      URL.revokeObjectURL(url)
-      setState('done')
-      setTimeout(() => setState('idle'), 3000)
-    } catch {
-      // API unavailable (production) — redirect to print mode layout, which auto-triggers print
-      window.location.href = '/deck/granbury?mode=print'
+const STORAGE_KEY = 'deck-theme'
+
+function ToolPill() {
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [dlState, setDlState] = useState<'idle' | 'loading' | 'done'>('idle')
+
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY) as 'dark' | 'light' | null
+    if (stored === 'light') setTheme('light')
+  }, [])
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    localStorage.setItem(STORAGE_KEY, next)
+    const root = document.querySelector('.deck-root')
+    if (root) {
+      if (next === 'light') root.setAttribute('data-theme', 'light')
+      else root.removeAttribute('data-theme')
     }
   }
 
+  const handleDownload = () => {
+    if (dlState === 'loading') return
+    setDlState('loading')
+    const t = document.querySelector('.deck-root')?.getAttribute('data-theme') || 'dark'
+    const a = document.createElement('a')
+    a.href = `/deck/Journey.Direct_Granbury_Deck_${t}.pdf`
+    a.download = `Journey.Direct_Granbury_Deck.pdf`
+    a.click()
+    setDlState('done')
+    setTimeout(() => setDlState('idle'), 3000)
+  }
+
   return (
-    <button
-      onClick={handleDownload}
-      disabled={state === 'loading'}
-      aria-label={state === 'loading' ? 'Generating PDF...' : 'Download PDF'}
-      className={`hidden lg:flex print:hidden fixed right-4 top-5 z-50 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 cursor-pointer ${
-        state === 'loading'
-          ? 'h-8 w-auto px-3 gap-2 border-orange/30 bg-orange/10 text-orange'
-          : state === 'done'
-          ? 'h-8 w-8 border-green-500/30 bg-green-500/10 text-green-400'
-          : 'h-8 w-8 border-warm-white/[0.08] bg-charcoal/60 text-warm-white/30 hover:text-warm-white/70 hover:border-warm-white/20'
-      }`}
-    >
-      {state === 'loading' ? (
-        <>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="animate-spin">
-            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+    <div className="flex print:hidden fixed right-4 top-5 z-50 items-center rounded-full border border-deck-text/[0.08] bg-deck-surface/50 backdrop-blur-xl shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+      {/* Theme toggle */}
+      <button
+        onClick={toggleTheme}
+        aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+        className="flex items-center justify-center h-8 w-8 rounded-full text-deck-text/40 hover:text-deck-text/80 transition-colors duration-200 cursor-pointer"
+      >
+        {theme === 'dark' ? (
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
           </svg>
-          <span className="text-[0.6rem] font-bold uppercase tracking-[0.1em]">Generating...</span>
-        </>
-      ) : state === 'done' ? (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-      ) : (
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
-        </svg>
-      )}
-    </button>
+        ) : (
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+        )}
+      </button>
+
+      {/* Divider */}
+      <div className="w-px h-4 bg-deck-text/[0.08]" />
+
+      {/* Download PDF */}
+      <button
+        onClick={handleDownload}
+        disabled={dlState === 'loading'}
+        aria-label={dlState === 'loading' ? 'Generating PDF...' : 'Download PDF'}
+        className={`flex items-center justify-center rounded-full transition-all duration-300 cursor-pointer ${
+          dlState === 'loading'
+            ? 'h-8 px-3 gap-2 text-orange'
+            : dlState === 'done'
+            ? 'h-8 w-8 text-green-500'
+            : 'h-8 w-8 text-deck-text/40 hover:text-deck-text/80'
+        }`}
+      >
+        {dlState === 'loading' ? (
+          <>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="animate-spin">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            </svg>
+            <span className="text-[0.55rem] font-bold uppercase tracking-[0.08em]">PDF</span>
+          </>
+        ) : dlState === 'done' ? (
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        ) : (
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+        )}
+      </button>
+    </div>
   )
 }
 
@@ -126,14 +167,14 @@ export default function DeckNav({ totalPages }: { totalPages: number }) {
 
   return (
     <>
-      <div className="hidden lg:flex print:hidden fixed right-4 top-1/2 z-50 -translate-y-1/2 flex-col items-center gap-1.5">
+      <div className="hidden lg:flex print:hidden fixed right-4 top-1/2 z-50 -translate-y-1/2 flex-col items-center gap-1.5 rounded-full border border-deck-text/[0.08] bg-deck-surface/50 backdrop-blur-xl shadow-[0_2px_12px_rgba(0,0,0,0.08)] py-2 px-1.5">
         {/* Chevron up */}
         <button
           onClick={() => goTo(current - 1)}
           aria-label="Previous page"
-          className={`mb-1 cursor-pointer transition-opacity duration-200 ${current <= 1 ? 'opacity-0 pointer-events-none' : 'opacity-30 hover:opacity-70'}`}
+          className={`cursor-pointer transition-opacity duration-200 ${current <= 1 ? 'opacity-0 pointer-events-none' : 'opacity-40 hover:opacity-80'}`}
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-warm-white"><polyline points="18 15 12 9 6 15" /></svg>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-deck-text"><polyline points="18 15 12 9 6 15" /></svg>
         </button>
 
         {Array.from({ length: totalPages }, (_, i) => (
@@ -143,8 +184,8 @@ export default function DeckNav({ totalPages }: { totalPages: number }) {
             aria-label={`Go to page ${i + 1}`}
             className={`block rounded-full transition-all duration-200 cursor-pointer ${
               current === i + 1
-                ? 'h-3 w-3 bg-orange'
-                : 'h-1.5 w-1.5 bg-warm-white/20 hover:bg-warm-white/40'
+                ? 'h-2.5 w-2.5 bg-orange'
+                : 'h-1.5 w-1.5 bg-deck-text/20 hover:bg-deck-text/40'
             }`}
           />
         ))}
@@ -153,18 +194,20 @@ export default function DeckNav({ totalPages }: { totalPages: number }) {
         <button
           onClick={() => goTo(current + 1)}
           aria-label="Next page"
-          className={`mt-1 cursor-pointer transition-opacity duration-200 ${current >= totalPages ? 'opacity-0 pointer-events-none' : 'opacity-30 hover:opacity-70'}`}
+          className={`cursor-pointer transition-opacity duration-200 ${current >= totalPages ? 'opacity-0 pointer-events-none' : 'opacity-40 hover:opacity-80'}`}
         >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-warm-white"><polyline points="6 9 12 15 18 9" /></svg>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-deck-text"><polyline points="6 9 12 15 18 9" /></svg>
         </button>
 
-        <span className="mt-1.5 text-[0.55rem] font-mono font-bold tabular-nums text-warm-white/30">
-          {String(current).padStart(2, '0')}/{String(totalPages).padStart(2, '0')}
+        <div className="w-3 h-px bg-deck-text/[0.08]" />
+
+        <span className="text-[0.5rem] font-mono font-bold tabular-nums text-deck-text/35">
+          {String(current).padStart(2, '0')}
         </span>
       </div>
 
-      {/* Download PDF button — with loading state */}
-      <DownloadButton />
+      {/* Tool pill — theme toggle + PDF download */}
+      <ToolPill />
     </>
   )
 }

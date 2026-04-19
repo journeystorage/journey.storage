@@ -9,6 +9,14 @@
   --color-terracotta: #D4956A;
   --color-sand: #C4B89A;
 
+  /* Semantic deck tokens — dark by default */
+  --color-deck-bg: #181818;
+  --color-deck-bg-deep: #111111;
+  --color-deck-text: #F5F0E8;
+  --color-deck-text-mid: #888680;
+  --color-deck-surface: #3A3835;
+  --color-deck-accent: #E8622A;
+
   --font-sans: var(--font-lato), sans-serif;
 
   --font-size-display: 4.5rem;
@@ -42,6 +50,39 @@
     --font-size-label: 0.75rem;
     --font-size-caption: 0.6875rem;
   }
+}
+
+/* ── Light theme overrides (deck only) ── */
+[data-theme="light"] {
+  --color-deck-bg: #F5F0E8;
+  --color-deck-bg-deep: #E8E3DB;
+  --color-deck-text: #181818;
+  --color-deck-text-mid: #5A5854;
+  --color-deck-surface: #D4D0C8;
+  /* accent stays #E8622A */
+}
+
+[data-theme="light"] .grain::before {
+  opacity: 0.025;
+}
+
+[data-theme="light"] .deck-print {
+  background: #F5F0E8;
+}
+
+/* Logo visibility — dark variant hidden by default, shown in light theme */
+.logo-dark { display: none; }
+[data-theme="light"] .logo-light { display: none; }
+[data-theme="light"] .logo-dark { display: block; }
+
+/* Competition map — swap dark/light image */
+.map-light { display: none; }
+[data-theme="light"] .map-dark { display: none; }
+[data-theme="light"] .map-light { display: block; }
+
+/* Light theme — contrast boost for faint text */
+[data-theme="light"] {
+  --color-deck-text: #000000;
 }
 
 html {
@@ -148,7 +189,7 @@ body {
 .deck-print {
   width: 297mm;
   margin: 0 auto;
-  background: black;
+  background: var(--color-deck-bg);
   overflow: hidden;
 }
 
@@ -178,6 +219,20 @@ body {
   min-block-size: unset !important;
   overflow: hidden !important;
   box-sizing: border-box !important;
+  border-radius: 0 !important;
+}
+
+/* Kill grain texture in print — it renders as noise in PDF */
+.deck-print .grain::before {
+  display: none !important;
+}
+
+
+/* Hide external widgets/badges in print mode */
+.deck-print [data-notion],
+.deck-print iframe:not([style*="-9999"]),
+.deck-print [class*="lc-"] {
+  display: none !important;
 }
 
 @media print {

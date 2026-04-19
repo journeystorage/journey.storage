@@ -147,6 +147,36 @@ This is a known limitation of Hostinger shared hosting. Consider migrating to Ve
 
 ---
 
+## Pitch Deck PDF — Pre-Commit Generation
+
+The Granbury pitch deck has a **Download PDF** button that serves pre-generated static PDFs from `apps/investors/public/deck/`. These PDFs must be regenerated locally before pushing whenever deck files change, because Hostinger does not have Chrome/Puppeteer.
+
+### When to regenerate
+
+Regenerate if **any** of these files were modified:
+- `apps/investors/src/app/deck/granbury/page.tsx`
+- `apps/investors/src/app/deck/granbury/*.tsx` (any deck component)
+- `apps/investors/src/styles/globals.css` (print/deck styles)
+- `apps/investors/public/images/` (any deck image)
+
+### How to regenerate
+
+```bash
+# 1. Start the investors dev server (if not already running)
+npm run dev:investors
+
+# 2. Generate both dark and light PDFs
+node apps/investors/scripts/generate-pdf.mjs
+
+# 3. Stage the updated PDFs
+git add apps/investors/public/deck/Journey.Direct_Granbury_Deck_dark.pdf
+git add apps/investors/public/deck/Journey.Direct_Granbury_Deck_light.pdf
+```
+
+The script generates both theme variants, outputs to `apps/investors/public/deck/`, and logs the file sizes. Current output is ~23 MB per file (uncompressed).
+
+---
+
 ## Local Development
 
 ```bash

@@ -63,13 +63,11 @@ export default function AcquisitionsMap() {
               <Geography
                 key={geo.rpiKey}
                 geography={geo}
-                fill="rgba(245,240,232,0.06)"
-                stroke="rgba(245,240,232,0.12)"
                 strokeWidth={0.5}
                 style={{
-                  default: { outline: 'none' },
-                  hover: { outline: 'none' },
-                  pressed: { outline: 'none' },
+                  default: { outline: 'none', fill: 'var(--color-deck-text)', fillOpacity: 0.06, stroke: 'var(--color-deck-text)', strokeOpacity: 0.12 },
+                  hover: { outline: 'none', fill: 'var(--color-deck-text)', fillOpacity: 0.06, stroke: 'var(--color-deck-text)', strokeOpacity: 0.12 },
+                  pressed: { outline: 'none', fill: 'var(--color-deck-text)', fillOpacity: 0.06, stroke: 'var(--color-deck-text)', strokeOpacity: 0.12 },
                 }}
               />
             ))
@@ -80,7 +78,7 @@ export default function AcquisitionsMap() {
             {/* Glow */}
             <circle r={8} fill="rgba(232,98,42,0.15)" />
             {/* Pin */}
-            <circle r={3.5} fill="#E8622A" stroke="rgba(245,240,232,0.35)" strokeWidth={1} />
+            <circle r={3.5} fill="#E8622A" strokeWidth={1} style={{ stroke: 'var(--color-deck-text)', strokeOpacity: 0.35 }} />
           </Marker>
         ))}
       </ComposableMap>
