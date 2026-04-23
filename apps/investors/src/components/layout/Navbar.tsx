@@ -37,7 +37,7 @@ export default function Navbar({ onBookCall, showNavLinks = false }: NavbarProps
 
   const handleLogoClick = useCallback(() => {
     setMobileOpen(false)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.location.href = 'https://journey.storage'
   }, [])
 
   const handleBook = useCallback(() => {
@@ -130,8 +130,7 @@ export default function Navbar({ onBookCall, showNavLinks = false }: NavbarProps
                         <a
                           key={link.label}
                           href={link.href}
-                          target={isCurrent ? undefined : '_blank'}
-                          rel={isCurrent ? undefined : 'noopener noreferrer'}
+                          rel="noopener noreferrer"
                           role="menuitem"
                           aria-current={isCurrent ? 'page' : undefined}
                           className={[

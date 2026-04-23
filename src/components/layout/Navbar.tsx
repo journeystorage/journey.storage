@@ -138,8 +138,7 @@ export default function Navbar() {
                       <a
                         key={link.label}
                         href={link.href}
-                        target={isCurrent ? undefined : '_blank'}
-                        rel={isCurrent ? undefined : 'noopener noreferrer'}
+                        rel="noopener noreferrer"
                         role="menuitem"
                         aria-current={isCurrent ? 'page' : undefined}
                         className={[

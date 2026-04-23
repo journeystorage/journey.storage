@@ -48,10 +48,10 @@ export default function Navbar() {
         ].join(' ')}
       >
         <nav className="mx-auto flex h-[64px] max-w-[var(--container-content)] items-center justify-between px-5 lg:h-[72px] lg:px-16" aria-label="Main navigation">
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          <a
+            href="https://journey.storage"
             className="relative block min-w-[140px] lg:min-w-[180px] cursor-pointer"
-            aria-label="Scroll to top"
+            aria-label="Go to Journey.Storage"
           >
             <Image
               src="/images/brand/logo-white-TM.svg"
@@ -62,7 +62,7 @@ export default function Navbar() {
               style={{ height: 'auto' }}
               priority
             />
-          </button>
+          </a>
 
           <div className="hidden lg:flex items-center gap-8">
             {links.map((link) => (
@@ -106,8 +106,7 @@ export default function Navbar() {
                         <a
                           key={link.label}
                           href={link.href}
-                          target={isCurrent ? undefined : '_blank'}
-                          rel={isCurrent ? undefined : 'noopener noreferrer'}
+                          rel="noopener noreferrer"
                           role="menuitem"
                           aria-current={isCurrent ? 'page' : undefined}
                           className={[
@@ -246,8 +245,7 @@ export default function Navbar() {
                         <a
                           key={link.label}
                           href={link.href}
-                          target={isCurrent ? undefined : '_blank'}
-                          rel={isCurrent ? undefined : 'noopener noreferrer'}
+                          rel="noopener noreferrer"
                           aria-current={isCurrent ? 'page' : undefined}
                           className="group/sub flex flex-col gap-0.5"
                         >
