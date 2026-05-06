@@ -167,3 +167,4 @@ scripts/export-deck-pdf.mjs
 scripts/extract-pdf-pages*.mjs
 scripts/screenshot-deck-pages.mjs
 scripts/test-deck-*.py
+.mcp.json

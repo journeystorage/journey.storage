@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase-server'
 
-const SOURCE_APP = 'main' as const
+const SOURCE_APP = 'investors' as const
 
 export async function POST(request: Request) {
   let payload: Record<string, unknown>
@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   const email = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : ''
   const phone = typeof payload.phone === 'string' ? payload.phone.trim() : ''
   const company = typeof payload.company === 'string' ? payload.company.trim() : ''
-  const formSource = typeof payload.form_source === 'string' ? payload.form_source : 'main-waitlist'
+  const formSource = typeof payload.form_source === 'string' ? payload.form_source : 'investors-booking'
   const accreditedRaw = typeof payload.accredited_investor === 'string' ? payload.accredited_investor : ''
   const accreditedInvestor = ['yes', 'no', 'not_sure'].includes(accreditedRaw) ? accreditedRaw : null
   const smsOptIn = payload.sms_opt_in === true

@@ -11,6 +11,7 @@
     "dev": "next dev",
     "dev:consulting": "next dev apps/consulting --port 3001 --webpack",
     "dev:investors": "next dev apps/investors --port 3002 --webpack",
+    "dev:tenant-lab": "next dev apps/tenant-lab --port 3003 --hostname 0.0.0.0",
     "build": "next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "build:consulting": "rm -rf src public .next && cp -r apps/consulting/src src && cp -r apps/consulting/public public && cp apps/consulting/next.config.ts next.config.ts && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "build:investors": "rm -rf src public .next && cp -r apps/investors/src src && cp -r apps/investors/public public && cp apps/investors/next.config.ts next.config.ts && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
@@ -19,6 +20,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "@supabase/supabase-js": "^2.104.0",
     "@tailwindcss/postcss": "^4.2.2",
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",

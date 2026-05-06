@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase-server'
 
-const SOURCE_APP = 'main' as const
+const SOURCE_APP = 'consulting' as const
+const ALLOWED_FORM_SOURCES = new Set([
+  'consulting-scout',
+  'consulting-pursuit',
+  'consulting-booking',
+])
 
 export async function POST(request: Request) {
   let payload: Record<string, unknown>
@@ -15,16 +20,18 @@ export async function POST(request: Request) {
   const email = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : ''
   const phone = typeof payload.phone === 'string' ? payload.phone.trim() : ''
   const company = typeof payload.company === 'string' ? payload.company.trim() : ''
-  const formSource = typeof payload.form_source === 'string' ? payload.form_source : 'main-waitlist'
-  const accreditedRaw = typeof payload.accredited_investor === 'string' ? payload.accredited_investor : ''
-  const accreditedInvestor = ['yes', 'no', 'not_sure'].includes(accreditedRaw) ? accreditedRaw : null
-  const smsOptIn = payload.sms_opt_in === true
+  const formSource = typeof payload.form_source === 'string' && ALLOWED_FORM_SOURCES.has(payload.form_source)
+    ? payload.form_source
+    : null
 
   if (!name) {
     return NextResponse.json({ success: false, error: 'name_required' }, { status: 400 })
   }
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ success: false, error: 'email_invalid' }, { status: 400 })
+  }
+  if (!formSource) {
+    return NextResponse.json({ success: false, error: 'form_source_invalid' }, { status: 400 })
   }
 
   try {
@@ -36,8 +43,6 @@ export async function POST(request: Request) {
       email,
       phone: phone || null,
       company: company || null,
-      accredited_investor: accreditedInvestor,
-      sms_opt_in: smsOptIn,
       raw_payload: payload,
       user_agent: request.headers.get('user-agent'),
     })

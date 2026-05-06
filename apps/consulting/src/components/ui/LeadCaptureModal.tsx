@@ -26,10 +26,7 @@ interface LeadCaptureModalProps {
   tierName: string
   tierDetail: string
   redirectUrl: string
-  webhookUrl?: string
 }
-
-const WEBHOOK_URL = process.env.NEXT_PUBLIC_LEAD_WEBHOOK_URL || ''
 
 export default function LeadCaptureModal({
   open,
@@ -38,7 +35,6 @@ export default function LeadCaptureModal({
   tierName,
   tierDetail,
   redirectUrl,
-  webhookUrl,
 }: LeadCaptureModalProps) {
   const prefersReducedMotion = useReducedMotion()
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<LeadForm>({
@@ -59,20 +55,17 @@ export default function LeadCaptureModal({
   }, [open, onClose])
 
   const onSubmit = async (data: LeadForm) => {
-    const url = webhookUrl || WEBHOOK_URL
-    if (url) {
-      try {
-        await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            form_source: formSource,
-            ...data,
-          }),
-        })
-      } catch {
-        // Non-blocking — redirect regardless
-      }
+    try {
+      await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          form_source: formSource,
+          ...data,
+        }),
+      })
+    } catch {
+      // Non-blocking — redirect regardless
     }
     reset()
     onClose()
