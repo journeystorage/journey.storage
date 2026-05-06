@@ -4,7 +4,6 @@
 - **Invoke the `frontend-design` skill** before writing any frontend code, every session, no exceptions.
 - **Read `DEPLOYMENT.md` before modifying any infrastructure file** (`next.config.ts`, `package.json` scripts, `turbo.json`, `apps/*/next.config.ts`).
 - **Never use `git add -A` or `git add .`** — always stage specific files by name.
-- **Update `CHANGELOG.md`** after completing any design, feature, or architecture change.
 
 ## Reference Images
 - If a reference image is provided: match layout, spacing, typography, and color exactly. Swap in placeholder content (images via `https://placehold.co/`, generic copy). Do not improve or add to the design.
