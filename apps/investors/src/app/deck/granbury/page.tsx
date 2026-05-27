@@ -83,7 +83,7 @@ function SlideCover() {
   return (
     <section className="deck-page relative flex min-h-dvh lg:h-dvh lg:min-h-0 lg:snap-start flex-col overflow-hidden bg-deck-bg">
       {/* Padded container — smaller on mobile, larger on desktop */}
-      <div className="cover-frame relative z-10 flex flex-1 flex-col p-3 lg:p-8">
+      <div className="relative z-10 flex flex-1 flex-col p-3 lg:p-8">
         <div className="grain relative flex flex-1 flex-col overflow-hidden rounded-2xl lg:rounded-3xl border border-orange/20">
           <Image
             src="/images/hero/direct-hero-bg-v2.webp"
@@ -716,7 +716,7 @@ function SlideGrowthThesis() {
 function SlideDealCover() {
   return (
     <section className="deck-page relative flex min-h-dvh lg:h-dvh lg:min-h-0 lg:snap-start flex-col overflow-hidden bg-deck-bg-deep">
-      <div className="cover-frame relative z-10 flex flex-1 flex-col p-3 lg:p-8">
+      <div className="relative z-10 flex flex-1 flex-col p-3 lg:p-8">
         <div className="grain relative flex flex-1 flex-col overflow-hidden rounded-2xl lg:rounded-3xl">
           <Image src="/images/deals/granbury/granbury-2.jpg" alt="" fill className="object-cover" style={{ filter: 'grayscale(30%) contrast(1.15) brightness(0.4) sepia(0.1)', objectPosition: '50% bottom', transform: 'scale(1.35)' }} />
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/80 lg:from-black/60 lg:via-black/30 lg:to-black/75" />
@@ -1275,9 +1275,9 @@ function SlideSourcesUses() {
             {/* Hero row — 3 key metrics */}
             <div className="grid grid-cols-3 gap-3 mb-3 font-mono" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {[
-                { label: 'Levered IRR', value: '26%' },
-                { label: 'MOIC', value: '2.56x' },
-                { label: 'YOC', value: '8.9%' },
+                { label: 'Levered IRR', value: '26.9%' },
+                { label: 'MOIC', value: '2.62x' },
+                { label: 'YOC', value: '9.0%' },
               ].map((m, i) => (
                 <div key={i} className="text-center py-4 rounded-xl border border-orange/20" style={{ background: 'rgba(232,98,42,0.05)' }}>
                   <div className="text-2xl font-black leading-none text-orange">{m.value}</div>
@@ -1288,10 +1288,10 @@ function SlideSourcesUses() {
             {/* Secondary row — 4 supporting metrics */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 font-mono" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {[
-                { label: 'Unlevered IRR', value: '14.7%' },
-                { label: 'Levered CoC', value: '11.6%' },
-                { label: 'Unlevered CoC', value: '6.6%' },
-                { label: 'Dev. Spread', value: '2.6%+' },
+                { label: 'Unlevered IRR', value: '15.0%' },
+                { label: 'Levered CoC', value: '13.0%' },
+                { label: 'Unlevered CoC', value: '6.8%' },
+                { label: 'Dev. Spread', value: '2.8%' },
               ].map((m, i) => (
                 <div key={i} className="text-center py-3 rounded-lg border border-deck-text/[0.06]">
                   <div className="text-lg font-black leading-none text-deck-text/70">{m.value}</div>
@@ -1311,8 +1311,8 @@ function SlideSourcesUses() {
                 <tbody className="font-mono" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {[
                     ['Acquisition Loan Proceeds', '$7,650,000'],
-                    ['LP Equity', '$4,413,500'],
-                    ['GP Equity', '$136,500'],
+                    ['LP Equity', '$4,450,300'],
+                    ['GP Equity', '$137,700'],
                   ].map(([label, val], i) => (
                     <tr key={i} className="border-b border-deck-text/[0.06]">
                       <td className="py-1.5 pr-2 font-sans text-[0.9rem] leading-[1.6] text-deck-text/55">{label}</td>
@@ -1321,7 +1321,7 @@ function SlideSourcesUses() {
                   ))}
                   <tr className="border-t border-deck-text/[0.15]">
                     <td className="py-1.5 pr-2 font-sans text-[0.8rem] font-bold text-deck-text">Total</td>
-                    <td className="py-1.5 text-right font-bold text-deck-text">$12,200,000</td>
+                    <td className="py-1.5 text-right font-bold text-deck-text">$12,240,000</td>
                   </tr>
                 </tbody>
               </table>
@@ -1335,9 +1335,9 @@ function SlideSourcesUses() {
                 </thead>
                 <tbody className="font-mono" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {[
-                    ['Acquisition & Closing Costs', '$10,962,000', '89.86%'],
-                    ['Technology Stack & Capex', '$683,000', '5.60%'],
-                    ['Working Capital and Sponsor, Lender & 3rd Party Fees', '$555,000', '4.54%'],
+                    ['Acquisition & Closing Costs', '$10,962,000', '89.56%'],
+                    ['Technology Stack & Capex', '$692,000', '5.65%'],
+                    ['Working Capital and Sponsor, Lender & 3rd Party Fees', '$586,000', '4.79%'],
                   ].map(([label, val, pct], i) => (
                     <tr key={i} className="border-b border-deck-text/[0.06]">
                       <td className="py-1.5 pr-2 font-sans text-[0.85rem] leading-[1.5] text-deck-text/55">{label}</td>
@@ -1347,7 +1347,7 @@ function SlideSourcesUses() {
                   ))}
                   <tr className="border-t border-deck-text/[0.15]">
                     <td className="py-1.5 pr-2 font-sans text-[0.8rem] font-bold text-deck-text">Total</td>
-                    <td className="py-1.5 text-right font-bold text-deck-text">$12,200,000</td>
+                    <td className="py-1.5 text-right font-bold text-deck-text">$12,240,000</td>
                     <td className="py-1.5 pl-2 text-right text-deck-text/30 text-[0.75rem]">100%</td>
                   </tr>
                 </tbody>
@@ -1367,20 +1367,19 @@ function SlideSourcesUses() {
 
 function SlideProjections() {
   const rows = [
-    { label: 'Rental Income', indent: true, values: ['$946,566', '$1,153,252', '$1,341,930', '$1,382,188', '$1,423,654'] },
-    { label: 'Ancillary Income', indent: true, values: ['$67,602', '$77,259', '$86,916', '$86,916', '$86,916'] },
-    { label: 'Fee & Other Income', indent: true, values: ['$31,949', '$37,064', '$39,604', '$40,600', '$41,626'] },
-    { label: 'Bad Debt', indent: true, values: ['($9,466)', '($11,533)', '($13,419)', '($13,822)', '($14,237)'] },
-    { label: 'Discounts', indent: true, values: ['($37,872)', '($37,872)', '($28,404)', '($28,404)', '($28,404)'] },
-    { label: 'Effective Gross Income', bold: true, values: ['$998,779', '$1,218,171', '$1,426,627', '$1,467,479', '$1,509,556'] },
+    { label: 'Rental Income', indent: true, values: ['$949,620', '$1,154,451', '$1,342,976', '$1,383,265', '$1,424,763'] },
+    { label: 'Ancillary Income', indent: true, values: ['$67,687', '$77,357', '$87,026', '$87,026', '$87,026'] },
+    { label: 'Fee & Other Income', indent: true, values: ['$32,035', '$37,105', '$39,638', '$40,635', '$41,662'] },
+    { label: 'Bad Debt', indent: true, values: ['($9,496)', '($11,545)', '($13,430)', '($13,833)', '($14,248)'] },
+    { label: 'Discounts', indent: true, values: ['($37,920)', '($37,920)', '($28,440)', '($28,440)', '($28,440)'] },
+    { label: 'Effective Gross Income', bold: true, values: ['$1,001,927', '$1,219,448', '$1,427,770', '$1,468,654', '$1,510,764'] },
     { label: '', spacer: true, values: ['', '', '', '', ''] },
-    { label: 'Total Expenses', bold: true, values: ['($357,580)', '($382,393)', '($406,439)', '($416,560)', '($426,942)'] },
+    { label: 'Total Expenses', bold: true, values: ['($338,429)', '($362,665)', '($386,271)', '($395,956)', '($405,892)'] },
     { label: '', spacer: true, values: ['', '', '', '', ''] },
-    { label: 'Net Operating Income', bold: true, highlight: true, values: ['$641,199', '$835,777', '$1,020,188', '$1,050,919', '$1,082,614'] },
+    { label: 'Net Operating Income', bold: true, highlight: true, values: ['$663,498', '$856,782', '$1,041,499', '$1,072,698', '$1,104,872'] },
     { label: '', spacer: true, values: ['', '', '', '', ''] },
-    { label: 'Yield on Cost', metric: true, values: ['5.26%', '6.85%', '8.36%', '8.61%', '8.87%'] },
-    { label: 'Debt Service Coverage', metric: true, values: ['1.33x', '1.73x', '1.68x', '1.63x', '1.3x'] },
-    { label: 'Cash on Cash', metric: true, values: ['0.00%', '7.24%', '8.42%', '26.60%', '15.59%'] },
+    { label: 'Yield on Cost', metric: true, values: ['5.42%', '7.00%', '8.51%', '8.76%', '9.03%'] },
+    { label: 'Debt Service Coverage', metric: true, values: ['1.38x', '1.78x', '1.72x', '1.66x', '1.33x'] },
   ]
 
   const years = [
@@ -1451,22 +1450,22 @@ function SlideReturns() {
       name: 'Upside Case',
       color: 'border-[#7AAF6E]/20 bg-[#7AAF6E]/[0.03]',
       labelBg: 'bg-[#7AAF6E]',
-      returns: ['$21,790', '$73,419', '$851,352', '$65,461', '$1,448,279'],
-      coc: ['2.18%', '9.52%', '94.66%', '101.20%', '246.03%'],
+      returns: ['$21,539', '$73,982', '$886,410', '$59,160', '$1,463,442'],
+      coc: ['2.25%', '9.65%', '98.29%', '104.21%', '250.55%'],
     },
     {
       name: 'Expected Case',
       color: 'border-orange/25 bg-orange/[0.04]',
       labelBg: 'bg-orange',
-      returns: ['$21,038', '$70,237', '$750,634', '$80,085', '$1,105,887'],
-      coc: ['2.10%', '9.13%', '84.19%', '92.20%', '202.79%'],
+      returns: ['$21,792', '$70,826', '$792,034', '$81,155', '$1,106,282'],
+      coc: ['2.18%', '9.26%', '88.47%', '96.58%', '207.21%'],
     },
     {
       name: 'Downside Case',
       color: 'border-deck-text/[0.08] bg-deck-text/[0.02]',
       labelBg: 'bg-stone',
-      returns: ['$20,238', '$67,072', '$652,257', '$76,779', '$848,316'],
-      coc: ['2.03%', '8.74%', '73.96%', '81.64%', '166.47%'],
+      returns: ['$21,041', '$67,685', '$694,439', '$77,876', '$846,961'],
+      coc: ['2.10%', '8.87%', '78.32%', '86.10%', '170.80%'],
     },
   ]
 
@@ -1489,7 +1488,7 @@ function SlideReturns() {
           <div className="flex items-center justify-between mb-4">
             <span className="rounded px-3 py-1 text-[0.7rem] font-bold uppercase tracking-[0.1em] text-warm-white bg-orange">Expected Case</span>
             <div className="text-right">
-              <div className="font-mono font-black text-orange text-2xl leading-none" style={{ fontVariantNumeric: 'tabular-nums' }}>202.79%</div>
+              <div className="font-mono font-black text-orange text-2xl leading-none" style={{ fontVariantNumeric: 'tabular-nums' }}>207.21%</div>
               <div className="text-[0.6rem] font-bold uppercase tracking-[0.15em] text-deck-text/50 mt-1">Cumulative CoC · Year 5</div>
             </div>
           </div>
@@ -1681,11 +1680,10 @@ const SLIDES = [
   SlideReturns, SlideContact,
 ]
 
-export default async function GranburyDeck({ searchParams }: { searchParams: Promise<{ mode?: string; theme?: string; auto?: string }> }) {
+export default async function GranburyDeck({ searchParams }: { searchParams: Promise<{ mode?: string; theme?: string }> }) {
   const params = await searchParams
   const isPrint = params.mode === 'print'
   const theme = params.theme || 'dark'
-  const autoprint = params.auto !== 'false'
 
   if (isPrint) {
     return (
@@ -1697,7 +1695,7 @@ export default async function GranburyDeck({ searchParams }: { searchParams: Pro
             </div>
           ))}
         </div>
-        {autoprint && <PrintTrigger />}
+        <PrintTrigger />
       </>
     )
   }
