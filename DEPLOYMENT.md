@@ -188,7 +188,18 @@ npm run dev:consulting
 
 # Investors — http://localhost:3002
 npm run dev:investors
+
+# Tenant Lab (API testing) — http://localhost:3003
+npm run dev:tenant-lab
 ```
+
+### Tenant Lab (`apps/tenant-lab/`)
+
+**Local-only testing app** — NOT deployed to Hostinger. No `build:tenant-lab` script exists, no Hostinger instance needed. This app tests the Tenant Inc. / Nectar API integration (units, availability, pricing) before migrating the infrastructure to the main website.
+
+- Requires `apps/tenant-lab/.env.local` with Tenant API credentials (gitignored)
+- No `output: 'standalone'` — dev-only, not meant for production
+- Safe to commit to `main` — no build script means Hostinger ignores it entirely
 
 ---
 
@@ -208,6 +219,14 @@ npm run dev:investors
 ---
 
 ## Changelog
+
+### 2026-04-25 — Tenant Lab (API integration testing)
+- Created `apps/tenant-lab/` — local-only app for testing Tenant Inc. / Nectar API integration
+- Server-side API client at `src/lib/tenant-api.ts`, API routes at `src/app/api/`
+- No build script, no Hostinger instance — dev-only (`npm run dev:tenant-lab`, port 3003)
+- Added Tenant API credentials to `.env.local` (root + `apps/tenant-lab/`)
+- Added `.env.example` at root with credential template (safe to commit)
+- Zero impact on existing deploys: no `build:tenant-lab`, no `output: 'standalone'`
 
 ### 2026-04-07 — Investors site standalone build ready
 - Added `output: 'standalone'` + `outputFileTracingRoot: __dirname` + `images.unoptimized: true` to `apps/investors/next.config.ts`
