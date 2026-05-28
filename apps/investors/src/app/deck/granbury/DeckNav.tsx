@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 
-
 const STORAGE_KEY = 'deck-theme'
 
 function ToolPill() {
@@ -25,20 +24,71 @@ function ToolPill() {
     }
   }
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (dlState === 'loading') return
     setDlState('loading')
-    const t = document.querySelector('.deck-root')?.getAttribute('data-theme') || 'dark'
-    const a = document.createElement('a')
-    a.href = `/deck/Journey.Direct_Granbury_Deck_${t}.pdf`
-    a.download = `Journey.Direct_Granbury_Deck.pdf`
-    a.click()
-    setDlState('done')
-    setTimeout(() => setDlState('idle'), 3000)
+    try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import('html2canvas-pro'),
+        import('jspdf'),
+      ])
+
+      const t = document.querySelector('.deck-root')?.getAttribute('data-theme') || 'dark'
+
+      // Load print layout in a hidden iframe
+      const iframe = document.createElement('iframe')
+      iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:1123px;height:794px;border:none;'
+      document.body.appendChild(iframe)
+
+      await new Promise<void>((resolve, reject) => {
+        iframe.onload = () => resolve()
+        iframe.onerror = () => reject(new Error('iframe load failed'))
+        iframe.src = `/deck/granbury?mode=print&theme=${t}`
+      })
+
+      // Wait for images/fonts to settle
+      const iframeDoc = iframe.contentDocument!
+      const images = Array.from(iframeDoc.querySelectorAll('img'))
+      await Promise.all(
+        images.map(img =>
+          img.complete ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r })
+        )
+      )
+      await new Promise(r => setTimeout(r, 1500))
+
+      const pages = Array.from(iframeDoc.querySelectorAll('.deck-print-page'))
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
+
+      for (let i = 0; i < pages.length; i++) {
+        const canvas = await html2canvas(pages[i] as HTMLElement, {
+          scale: 1.5,
+          useCORS: true,
+          logging: false,
+          windowWidth: 1123,
+          windowHeight: 794,
+        })
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.75)
+
+        if (i > 0) pdf.addPage()
+        pdf.addImage(imgData, 'JPEG', 0, 0, 297, 210)
+      }
+
+      document.body.removeChild(iframe)
+
+      const today = new Date().toISOString().slice(0, 10)
+      pdf.save(`Journey.Direct_Granbury_Deck_${today}.pdf`)
+
+      setDlState('done')
+      setTimeout(() => setDlState('idle'), 3000)
+    } catch (err) {
+      console.error('PDF generation failed:', err)
+      setDlState('idle')
+    }
   }
 
   return (
-    <div className="flex print:hidden fixed right-4 top-5 z-50 items-center rounded-full border border-deck-text/[0.08] bg-deck-surface/50 backdrop-blur-xl shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
+    <div className="hidden lg:flex print:hidden fixed right-4 top-5 z-50 items-center rounded-full border border-deck-text/[0.08] bg-deck-surface/50 backdrop-blur-xl shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
       {/* Theme toggle */}
       <button
         onClick={toggleTheme}
