@@ -1,70 +1,62 @@
 'use client'
 
-import { useRef } from 'react'
-import { motion, useInView, useReducedMotion } from 'framer-motion'
-import { CALENDAR_URL, sectionIds } from '@/lib/constants'
+import ScrollReveal from '@/components/ui/ScrollReveal'
 
-export default function FinalCTA() {
-  const ref = useRef<HTMLElement>(null)
-  const isInView = useInView(ref, { once: true, margin: '-60px' })
-  const prefersReducedMotion = useReducedMotion()
-  const ease = [0.22, 1, 0.36, 1] as const
+interface FinalCTAProps {
+  onBookCall: () => void
+}
 
-  const anim = (delay: number) =>
-    prefersReducedMotion
-      ? {}
-      : {
-          initial: { opacity: 0, y: 24 } as const,
-          animate: isInView ? ({ opacity: 1, y: 0 } as const) : undefined,
-          transition: { duration: 0.6, ease, delay },
-        }
-
+export default function FinalCTA({ onBookCall }: FinalCTAProps) {
   return (
-    <section ref={ref} id={sectionIds.cta} className="relative overflow-hidden bg-warm-white pb-6 md:pb-8 lg:pb-10">
-      {/* Dark floating container */}
-      <div className="grain relative mx-3 md:mx-6 lg:mx-10 mt-4 md:mt-6 lg:mt-8 rounded-[24px] md:rounded-[32px] overflow-hidden bg-black">
-        {/* Radial glow */}
-        <div className="pointer-events-none absolute inset-0 z-[1]" aria-hidden="true" style={{
-          background: 'radial-gradient(ellipse 50% 60% at 50% 40%, rgba(232,98,42,0.06), transparent)',
-        }} />
+    <section className="grain relative overflow-hidden bg-black py-24 md:py-28 lg:py-36">
+      {/* Ghost text */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none select-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-black uppercase leading-none text-warm-white/[0.015]"
+        style={{ fontSize: 'clamp(6rem, 20vw, 18rem)' }}
+      >
+        Direct
+      </div>
 
-        {/* Ghost watermark — bottom at label midline */}
-        <div className="pointer-events-none absolute inset-x-0 top-[15px] md:top-0 z-[1] select-none overflow-hidden flex justify-center" aria-hidden="true">
-          <span className="text-[4.5rem] md:text-[12rem] lg:text-[15rem] font-black uppercase leading-none text-warm-white/[0.02] whitespace-nowrap">
-            READY?
-          </span>
-        </div>
+      <div
+        className="absolute inset-0"
+        style={{ background: 'radial-gradient(ellipse 50% 60% at 50% 40%, rgba(232,98,42,0.07), transparent)' }}
+      />
 
-        <div className="relative z-[3] py-20 md:py-24 lg:py-28 px-5 md:px-10 lg:px-16 text-center">
-          <motion.div className="flex items-center justify-center gap-3 mb-5" {...anim(0)}>
-            <div className="h-px w-8 bg-orange" />
-            <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">Ready to move?</span>
-            <div className="h-px w-8 bg-orange" />
-          </motion.div>
+      <div className="relative z-10 mx-auto w-full max-w-[var(--container-content)] px-5 md:px-8 lg:px-16 text-center">
 
-          <motion.h2 className="text-h1 font-black text-warm-white leading-[1.0]" {...anim(0.1)}>
-            Book a 30-minute call<br className="hidden md:block" /> directly with Jonah.
-          </motion.h2>
+        <ScrollReveal>
+          <h2
+            className="font-black leading-[0.95] tracking-[-0.03em] text-warm-white mb-6"
+            style={{ fontSize: 'clamp(2.2rem, 5.5vw, 4rem)' }}
+          >
+            Ready to see the<br />full picture?
+          </h2>
+        </ScrollReveal>
 
-          <motion.p className="mt-5 mx-auto max-w-[480px] text-body leading-[1.75] text-warm-white/45" {...anim(0.2)}>
-            No sales team. No intake form. A direct conversation about your deals, your market, and whether Journey.Consulting&trade; is the right fit for you.
-          </motion.p>
+        <ScrollReveal delay={80}>
+          <p className="mx-auto max-w-[520px] text-body leading-[1.7] text-warm-white/55 mb-10">
+            We share the complete platform overview: market thesis, deal
+            specifics, financial projections, and investment terms. In a
+            private, one-on-one conversation. No gatekeepers.
+          </p>
+        </ScrollReveal>
 
-          <motion.div className="mt-10" {...anim(0.3)}>
-            <a
-              href={CALENDAR_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-sm bg-orange px-8 py-4 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]"
-            >
-              Schedule a call <span>&rarr;</span>
-            </a>
-          </motion.div>
+        <ScrollReveal delay={160}>
+          <button
+            onClick={onBookCall}
+            className="group inline-flex items-center gap-3 rounded-sm bg-orange px-12 py-5 text-body font-bold uppercase tracking-[0.18em] text-warm-white shadow-[0_4px_24px_rgba(232,98,42,0.35)] transition-[transform,box-shadow,filter] duration-200 hover:brightness-[1.1] hover:shadow-[0_8px_32px_rgba(232,98,42,0.45)] hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+          >
+            Book a call
+            <span className="transition-transform duration-200 group-hover:translate-x-1">→</span>
+          </button>
+        </ScrollReveal>
 
-          <motion.p className="mt-5 text-caption text-warm-white/25" {...anim(0.4)}>
-            Single-project engagements also available &middot; Retainer + success fee structure upon request
-          </motion.p>
-        </div>
+        <ScrollReveal delay={240}>
+          <p className="mt-6 text-body-sm text-warm-white/40">
+            For accredited investors.
+          </p>
+        </ScrollReveal>
       </div>
     </section>
   )

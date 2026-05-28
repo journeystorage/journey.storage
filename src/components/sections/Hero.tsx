@@ -1,142 +1,124 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { ChevronDown } from 'lucide-react'
-import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
-import { sectionIds } from '@/lib/constants'
-import { scrollToSection } from '@/lib/utils'
-import Button from '@/components/ui/Button'
 
-export default function Hero() {
-  const prefersReducedMotion = useReducedMotion()
-  const [showIndicator, setShowIndicator] = useState(true)
+interface HeroProps {
+  onBookCall: () => void
+}
 
-  const { scrollY } = useScroll()
-  const bgY = useTransform(scrollY, [0, 800], [0, 120])
-  // Parallax only on mobile — desktop keeps image fixed for consistent framing
-  const parallaxStyle = prefersReducedMotion ? {} : { y: bgY }
-
-  useEffect(() => {
-    const onScroll = () => setShowIndicator(window.scrollY < 100)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  const fadeUp = (delay: number) =>
-    prefersReducedMotion
-      ? {}
-      : {
-          initial: { opacity: 0, y: 40 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const, delay },
-        }
-
+export default function Hero({ onBookCall }: HeroProps) {
   return (
-    <section id={sectionIds.hero} className="grain relative h-screen min-h-[700px] overflow-hidden bg-black">
-      <motion.div className="absolute inset-0 lg:!transform-none" style={parallaxStyle}>
+    <section className="relative flex min-h-screen flex-col overflow-hidden bg-black">
+      {/* ── Background image (COLOR with premium overlay system) ── */}
+      <div className="absolute inset-0">
         <Image
-          src="/images/hero/home-hero-bg-v2-box.webp"
-          alt="A woman standing at the threshold between her apartment and a modern storage facility"
+          src="/images/hero/direct-hero-bg-v2.webp"
+          alt=""
           fill
-          className="object-cover object-center lg:scale-125 lg:object-[center_15%]"
           priority
-          quality={100}
-          sizes="(max-width: 768px) 200vw, 100vw"
-          unoptimized
-        />
-      </motion.div>
-
-      <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-black/20 max-lg:hidden" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent lg:hidden" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-
-      {/* Ghost watermark */}
-      <div className="pointer-events-none absolute inset-0 z-[3] flex items-center overflow-hidden select-none" aria-hidden="true">
-        <motion.span
-          className="ml-[5%] text-[12rem] md:text-[18rem] lg:text-[28rem] font-black uppercase leading-none text-warm-white"
-          initial={{ opacity: 0.03 }}
-          animate={prefersReducedMotion ? { opacity: 0.03 } : {
-            opacity: [0.03, 0.06, 0.03],
-            x: [0, 15, 0],
+          sizes="100vw"
+          className="object-cover"
+          style={{
+            filter: 'contrast(1.1) brightness(0.45) saturate(0.85)',
+            objectPosition: '50% 62%',
           }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </div>
+
+      {/* Overlay stack */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/85" />
+      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 70% 60% at 50% 45%, transparent, rgba(24,24,24,0.65))' }} />
+      <div className="absolute inset-0 mix-blend-overlay" style={{ background: 'radial-gradient(ellipse 60% 55% at 50% 40%, rgba(232,98,42,0.12), transparent)' }} />
+      <div className="absolute inset-0 bg-[#1a1510]/30" />
+      <div className="grain absolute inset-0 pointer-events-none" />
+
+      {/* ── Main content ── */}
+      <div className="relative z-10 mx-auto flex w-full max-w-[var(--container-content)] flex-1 flex-col items-center justify-center px-5 md:px-8 lg:px-16 text-center pt-[120px] pb-[60px]">
+
+        {/* Eyebrow badge */}
+        <div className="hero-fade-up inline-flex items-center gap-2.5 rounded-full border border-warm-white/[0.10] bg-black/40 backdrop-blur-md px-5 py-2.5">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-orange opacity-60" style={{ animation: 'pulseDot 2s ease-in-out infinite' }} />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-orange" />
+          </span>
+          <span className="flex flex-col leading-tight">
+            <span className="text-[0.9rem] font-black tracking-[0.08em] text-warm-white/90">
+              JOURNEY.<span className="font-light">DIRECT</span>&trade;
+            </span>
+            <span className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-warm-white/40">
+              Investment Platform
+            </span>
+          </span>
+        </div>
+
+        {/* Accent divider */}
+        <div className="hero-fade-up mt-10 flex items-center gap-3" style={{ animationDelay: '0.08s' }}>
+          <div className="h-px w-8 bg-orange/60" />
+          <span className="text-[0.6rem] font-bold uppercase tracking-[0.3em] text-orange/80">Est. 2026</span>
+          <div className="h-px w-8 bg-orange/60" />
+        </div>
+
+        {/* Headline */}
+        <h1
+          className="hero-fade-up mt-8 lg:mt-10 font-black leading-[0.88] tracking-[-0.045em] text-warm-white"
+          style={{ animationDelay: '0.14s', fontSize: 'clamp(2.8rem, 8.5vw, 7rem)' }}
         >
-          SPACE
-        </motion.span>
+          Direct access to<br />self-storage
+        </h1>
+
+        {/* Subheadline */}
+        <p
+          className="hero-fade-up mt-8 lg:mt-10 max-w-[520px] text-base md:text-lg leading-[1.7] text-warm-white/70"
+          style={{ animationDelay: '0.22s' }}
+        >
+          Invest in <strong className="font-semibold text-warm-white/90">value-add acquisitions</strong> through
+          an operator-led platform designed for <strong className="font-semibold text-warm-white/90">long-term
+          value creation</strong>.
+        </p>
+
+        {/* CTA: exploratory, not "book a call" */}
+        <a
+          href="#market"
+          className="hero-fade-up group mt-10 lg:mt-12 inline-flex items-center gap-3 rounded-sm border border-warm-white/20 bg-warm-white/[0.04] backdrop-blur-sm px-10 py-4 text-body-sm font-bold uppercase tracking-[0.18em] text-warm-white transition-colors duration-200 hover:border-orange hover:bg-orange/[0.08] hover:text-orange"
+          style={{ animationDelay: '0.30s' }}
+        >
+          Explore the platform
+          <span className="transition-transform duration-200 group-hover:translate-y-0.5">&darr;</span>
+        </a>
+
+        <span
+          className="hero-fade-up mt-4 text-caption text-warm-white/35"
+          style={{ animationDelay: '0.34s' }}
+        >
+          For accredited investors.
+        </span>
       </div>
 
-      {/* Decorative rings */}
-      <div className="pointer-events-none absolute -right-[120px] -top-[120px] z-[3] hidden lg:block" aria-hidden="true">
-        <div className="h-[600px] w-[600px] rounded-full border border-warm-white/[0.04]" />
-        <div className="absolute inset-[80px] rounded-full border border-orange/[0.06]" />
-        <div className="absolute inset-[160px] rounded-full border border-warm-white/[0.03]" />
-      </div>
-
-      {/* Dot grid */}
-      <div
-        className="pointer-events-none absolute inset-0 z-[3] hidden opacity-[0.06] lg:block"
-        aria-hidden="true"
-        style={{
-          backgroundImage: 'radial-gradient(circle, #F5F0E8 0.7px, transparent 0.7px)',
-          backgroundSize: '20px 20px',
-        }}
-      />
-
-      {/* Content */}
-      <div className="relative z-10 flex h-full items-end pb-[14vh] lg:items-center lg:pb-0">
-        <div className="mx-auto w-full max-w-content px-5 md:px-8 lg:px-16">
-          <div className="max-w-[750px]">
-            <motion.div className="mb-6 flex items-center gap-3" {...fadeUp(0.1)}>
-              <div className="h-px w-8 bg-orange" />
-              <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">
-                Journey.Storage&trade;
-              </span>
-            </motion.div>
-
-            {/* H1 — BIGGER: 4rem mobile → 9rem xl */}
-            <motion.h1
-              className="text-[3.5rem] leading-[0.86] sm:text-[4.5rem] md:text-[6rem] lg:text-[8rem] xl:text-[9rem] font-black uppercase text-warm-white"
-              {...fadeUp(0.2)}
-            >
-              Space to
-              <br />
-              move on.
-            </motion.h1>
-
-            <motion.p
-              className="mt-8 max-w-[440px] lg:max-w-[480px] text-xl leading-[1.7] text-warm-white/70"
-              {...fadeUp(0.45)}
-            >
-              A <strong className="font-semibold text-warm-white/90">new kind</strong> of storage company.
-              <br className="hidden lg:block" />
-              Built for <strong className="font-semibold text-warm-white/90">people in motion</strong>,
-              not for boxes sitting still.
-            </motion.p>
-
-            <motion.div className="mt-12" {...fadeUp(0.65)}>
-              <Button
-                variant="primary"
-                onClick={() => scrollToSection(sectionIds.waitlist)}
-              >
-                Join the waitlist
-              </Button>
-            </motion.div>
-          </div>
+      {/* ── Proof strip: bridge between hero and content ── */}
+      <div className="hero-fade-up relative z-10 shrink-0 border-t border-warm-white/[0.06]" style={{ animationDelay: '0.40s' }}>
+        <div className="mx-auto max-w-[var(--container-content)] px-5 md:px-8 lg:px-16 py-5 flex items-center justify-center gap-6 lg:gap-14 flex-wrap">
+          {[
+            { value: '$200M+', label: 'acquired' },
+            { value: '30+', label: 'facilities' },
+            { value: '18+', label: 'years' },
+          ].map((stat, i) => (
+            <div key={stat.label} className="flex items-center gap-6 lg:gap-14">
+              <div className="flex items-baseline gap-2">
+                <span
+                  className="font-bold text-warm-white text-lg"
+                  style={{ fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}
+                >
+                  {stat.value.replace('+', '')}<span className="text-orange">+</span>
+                </span>
+                <span className="text-[0.65rem] font-bold uppercase tracking-[0.12em] text-warm-white/35">
+                  {stat.label}
+                </span>
+              </div>
+              {i < 2 && <div className="h-4 w-px bg-warm-white/[0.08] hidden sm:block" />}
+            </div>
+          ))}
         </div>
       </div>
-
-      {/* Scroll indicator */}
-      {showIndicator && (
-        <div className="absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 lg:block">
-          <motion.div
-            animate={{ opacity: [0.2, 0.5, 0.2] }}
-            transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <ChevronDown size={24} className="text-warm-white/40" />
-          </motion.div>
-        </div>
-      )}
     </section>
   )
 }

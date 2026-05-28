@@ -68,7 +68,7 @@ export default function LeadCaptureModal({
 
     setSubmitting(true)
     try {
-      await fetch('/api/waitlist', {
+      await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
