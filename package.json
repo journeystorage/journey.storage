@@ -12,7 +12,7 @@
     "dev:consulting": "next dev apps/consulting --port 3001 --webpack",
     "dev:investors": "next dev apps/investors --port 3002 --webpack",
     "dev:tenant-lab": "next dev apps/tenant-lab --port 3003 --hostname 0.0.0.0",
-    "build": "echo '=== BUILDING MAIN SITE ===' && next build && echo '=== BUILD COMPLETE ===' && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
+    "build": "next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "build:consulting": "rm -rf src public .next && cp -r apps/consulting/src src && cp -r apps/consulting/public public && cp apps/consulting/next.config.ts next.config.ts && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "build:investors": "rm -rf src public .next && cp -r apps/investors/src src && cp -r apps/investors/public public && cp apps/investors/next.config.ts next.config.ts && npm install && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "start": "HOSTNAME=0.0.0.0 node .next/standalone/server.js",
