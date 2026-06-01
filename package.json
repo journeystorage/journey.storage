@@ -13,8 +13,8 @@
     "dev:investors": "next dev apps/investors --port 3002 --webpack",
     "dev:tenant-lab": "next dev apps/tenant-lab --port 3003 --hostname 0.0.0.0",
     "build": "next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
-    "build:consulting": "rm -rf src public .next && cp -r apps/consulting/src src && cp -r apps/consulting/public public && cp apps/consulting/next.config.ts next.config.ts && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
-    "build:investors": "rm -rf src public .next && cp -r apps/investors/src src && cp -r apps/investors/public public && cp apps/investors/next.config.ts next.config.ts && npm install && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
+    "build:consulting": "npm run build -w @journey/consulting && rm -rf .next/standalone && mkdir -p .next && cp -r apps/consulting/.next/standalone .next/standalone && cp -r apps/consulting/public .next/standalone/public && cp -r apps/consulting/.next/static .next/standalone/.next/static",
+    "build:investors": "npm install && npm run build -w @journey/investors && rm -rf .next/standalone && mkdir -p .next && cp -r apps/investors/.next/standalone .next/standalone && cp -r apps/investors/public .next/standalone/public && cp -r apps/investors/.next/static .next/standalone/.next/static",
     "start": "HOSTNAME=0.0.0.0 node .next/standalone/server.js",
     "lint": "next lint"
   },

@@ -1,9 +1,9 @@
 import Script from 'next/script'
 import type { Metadata } from 'next'
-import { Lato, IBM_Plex_Mono } from 'next/font/google'
+import { Lato } from 'next/font/google'
 import '@/styles/globals.css'
 
-const GTM_ID = 'GTM-PK22Z6BM'
+const GTM_ID = 'GTM-NL5KP8QJ'
 
 const lato = Lato({
   subsets: ['latin'],
@@ -13,28 +13,38 @@ const lato = Lato({
   display: 'swap',
 })
 
-const plexMono = IBM_Plex_Mono({
-  subsets: ['latin'],
-  weight: ['300', '500', '700'],
-  variable: '--font-mono',
-  display: 'swap',
-})
-
 export const metadata: Metadata = {
-  title: 'Journey.Direct™ — Direct investment in self-storage | Journey.Storage™',
+  title: 'Journey.Storage™ — Space to move on.',
   description:
-    'Operator-led direct investment in self-storage. Value-add acquisitions in high-demand U.S. markets. For accredited investors. Part of the Journey.Storage ecosystem.',
-  metadataBase: new URL('https://direct.journey.storage'),
+    'Journey.Storage™ is a new kind of self-storage company — built for the moments that matter. Space to move on.',
+  metadataBase: new URL('https://journey.storage'),
   openGraph: {
-    title: 'Journey.Direct™ — Direct investment in self-storage',
-    description: 'Operator-led direct investment in self-storage. Value-add acquisitions in high-demand U.S. markets. For accredited investors.',
-    url: 'https://direct.journey.storage',
-    siteName: 'Journey.Direct™',
+    title: 'Journey.Storage™ — Space to move on.',
+    description:
+      'Journey.Storage™ is a new kind of self-storage company — built for the moments that matter. Space to move on.',
+    url: 'https://journey.storage',
+    siteName: 'Journey.Storage™',
+    images: [
+      {
+        url: '/images/brand/og-image-default.png',
+        width: 1200,
+        height: 630,
+        alt: 'Journey.Storage™ — Space to move on.',
+      },
+    ],
     locale: 'en_US',
     type: 'website',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Journey.Storage™ — Space to move on.',
+    description:
+      'Journey.Storage™ is a new kind of self-storage company — built for the moments that matter. Space to move on.',
+    images: ['/images/brand/og-image-default.png'],
+  },
   icons: {
     icon: '/images/brand/favicon.svg',
+    apple: '/images/brand/apple-touch-icon.svg',
   },
 }
 
@@ -44,7 +54,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${lato.variable} ${plexMono.variable}`}>
+    <html lang="en" className={lato.variable}>
       <Script id="gtm" strategy="afterInteractive">{`
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -52,7 +62,7 @@ export default function RootLayout({
         'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
         })(window,document,'script','dataLayer','${GTM_ID}');
       `}</Script>
-      <body className="bg-black text-warm-white font-sans antialiased">
+      <body className="bg-black text-black font-sans antialiased">
         <noscript>
           <iframe
             src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}

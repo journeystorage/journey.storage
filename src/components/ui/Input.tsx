@@ -5,6 +5,7 @@ import { forwardRef, type InputHTMLAttributes, useId } from 'react'
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string
   error?: string
+  /** Renders on a dark background */
   onDark?: boolean
 }
 

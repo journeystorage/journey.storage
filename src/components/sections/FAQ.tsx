@@ -1,123 +1,136 @@
 'use client'
 
-import { useState } from 'react'
-import { Plus, Minus } from 'lucide-react'
-import ScrollReveal from '@/components/ui/ScrollReveal'
+import { useRef, useState } from 'react'
+import { motion, useInView, useReducedMotion, AnimatePresence } from 'framer-motion'
+import { Plus } from 'lucide-react'
+import { sectionIds } from '@/lib/constants'
 
 const faqs = [
   {
-    q: 'What is Journey.Direct\u2122?',
-    a: 'Journey.Direct\u2122 is the investment platform within the Journey.Storage\u2122 ecosystem. We structure direct investment opportunities in self-storage assets \u2014 acquired, operated, and managed by our team. Investors participate as limited partners in individual deals.',
+    question: 'When is Journey opening?',
+    answer: "We're building our first facilities now. Join the waitlist and we'll notify you the moment we open near you. Early members get priority access.",
   },
   {
-    q: 'Who can invest?',
-    a: 'Journey.Direct\u2122 offerings are available to accredited investors as defined by SEC regulations. During our introductory call, we\u2019ll confirm eligibility and walk you through the verification process.',
+    question: 'How does pricing work?',
+    answer: "Month-to-month. No lock-in contracts, no rate hikes after move-in. You see the price, you pay the price. If you need to leave, you leave — no penalties, no fees.",
   },
   {
-    q: 'What type of deals do you focus on?',
-    a: 'Value-add acquisitions in Tier 1-3 U.S. markets. We target existing facilities that are underperforming due to outdated operations, poor revenue management, or lack of technology adoption. We buy below replacement cost and execute a defined operational improvement plan.',
+    question: 'What sizes are available?',
+    answer: "From compact 5\u00d75 closets (~25 sq ft) for boxes and seasonal gear, to 10\u00d725 garage-size spaces (~250 sq ft) that fit an entire household. Mid-range options like 5\u00d710, 10\u00d710, and 10\u00d715 cover everything in between.",
   },
   {
-    q: 'How is Journey.Direct\u2122 different from a REIT or syndication?',
-    a: 'We are operators first. The team acquiring and managing your investment is the same team that runs the facilities day-to-day. There\u2019s no separation between the investment side and the operational side. This alignment means we catch problems early, move faster on value-add initiatives, and maintain tighter cost control than passive sponsors.',
+    question: 'What types of storage do you offer?',
+    answer: "Self storage, climate-controlled spaces, drive-up access, indoor storage, and vehicle & RV parking. Every facility is designed with digital locks, 24/7 access, and the same quality experience across all space types.",
   },
   {
-    q: 'What is the typical hold period?',
-    a: 'Our targeted hold period is approximately 5\u20137 years, though this varies by deal. We typically pursue a cash-out refinance midway through the hold to return a majority, if not all, of invested capital while retaining upside.',
+    question: 'How does digital access work?',
+    answer: "No keys, no codes to memorize. You get a digital access credential on your phone. Gates and locks respond to you automatically. Works 24/7, every day of the year.",
   },
   {
-    q: 'What returns can I expect?',
-    a: 'We share detailed return projections \u2014 including downside, expected, and upside scenarios \u2014 during the private platform overview after our initial call. All projections are forward-looking estimates based on assumptions and are not guarantees of future performance.',
-  },
-  {
-    q: 'Does the sponsor co-invest?',
-    a: 'Yes. The sponsor invests alongside limited partners in every deal. We believe alignment of interest is non-negotiable.',
-  },
-  {
-    q: 'How do I receive updates on my investment?',
-    a: 'Investors receive quarterly reports covering occupancy, revenue, expenses, and strategic updates. You\u2019ll also have direct access to our team \u2014 not a portal, not an AI, a person.',
-  },
-  {
-    q: 'What are the fees?',
-    a: 'Fee structures are detailed in each deal\u2019s offering documents and are discussed transparently during the platform overview call. We structure fees to align sponsor and investor incentives.',
-  },
-  {
-    q: 'What if I have more questions?',
-    a: 'Book a call. We prefer direct conversation over email chains. You\u2019ll speak with Jonah directly \u2014 not an associate, not a sales team.',
+    question: 'How does move-out work?',
+    answer: "Empty your space, snap a photo, and send it through the app. You'll get approval in seconds. Access turns off, and you're done. No calls, no office visits, no waiting.",
   },
 ]
 
-export default function FAQ() {
-  const [openIndex, setOpenIndex] = useState<number | null>(null)
-
-  const toggle = (i: number) => {
-    setOpenIndex(prev => (prev === i ? null : i))
-  }
+function FAQItem({ item, isOpen, onToggle, index, isInView }: {
+  item: typeof faqs[0]
+  isOpen: boolean
+  onToggle: () => void
+  index: number
+  isInView: boolean
+}) {
+  const prefersReducedMotion = useReducedMotion()
 
   return (
-    <section id="faq" className="relative overflow-hidden bg-warm-white py-20 md:py-24 lg:py-32">
-      <div className="relative z-10 mx-auto w-full max-w-[var(--container-content)] px-5 md:px-8 lg:px-16">
+    <motion.div
+      className="border-b border-warm-white/[0.06] last:border-b-0"
+      initial={prefersReducedMotion ? undefined : { opacity: 0, y: 16 }}
+      animate={isInView ? { opacity: 1, y: 0 } : undefined}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.2 + index * 0.07 }}
+    >
+      <button
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-4 py-6 text-left cursor-pointer group"
+        aria-expanded={isOpen}
+      >
+        <span className={`text-base md:text-lg font-bold transition-colors duration-200 ${isOpen ? 'text-warm-white' : 'text-warm-white/60 group-hover:text-warm-white/80'}`}>
+          {item.question}
+        </span>
+        <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors duration-200 ${isOpen ? 'bg-orange' : 'bg-warm-white/[0.06] group-hover:bg-warm-white/[0.1]'}`}>
+          <Plus
+            size={14}
+            className={`transition-transform duration-300 ${isOpen ? 'rotate-45 text-warm-white' : 'text-warm-white/50'}`}
+          />
+        </div>
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <p className="pb-6 text-body-sm leading-[1.7] text-warm-white/40 max-w-[600px]">
+              {item.answer}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
 
-        {/* Section label */}
-        <ScrollReveal>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="h-px w-8 bg-orange/60" />
-            <span className="text-label font-bold uppercase tracking-[0.25em] text-orange">
-              FAQ
-            </span>
+export default function FAQ() {
+  const ref = useRef<HTMLElement>(null)
+  const isInView = useInView(ref, { once: true, margin: '-60px' })
+  const prefersReducedMotion = useReducedMotion()
+  const ease = [0.22, 1, 0.36, 1] as const
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
+
+  return (
+    <section ref={ref} id={sectionIds.faq} className="grain relative overflow-hidden bg-black py-20 lg:py-28">
+      {/* Radial glow */}
+      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true" style={{
+        background: 'radial-gradient(ellipse 50% 40% at 50% 20%, rgba(232,98,42,0.04), transparent)',
+      }} />
+
+      <div className="relative z-10 mx-auto max-w-content px-5 md:px-8 lg:px-16">
+        {/* Header */}
+        <motion.div
+          className="mb-14 lg:mb-16 text-center"
+          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 25 }}
+          animate={isInView ? { opacity: 1, y: 0 } : undefined}
+          transition={{ duration: 0.5, ease }}
+        >
+          <div className="flex items-center justify-center gap-3 mb-5">
+            <div className="h-px w-8 bg-orange" />
+            <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">FAQ</span>
+            <div className="h-px w-8 bg-orange" />
           </div>
-        </ScrollReveal>
-
-        {/* Headline: matches main + consulting pattern */}
-        <ScrollReveal delay={80}>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-black leading-[0.95] mb-10 lg:mb-14">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-warm-white leading-[0.95]">
             Questions?
             <br />
-            <span className="font-light text-black/30">Answered.</span>
+            <span className="font-light text-warm-white/30">Answered.</span>
           </h2>
-        </ScrollReveal>
+        </motion.div>
 
         {/* Accordion */}
-        <ScrollReveal delay={160}>
-          <div className="max-w-[800px] divide-y divide-black/[0.08]">
-            {faqs.map((faq, i) => {
-              const isOpen = openIndex === i
-              return (
-                <div key={i}>
-                  <button
-                    onClick={() => toggle(i)}
-                    className="w-full flex items-start justify-between gap-4 py-5 text-left cursor-pointer group"
-                    aria-expanded={isOpen}
-                  >
-                    <span
-                      className={`text-body font-bold transition-colors duration-200 ${
-                        isOpen
-                          ? 'text-orange'
-                          : 'text-black/80 group-hover:text-black'
-                      }`}
-                    >
-                      {faq.q}
-                    </span>
-                    <span className="shrink-0 mt-0.5">
-                      {isOpen ? (
-                        <Minus size={18} className="text-orange" />
-                      ) : (
-                        <Plus size={18} className="text-stone group-hover:text-charcoal transition-colors duration-200" />
-                      )}
-                    </span>
-                  </button>
-                  <div className={`faq-content ${isOpen ? 'open' : ''}`}>
-                    <div>
-                      <p className="pb-5 text-body-sm leading-[1.7] text-charcoal/70 pr-8">
-                        {faq.a}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
+        <div className="mx-auto max-w-[700px]">
+          <div className="border-t border-warm-white/[0.06]">
+            {faqs.map((item, i) => (
+              <FAQItem
+                key={i}
+                item={item}
+                isOpen={openIndex === i}
+                onToggle={() => setOpenIndex(openIndex === i ? null : i)}
+                index={i}
+                isInView={isInView}
+              />
+            ))}
           </div>
-        </ScrollReveal>
+        </div>
       </div>
     </section>
   )
