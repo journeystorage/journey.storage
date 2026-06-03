@@ -71,6 +71,25 @@ Each app is deployed as a **separate Hostinger instance** from the same GitHub r
 
 > **IMPORTANT:** Investors uses **Custom** preset (not "Next.js" preset) because it needs an explicit Start command to run the standalone server. Same rationale as consulting.
 
+### Springfield (SGF11 deck)
+
+| Field              | Value                              |
+|--------------------|------------------------------------|
+| Framework preset   | Custom                             |
+| Branch             | main                               |
+| Node version       | 20                                 |
+| Install command    | `npm ci`                           |
+| Build command      | `npm run build:springfield`        |
+| Start command      | `npm run start:springfield -- -p $PORT` |
+
+**How it works:** Springfield is a **pre-built static export** (the deck was authored outside this monorepo as a Next.js standalone export). The bundle lives at `apps/springfield/public/` and is served by `apps/springfield/server.mjs` — a tiny zero-dependency Node http server (built-in `http`/`fs`/`path` only). The `build:springfield` script is a no-op echo because there is nothing to compile; `start:springfield` launches the static server, which reads `-p $PORT` from Hostinger's start command and binds to `0.0.0.0`.
+
+The server is single-process and zero-dependency, so it stays well under Hostinger's shared-hosting process limit (see "Process limit strategy" below).
+
+**Replacing the bundle.** When the deck is rebuilt upstream, drop the new static export into `apps/springfield/public/` (replacing the previous contents) and commit. There is no `npm install` step needed for this app — the server has no dependencies.
+
+> **IMPORTANT:** Use the **Custom** preset (not Static / not Next.js). Hostinger's "Static" preset cannot run a Node start command, and the "Next.js" preset expects a `.next/standalone/server.js` artifact that this app does not produce.
+
 ---
 
 ## Post-Deploy Checklist
@@ -98,6 +117,9 @@ These files control deployment. Changing them incorrectly **will break productio
 | `package.json` `"build:investors"` script | Investors build | Only if you understand the file replacement flow |
 | `apps/investors/next.config.ts` | Investors config (has standalone) | Only if you understand the build:investors flow |
 | `package.json` `"start"` script | Used by consulting only | **NO** — main site ignores this (Framework preset) |
+| `package.json` `"build:springfield"` script | Springfield build (no-op) | Safe to edit only if you understand the static-export flow |
+| `package.json` `"start:springfield"` script | Springfield start | Safe to edit — must keep `node apps/springfield/server.mjs` |
+| `apps/springfield/server.mjs` | Static file server for the SGF11 deck | **NO** — keep zero-dependency, single-process |
 | `turbo.json` | Turborepo config | Avoid changes — affects workspace detection |
 | `.gitignore` | Must include `screenshots/` | Ensure screenshots/ stays ignored |
 
@@ -143,6 +165,8 @@ This is a known limitation of Hostinger shared hosting. Consider migrating to Ve
 ### Node version
 - Main site: Node 22.x (Framework preset default)
 - Consulting: Node 20 (Custom preset)
+- Investors: Node 20 (Custom preset)
+- Springfield: Node 20 (Custom preset, but the server is zero-dependency so any Node ≥ 16 works)
 - Next.js 16.x requires Node.js >= 20.9.0
 
 ---
@@ -191,6 +215,9 @@ npm run dev:investors
 
 # Tenant Lab (API testing) — http://localhost:3003
 npm run dev:tenant-lab
+
+# Springfield (SGF11 static deck) — http://localhost:3004
+npm run dev:springfield
 ```
 
 ### Tenant Lab (`apps/tenant-lab/`)

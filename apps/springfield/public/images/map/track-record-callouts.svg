@@ -1,0 +1,96 @@
+<svg viewBox="0 0 1200 360" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;font-family:'Lato','Helvetica Neue',Arial,sans-serif;">
+<rect width="1200" height="360" fill="transparent" />
+<path d="
+M 200 130
+C 250 110, 320 100, 400 100
+C 460 100, 510 95, 560 88
+C 620 80, 680 75, 730 80
+C 780 86, 830 100, 870 118
+C 905 132, 935 152, 960 175
+C 985 200, 1000 230, 1005 260
+C 1010 285, 1000 305, 980 318
+C 960 330, 930 332, 900 330
+C 880 328, 860 322, 840 325
+C 820 327, 800 332, 780 330
+C 760 328, 745 322, 730 326
+C 715 330, 700 338, 685 335
+C 670 332, 660 320, 645 318
+C 630 316, 615 325, 600 330
+C 585 335, 570 332, 555 328
+C 540 325, 525 322, 510 325
+C 495 328, 480 335, 460 338
+C 435 342, 410 340, 388 332
+C 365 322, 345 308, 328 290
+C 312 273, 300 252, 285 235
+C 270 218, 252 205, 232 195
+C 215 187, 200 170, 195 152
+C 192 140, 196 132, 200 130 Z
+" fill="#2f3231" stroke="#4d5150" stroke-width="1" />
+<path d="M 730 326 C 745 335, 752 345, 754 360 L 756 360 L 758 350 C 760 340, 754 330, 745 328 Z" fill="#2f3231" stroke="#4d5150" stroke-width="1" />
+<path d="M 280 130 L 285 320" fill="none" stroke="#4d5150" stroke-width="0.6" opacity="0.45" />
+<path d="M 400 105 L 410 335" fill="none" stroke="#4d5150" stroke-width="0.6" opacity="0.45" />
+<path d="M 520 95 L 530 330" fill="none" stroke="#4d5150" stroke-width="0.6" opacity="0.45" />
+<path d="M 640 85 L 650 318" fill="none" stroke="#4d5150" stroke-width="0.6" opacity="0.45" />
+<path d="M 760 90 L 770 326" fill="none" stroke="#4d5150" stroke-width="0.6" opacity="0.45" />
+<path d="M 880 110 L 890 320" fill="none" stroke="#4d5150" stroke-width="0.6" opacity="0.45" />
+<path d="M 200 200 L 1005 215" fill="none" stroke="#4d5150" stroke-width="0.6" opacity="0.45" />
+<path d="M 240 260 L 1000 270" fill="none" stroke="#4d5150" stroke-width="0.6" opacity="0.45" />
+<circle cx="245" cy="135" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="252" cy="155" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="260" cy="175" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="610" cy="200" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="618" cy="215" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="628" cy="208" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="618" cy="222" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="635" cy="218" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="640" cy="230" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="628" cy="232" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="650" cy="220" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="605" cy="220" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="645" cy="240" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="660" cy="235" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="530" cy="230" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="545" cy="240" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="470" cy="270" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="485" cy="280" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="500" cy="290" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="470" cy="295" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="520" cy="295" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="490" cy="305" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="455" cy="285" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="510" cy="312" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="478" cy="285" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="465" cy="312" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="495" cy="318" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="510" cy="305" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="480" cy="320" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="505" cy="322" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="590" cy="305" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="605" cy="298" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="855" cy="260" r="4.5" fill="#D55A2B" opacity="0.95" />
+<circle cx="845" cy="268" r="4.5" fill="#D55A2B" opacity="0.95" />
+<line x1="200" y1="182.5" x2="250" y2="165" stroke="#D55A2B" stroke-width="1.5" opacity="0.85" />
+<circle cx="250" cy="165" r="7" fill="none" stroke="#D55A2B" stroke-width="1.5" opacity="0.85" />
+<line x1="270" y1="62.5" x2="255" y2="145" stroke="#D55A2B" stroke-width="1.5" opacity="0.85" />
+<circle cx="255" cy="145" r="7" fill="none" stroke="#D55A2B" stroke-width="1.5" opacity="0.85" />
+<line x1="660" y1="62.5" x2="490" y2="290" stroke="#D55A2B" stroke-width="1.5" opacity="0.85" />
+<circle cx="490" cy="290" r="7" fill="none" stroke="#D55A2B" stroke-width="1.5" opacity="0.85" />
+<line x1="970" y1="182.5" x2="855" y2="260" stroke="#D55A2B" stroke-width="1.5" opacity="0.85" />
+<circle cx="855" cy="260" r="7" fill="none" stroke="#D55A2B" stroke-width="1.5" opacity="0.85" />
+<rect x="35" y="145" width="165" height="75" fill="rgba(30,33,32,0.95)" stroke="#D55A2B" stroke-width="1.5" rx="3" />
+<text x="47" y="167" fill="#fff" font-size="14" font-weight="700" letter-spacing="0.01em">70-person team</text>
+<text x="47" y="187" fill="#cfc9bd" font-size="13" font-weight="400" letter-spacing="0.01em">$400M AUM</text>
+<text x="47" y="207" fill="#cfc9bd" font-size="13" font-weight="400" letter-spacing="0.01em">$4.5M Payroll</text>
+<rect x="270" y="25" width="190" height="75" fill="rgba(30,33,32,0.95)" stroke="#D55A2B" stroke-width="1.5" rx="3" />
+<text x="282" y="47" fill="#fff" font-size="14" font-weight="700" letter-spacing="0.01em">$95M Portfolio Exit</text>
+<text x="282" y="67" fill="#cfc9bd" font-size="13" font-weight="400" letter-spacing="0.01em">10 Locations</text>
+<text x="282" y="87" fill="#cfc9bd" font-size="13" font-weight="400" letter-spacing="0.01em">4.87% Cap Rate</text>
+<rect x="660" y="25" width="175" height="75" fill="rgba(30,33,32,0.95)" stroke="#D55A2B" stroke-width="1.5" rx="3" />
+<text x="672" y="47" fill="#fff" font-size="14" font-weight="700" letter-spacing="0.01em">17-person team</text>
+<text x="672" y="67" fill="#cfc9bd" font-size="13" font-weight="400" letter-spacing="0.01em">$70M Developed</text>
+<text x="672" y="87" fill="#cfc9bd" font-size="13" font-weight="400" letter-spacing="0.01em">$1.5M Payroll</text>
+<rect x="970" y="145" width="210" height="75" fill="rgba(30,33,32,0.95)" stroke="#D55A2B" stroke-width="1.5" rx="3" />
+<text x="982" y="167" fill="#fff" font-size="14" font-weight="700" letter-spacing="0.01em">$387k (1st Project)</text>
+<text x="982" y="187" fill="#cfc9bd" font-size="13" font-weight="400" letter-spacing="0.01em">CC Conversion</text>
+<text x="982" y="207" fill="#cfc9bd" font-size="13" font-weight="400" letter-spacing="0.01em">13% Stabilized Yield</text>
+</svg>

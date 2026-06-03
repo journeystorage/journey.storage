@@ -1,0 +1,9 @@
+{
+  "name": "@journey/springfield",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Springfield deck (SGF11) — static export served via a minimal Node http server.",
+  "scripts": {
+    "start": "node server.mjs"
+  }
+}
