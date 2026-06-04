@@ -35,7 +35,47 @@
     __dlBtn.dataset.boundEarly = '1';
     __dlBtn.addEventListener('click', function(){ window.print(); });
   }
-  if (window.matchMedia('(max-width: 1023px)').matches) return;
+  // --- MOBILE PATCH: inject a visible floating theme toggle so the
+  // user can switch dark/light from a phone. The original toggle lives
+  // inside a `hidden lg:flex` side-pager wrapper which is display:none
+  // on mobile, leaving the click handler unreachable. We add a sibling
+  // button on the body that proxies to it.
+  if (window.matchMedia('(max-width: 1023px)').matches) {
+    if (!document.getElementById('mobile-deck-controls')) {
+      const wrap = document.createElement('div');
+      wrap.id = 'mobile-deck-controls';
+      wrap.style.cssText = 'position:fixed; top:14px; right:14px; z-index:9999; display:flex; gap:8px;';
+      const mkBtn = function(label, svgPath, onClick){
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('aria-label', label);
+        b.style.cssText = 'width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.45); color:#fff; border:1px solid rgba(255,255,255,0.18); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); cursor:pointer; -webkit-tap-highlight-color:transparent; padding:0;';
+        b.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+svgPath+'</svg>';
+        b.addEventListener('click', onClick);
+        return b;
+      };
+      // Sun + moon path swaps in CSS via [data-theme]; default icon is moon
+      const themePath = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>';
+      const dlPath = '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>';
+      const themeBtnMobile = mkBtn('Toggle theme', themePath, function(){
+        const orig = document.querySelector('button[aria-label*="theme" i]:not(#mobile-deck-controls button)');
+        if (orig) orig.click(); else {
+          // fallback: toggle directly
+          const html = document.documentElement;
+          const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+          html.setAttribute('data-theme', next);
+        }
+      });
+      const dlBtnMobile = mkBtn('Download PDF', dlPath, function(){
+        const orig = document.querySelector('button[aria-label*="Download" i]:not(#mobile-deck-controls button), button[aria-label*="PDF" i]:not(#mobile-deck-controls button)');
+        if (orig) orig.click(); else window.print();
+      });
+      wrap.appendChild(themeBtnMobile);
+      wrap.appendChild(dlBtnMobile);
+      document.body.appendChild(wrap);
+    }
+    return;
+  }
 
     const sections = Array.from(document.querySelectorAll('section'));
     const total = sections.length;
