@@ -633,8 +633,8 @@ main.deck, main.scroll-smooth, main {
   }
   /* Snap container on mobile is the document, not main */
   html, body {
-    scroll-snap-type: y proximity;
-    scroll-behavior: smooth;
+    scroll-snap-type: none;
+    scroll-behavior: auto;
   }
   /* The orange divider between mobile sections is showing through the
      body bg; tone it down so it does not flash during scroll. */
@@ -660,7 +660,7 @@ main.deck, main.scroll-smooth, main {
     scroll-snap-stop: normal !important;
   }
   /* Re-enable smooth scroll only for programmatic scrollTo */
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: auto; }
 
   /* (O) INFLECTION slide: still 21 overflows in the 7-year stat strip and
      bar chart. Tighten further. */
