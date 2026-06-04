@@ -58,17 +58,20 @@
       const themePath = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>';
       const dlPath = '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>';
       const themeBtnMobile = mkBtn('Toggle theme', themePath, function(){
+        // Direct toggle (no proxy through the hidden original button — iOS
+        // Safari synthetic .click() on display:none can be flaky).
+        const html = document.documentElement;
+        const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        html.setAttribute('data-theme', next);
+        // Keep the original button's aria-label in sync for accessibility
         const orig = document.querySelector('button[aria-label*="theme" i]:not(#mobile-deck-controls button)');
-        if (orig) orig.click(); else {
-          // fallback: toggle directly
-          const html = document.documentElement;
-          const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-          html.setAttribute('data-theme', next);
-        }
+        if (orig) orig.setAttribute('aria-label', next === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+        themeBtnMobile.setAttribute('aria-label', next === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
       });
       const dlBtnMobile = mkBtn('Download PDF', dlPath, function(){
-        const orig = document.querySelector('button[aria-label*="Download" i]:not(#mobile-deck-controls button), button[aria-label*="PDF" i]:not(#mobile-deck-controls button)');
-        if (orig) orig.click(); else window.print();
+        // Direct print (no proxy). Brief delay lets the browser paint
+        // the print stylesheet's hidden-mobile-controls before snapping.
+        window.print();
       });
       wrap.appendChild(themeBtnMobile);
       wrap.appendChild(dlBtnMobile);
@@ -186,28 +189,9 @@
       }
     });
 
-    /* ---------- 3. Theme toggle (sun/moon) ---------- */
-    /* The Granbury CSS uses [data-theme=light] on <html> to swap
-     * the deck color tokens (--color-deck-bg, --color-deck-text, etc).
-     * Just toggle that attribute - every Tailwind class referencing
-     * the deck tokens picks up the new colors automatically. */
-    const themeBtn = document.querySelector('button[aria-label*="theme" i]');
-    if (themeBtn) {
-      themeBtn.addEventListener('click', function(){
-        const html = document.documentElement;
-        const current = html.getAttribute('data-theme');
-        const next = current === 'light' ? 'dark' : 'light';
-        html.setAttribute('data-theme', next);
-        themeBtn.setAttribute('aria-label', next === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
-      });
-    }
-
-    /* ---------- 4. Download / print ---------- */
-    const dlBtn = document.querySelector('button[aria-label*="Download" i], button[aria-label*="PDF" i]');
-    if (dlBtn) {
-      dlBtn.addEventListener('click', function(){
-        window.print();
-      });
-    }
+    /* Theme toggle + download were already bound by the MOBILE PATCH
+       block at the top of ready(); rebinding them here would cause the
+       handler to fire twice per click and toggle right back to the
+       previous state, so the click appears to do nothing. */
   });
 })();
