@@ -25,16 +25,26 @@
   // (otherwise the body element keeps its hardcoded color through
   // the cascade and the light theme is barely visible).
   function applyTheme(theme){
+    // Match Granbury behavior: set/clear data-theme on .deck-root (the
+    // wrapper). The original deck CSS keys variables on
+    // [data-theme=light] which inherits from any ancestor — both <html>
+    // and .deck-root work, but Granbury uses .deck-root and we match.
     const html = document.documentElement;
+    const root = document.querySelector('.deck-root');
     const body = document.body;
-    html.setAttribute('data-theme', theme);
+    // Wipe both theme classes first so reverts don't get stuck
+    body.classList.remove('bg-black', 'bg-warm-white', 'text-black', 'text-warm-white');
     if (theme === 'light') {
-      body.classList.remove('bg-black', 'text-warm-white');
+      html.setAttribute('data-theme', 'light');
+      if (root) root.setAttribute('data-theme', 'light');
       body.classList.add('bg-warm-white', 'text-black');
     } else {
-      body.classList.remove('bg-warm-white', 'text-black');
+      html.removeAttribute('data-theme');
+      if (root) root.removeAttribute('data-theme');
       body.classList.add('bg-black', 'text-warm-white');
     }
+    // Trigger a recompute in case any rule was cached
+    body.offsetHeight; // force reflow
     try { localStorage.setItem('deck-theme', theme); } catch(e){}
   }
   // Apply persisted theme on load

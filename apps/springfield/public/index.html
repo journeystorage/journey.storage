@@ -575,53 +575,7 @@ section.deck-page img.deck-clickable:hover {
   }
 }
 
-/* ===== Print stylesheet for window.print() PDF export (v3) ===== */
-@media print {
-  /* Hide our floating mobile controls */
-  #mobile-deck-controls { display: none !important; }
-  /* Also hide the desktop pager and any UI chrome */
-  .hidden.lg\:flex,
-  [class*="right-4"][class*="top-1/2"],
-  .lg\:hidden.print\:hidden { display: none !important; }
-
-  /* Force light theme for paper */
-  :root, html[data-theme="light"] {
-    --color-deck-bg: #ffffff !important;
-    --color-deck-text: #111111 !important;
-    --color-deck-surface: #ffffff !important;
-  }
-  html { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  body { background: white !important; color: #111 !important; }
-
-  /* Each deck section becomes its own landscape A4 page */
-  @page { size: A4 landscape; margin: 0; }
-  main, html, body {
-    height: auto !important;
-    overflow: visible !important;
-    background: white !important;
-  }
-  section.deck-page {
-    width: 297mm !important;
-    min-height: 210mm !important;
-    height: 210mm !important;
-    max-height: 210mm !important;
-    page-break-after: always !important;
-    break-after: page !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    background: white !important;
-    color: #111 !important;
-  }
-  section.deck-page:last-of-type {
-    page-break-after: auto !important;
-    break-after: auto !important;
-  }
-  /* Inside-section dividers we use on mobile (orange separator strips) */
-  .lg\:hidden.print\:hidden { display: none !important; }
+/* (v3 print block superseded by v7) */
 }
 
 /* ===== Additional mobile fixes (v4) ===== */
@@ -803,6 +757,92 @@ main.deck, main.scroll-smooth, main {
     padding-bottom: 24px !important;
   }
 }
+
+/* ===== v7: print pagination (one section per page), theme parity ===== */
+
+/* The v3 @media print rules were trapped by parent overflow:hidden and
+   the inner section's `lg:overflow-hidden` plus the deck's built-in
+   `.deck-page { width:297mm; height:210mm }` rule which was scoped to
+   .deck-print-page descendants (a Next.js print-route wrapper Springfield
+   doesn't have). Override aggressively. */
+@media print {
+  /* Step 1: blow open every scroll/overflow trap so page-break works */
+  html, body, main, main.deck, main.scroll-smooth {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    background: white !important;
+    color: #111 !important;
+    scroll-snap-type: none !important;
+  }
+
+  /* Step 2: hide chrome that isn't part of the deck */
+  #mobile-deck-controls,
+  .hidden.lg\:flex,
+  [class*="right-4"][class*="top-1/2"],
+  .lg\:hidden.print\:hidden,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Step 3: paginate. Each section is one landscape A4 page. */
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  section.deck-page {
+    /* Full landscape page */
+    width: 297mm !important;
+    height: 210mm !important;
+    min-height: 210mm !important;
+    max-height: 210mm !important;
+    /* Hard break after every section, never split a section across pages */
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    /* Lay out content cleanly */
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+    /* Reset any mobile flex weirdness */
+    flex: 0 0 auto !important;
+    /* Light theme on paper */
+    background: white !important;
+    color: #111 !important;
+    border-radius: 0 !important;
+  }
+  section.deck-page:last-of-type {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+  /* Force light theme variables during print */
+  :root, html, html[data-theme="light"], .deck-root, .deck-root[data-theme="light"] {
+    --color-deck-bg: #ffffff !important;
+    --color-deck-bg-deep: #f5f0e8 !important;
+    --color-deck-text: #181818 !important;
+    --color-deck-surface: #ffffff !important;
+  }
+  html { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* Sections that have full-bleed images (hero, closing, SGF11
+     transition) — preserve their backgrounds, so the image still acts
+     as the slide background on paper. */
+  section.deck-page img[src*="direct-hero-bg"],
+  section.deck-page img[src*="sgf11-downtown"] {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    z-index: 0 !important;
+  }
+}
+
 
 
 
