@@ -20,13 +20,35 @@
   ready(function(){
   // --- MOBILE PATCH: theme + download keep working at all breakpoints,
   // but the deck pager / scroll-spy is desktop-only.
+  // Helper: apply a theme reliably by flipping data-theme AND swapping
+  // the body's hardcoded Tailwind bg-black / bg-warm-white utilities
+  // (otherwise the body element keeps its hardcoded color through
+  // the cascade and the light theme is barely visible).
+  function applyTheme(theme){
+    const html = document.documentElement;
+    const body = document.body;
+    html.setAttribute('data-theme', theme);
+    if (theme === 'light') {
+      body.classList.remove('bg-black', 'text-warm-white');
+      body.classList.add('bg-warm-white', 'text-black');
+    } else {
+      body.classList.remove('bg-warm-white', 'text-black');
+      body.classList.add('bg-black', 'text-warm-white');
+    }
+    try { localStorage.setItem('deck-theme', theme); } catch(e){}
+  }
+  // Apply persisted theme on load
+  try {
+    const saved = localStorage.getItem('deck-theme');
+    if (saved === 'light') applyTheme('light');
+  } catch(e){}
+
   const __themeBtn = document.querySelector('button[aria-label*="theme" i]');
   if (__themeBtn && !__themeBtn.dataset.boundEarly) {
     __themeBtn.dataset.boundEarly = '1';
     __themeBtn.addEventListener('click', function(){
-      const html = document.documentElement;
-      const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-      html.setAttribute('data-theme', next);
+      const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      applyTheme(next);
       __themeBtn.setAttribute('aria-label', next === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
     });
   }
@@ -57,16 +79,16 @@
       // Sun + moon path swaps in CSS via [data-theme]; default icon is moon
       const themePath = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>';
       const dlPath = '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>';
-      // Direct toggle. User taps work reliably via click on a real button;
-      // we don't proxy through the hidden original, which is what was failing.
+      // Direct toggle via the shared applyTheme() helper. Modifies body
+      // classList in addition to data-theme so the cascade always loses
+      // to bg-black, even on iOS Safari.
       const themeBtnMobile = mkBtn('Toggle theme', themePath, function(){
-        const html = document.documentElement;
-        const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-        html.setAttribute('data-theme', next);
-        try { localStorage.setItem('deck-theme', next); } catch(e){}
+        const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        applyTheme(next);
         const orig = document.querySelector('button[aria-label*="theme" i]:not(#mobile-deck-controls button)');
         const label = next === 'light' ? 'Switch to dark theme' : 'Switch to light theme';
         if (orig) orig.setAttribute('aria-label', label);
+        themeBtnMobile.setAttribute('aria-label', label);
       });
       const dlBtnMobile = mkBtn('Download PDF', dlPath, function(){
         // Direct print (no proxy). Brief delay lets the browser paint
