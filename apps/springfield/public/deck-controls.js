@@ -57,16 +57,16 @@
       // Sun + moon path swaps in CSS via [data-theme]; default icon is moon
       const themePath = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>';
       const dlPath = '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>';
+      // Direct toggle. User taps work reliably via click on a real button;
+      // we don't proxy through the hidden original, which is what was failing.
       const themeBtnMobile = mkBtn('Toggle theme', themePath, function(){
-        // Direct toggle (no proxy through the hidden original button — iOS
-        // Safari synthetic .click() on display:none can be flaky).
         const html = document.documentElement;
         const next = html.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
         html.setAttribute('data-theme', next);
-        // Keep the original button's aria-label in sync for accessibility
+        try { localStorage.setItem('deck-theme', next); } catch(e){}
         const orig = document.querySelector('button[aria-label*="theme" i]:not(#mobile-deck-controls button)');
-        if (orig) orig.setAttribute('aria-label', next === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
-        themeBtnMobile.setAttribute('aria-label', next === 'light' ? 'Switch to dark theme' : 'Switch to light theme');
+        const label = next === 'light' ? 'Switch to dark theme' : 'Switch to light theme';
+        if (orig) orig.setAttribute('aria-label', label);
       });
       const dlBtnMobile = mkBtn('Download PDF', dlPath, function(){
         // Direct print (no proxy). Brief delay lets the browser paint
