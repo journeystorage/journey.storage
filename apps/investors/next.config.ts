@@ -1,16 +1,18 @@
 import type { NextConfig } from 'next'
 import path from 'path'
 
+const workspaceRoot = path.join(__dirname, '..', '..')
+
 const nextConfig: NextConfig = {
-    reactStrictMode: true,
-    output: 'standalone',
-    outputFileTracingRoot: __dirname,
-    images: {
-          unoptimized: true,
-    },
-    turbopack: {
-          root: path.join(__dirname, '..', '..'),
-    },
+      reactStrictMode: true,
+      output: 'standalone',
+      outputFileTracingRoot: workspaceRoot,
+      images: {
+              unoptimized: true,
+      },
+      turbopack: {
+              root: workspaceRoot,
+      },
 }
 
 export default nextConfig
