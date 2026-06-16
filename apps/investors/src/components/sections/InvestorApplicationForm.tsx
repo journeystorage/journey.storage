@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, FormEvent } from 'react'
+import { useState, useEffect, type FormEvent, type ReactNode } from 'react'
 
 const CALENDLY_URL = 'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1UO_n2BsSorjoLlzCVGjqLvi8dhAWDYSFVTj0uSItghc2OgucVW1F2nHLcwPeyLDbi546yr8kV'
 
@@ -434,7 +434,7 @@ export default function InvestorApplicationForm({
 
 function Field({
   label, error, children,
-}: { label: string; error?: string; children: React.ReactNode }) {
+}: { label: string; error?: string; children: ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
       <label className="text-sm font-bold text-white">{label}</label>
