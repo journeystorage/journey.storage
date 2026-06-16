@@ -1,46 +1,34 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, FormEvent } from 'react'
 
 const CALENDLY_URL = 'https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ1UO_n2BsSorjoLlzCVGjqLvi8dhAWDYSFVTj0uSItghc2OgucVW1F2nHLcwPeyLDbi546yr8kV'
 
-const step1Schema = z.object({
-  full_name: z.string().min(2, 'Full name required'),
-  email: z.string().email('Valid email required'),
-  phone: z.string().min(7, 'Phone required'),
-  state_code: z.string().length(2, 'Select your state'),
-})
+type FormData = {
+  full_name: string
+  email: string
+  phone: string
+  state_code: string
+  accredited_status: string
+  check_size_band: string
+  timeline: string
+  prior_re_experience: string
+  source_of_capital: string
+  message: string
+}
 
-const step2Schema = z.object({
-  accredited_status: z.enum([
-    'income', 'net_worth', 'professional', 'entity',
-    'not_accredited', 'unsure',
-  ]),
-})
-
-const step3Schema = z.object({
-  check_size_band: z.enum([
-    '50k_100k', '100k_250k', '250k_500k', '500k_1m', '1m_plus',
-  ]),
-  timeline: z.enum([
-    'immediate', '30_60_days', '60_90_days', 'exploring',
-  ]),
-  prior_re_experience: z.enum([
-    'syndications', 'direct_ownership', 'reit_only', 'none',
-  ]),
-  source_of_capital: z.enum([
-    'personal_savings', '1031_exchange', 'sdira',
-    'company_cash', 'family_office', 'other',
-  ]),
-  message: z.string().optional(),
-})
-
-const fullSchema = step1Schema.merge(step2Schema).merge(step3Schema)
-type InvestorFormData = z.infer<typeof fullSchema>
+const initialForm: FormData = {
+  full_name: '',
+  email: '',
+  phone: '',
+  state_code: '',
+  accredited_status: '',
+  check_size_band: '',
+  timeline: '',
+  prior_re_experience: '',
+  source_of_capital: '',
+  message: '',
+}
 
 const US_STATES: Array<[string, string]> = [
   ['AL','Alabama'],['AK','Alaska'],['AZ','Arizona'],['AR','Arkansas'],
@@ -58,6 +46,15 @@ const US_STATES: Array<[string, string]> = [
   ['WI','Wisconsin'],['WY','Wyoming'],['DC','District of Columbia'],
 ]
 
+const ACCREDITED_OPTIONS: Array<{ value: string; title: string; desc: string }> = [
+  { value: 'income', title: 'Income', desc: '$200k+ single / $300k+ joint for the last 2 years with reasonable expectation of the same this year.' },
+  { value: 'net_worth', title: 'Net worth', desc: '$1M+ net worth, individually or jointly with spouse, excluding primary residence.' },
+  { value: 'professional', title: 'Professional certification', desc: 'Series 7, Series 65, Series 82, or a knowledgeable employee of the fund.' },
+  { value: 'entity', title: 'Entity / family office', desc: 'An entity with $5M+ in assets, or all equity owners are accredited.' },
+  { value: 'unsure', title: "I'm not sure", desc: 'Reach out anyway. We can help you determine eligibility.' },
+  { value: 'not_accredited', title: "I'm not accredited", desc: "Our 506(c) deals aren't available to non-accredited investors, but we'll keep you informed." },
+]
+
 function getUtmFromUrl() {
   if (typeof window === 'undefined') return {}
   const p = new URLSearchParams(window.location.search)
@@ -72,20 +69,18 @@ function getUtmFromUrl() {
   }
 }
 
+const inputCls =
+  'w-full bg-white/[0.06] text-white border border-stone-400/30 rounded-sm px-4 py-3.5 text-base font-normal placeholder:text-stone-400 focus:border-orange-500 focus:outline-none transition-colors'
+
 export default function InvestorApplicationForm({
   formSource = 'website-investor-form',
 }: { formSource?: string }) {
   const [step, setStep] = useState(1)
+  const [data, setData] = useState<FormData>(initialForm)
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({})
+  const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState<null | 'accredited' | 'not_accredited'>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  const {
-    register, handleSubmit, trigger, getValues,
-    formState: { errors, isSubmitting },
-  } = useForm<InvestorFormData>({
-    resolver: zodResolver(fullSchema),
-    mode: 'onBlur',
-  })
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -98,8 +93,58 @@ export default function InvestorApplicationForm({
   const totalSteps = 3
   const progressPct = (step / totalSteps) * 100
 
-  const onFinalSubmit = async (data: InvestorFormData) => {
-    setError(null)
+  const update = (field: keyof FormData, value: string) => {
+    setData(prev => ({ ...prev, [field]: value }))
+    if (errors[field]) {
+      setErrors(prev => {
+        const next = { ...prev }
+        delete next[field]
+        return next
+      })
+    }
+  }
+
+  const validateStep1 = () => {
+    const e: Partial<Record<keyof FormData, string>> = {}
+    if (data.full_name.trim().length < 2) e.full_name = 'Full name required'
+    if (!/^\S+@\S+\.\S+$/.test(data.email)) e.email = 'Valid email required'
+    if (data.phone.trim().length < 7) e.phone = 'Phone required'
+    if (data.state_code.length !== 2) e.state_code = 'Select your state'
+    setErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  const validateStep2 = () => {
+    const e: Partial<Record<keyof FormData, string>> = {}
+    if (!data.accredited_status) e.accredited_status = 'Please choose one'
+    setErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  const validateStep3 = () => {
+    const e: Partial<Record<keyof FormData, string>> = {}
+    if (!data.check_size_band) e.check_size_band = 'Select a range'
+    if (!data.timeline) e.timeline = 'Select timeline'
+    if (!data.prior_re_experience) e.prior_re_experience = 'Select one'
+    if (!data.source_of_capital) e.source_of_capital = 'Select one'
+    setErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  const handleNext = () => {
+    let valid = false
+    if (step === 1) valid = validateStep1()
+    if (step === 2) valid = validateStep2()
+    if (valid) setStep(s => s + 1)
+  }
+
+  const handleBack = () => setStep(s => Math.max(1, s - 1))
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    if (!validateStep3()) return
+    setSubmitError(null)
+    setSubmitting(true)
     try {
       const payload = { ...data, ...getUtmFromUrl(), form_source: formSource }
       const res = await fetch('/api/investor-lead', {
@@ -107,12 +152,10 @@ export default function InvestorApplicationForm({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
         throw new Error(body.error || 'Submission failed')
       }
-
       if (typeof window !== 'undefined') {
         const dl = (window as unknown as { dataLayer?: Array<Record<string, unknown>> }).dataLayer
         if (Array.isArray(dl)) {
@@ -126,41 +169,31 @@ export default function InvestorApplicationForm({
           })
         }
       }
-
-      const isAccredited = ['income', 'net_worth', 'professional', 'entity']
-        .includes(data.accredited_status)
+      const isAccredited = ['income', 'net_worth', 'professional', 'entity'].includes(data.accredited_status)
       setSubmitted(isAccredited ? 'accredited' : 'not_accredited')
-
       if (isAccredited) {
         setTimeout(() => { window.location.href = CALENDLY_URL }, 2500)
       }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something went wrong')
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Something went wrong')
+    } finally {
+      setSubmitting(false)
     }
   }
-
-  const handleNext = async () => {
-    let valid = false
-    if (step === 1) valid = await trigger(['full_name', 'email', 'phone', 'state_code'])
-    if (step === 2) valid = await trigger(['accredited_status'])
-    if (valid) setStep(s => s + 1)
-  }
-
-  const handleBack = () => setStep(s => Math.max(1, s - 1))
 
   if (submitted === 'accredited') {
     return (
       <div className="py-16 text-center">
-        <h3 className="text-3xl font-black text-warm-white mb-4">
+        <h3 className="text-3xl font-black text-white mb-4">
           You&apos;re in. Redirecting you to book your call.
         </h3>
-        <p className="text-warm-white/60 max-w-md mx-auto leading-relaxed">
+        <p className="text-white/60 max-w-md mx-auto leading-relaxed">
           Jonah will walk you through the platform thesis, the Granbury deal specifics,
           and answer every question. Quietly, directly, on a 30-minute call.
         </p>
-        <p className="mt-6 text-sm text-warm-white/40">
+        <p className="mt-6 text-sm text-white/40">
           If you aren&apos;t redirected in 5 seconds,{' '}
-          <a href={CALENDLY_URL} className="text-orange underline">click here</a>.
+          <a href={CALENDLY_URL} className="text-orange-500 underline">click here</a>.
         </p>
       </div>
     )
@@ -169,15 +202,15 @@ export default function InvestorApplicationForm({
   if (submitted === 'not_accredited') {
     return (
       <div className="py-16 text-center max-w-lg mx-auto">
-        <h3 className="text-3xl font-black text-warm-white mb-4">
+        <h3 className="text-3xl font-black text-white mb-4">
           Thanks for your interest.
         </h3>
-        <p className="text-warm-white/60 leading-relaxed">
+        <p className="text-white/60 leading-relaxed">
           Journey.Direct&trade; opportunities under Rule 506(c) are limited to
           accredited investors. We&apos;ll keep you informed of our broader market
           insights and any future opportunities open to a wider audience.
         </p>
-        <p className="mt-6 text-sm text-warm-white/40">
+        <p className="mt-6 text-sm text-white/40">
           Curious what accredited means? Income above $200k single / $300k joint
           for the last two years, or $1M+ net worth excluding primary residence.
         </p>
@@ -186,167 +219,178 @@ export default function InvestorApplicationForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onFinalSubmit)} className="flex flex-col gap-6">
-      <div className="w-full bg-warm-white/10 h-px relative">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      <div className="w-full bg-white/10 h-px relative">
         <div
-          className="absolute top-0 left-0 h-px bg-orange transition-all duration-300"
+          className="absolute top-0 left-0 h-px bg-orange-500 transition-all duration-300"
           style={{ width: `${progressPct}%` }}
         />
       </div>
-      <p className="text-caption uppercase tracking-[0.15em] text-warm-white/40">
+      <p className="text-xs uppercase tracking-[0.15em] text-white/40">
         Step {step} of {totalSteps}
       </p>
 
-      <AnimatePresence mode="wait">
-        {step === 1 && (
-          <motion.div
-            key="step1"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="flex flex-col gap-5"
-          >
-            <h3 className="text-2xl font-black text-warm-white">
-              Tell us who you are
-            </h3>
-            <Field label="Full name" error={errors.full_name?.message}>
-              <input {...register('full_name')} className={inputCls} placeholder="Jane Investor" />
-            </Field>
-            <Field label="Email" error={errors.email?.message}>
-              <input {...register('email')} type="email" className={inputCls} placeholder="you@email.com" />
-            </Field>
-            <Field label="Phone" error={errors.phone?.message}>
-              <input {...register('phone')} type="tel" className={inputCls} placeholder="(555) 000-0000" />
-            </Field>
-            <Field label="State of residence" error={errors.state_code?.message}>
-              <select {...register('state_code')} className={inputCls} defaultValue="">
-                <option value="" disabled>Select your state</option>
-                {US_STATES.map(([code, name]) => (
-                  <option key={code} value={code}>{name}</option>
-                ))}
-              </select>
-            </Field>
-          </motion.div>
-        )}
-
-        {step === 2 && (
-          <motion.div
-            key="step2"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="flex flex-col gap-5"
-          >
-            <h3 className="text-2xl font-black text-warm-white">
-              Accredited investor status
-            </h3>
-            <p className="text-sm text-warm-white/60 leading-relaxed">
-              Journey.Direct&trade; offerings are made under SEC Rule 506(c).
-              Accreditation will be verified independently before any subscription.
-              Pick the basis that applies to you.
-            </p>
-            <RadioOption value="income" register={register('accredited_status')}
-              title="Income"
-              desc="$200k+ single / $300k+ joint for the last 2 years with reasonable expectation of the same this year."
+      {step === 1 && (
+        <div className="flex flex-col gap-5">
+          <h3 className="text-2xl font-black text-white">Tell us who you are</h3>
+          <Field label="Full name" error={errors.full_name}>
+            <input
+              value={data.full_name}
+              onChange={(e) => update('full_name', e.target.value)}
+              className={inputCls}
+              placeholder="Jane Investor"
             />
-            <RadioOption value="net_worth" register={register('accredited_status')}
-              title="Net worth"
-              desc="$1M+ net worth, individually or jointly with spouse, excluding primary residence."
+          </Field>
+          <Field label="Email" error={errors.email}>
+            <input
+              type="email"
+              value={data.email}
+              onChange={(e) => update('email', e.target.value)}
+              className={inputCls}
+              placeholder="you@email.com"
             />
-            <RadioOption value="professional" register={register('accredited_status')}
-              title="Professional certification"
-              desc="Series 7, Series 65, Series 82, or a knowledgeable employee of the fund."
+          </Field>
+          <Field label="Phone" error={errors.phone}>
+            <input
+              type="tel"
+              value={data.phone}
+              onChange={(e) => update('phone', e.target.value)}
+              className={inputCls}
+              placeholder="(555) 000-0000"
             />
-            <RadioOption value="entity" register={register('accredited_status')}
-              title="Entity / family office"
-              desc="An entity with $5M+ in assets, or all equity owners are accredited."
-            />
-            <RadioOption value="unsure" register={register('accredited_status')}
-              title="I'm not sure"
-              desc="Reach out anyway. We can help you determine eligibility."
-            />
-            <RadioOption value="not_accredited" register={register('accredited_status')}
-              title="I'm not accredited"
-              desc="Our 506(c) deals aren't available to non-accredited investors, but we'll keep you informed."
-            />
-            {errors.accredited_status && (
-              <p className="text-sm text-orange">Please choose one</p>
-            )}
-          </motion.div>
-        )}
+          </Field>
+          <Field label="State of residence" error={errors.state_code}>
+            <select
+              value={data.state_code}
+              onChange={(e) => update('state_code', e.target.value)}
+              className={inputCls}
+            >
+              <option value="" disabled>Select your state</option>
+              {US_STATES.map(([code, name]) => (
+                <option key={code} value={code}>{name}</option>
+              ))}
+            </select>
+          </Field>
+        </div>
+      )}
 
-        {step === 3 && (
-          <motion.div
-            key="step3"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="flex flex-col gap-5"
-          >
-            <h3 className="text-2xl font-black text-warm-white">
-              Your investment profile
-            </h3>
-            <p className="text-sm text-warm-white/60 leading-relaxed">
-              This helps Jonah prep for your call. Nothing here commits you to anything.
-            </p>
-
-            <Field label="Check size you're considering">
-              <select {...register('check_size_band')} className={inputCls} defaultValue="">
-                <option value="" disabled>Select a range</option>
-                <option value="50k_100k">$50,000 - $100,000</option>
-                <option value="100k_250k">$100,000 - $250,000</option>
-                <option value="250k_500k">$250,000 - $500,000</option>
-                <option value="500k_1m">$500,000 - $1,000,000</option>
-                <option value="1m_plus">$1,000,000+</option>
-              </select>
-            </Field>
-
-            <Field label="Investment timeline">
-              <select {...register('timeline')} className={inputCls} defaultValue="">
-                <option value="" disabled>Select timeline</option>
-                <option value="immediate">Ready now</option>
-                <option value="30_60_days">30 - 60 days</option>
-                <option value="60_90_days">60 - 90 days</option>
-                <option value="exploring">Exploring, no timeline</option>
-              </select>
-            </Field>
-
-            <Field label="Prior real estate investing experience">
-              <select {...register('prior_re_experience')} className={inputCls} defaultValue="">
-                <option value="" disabled>Select one</option>
-                <option value="syndications">Prior syndications / private deals</option>
-                <option value="direct_ownership">Direct property ownership</option>
-                <option value="reit_only">Public REITs only</option>
-                <option value="none">This would be my first</option>
-              </select>
-            </Field>
-
-            <Field label="Source of investment capital">
-              <select {...register('source_of_capital')} className={inputCls} defaultValue="">
-                <option value="" disabled>Select one</option>
-                <option value="personal_savings">Personal savings / liquid</option>
-                <option value="1031_exchange">1031 exchange proceeds</option>
-                <option value="sdira">Self-directed IRA</option>
-                <option value="company_cash">Company / operating cash</option>
-                <option value="family_office">Family office</option>
-                <option value="other">Other</option>
-              </select>
-            </Field>
-
-            <Field label="Anything you'd like Jonah to know? (Optional)">
-              <textarea
-                {...register('message')}
-                rows={3}
-                className={`${inputCls} resize-none`}
-                placeholder="Specific questions, context on your goals, etc."
+      {step === 2 && (
+        <div className="flex flex-col gap-5">
+          <h3 className="text-2xl font-black text-white">Accredited investor status</h3>
+          <p className="text-sm text-white/60 leading-relaxed">
+            Journey.Direct&trade; offerings are made under SEC Rule 506(c).
+            Accreditation will be verified independently before any subscription.
+            Pick the basis that applies to you.
+          </p>
+          {ACCREDITED_OPTIONS.map(opt => (
+            <label
+              key={opt.value}
+              className={`flex gap-3 p-4 border transition-colors cursor-pointer ${
+                data.accredited_status === opt.value
+                  ? 'border-orange-500'
+                  : 'border-white/10 hover:border-orange-500/40'
+              }`}
+            >
+              <input
+                type="radio"
+                name="accredited_status"
+                value={opt.value}
+                checked={data.accredited_status === opt.value}
+                onChange={(e) => update('accredited_status', e.target.value)}
+                className="mt-1 accent-orange-500"
               />
-            </Field>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <div className="flex flex-col gap-1">
+                <span className="text-white font-bold">{opt.title}</span>
+                <span className="text-sm text-white/60 leading-relaxed">{opt.desc}</span>
+              </div>
+            </label>
+          ))}
+          {errors.accredited_status && (
+            <p className="text-sm text-orange-500">{errors.accredited_status}</p>
+          )}
+        </div>
+      )}
 
-      {error && (
-        <p className="text-orange text-sm">{error}</p>
+      {step === 3 && (
+        <div className="flex flex-col gap-5">
+          <h3 className="text-2xl font-black text-white">Your investment profile</h3>
+          <p className="text-sm text-white/60 leading-relaxed">
+            This helps Jonah prep for your call. Nothing here commits you to anything.
+          </p>
+
+          <Field label="Check size you're considering" error={errors.check_size_band}>
+            <select
+              value={data.check_size_band}
+              onChange={(e) => update('check_size_band', e.target.value)}
+              className={inputCls}
+            >
+              <option value="" disabled>Select a range</option>
+              <option value="50k_100k">$50,000 - $100,000</option>
+              <option value="100k_250k">$100,000 - $250,000</option>
+              <option value="250k_500k">$250,000 - $500,000</option>
+              <option value="500k_1m">$500,000 - $1,000,000</option>
+              <option value="1m_plus">$1,000,000+</option>
+            </select>
+          </Field>
+
+          <Field label="Investment timeline" error={errors.timeline}>
+            <select
+              value={data.timeline}
+              onChange={(e) => update('timeline', e.target.value)}
+              className={inputCls}
+            >
+              <option value="" disabled>Select timeline</option>
+              <option value="immediate">Ready now</option>
+              <option value="30_60_days">30 - 60 days</option>
+              <option value="60_90_days">60 - 90 days</option>
+              <option value="exploring">Exploring, no timeline</option>
+            </select>
+          </Field>
+
+          <Field label="Prior real estate investing experience" error={errors.prior_re_experience}>
+            <select
+              value={data.prior_re_experience}
+              onChange={(e) => update('prior_re_experience', e.target.value)}
+              className={inputCls}
+            >
+              <option value="" disabled>Select one</option>
+              <option value="syndications">Prior syndications / private deals</option>
+              <option value="direct_ownership">Direct property ownership</option>
+              <option value="reit_only">Public REITs only</option>
+              <option value="none">This would be my first</option>
+            </select>
+          </Field>
+
+          <Field label="Source of investment capital" error={errors.source_of_capital}>
+            <select
+              value={data.source_of_capital}
+              onChange={(e) => update('source_of_capital', e.target.value)}
+              className={inputCls}
+            >
+              <option value="" disabled>Select one</option>
+              <option value="personal_savings">Personal savings / liquid</option>
+              <option value="1031_exchange">1031 exchange proceeds</option>
+              <option value="sdira">Self-directed IRA</option>
+              <option value="company_cash">Company / operating cash</option>
+              <option value="family_office">Family office</option>
+              <option value="other">Other</option>
+            </select>
+          </Field>
+
+          <Field label="Anything you'd like Jonah to know? (Optional)">
+            <textarea
+              value={data.message}
+              onChange={(e) => update('message', e.target.value)}
+              rows={3}
+              className={`${inputCls} resize-none`}
+              placeholder="Specific questions, context on your goals, etc."
+            />
+          </Field>
+        </div>
+      )}
+
+      {submitError && (
+        <p className="text-orange-500 text-sm">{submitError}</p>
       )}
 
       <div className="flex gap-3 mt-2">
@@ -354,7 +398,7 @@ export default function InvestorApplicationForm({
           <button
             type="button"
             onClick={handleBack}
-            className="flex-1 py-3 border border-warm-white/20 text-warm-white/70 hover:text-warm-white hover:border-warm-white/40 transition-colors"
+            className="flex-1 py-3 border border-white/20 text-white/70 hover:text-white hover:border-white/40 transition-colors"
           >
             Back
           </button>
@@ -363,7 +407,7 @@ export default function InvestorApplicationForm({
           <button
             type="button"
             onClick={handleNext}
-            className="flex-1 py-3 bg-orange text-warm-white font-bold hover:bg-orange/90 transition-colors"
+            className="flex-1 py-3 bg-orange-500 text-white font-bold hover:bg-orange-600 transition-colors"
           >
             Continue
           </button>
@@ -371,15 +415,15 @@ export default function InvestorApplicationForm({
         {step === totalSteps && (
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="flex-1 py-3 bg-orange text-warm-white font-bold hover:bg-orange/90 transition-colors disabled:opacity-50"
+            disabled={submitting}
+            className="flex-1 py-3 bg-orange-500 text-white font-bold hover:bg-orange-600 transition-colors disabled:opacity-50"
           >
-            {isSubmitting ? 'Submitting...' : 'Request platform overview'}
+            {submitting ? 'Submitting...' : 'Request platform overview'}
           </button>
         )}
       </div>
 
-      <p className="text-caption text-warm-white/40 leading-relaxed">
+      <p className="text-xs text-white/40 leading-relaxed">
         By submitting, you confirm the information above is accurate. Accredited status
         will be verified independently before any subscription. We do not sell or share
         your information.
@@ -388,38 +432,14 @@ export default function InvestorApplicationForm({
   )
 }
 
-const inputCls =
-  'w-full bg-warm-white/[0.06] text-warm-white border border-stone/30 ' +
-  'rounded-sm px-4 py-3.5 text-body font-normal placeholder:text-stone ' +
-  'focus:border-orange focus:outline-none transition-colors'
-
 function Field({
   label, error, children,
 }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-body-sm font-bold text-warm-white">{label}</label>
+      <label className="text-sm font-bold text-white">{label}</label>
       {children}
-      {error && <p className="text-sm text-orange">{error}</p>}
+      {error && <p className="text-sm text-orange-500">{error}</p>}
     </div>
-  )
-}
-
-function RadioOption({
-  value, register, title, desc,
-}: {
-  value: string
-  register: ReturnType<ReturnType<typeof useForm>['register']>
-  title: string
-  desc: string
-}) {
-  return (
-    <label className="flex gap-3 p-4 border border-warm-white/10 hover:border-orange/40 transition-colors cursor-pointer">
-      <input type="radio" value={value} {...register} className="mt-1 accent-orange" />
-      <div className="flex flex-col gap-1">
-        <span className="text-warm-white font-bold">{title}</span>
-        <span className="text-sm text-warm-white/60 leading-relaxed">{desc}</span>
-      </div>
-    </label>
   )
 }
