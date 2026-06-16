@@ -60,11 +60,17 @@ export default function Waitlist() {
 
   const onSubmit = async (data: WaitlistForm) => {
     try {
-      await fetch('/api/waitlist', {
+      const response = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ form_source: 'website-waitlist', ...data }),
       })
+      if (response.ok && typeof window !== 'undefined') {
+        const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag
+        if (typeof gtag === 'function') {
+          gtag('event', 'lead_submitted', { form_source: 'website-waitlist' })
+        }
+      }
     } catch { /* Phase 1 */ }
     setSubmitted(true)
   }
