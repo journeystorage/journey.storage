@@ -66,9 +66,9 @@ export default function Waitlist() {
         body: JSON.stringify({ form_source: 'website-waitlist', ...data }),
       })
       if (response.ok && typeof window !== 'undefined') {
-        const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag
-        if (typeof gtag === 'function') {
-          gtag('event', 'lead_submitted', { form_source: 'website-waitlist' })
+        const dl = (window as unknown as { dataLayer?: Array<Record<string, unknown>> }).dataLayer
+        if (Array.isArray(dl)) {
+          dl.push({ event: 'lead_submitted', form_source: 'website-waitlist' })
         }
       }
     } catch { /* Phase 1 */ }
