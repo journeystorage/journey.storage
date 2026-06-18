@@ -15,9 +15,9 @@
     "dev:springfield": "node apps/springfield/server.mjs",
     "build": "next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "build:consulting": "npm run build -w @journey/consulting && rm -rf .next/standalone && mkdir -p .next && cp -r apps/consulting/.next/standalone .next/standalone && cp -r apps/consulting/public .next/standalone/public && cp -r apps/consulting/.next/static .next/standalone/.next/static",
-    "build:investors": "npm install && npm run build -w @journey/investors && cp -r apps/investors/public apps/investors/.next/standalone/apps/investors/public && cp -r apps/investors/.next/static apps/investors/.next/standalone/apps/investors/.next/static && rm -rf .next/standalone && mkdir -p .next && cp -r apps/investors/.next/standalone/. .next/standalone",
+    "build:investors": "npm install && npm run build -w @journey/investors && cp -r apps/investors/public apps/investors/.next/standalone/apps/investors/public && cp -r apps/investors/.next/static apps/investors/.next/standalone/apps/investors/.next/static && rm -rf .next/standalone && mkdir -p .next && cp -r apps/investors/.next/standalone/. .next/standalone && ln -sf apps/investors/server.js .next/standalone/server.js",
     "build:springfield": "echo Springfield is a pre-built static export, no build step required.",
-    "start": "HOSTNAME=0.0.0.0 sh -c \"if [ -f .next/standalone/apps/investors/server.js ]; then node .next/standalone/apps/investors/server.js; else node .next/standalone/server.js; fi\"",
+    "start": "HOSTNAME=0.0.0.0 node .next/standalone/server.js",
     "start:springfield": "node apps/springfield/server.mjs",
     "lint": "next lint"
   },
