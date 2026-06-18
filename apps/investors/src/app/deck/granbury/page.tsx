@@ -1609,7 +1609,7 @@ function SlideContact() {
             </div>
 
             <div className="mt-8 inline-flex w-fit items-center rounded-sm bg-orange px-5 py-2.5">
-              <span className="text-[0.75rem] font-bold tracking-[0.1em] uppercase text-warm-white">Accepting subscriptions until May 15, 2026</span>
+              <span className="text-[0.75rem] font-bold tracking-[0.1em] uppercase text-warm-white">Accepting subscriptions</span>
             </div>
           </div>
 
