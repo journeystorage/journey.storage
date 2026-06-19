@@ -182,121 +182,126 @@ export default function SizeGuidePage() {
         </div>
       </div>
 
-      {/* Cream card (Life Moments style) */}
-      <section
-        className="sg-cream-card"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-      >
-        <span aria-hidden="true" className="sg-watermark">SIZES</span>
+      {/* Life Moments wrapper: matches main site section.bg-black py-10 md:py-14 lg:py-16 */}
+      <section className="sg-life-section">
+        {/* Cream card (Life Moments style) */}
+        <section
+          className="sg-cream-card"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+        >
+          <span aria-hidden="true" className="sg-watermark">SIZES</span>
 
-        <div style={{ position: 'relative' }}>
-          <div className="sg-eyebrow">
-            <span className="sg-dash" />
-            <span>Size Guide</span>
-            <span className="sg-dash" />
-          </div>
-          <h1 className="sg-title">Find your size.</h1>
-          <p className="sg-subtitle">
-            Sizes are approximate and may vary by facility. Tap any size to see what fits, or let them cycle through on their own.
-          </p>
-
-          <div className="sg-grid">
-            {/* Numbered list */}
-            <ul className="sg-list">
-              {UNITS.map((u, i) => {
-                const isActive = i === activeIdx
-                return (
-                  <li key={u.num}>
-                    <button
-                      type="button"
-                      data-active={isActive}
-                      className="sg-num-button"
-                      style={isActive ? { background: u.accent } : undefined}
-                      onClick={() => {
-                        setActiveIdx(i)
-                        if (timerRef.current) clearInterval(timerRef.current)
-                        timerRef.current = null
-                      }}
-                    >
-                      <span className="sg-bg-num">{u.num}</span>
-                      <div className="sg-row-meta">
-                        <span className="sg-row-dot" />
-                        <span>{u.num}</span>
-                      </div>
-                      <div className="sg-row-title">
-                        {u.size} <span className="sg-row-sub">, fits {u.fits}</span>
-                      </div>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-
-            {/* Collage */}
-            <div className="sg-collage">
-              {UNITS.map((u, i) => {
-                let pos: 'active' | 'left' | 'right' | 'hidden' = 'hidden'
-                if (i === activeIdx) pos = 'active'
-                else if (i === prevIdx) pos = 'left'
-                else if (i === nextIdx) pos = 'right'
-                return (
-                  <div key={u.num} data-pos={pos} className="sg-photo-card">
-                    <Placeholder unit={u} showCaption={pos === 'active'} />
-                  </div>
-                )
-              })}
+          <div style={{ position: 'relative' }}>
+            <div className="sg-eyebrow">
+              <span className="sg-dash" />
+              <span>Size Guide</span>
+              <span className="sg-dash" />
             </div>
-          </div>
+            <h1 className="sg-title">Find your size.</h1>
+            <p className="sg-subtitle">
+              Sizes are approximate and may vary by facility. Tap any size to see what fits, or let them cycle through on their own.
+            </p>
 
-          {/* Details panel */}
-          <div className="sg-details">
-            <div>
-              <p className="sg-stat-eyebrow">Selected size</p>
-              <p className="sg-stat-size">{active.size}</p>
-              <p className="sg-stat-compare">{active.comparison}</p>
-              <div className="sg-stat-grid">
-                <div className="sg-stat">
-                  <p className="sg-stat-label">Square feet</p>
-                  <p className="sg-stat-value">{active.sqft}</p>
-                </div>
-                <div className="sg-stat">
-                  <p className="sg-stat-label">Cubic feet</p>
-                  <p className="sg-stat-value">{active.cubicFt.toLocaleString()}</p>
-                </div>
-              </div>
-            </div>
-            <div>
-              <p className="sg-desc">{active.description}</p>
-              <div style={{ marginTop: 24 }}>
-                <p className="sg-rsf-label">The right size for</p>
-                <ul className="sg-rsf-list">
-                  {active.rightSizeFor.map((item) => (
-                    <li key={item}>
-                      <span className="sg-rsf-bullet" />
-                      <span>{item}</span>
+            <div className="sg-grid">
+              {/* Numbered list */}
+              <ul className="sg-list">
+                {UNITS.map((u, i) => {
+                  const isActive = i === activeIdx
+                  return (
+                    <li key={u.num}>
+                      <button
+                        type="button"
+                        data-active={isActive}
+                        className="sg-num-button"
+                        style={isActive ? { background: u.accent } : undefined}
+                        onClick={() => {
+                          setActiveIdx(i)
+                          if (timerRef.current) clearInterval(timerRef.current)
+                          timerRef.current = null
+                        }}
+                      >
+                        <span className="sg-bg-num">{u.num}</span>
+                        <div className="sg-row-meta">
+                          <span className="sg-row-dot" />
+                          <span>{u.num}</span>
+                        </div>
+                        <div className="sg-row-title">
+                          {u.size} <span className="sg-row-sub">, fits {u.fits}</span>
+                        </div>
+                      </button>
                     </li>
-                  ))}
-                </ul>
+                  )
+                })}
+              </ul>
+
+              {/* Collage */}
+              <div className="sg-collage">
+                {UNITS.map((u, i) => {
+                  let pos: 'active' | 'left' | 'right' | 'hidden' = 'hidden'
+                  if (i === activeIdx) pos = 'active'
+                  else if (i === prevIdx) pos = 'left'
+                  else if (i === nextIdx) pos = 'right'
+                  return (
+                    <div key={u.num} data-pos={pos} className="sg-photo-card">
+                      <Placeholder unit={u} showCaption={pos === 'active'} />
+                    </div>
+                  )
+                })}
               </div>
-              <div style={{ marginTop: 32 }}>
-                <a
-                  className="sg-pill-cta"
-                  href={`mailto:hello@journey.storage?subject=${encodeURIComponent(
-                    `Inquiry about ${active.size} unit`,
-                  )}`}
-                >
-                  Contact us about this size <span aria-hidden="true">→</span>
-                </a>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      {/* Details panel — moved OUT of the cream card, sits on black background */}
+      <section className="sg-details-section">
+        <div className="sg-details">
+          <div>
+            <p className="sg-stat-eyebrow">Selected size</p>
+            <p className="sg-stat-size">{active.size}</p>
+            <p className="sg-stat-compare">{active.comparison}</p>
+            <div className="sg-stat-grid">
+              <div className="sg-stat">
+                <p className="sg-stat-label">Square feet</p>
+                <p className="sg-stat-value">{active.sqft}</p>
               </div>
+              <div className="sg-stat">
+                <p className="sg-stat-label">Cubic feet</p>
+                <p className="sg-stat-value">{active.cubicFt.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            <p className="sg-desc">{active.description}</p>
+            <div style={{ marginTop: 24 }}>
+              <p className="sg-rsf-label">The right size for</p>
+              <ul className="sg-rsf-list">
+                {active.rightSizeFor.map((item) => (
+                  <li key={item}>
+                    <span className="sg-rsf-bullet" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div style={{ marginTop: 32 }}>
+              <a
+                className="sg-pill-cta"
+                href={`mailto:hello@journey.storage?subject=${encodeURIComponent(
+                  `Inquiry about ${active.size} unit`,
+                )}`}
+              >
+                Contact us about this size <span aria-hidden="true">→</span>
+              </a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Comparison table */}
-      <section className="sg-table-wrap">
-        <div style={{ maxWidth: 1024, margin: '0 auto' }}>
+      {/* Side by side — How It Works style: full-width black with grain texture */}
+      <section className="sg-table-section">
+        <div className="sg-table-inner">
           <div className="sg-eyebrow sg-eyebrow-left">
             <span className="sg-dash" />
             <span>Side by side</span>
@@ -470,21 +475,35 @@ export default function SizeGuidePage() {
           100% { transform: translateX(-50%); }
         }
 
-        /* Cream card (matched to live: mx-3 md:mx-6 lg:mx-10, pt-16/20/24, pb-12/16/20) */
+        /* Life Moments wrapper section: matches main site (bg-black py-10 md:py-14 lg:py-16) */
+        .sg-life-section {
+          position: relative;
+          background: var(--sg-site-dark);
+          padding: 40px 0;
+          overflow: hidden;
+        }
+        @media (min-width: 768px) {
+          .sg-life-section { padding: 56px 0; }
+        }
+        @media (min-width: 1024px) {
+          .sg-life-section { padding: 64px 0; }
+        }
+
+        /* Cream card (matches Life Moments cream card exactly) */
         .sg-cream-card {
           background: var(--sg-warm-white);
           color: var(--sg-site-dark);
           border-radius: 24px;
-          margin: 16px 12px;
+          margin: 0 12px;
           padding: 64px 20px 48px;
           position: relative;
           overflow: hidden;
         }
         @media (min-width: 768px) {
-          .sg-cream-card { margin: 24px; border-radius: 24px; padding: 80px 32px 64px; }
+          .sg-cream-card { margin: 0 24px; border-radius: 32px; padding: 80px 32px 64px; }
         }
         @media (min-width: 1024px) {
-          .sg-cream-card { margin: 32px 40px; border-radius: 32px; padding: 96px 40px 80px; }
+          .sg-cream-card { margin: 0 40px; border-radius: 32px; padding: 96px 40px 80px; }
         }
         .sg-watermark {
           position: absolute;
@@ -532,7 +551,7 @@ export default function SizeGuidePage() {
           line-height: 1.55;
         }
 
-        /* Grid stacks until lg (matches live lg:grid lg:grid-cols-[1fr_1.5fr]) */
+        /* Grid stacks until lg */
         .sg-grid {
           display: grid;
           gap: 32px;
@@ -628,7 +647,7 @@ export default function SizeGuidePage() {
         .sg-num-button[data-active='true'] .sg-row-title { color: var(--sg-site-dark); }
         .sg-num-button[data-active='true'] .sg-bg-num { color: rgba(24, 24, 24, 0.14); }
 
-        /* Collage, mobile sizing scaled down */
+        /* Collage */
         .sg-collage {
           position: relative;
           height: 400px;
@@ -712,13 +731,23 @@ export default function SizeGuidePage() {
           font-weight: 700;
         }
 
-        /* Details panel */
+        /* Details section — sits on dark background BELOW cream card */
+        .sg-details-section {
+          background: var(--sg-site-dark);
+          padding: 56px 16px;
+        }
+        @media (min-width: 768px) {
+          .sg-details-section { padding: 72px 32px; }
+        }
+        @media (min-width: 1024px) {
+          .sg-details-section { padding: 80px 40px; }
+        }
         .sg-details {
           max-width: 1000px;
-          margin: 56px auto 0;
+          margin: 0 auto;
           padding: 32px;
-          background: rgba(24, 24, 24, 0.04);
-          border: 1px solid rgba(24, 24, 24, 0.08);
+          background: rgba(245, 240, 232, 0.04);
+          border: 1px solid rgba(245, 240, 232, 0.1);
           border-radius: 20px;
           display: grid;
           gap: 28px;
@@ -740,11 +769,12 @@ export default function SizeGuidePage() {
           font-weight: 900;
           letter-spacing: -0.02em;
           line-height: 1;
+          color: var(--sg-warm-white);
         }
         .sg-stat-compare {
           margin-top: 8px;
           font-size: 14px;
-          color: rgba(24, 24, 24, 0.6);
+          color: rgba(245, 240, 232, 0.6);
         }
         .sg-stat-grid {
           margin-top: 18px;
@@ -754,8 +784,8 @@ export default function SizeGuidePage() {
           font-size: 14px;
         }
         .sg-stat {
-          background: var(--sg-warm-white);
-          border: 1px solid rgba(24, 24, 24, 0.1);
+          background: rgba(245, 240, 232, 0.06);
+          border: 1px solid rgba(245, 240, 232, 0.1);
           border-radius: 12px;
           padding: 10px 14px;
         }
@@ -764,24 +794,25 @@ export default function SizeGuidePage() {
           font-weight: 700;
           letter-spacing: 0.16em;
           text-transform: uppercase;
-          color: rgba(24, 24, 24, 0.5);
+          color: rgba(245, 240, 232, 0.5);
         }
         .sg-stat-value {
           margin-top: 4px;
           font-size: 18px;
           font-weight: 900;
+          color: var(--sg-warm-white);
         }
         .sg-desc {
           font-size: 16px;
           line-height: 1.6;
-          color: rgba(24, 24, 24, 0.78);
+          color: rgba(245, 240, 232, 0.78);
         }
         .sg-rsf-label {
           font-size: 11px;
           font-weight: 700;
           letter-spacing: 0.22em;
           text-transform: uppercase;
-          color: rgba(24, 24, 24, 0.55);
+          color: rgba(245, 240, 232, 0.55);
         }
         .sg-rsf-list {
           margin-top: 12px;
@@ -789,7 +820,7 @@ export default function SizeGuidePage() {
           grid-template-columns: 1fr;
           gap: 8px;
           font-size: 14px;
-          color: rgba(24, 24, 24, 0.78);
+          color: rgba(245, 240, 232, 0.78);
           list-style: none;
           padding: 0;
         }
@@ -814,31 +845,47 @@ export default function SizeGuidePage() {
           display: inline-flex;
           align-items: center;
           gap: 10px;
-          background: var(--sg-site-dark);
-          color: var(--sg-warm-white);
+          background: var(--sg-warm-white);
+          color: var(--sg-site-dark);
           font-weight: 700;
           font-size: 12px;
           letter-spacing: 0.18em;
           text-transform: uppercase;
           padding: 13px 26px;
           border-radius: 24px;
-          transition: background-color 0.25s ease;
+          transition: background-color 0.25s ease, color 0.25s ease;
           text-decoration: none;
         }
-        .sg-pill-cta:hover { background: var(--sg-orange); }
+        .sg-pill-cta:hover { background: var(--sg-orange); color: var(--sg-warm-white); }
 
-        /* Comparison table */
-        .sg-table-wrap {
-          margin: 32px 12px;
-          background: #1f1c1a;
-          border-radius: 24px;
-          padding: 56px 28px;
-        }
-        @media (min-width: 768px) {
-          .sg-table-wrap { margin: 32px 24px; padding: 64px 40px; }
+        /* Side by side — How It Works style: full-width black with grain texture */
+        .sg-table-section {
+          position: relative;
+          background: var(--sg-site-dark);
+          padding: 112px 20px 64px;
+          overflow: hidden;
         }
         @media (min-width: 1024px) {
-          .sg-table-wrap { margin: 32px 40px; }
+          .sg-table-section { padding: 160px 64px 80px; }
+        }
+        /* Subtle grain texture overlay (matches main site .grain class) */
+        .sg-table-section::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background-image:
+            radial-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            radial-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+          background-size: 3px 3px, 7px 7px;
+          background-position: 0 0, 1px 2px;
+          pointer-events: none;
+          opacity: 0.6;
+        }
+        .sg-table-inner {
+          position: relative;
+          z-index: 1;
+          max-width: 1024px;
+          margin: 0 auto;
         }
         .sg-table-title {
           margin-top: 12px;
@@ -895,6 +942,14 @@ export default function SizeGuidePage() {
         }
         @media (min-width: 1024px) {
           .sg-final-cta { margin: 0 40px 72px; }
+        }
+        .sg-final-cta .sg-pill-cta {
+          background: var(--sg-site-dark);
+          color: var(--sg-warm-white);
+        }
+        .sg-final-cta .sg-pill-cta:hover {
+          background: var(--sg-orange);
+          color: var(--sg-warm-white);
         }
         .sg-final-title {
           margin-top: 12px;
