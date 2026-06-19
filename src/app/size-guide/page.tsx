@@ -1,281 +1,294 @@
-import type { Metadata } from 'next'
-import Link from 'next/link'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'Storage Unit Size Guide | Journey.Storage',
-  description:
-    'Find the right storage unit size for your move, renovation, or seasonal needs. Compare dimensions, square footage, and what fits in each Journey self-storage unit.',
-}
+import { useEffect, useRef, useState } from 'react'
 
 type Unit = {
+  num: string
   size: string
   sqft: number
   cubicFt: number
   fits: string
+  caption: string
   comparison: string
   description: string
   rightSizeFor: string[]
-  group: 'small' | 'medium' | 'large'
+  accent: string
+  card: string
 }
 
 const UNITS: Unit[] = [
   {
-    size: "5' x 5'",
-    sqft: 25,
-    cubicFt: 200,
-    fits: 'A storage closet',
-    comparison: 'Similar to a large standard closet',
-    description:
-      "Our smallest standard unit. The right fit for stashing away household items, small furniture, or seasonal belongings you don't need every day.",
-    rightSizeFor: [
-      'Up to 10 large moving boxes',
-      'Seasonal clothing or shoes',
-      'Sports gear or equipment',
-      'A small desk or chair',
-    ],
-    group: 'small',
+    num: '01', size: "5' x 5'", sqft: 25, cubicFt: 200,
+    fits: 'a storage closet',
+    caption: "Just enough room for the things you can't quite let go of.",
+    comparison: 'Similar to a large standard closet.',
+    description: "Our smallest standard unit. The right fit for stashing away household items, small furniture, or seasonal belongings you don't need every day.",
+    rightSizeFor: ['Up to 10 large moving boxes', 'Seasonal clothing or shoes', 'Sports gear or equipment', 'A small desk or chair'],
+    accent: '#6f9fc4', card: '#d4e2ec',
   },
   {
-    size: "5' x 10'",
-    sqft: 50,
-    cubicFt: 400,
-    fits: 'A studio apartment',
-    comparison: 'Similar to a large walk-in closet or small shed',
-    description:
-      "A balance of space and versatility. Holds the contents of a mid-sized bedroom, dorm, or studio apartment, a few large furniture pieces plus boxes.",
-    rightSizeFor: [
-      '20+ large moving boxes',
-      'A twin or full mattress',
-      'A small office set-up',
-      'Around 2 large furniture pieces',
-    ],
-    group: 'small',
+    num: '02', size: "5' x 10'", sqft: 50, cubicFt: 400,
+    fits: 'a studio apartment',
+    caption: 'Room for the studio you outgrew, with space to breathe.',
+    comparison: 'Similar to a large walk-in closet or small shed.',
+    description: 'A balance of space and versatility. Holds the contents of a mid-sized bedroom, dorm, or studio apartment, a few large furniture pieces plus boxes.',
+    rightSizeFor: ['20+ large moving boxes', 'A twin or full mattress', 'A small office set-up', 'Around 2 large furniture pieces'],
+    accent: '#8ab07a', card: '#d6e2cb',
   },
   {
-    size: "5' x 15'",
-    sqft: 75,
-    cubicFt: 600,
-    fits: 'A one-bedroom apartment',
-    comparison: 'Similar to a large walk-in closet',
-    description:
-      "Fits the contents of an entire bedroom and a bit extra. A go-to choice if you're moving out of a small apartment, with room to walk around and browse.",
-    rightSizeFor: [
-      'Around 30 large moving boxes',
-      'A bedroom furniture set',
-      'A kitchen table',
-      'Luggage and travel gear',
-    ],
-    group: 'medium',
+    num: '03', size: "5' x 15'", sqft: 75, cubicFt: 600,
+    fits: 'a one-bedroom apartment',
+    caption: 'A clean transition between chapters of life.',
+    comparison: 'Similar to a large walk-in closet.',
+    description: "Fits the contents of an entire bedroom and a bit extra. A go-to choice if you're moving out of a small apartment, with room to walk around and browse.",
+    rightSizeFor: ['Around 30 large moving boxes', 'A bedroom furniture set', 'A kitchen table', 'Luggage and travel gear'],
+    accent: '#e3c14a', card: '#f0e0a8',
   },
   {
-    size: "10' x 10'",
-    sqft: 100,
-    cubicFt: 800,
-    fits: 'Two small bedrooms',
-    comparison: 'Similar to half of a one-car garage',
-    description:
-      "Space for an entire living area or two bedrooms, boxes and all. Spacious enough to store your stuff with room to spare.",
-    rightSizeFor: [
-      'Around 40 large moving boxes',
-      'Large household furniture sets',
-      'Appliances',
-      'Seasonal clothing',
-    ],
-    group: 'medium',
+    num: '04', size: "10' x 10'", sqft: 100, cubicFt: 800,
+    fits: 'two small bedrooms',
+    caption: 'Two rooms, packed and waiting for what comes next.',
+    comparison: 'Similar to half of a one-car garage.',
+    description: 'Space for an entire living area or two bedrooms, boxes and all. Spacious enough to store your stuff with room to spare.',
+    rightSizeFor: ['Around 40 large moving boxes', 'Large household furniture sets', 'Appliances', 'Seasonal clothing'],
+    accent: '#d4956a', card: '#e8cbb4',
   },
   {
-    size: "10' x 15'",
-    sqft: 150,
-    cubicFt: 1200,
-    fits: 'A two-bedroom home',
-    comparison: 'Similar to a large bedroom',
-    description:
-      "Room for bulky furniture and appliances. Holds up to four rooms' worth of belongings, ideal for moving, decluttering, or freeing up your garage.",
-    rightSizeFor: [
-      'Around 60 large moving boxes',
-      'Large furniture sets',
-      'Small business inventory',
-      'Kitchenware',
-    ],
-    group: 'large',
+    num: '05', size: "10' x 15'", sqft: 150, cubicFt: 1200,
+    fits: 'a two-bedroom home',
+    caption: 'Your growth should not wait for square footage.',
+    comparison: 'Similar to a large bedroom.',
+    description: "Room for bulky furniture and appliances. Holds up to four rooms' worth of belongings, ideal for moving, decluttering, or freeing up your garage.",
+    rightSizeFor: ['Around 60 large moving boxes', 'Large furniture sets', 'Small business inventory', 'Kitchenware'],
+    accent: '#b96c52', card: '#e3b9a8',
   },
   {
-    size: "10' x 20'",
-    sqft: 200,
-    cubicFt: 1600,
-    fits: 'A three-bedroom home',
-    comparison: 'Similar to a standard one-car garage',
-    description:
-      "For when you need serious space. Five rooms' worth of belongings, living room sets, patio furniture, and full-sized appliances all fit comfortably.",
-    rightSizeFor: [
-      'Around 80 large moving boxes',
-      'Full living and dining rooms',
-      'Full kitchenware sets',
-      'Major appliances',
-    ],
-    group: 'large',
+    num: '06', size: "10' x 20'", sqft: 200, cubicFt: 1600,
+    fits: 'a three-bedroom home',
+    caption: 'Big enough for the home you are building toward.',
+    comparison: 'Similar to a standard one-car garage.',
+    description: "For when you need serious space. Five rooms' worth of belongings, living room sets, patio furniture, and full-sized appliances all fit comfortably.",
+    rightSizeFor: ['Around 80 large moving boxes', 'Full living and dining rooms', 'Full kitchenware sets', 'Major appliances'],
+    accent: '#8a7aa5', card: '#cec5dc',
   },
   {
-    size: "10' x 30'",
-    sqft: 300,
-    cubicFt: 2400,
-    fits: 'A four or five-bedroom home',
-    comparison: 'Similar to a large one-car garage',
-    description:
-      "Our largest standard unit. Built for big moves, full home renovations, or storing the contents of a multi-bedroom house with room to maneuver.",
-    rightSizeFor: [
-      'Around 100+ large moving boxes',
-      'Multiple bedroom sets',
-      'Large appliances and furniture',
-      'Long-term storage of vehicles or trailers (where permitted)',
-    ],
-    group: 'large',
+    num: '07', size: "10' x 30'", sqft: 300, cubicFt: 2400,
+    fits: 'a four or five-bedroom home',
+    caption: 'A whole life, ready for its next move.',
+    comparison: 'Similar to a large one-car garage.',
+    description: 'Our largest standard unit. Built for big moves, full home renovations, or storing the contents of a multi-bedroom house with room to maneuver.',
+    rightSizeFor: ['Around 100+ large moving boxes', 'Multiple bedroom sets', 'Large appliances and furniture', 'Long-term storage of vehicles or trailers (where permitted)'],
+    accent: '#5d8a85', card: '#bdd3d0',
   },
 ]
 
-function UnitIllustration({ size, sqft }: { size: string; sqft: number }) {
-  const scale = Math.min(1, Math.max(0.45, sqft / 300))
-  const w = 240 * scale
-  const h = 160 * scale
+const TICKER_ITEMS = ['24/7 access', '100% digital', '0 hidden fees', 'month-to-month', 'smart locks', 'climate control']
+
+const ROTATE_MS = 4500
+
+function UnitSVG() {
   return (
-    <div
-      className="relative flex h-44 w-full items-center justify-center rounded-md bg-warm-white/5 ring-1 ring-warm-white/10"
-      aria-hidden="true"
-    >
-      <svg viewBox="0 0 240 160" width={w} height={h} className="overflow-visible">
-        <rect x="20" y="20" width="200" height="120" rx="6" fill="none" stroke="#ff6b35" strokeWidth="2" strokeDasharray="4 4" />
-        <line x1="60" y1="140" x2="60" y2="155" stroke="#ff6b35" strokeWidth="2" />
-        <line x1="60" y1="155" x2="120" y2="155" stroke="#ff6b35" strokeWidth="2" />
-        <text x="120" y="78" textAnchor="middle" fill="#f6f1e8" fontSize="22" fontWeight="700" letterSpacing="0.05em">
-          {size}
-        </text>
-        <text x="120" y="102" textAnchor="middle" fill="#f6f1e8" opacity="0.6" fontSize="11" letterSpacing="0.15em">
-          {sqft} SQ FT
-        </text>
-      </svg>
-    </div>
+    <svg viewBox="0 0 200 140" width="170" aria-hidden="true">
+      <rect x={10} y={14} width={180} height={112} rx={6} fill="none" stroke="#181818" strokeOpacity={0.4} strokeWidth={2} />
+      <g stroke="#181818" strokeOpacity={0.2} strokeWidth={1.5}>
+        <line x1={20} y1={40} x2={180} y2={40} />
+        <line x1={20} y1={58} x2={180} y2={58} />
+        <line x1={20} y1={76} x2={180} y2={76} />
+        <line x1={20} y1={94} x2={180} y2={94} />
+        <line x1={20} y1={112} x2={180} y2={112} />
+      </g>
+      <circle cx={100} cy={120} r={2.5} fill="#181818" fillOpacity={0.5} />
+    </svg>
   )
 }
 
-function SizeCard({ unit }: { unit: Unit }) {
+function Placeholder({ unit, showCaption }: { unit: Unit; showCaption: boolean }) {
   return (
-    <article className="group flex flex-col rounded-lg bg-warm-white/[0.03] p-6 ring-1 ring-warm-white/10 transition hover:ring-orange/40">
-      <UnitIllustration size={unit.size} sqft={unit.sqft} />
-
-      <div className="mt-5 flex items-baseline justify-between gap-3">
-        <h3 className="text-2xl font-bold tracking-tight text-warm-white">{unit.size}</h3>
-        <span className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-orange">{unit.sqft} sq ft</span>
+    <>
+      <div className="sg-placeholder" style={{ background: unit.card }}>
+        <UnitSVG />
+        <p style={{ marginTop: 16, fontSize: 30, fontWeight: 900, letterSpacing: '-0.01em' }}>{unit.size}</p>
+        <p style={{ marginTop: 4, fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(24,24,24,0.6)', fontWeight: 700 }}>
+          {unit.sqft} sq ft
+        </p>
       </div>
-
-      <p className="mt-1 text-sm text-warm-white/60">{unit.comparison}</p>
-
-      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-xs uppercase tracking-[0.12em] text-warm-white/50">
-        <span><span className="text-warm-white/80">{unit.sqft}</span> sq ft</span>
-        <span><span className="text-warm-white/80">{unit.cubicFt.toLocaleString()}</span> cu ft</span>
-        <span>Fits <span className="text-warm-white/80">{unit.fits}</span></span>
-      </div>
-
-      <p className="mt-4 text-sm leading-relaxed text-warm-white/75">{unit.description}</p>
-
-      <div className="mt-5">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-warm-white/60">The right size for</p>
-        <ul className="mt-2 space-y-1 text-sm text-warm-white/80">
-          {unit.rightSizeFor.map((item) => (
-            <li key={item} className="flex gap-2">
-              <span className="mt-2 inline-block h-1 w-1 shrink-0 rounded-full bg-orange" />
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="mt-6 pt-6 border-t border-warm-white/10">
-        <Link
-          href={`/contact?unit=${encodeURIComponent(unit.size)}`}
-          className="inline-flex items-center gap-2 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-orange hover:text-warm-white transition"
-        >
-          Contact us about this size
-          <span aria-hidden="true">→</span>
-        </Link>
-      </div>
-    </article>
+      {showCaption && <div className="sg-caption">{unit.caption}</div>}
+    </>
   )
 }
 
 export default function SizeGuidePage() {
-  const small = UNITS.filter((u) => u.group === 'small')
-  const medium = UNITS.filter((u) => u.group === 'medium')
-  const large = UNITS.filter((u) => u.group === 'large')
+  const [activeIdx, setActiveIdx] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    if (paused) return
+    timerRef.current = setInterval(() => {
+      setActiveIdx((i) => (i + 1) % UNITS.length)
+    }, ROTATE_MS)
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [paused, activeIdx])
+
+  const active = UNITS[activeIdx]
+  const prevIdx = (activeIdx - 1 + UNITS.length) % UNITS.length
+  const nextIdx = (activeIdx + 1) % UNITS.length
 
   return (
-    <main className="bg-black text-warm-white">
-      <section className="relative overflow-hidden border-b border-warm-white/10">
-        <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
-          <p className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-orange">Storage Unit Size Guide</p>
-          <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight md:text-6xl">
-            Find the right size for what you need to store.
-          </h1>
-          <p className="mt-6 max-w-2xl text-base text-warm-white/70 md:text-lg">
-            Not sure which unit fits your needs? This guide helps you visualize the right size, from a single closet of belongings up to a multi-bedroom home. Sizes are approximate and may vary by facility.
+    <main className="sg-root">
+      {/* Orange ticker */}
+      <div className="sg-ticker" aria-label="Journey features">
+        <div className="sg-ticker-track">
+          {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
+            <div key={`${item}-${i}`} className="sg-ticker-item">
+              {item}
+              <span className="sg-ticker-dot">•</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Cream card (Life Moments style) */}
+      <section
+        className="sg-cream-card"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        <span aria-hidden="true" className="sg-watermark">SIZES</span>
+
+        <div style={{ position: 'relative' }}>
+          <div className="sg-eyebrow">
+            <span className="sg-dash" />
+            <span>Size Guide</span>
+            <span className="sg-dash" />
+          </div>
+          <h1 className="sg-title">Find your size.</h1>
+          <p className="sg-subtitle">
+            Sizes are approximate and may vary by facility. Tap any size to see what fits, or let them cycle through on their own.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-warm-white/60">
-            <a href="#small" className="rounded-full border border-warm-white/15 px-4 py-2 hover:border-orange hover:text-orange transition">Small</a>
-            <a href="#medium" className="rounded-full border border-warm-white/15 px-4 py-2 hover:border-orange hover:text-orange transition">Medium</a>
-            <a href="#large" className="rounded-full border border-warm-white/15 px-4 py-2 hover:border-orange hover:text-orange transition">Large</a>
-            <a href="#compare" className="rounded-full border border-warm-white/15 px-4 py-2 hover:border-orange hover:text-orange transition">Compare All</a>
+          <div className="sg-grid">
+            {/* Numbered list */}
+            <ul className="sg-list">
+              {UNITS.map((u, i) => {
+                const isActive = i === activeIdx
+                return (
+                  <li key={u.num}>
+                    <button
+                      type="button"
+                      data-active={isActive}
+                      className="sg-num-button"
+                      style={isActive ? { background: u.accent } : undefined}
+                      onClick={() => {
+                        setActiveIdx(i)
+                        if (timerRef.current) clearInterval(timerRef.current)
+                        timerRef.current = null
+                      }}
+                    >
+                      <span className="sg-bg-num">{u.num}</span>
+                      <div className="sg-row-meta">
+                        <span className="sg-row-dot" />
+                        <span>{u.num}</span>
+                      </div>
+                      <div className="sg-row-title">
+                        {u.size} <span className="sg-row-sub">, fits {u.fits}</span>
+                      </div>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+
+            {/* Collage */}
+            <div className="sg-collage">
+              {UNITS.map((u, i) => {
+                let pos: 'active' | 'left' | 'right' | 'hidden' = 'hidden'
+                if (i === activeIdx) pos = 'active'
+                else if (i === prevIdx) pos = 'left'
+                else if (i === nextIdx) pos = 'right'
+                return (
+                  <div key={u.num} data-pos={pos} className="sg-photo-card">
+                    <Placeholder unit={u} showCaption={pos === 'active'} />
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Details panel */}
+          <div className="sg-details">
+            <div>
+              <p className="sg-stat-eyebrow">Selected size</p>
+              <p className="sg-stat-size">{active.size}</p>
+              <p className="sg-stat-compare">{active.comparison}</p>
+              <div className="sg-stat-grid">
+                <div className="sg-stat">
+                  <p className="sg-stat-label">Square feet</p>
+                  <p className="sg-stat-value">{active.sqft}</p>
+                </div>
+                <div className="sg-stat">
+                  <p className="sg-stat-label">Cubic feet</p>
+                  <p className="sg-stat-value">{active.cubicFt.toLocaleString()}</p>
+                </div>
+              </div>
+            </div>
+            <div>
+              <p className="sg-desc">{active.description}</p>
+              <div style={{ marginTop: 24 }}>
+                <p className="sg-rsf-label">The right size for</p>
+                <ul className="sg-rsf-list">
+                  {active.rightSizeFor.map((item) => (
+                    <li key={item}>
+                      <span className="sg-rsf-bullet" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div style={{ marginTop: 32 }}>
+                <a
+                  className="sg-pill-cta"
+                  href={`mailto:hello@journey.storage?subject=${encodeURIComponent(
+                    `Inquiry about ${active.size} unit`,
+                  )}`}
+                >
+                  Contact us about this size <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <SizeGroupSection
-        id="small"
-        eyebrow="Small Units"
-        title="For a closet, dorm, or studio."
-        description="Perfect for seasonal items, small furniture, and the contents of a studio or one bedroom."
-        units={small}
-      />
+      {/* Comparison table */}
+      <section className="sg-table-wrap">
+        <div style={{ maxWidth: 1024, margin: '0 auto' }}>
+          <div className="sg-eyebrow sg-eyebrow-left">
+            <span className="sg-dash" />
+            <span>Side by side</span>
+          </div>
+          <h2 className="sg-table-title">Unit size comparison</h2>
+          <p className="sg-table-sub">All Journey self-storage sizes at a glance.</p>
 
-      <SizeGroupSection
-        id="medium"
-        eyebrow="Medium Units"
-        title="For one or two bedrooms."
-        description="Fits the contents of a one to two bedroom apartment with room to walk around."
-        units={medium}
-        alt
-      />
-
-      <SizeGroupSection
-        id="large"
-        eyebrow="Large Units"
-        title="For a whole home."
-        description="Designed for moves, renovations, and full multi-bedroom homes."
-        units={large}
-      />
-
-      <section id="compare" className="border-y border-warm-white/10 bg-warm-white/[0.02]">
-        <div className="mx-auto max-w-6xl px-6 py-20">
-          <p className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-orange">Side by side</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">Unit size comparison</h2>
-          <p className="mt-3 max-w-2xl text-sm text-warm-white/70">All Journey self-storage sizes at a glance. Sizes are approximate and may vary by facility.</p>
-
-          <div className="mt-8 overflow-x-auto">
-            <table className="w-full min-w-[640px] border-collapse text-left">
+          <div className="sg-table-scroll">
+            <table className="sg-table">
               <thead>
-                <tr className="text-[0.7rem] uppercase tracking-[0.15em] text-warm-white/50">
-                  <th className="border-b border-warm-white/10 py-3 pr-4 font-bold">Unit Size</th>
-                  <th className="border-b border-warm-white/10 py-3 pr-4 font-bold">Square Feet</th>
-                  <th className="border-b border-warm-white/10 py-3 pr-4 font-bold">Cubic Feet</th>
-                  <th className="border-b border-warm-white/10 py-3 pr-4 font-bold">Fits The Contents Of</th>
+                <tr>
+                  <th>Unit Size</th>
+                  <th>Square Feet</th>
+                  <th>Cubic Feet</th>
+                  <th>Fits The Contents Of</th>
                 </tr>
               </thead>
-              <tbody className="text-sm">
+              <tbody>
                 {UNITS.map((u) => (
-                  <tr key={u.size} className="border-b border-warm-white/5 last:border-b-0">
-                    <td className="py-4 pr-4 font-bold text-warm-white">{u.size}</td>
-                    <td className="py-4 pr-4 text-warm-white/80">{u.sqft}</td>
-                    <td className="py-4 pr-4 text-warm-white/80">{u.cubicFt.toLocaleString()}</td>
-                    <td className="py-4 pr-4 text-warm-white/80">{u.fits}</td>
+                  <tr key={u.num}>
+                    <td style={{ fontWeight: 900, color: 'var(--sg-warm-white)' }}>{u.size}</td>
+                    <td>{u.sqft}</td>
+                    <td>{u.cubicFt.toLocaleString()}</td>
+                    <td>Fits {u.fits}</td>
                   </tr>
                 ))}
               </tbody>
@@ -284,58 +297,485 @@ export default function SizeGuidePage() {
         </div>
       </section>
 
-      <section className="border-b border-warm-white/10">
-        <div className="mx-auto max-w-4xl px-6 py-20 text-center">
-          <p className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-orange">Still not sure?</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
-            Tell us what you need to store. We'll help you pick the right size.
-          </h2>
-          <p className="mt-4 text-warm-white/70">
-            Our team can walk you through unit options at the facility nearest you and answer any questions about availability, pricing, and features.
-          </p>
-          <div className="mt-8">
-            <Link
-              href="/contact"
-              className="inline-flex items-center gap-3 rounded-full bg-orange px-8 py-3 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-black hover:bg-warm-white transition"
-            >
-              Contact Us
-              <span aria-hidden="true">→</span>
-            </Link>
-          </div>
+      {/* Final CTA */}
+      <section className="sg-final-cta">
+        <div className="sg-eyebrow">
+          <span className="sg-dash" />
+          <span>Still not sure?</span>
+          <span className="sg-dash" />
+        </div>
+        <h2 className="sg-final-title">Tell us what you need to store.</h2>
+        <p className="sg-final-sub">
+          Our team can walk you through unit options at the facility nearest you and answer any questions about availability, pricing, and features.
+        </p>
+        <div style={{ marginTop: 32 }}>
+          <a className="sg-pill-cta" href="mailto:hello@journey.storage?subject=Storage%20size%20guide%20inquiry">
+            Contact Us <span aria-hidden="true">→</span>
+          </a>
         </div>
       </section>
+
+      <style jsx>{`
+        :global(:root) {
+          --sg-site-dark: #181818;
+          --sg-warm-white: #f5f0e8;
+          --sg-orange: #e8622a;
+        }
+        .sg-root {
+          background: var(--sg-site-dark);
+          color: var(--sg-warm-white);
+          font-family: 'Lato', 'Lato Fallback', system-ui, -apple-system, sans-serif;
+        }
+
+        /* Ticker */
+        .sg-ticker {
+          position: relative;
+          overflow: hidden;
+          background: var(--sg-orange);
+          padding: 14px 0;
+        }
+        .sg-ticker-track {
+          display: flex;
+          width: max-content;
+          animation: sg-ticker-scroll 30s linear infinite;
+        }
+        .sg-ticker:hover .sg-ticker-track { animation-play-state: paused; }
+        .sg-ticker-item {
+          color: rgba(245, 240, 232, 0.9);
+          font-size: 11.2px;
+          font-weight: 700;
+          letter-spacing: 0.3em;
+          text-transform: uppercase;
+          margin: 0 24px;
+          white-space: nowrap;
+          display: inline-flex;
+          align-items: center;
+          gap: 24px;
+        }
+        @media (min-width: 768px) {
+          .sg-ticker-item { margin: 0 40px; }
+        }
+        .sg-ticker-dot { opacity: 0.7; }
+        @keyframes sg-ticker-scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+
+        /* Cream card */
+        .sg-cream-card {
+          background: var(--sg-warm-white);
+          color: var(--sg-site-dark);
+          border-radius: 24px;
+          margin: 24px 12px;
+          padding: 64px 24px 60px;
+          position: relative;
+          overflow: hidden;
+        }
+        @media (min-width: 768px) {
+          .sg-cream-card { margin: 28px 24px; border-radius: 32px; padding: 80px 32px 64px; }
+        }
+        @media (min-width: 1024px) {
+          .sg-cream-card { margin: 32px 40px; padding: 96px 40px 80px; }
+        }
+        .sg-watermark {
+          position: absolute;
+          inset-inline: 0;
+          top: 60px;
+          text-align: center;
+          font-weight: 900;
+          letter-spacing: -0.04em;
+          line-height: 1;
+          color: rgba(24, 24, 24, 0.06);
+          user-select: none;
+          pointer-events: none;
+          font-size: clamp(110px, 13vw, 200px);
+        }
+
+        .sg-eyebrow {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          color: var(--sg-orange);
+          font-size: 12px;
+          font-weight: 700;
+          letter-spacing: 0.32em;
+          text-transform: uppercase;
+        }
+        .sg-eyebrow-left { justify-content: flex-start; }
+        .sg-dash { height: 1px; width: 36px; background: var(--sg-orange); }
+
+        .sg-title {
+          text-align: center;
+          font-weight: 900;
+          font-size: clamp(36px, 5.5vw, 60px);
+          letter-spacing: -0.02em;
+          line-height: 1.05;
+          color: var(--sg-site-dark);
+          margin-top: 18px;
+        }
+        .sg-subtitle {
+          text-align: center;
+          max-width: 640px;
+          margin: 18px auto 0;
+          color: rgba(24, 24, 24, 0.65);
+          font-size: 16px;
+          line-height: 1.55;
+        }
+
+        .sg-grid {
+          display: grid;
+          gap: 48px;
+          margin-top: 56px;
+        }
+        @media (min-width: 768px) {
+          .sg-grid { grid-template-columns: 1fr 1fr; align-items: center; }
+        }
+
+        /* Number list */
+        .sg-list {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          max-width: 460px;
+          margin: 0 auto;
+          list-style: none;
+          padding: 0;
+        }
+        .sg-num-button {
+          position: relative;
+          width: 100%;
+          min-height: 90px;
+          text-align: left;
+          border-radius: 16px;
+          padding: 18px 26px;
+          background: transparent;
+          cursor: pointer;
+          border: 0;
+          color: rgba(24, 24, 24, 0.42);
+          transition: background-color 0.35s ease, color 0.35s ease;
+          font-family: inherit;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+        .sg-num-button:hover { background: rgba(24, 24, 24, 0.04); }
+        .sg-row-meta {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          color: inherit;
+        }
+        .sg-row-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: currentColor;
+          opacity: 0.6;
+        }
+        .sg-row-title {
+          margin-top: 6px;
+          font-size: 22px;
+          font-weight: 900;
+          letter-spacing: -0.01em;
+          line-height: 1.15;
+          color: inherit;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .sg-row-sub {
+          font-size: 16px;
+          font-weight: 400;
+          color: rgba(24, 24, 24, 0.55);
+          margin-left: 6px;
+          letter-spacing: 0;
+        }
+        .sg-num-button[data-active='true'] .sg-row-sub { color: rgba(24, 24, 24, 0.7); }
+        .sg-bg-num {
+          position: absolute;
+          right: 26px;
+          top: 50%;
+          transform: translateY(-50%);
+          font-weight: 900;
+          font-size: 72px;
+          color: rgba(24, 24, 24, 0.07);
+          pointer-events: none;
+          letter-spacing: -0.04em;
+          line-height: 1;
+        }
+        .sg-num-button[data-active='true'] { color: var(--sg-site-dark); }
+        .sg-num-button[data-active='true'] .sg-row-meta { color: rgba(24, 24, 24, 0.85); }
+        .sg-num-button[data-active='true'] .sg-row-title { color: var(--sg-site-dark); }
+        .sg-num-button[data-active='true'] .sg-bg-num { color: rgba(24, 24, 24, 0.14); }
+
+        /* Collage */
+        .sg-collage {
+          position: relative;
+          height: 480px;
+          width: 100%;
+          max-width: 560px;
+          margin: 0 auto;
+        }
+        .sg-photo-card {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          border-radius: 20px;
+          overflow: hidden;
+          transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.55s ease;
+          box-shadow: 0 25px 50px -20px rgba(0, 0, 0, 0.35);
+        }
+        .sg-photo-card[data-pos='active'] {
+          transform: translate(-50%, -50%) scale(1);
+          width: 350px;
+          height: 440px;
+          z-index: 30;
+          opacity: 1;
+        }
+        .sg-photo-card[data-pos='left'] {
+          transform: translate(calc(-50% - 140px), calc(-50% + 4px)) rotate(-3deg) scale(0.85);
+          width: 220px;
+          height: 340px;
+          z-index: 10;
+          opacity: 0.85;
+        }
+        .sg-photo-card[data-pos='right'] {
+          transform: translate(calc(-50% + 140px), calc(-50% + 4px)) rotate(3deg) scale(0.85);
+          width: 220px;
+          height: 340px;
+          z-index: 10;
+          opacity: 0.85;
+        }
+        .sg-photo-card[data-pos='hidden'] {
+          transform: translate(-50%, -50%) scale(0.6);
+          opacity: 0;
+          pointer-events: none;
+        }
+        :global(.sg-placeholder) {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: #181818;
+          text-align: center;
+          padding: 24px;
+        }
+        :global(.sg-caption) {
+          position: absolute;
+          inset-inline: 0;
+          bottom: 0;
+          padding: 22px 24px;
+          background: linear-gradient(to top, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0));
+          color: var(--sg-warm-white);
+          font-size: 14px;
+          font-weight: 700;
+        }
+
+        /* Details panel */
+        .sg-details {
+          max-width: 1000px;
+          margin: 56px auto 0;
+          padding: 32px;
+          background: rgba(24, 24, 24, 0.04);
+          border: 1px solid rgba(24, 24, 24, 0.08);
+          border-radius: 20px;
+          display: grid;
+          gap: 28px;
+          grid-template-columns: 1fr;
+        }
+        @media (min-width: 768px) {
+          .sg-details { grid-template-columns: 1fr 2fr; padding: 40px; }
+        }
+        .sg-stat-eyebrow {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          color: var(--sg-orange);
+        }
+        .sg-stat-size {
+          margin-top: 10px;
+          font-size: 40px;
+          font-weight: 900;
+          letter-spacing: -0.02em;
+          line-height: 1;
+        }
+        .sg-stat-compare {
+          margin-top: 8px;
+          font-size: 14px;
+          color: rgba(24, 24, 24, 0.6);
+        }
+        .sg-stat-grid {
+          margin-top: 18px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          font-size: 14px;
+        }
+        .sg-stat {
+          background: var(--sg-warm-white);
+          border: 1px solid rgba(24, 24, 24, 0.1);
+          border-radius: 12px;
+          padding: 10px 14px;
+        }
+        .sg-stat-label {
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
+          color: rgba(24, 24, 24, 0.5);
+        }
+        .sg-stat-value {
+          margin-top: 4px;
+          font-size: 18px;
+          font-weight: 900;
+        }
+        .sg-desc {
+          font-size: 16px;
+          line-height: 1.6;
+          color: rgba(24, 24, 24, 0.78);
+        }
+        .sg-rsf-label {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.22em;
+          text-transform: uppercase;
+          color: rgba(24, 24, 24, 0.55);
+        }
+        .sg-rsf-list {
+          margin-top: 12px;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 8px;
+          font-size: 14px;
+          color: rgba(24, 24, 24, 0.78);
+          list-style: none;
+          padding: 0;
+        }
+        @media (min-width: 640px) {
+          .sg-rsf-list { grid-template-columns: 1fr 1fr; }
+        }
+        .sg-rsf-list li {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+        }
+        .sg-rsf-bullet {
+          margin-top: 9px;
+          display: inline-block;
+          width: 5px;
+          height: 5px;
+          flex-shrink: 0;
+          border-radius: 50%;
+          background: var(--sg-orange);
+        }
+        .sg-pill-cta {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          background: var(--sg-site-dark);
+          color: var(--sg-warm-white);
+          font-weight: 700;
+          font-size: 12px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          padding: 13px 26px;
+          border-radius: 24px;
+          transition: background-color 0.25s ease;
+          text-decoration: none;
+        }
+        .sg-pill-cta:hover { background: var(--sg-orange); }
+
+        /* Comparison table */
+        .sg-table-wrap {
+          margin: 32px 12px;
+          background: #1f1c1a;
+          border-radius: 24px;
+          padding: 56px 28px;
+        }
+        @media (min-width: 768px) {
+          .sg-table-wrap { margin: 32px 24px; padding: 64px 40px; }
+        }
+        @media (min-width: 1024px) {
+          .sg-table-wrap { margin: 32px 40px; }
+        }
+        .sg-table-title {
+          margin-top: 12px;
+          font-weight: 900;
+          font-size: clamp(30px, 4vw, 42px);
+          letter-spacing: -0.02em;
+          line-height: 1.05;
+          color: var(--sg-warm-white);
+        }
+        .sg-table-sub {
+          margin-top: 12px;
+          max-width: 640px;
+          color: rgba(245, 240, 232, 0.7);
+          font-size: 15px;
+        }
+        .sg-table-scroll {
+          margin-top: 32px;
+          overflow-x: auto;
+        }
+        .sg-table {
+          width: 100%;
+          min-width: 640px;
+          border-collapse: collapse;
+          text-align: left;
+        }
+        .sg-table thead th {
+          padding: 12px 16px 12px 0;
+          color: rgba(245, 240, 232, 0.5);
+          font-size: 11px;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          font-weight: 700;
+          border-bottom: 1px solid rgba(245, 240, 232, 0.1);
+        }
+        .sg-table tbody tr { border-bottom: 1px solid rgba(245, 240, 232, 0.08); }
+        .sg-table tbody tr:last-child { border-bottom: 0; }
+        .sg-table tbody td {
+          padding: 16px 16px 16px 0;
+          color: rgba(245, 240, 232, 0.9);
+          font-size: 14px;
+        }
+
+        /* Final CTA */
+        .sg-final-cta {
+          margin: 0 12px 60px;
+          background: var(--sg-warm-white);
+          color: var(--sg-site-dark);
+          border-radius: 24px;
+          padding: 64px 24px;
+          text-align: center;
+        }
+        @media (min-width: 768px) {
+          .sg-final-cta { margin: 0 24px 64px; padding: 80px 32px; border-radius: 32px; }
+        }
+        @media (min-width: 1024px) {
+          .sg-final-cta { margin: 0 40px 72px; }
+        }
+        .sg-final-title {
+          margin-top: 12px;
+          font-weight: 900;
+          font-size: clamp(34px, 4.5vw, 52px);
+          letter-spacing: -0.02em;
+          line-height: 1.05;
+        }
+        .sg-final-sub {
+          margin: 16px auto 0;
+          color: rgba(24, 24, 24, 0.65);
+          max-width: 640px;
+          line-height: 1.55;
+        }
+      `}</style>
     </main>
-  )
-}
-
-function SizeGroupSection({
-  id,
-  eyebrow,
-  title,
-  description,
-  units,
-  alt = false,
-}: {
-  id: string
-  eyebrow: string
-  title: string
-  description: string
-  units: Unit[]
-  alt?: boolean
-}) {
-  return (
-    <section id={id} className={alt ? 'bg-warm-white/[0.02]' : ''}>
-      <div className="mx-auto max-w-6xl px-6 py-20">
-        <p className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-orange">{eyebrow}</p>
-        <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">{title}</h2>
-        <p className="mt-3 max-w-2xl text-sm text-warm-white/70 md:text-base">{description}</p>
-
-        <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {units.map((unit) => (
-            <SizeCard key={unit.size} unit={unit} />
-          ))}
-        </div>
-      </div>
-    </section>
   )
 }
