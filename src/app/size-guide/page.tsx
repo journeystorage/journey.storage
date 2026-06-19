@@ -138,6 +138,28 @@ export default function SizeGuidePage() {
 
   return (
     <main className="sg-root">
+      {/* Site header (matched to journey.storage main page) */}
+      <header className="sg-header">
+        <div className="sg-header-inner">
+          <a href="/" aria-label="Journey.Storage home" className="sg-logo-link">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/brand/logo-white-TM.svg"
+              alt="Journey.Storage"
+              className="sg-logo"
+            />
+          </a>
+          <nav className="sg-nav" aria-label="Primary">
+            <a href="/spaces">Spaces</a>
+            <a href="/locations">Locations</a>
+            <a href="/about">About</a>
+            <a href="/blog" className="sg-nav-muted">Blog</a>
+            <a href="/ecosystem">Ecosystem <span aria-hidden="true" style={{ opacity: 0.7 }}>▾</span></a>
+          </nav>
+          <a className="sg-waitlist-btn" href="/#waitlist">Join the waitlist</a>
+        </div>
+      </header>
+
       {/* Orange ticker */}
       <div className="sg-ticker" aria-label="Journey features">
         <div className="sg-ticker-track">
@@ -326,6 +348,56 @@ export default function SizeGuidePage() {
           color: var(--sg-warm-white);
           font-family: 'Lato', 'Lato Fallback', system-ui, -apple-system, sans-serif;
         }
+
+        /* Header */
+        .sg-header {
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          background: rgba(24, 24, 24, 0.95);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+        }
+        .sg-header-inner {
+          max-width: 1280px;
+          margin: 0 auto;
+          padding: 0 24px;
+          height: 73px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .sg-logo-link { display: inline-flex; align-items: center; }
+        .sg-logo { height: 13px; width: 180px; display: block; }
+        .sg-nav { display: none; }
+        @media (min-width: 768px) {
+          .sg-nav { display: flex; gap: 32px; align-items: center; }
+        }
+        .sg-nav a {
+          color: var(--sg-warm-white);
+          font-size: 16px;
+          font-weight: 700;
+          line-height: 24px;
+          letter-spacing: 0;
+          text-decoration: none;
+          transition: color 0.2s ease;
+        }
+        .sg-nav a.sg-nav-muted { color: rgba(245, 240, 232, 0.5); }
+        .sg-nav a:hover { color: var(--sg-orange); }
+        .sg-waitlist-btn {
+          background: var(--sg-orange);
+          color: var(--sg-warm-white);
+          font-weight: 700;
+          border-radius: 24px;
+          padding: 12px 24px;
+          font-size: 16px;
+          line-height: 24px;
+          display: inline-flex;
+          align-items: center;
+          text-decoration: none;
+          transition: opacity 0.2s ease;
+        }
+        .sg-waitlist-btn:hover { opacity: 0.9; }
 
         /* Ticker */
         .sg-ticker {
