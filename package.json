@@ -15,7 +15,7 @@
     "dev:springfield": "node apps/springfield/server.mjs",
     "build": "next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "build:consulting": "rm -rf src public .next && cp -r apps/consulting/src src && cp -r apps/consulting/public public && cp apps/consulting/next.config.ts next.config.ts && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
-    "build:investors": "rm -rf src public .next && cp -r apps/investors/src src && cp -r apps/investors/public public && mkdir -p public/deck/springfield && cp -R apps/springfield/public/. public/deck/springfield/ && cp apps/investors/next.config.ts next.config.ts && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
+    "build:investors": "rm -rf src public .next && cp -r apps/investors/src src && cp -r apps/investors/public public && mkdir -p public/deck/springfield && cp -R apps/springfield/public/. public/deck/springfield/ && sed -i 's#<head>#<head><base href=\"/deck/springfield/\">#' public/deck/springfield/index.html && cp apps/investors/next.config.ts next.config.ts && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "build:springfield": "echo Springfield is a pre-built static export, no build step required.",
     "start": "HOSTNAME=0.0.0.0 node .next/standalone/server.js",
     "start:springfield": "node apps/springfield/server.mjs",
