@@ -7,9 +7,9 @@ const nextConfig: NextConfig = {
               images: {
                               unoptimized: true,
               },
-  async rewrites() {
+  async redirects() {
     return [
-      { source: '/deck/springfield', destination: '/deck/springfield/index.html' },
+      { source: '/deck/springfield', destination: '/deck/springfield/index.html', permanent: false },
     ]
   },
 }
