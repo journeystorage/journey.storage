@@ -7,11 +7,6 @@ const nextConfig: NextConfig = {
               images: {
                               unoptimized: true,
               },
-  async redirects() {
-    return [
-      { source: '/deck/springfield', destination: '/deck/springfield/index.html', permanent: false },
-    ]
-  },
 }
 
 export default nextConfig
