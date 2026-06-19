@@ -157,6 +157,16 @@ export default function SizeGuidePage() {
             <a href="/ecosystem">Ecosystem <span aria-hidden="true" style={{ opacity: 0.7 }}>▾</span></a>
           </nav>
           <a className="sg-waitlist-btn" href="/#waitlist">Join the waitlist</a>
+          <button
+            type="button"
+            className="sg-hamburger"
+            aria-label="Open menu"
+            onClick={() => { window.location.href = '/' }}
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
       </header>
 
@@ -361,16 +371,22 @@ export default function SizeGuidePage() {
         .sg-header-inner {
           max-width: 1280px;
           margin: 0 auto;
-          padding: 0 24px;
-          height: 73px;
+          padding: 0 20px;
+          height: 64px;
           display: flex;
           align-items: center;
           justify-content: space-between;
         }
+        @media (min-width: 1024px) {
+          .sg-header-inner { padding: 0 64px; height: 73px; }
+        }
         .sg-logo-link { display: inline-flex; align-items: center; }
-        .sg-logo { height: 13px; width: 180px; display: block; }
+        .sg-logo { height: 11px; width: 140px; display: block; }
+        @media (min-width: 1024px) {
+          .sg-logo { height: 13px; width: 180px; }
+        }
         .sg-nav { display: none; }
-        @media (min-width: 768px) {
+        @media (min-width: 1024px) {
           .sg-nav { display: flex; gap: 32px; align-items: center; }
         }
         .sg-nav a {
@@ -385,6 +401,7 @@ export default function SizeGuidePage() {
         .sg-nav a.sg-nav-muted { color: rgba(245, 240, 232, 0.5); }
         .sg-nav a:hover { color: var(--sg-orange); }
         .sg-waitlist-btn {
+          display: none;
           background: var(--sg-orange);
           color: var(--sg-warm-white);
           font-weight: 700;
@@ -392,12 +409,32 @@ export default function SizeGuidePage() {
           padding: 12px 24px;
           font-size: 16px;
           line-height: 24px;
-          display: inline-flex;
           align-items: center;
           text-decoration: none;
           transition: opacity 0.2s ease;
         }
+        @media (min-width: 1024px) {
+          .sg-waitlist-btn { display: inline-flex; }
+        }
         .sg-waitlist-btn:hover { opacity: 0.9; }
+        .sg-hamburger {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
+          color: var(--sg-warm-white);
+          border: 0;
+          border-radius: 8px;
+          padding: 8px;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+        }
+        .sg-hamburger:hover { background: rgba(0, 0, 0, 0.6); }
+        @media (min-width: 1024px) {
+          .sg-hamburger { display: none; }
+        }
 
         /* Ticker */
         .sg-ticker {
@@ -433,21 +470,21 @@ export default function SizeGuidePage() {
           100% { transform: translateX(-50%); }
         }
 
-        /* Cream card */
+        /* Cream card (matched to live: mx-3 md:mx-6 lg:mx-10, pt-16/20/24, pb-12/16/20) */
         .sg-cream-card {
           background: var(--sg-warm-white);
           color: var(--sg-site-dark);
           border-radius: 24px;
-          margin: 24px 12px;
-          padding: 64px 24px 60px;
+          margin: 16px 12px;
+          padding: 64px 20px 48px;
           position: relative;
           overflow: hidden;
         }
         @media (min-width: 768px) {
-          .sg-cream-card { margin: 28px 24px; border-radius: 32px; padding: 80px 32px 64px; }
+          .sg-cream-card { margin: 24px; border-radius: 24px; padding: 80px 32px 64px; }
         }
         @media (min-width: 1024px) {
-          .sg-cream-card { margin: 32px 40px; padding: 96px 40px 80px; }
+          .sg-cream-card { margin: 32px 40px; border-radius: 32px; padding: 96px 40px 80px; }
         }
         .sg-watermark {
           position: absolute;
@@ -495,13 +532,19 @@ export default function SizeGuidePage() {
           line-height: 1.55;
         }
 
+        /* Grid stacks until lg (matches live lg:grid lg:grid-cols-[1fr_1.5fr]) */
         .sg-grid {
           display: grid;
-          gap: 48px;
-          margin-top: 56px;
+          gap: 32px;
+          margin-top: 40px;
         }
-        @media (min-width: 768px) {
-          .sg-grid { grid-template-columns: 1fr 1fr; align-items: center; }
+        @media (min-width: 1024px) {
+          .sg-grid {
+            grid-template-columns: 1fr 1.5fr;
+            align-items: center;
+            gap: 40px;
+            margin-top: 56px;
+          }
         }
 
         /* Number list */
@@ -585,13 +628,16 @@ export default function SizeGuidePage() {
         .sg-num-button[data-active='true'] .sg-row-title { color: var(--sg-site-dark); }
         .sg-num-button[data-active='true'] .sg-bg-num { color: rgba(24, 24, 24, 0.14); }
 
-        /* Collage */
+        /* Collage, mobile sizing scaled down */
         .sg-collage {
           position: relative;
-          height: 480px;
+          height: 400px;
           width: 100%;
           max-width: 560px;
           margin: 0 auto;
+        }
+        @media (min-width: 1024px) {
+          .sg-collage { height: 480px; }
         }
         .sg-photo-card {
           position: absolute;
@@ -604,22 +650,22 @@ export default function SizeGuidePage() {
         }
         .sg-photo-card[data-pos='active'] {
           transform: translate(-50%, -50%) scale(1);
-          width: 350px;
-          height: 440px;
+          width: 260px;
+          height: 340px;
           z-index: 30;
           opacity: 1;
         }
         .sg-photo-card[data-pos='left'] {
-          transform: translate(calc(-50% - 140px), calc(-50% + 4px)) rotate(-3deg) scale(0.85);
-          width: 220px;
-          height: 340px;
+          transform: translate(calc(-50% - 90px), calc(-50% + 4px)) rotate(-3deg) scale(0.85);
+          width: 170px;
+          height: 270px;
           z-index: 10;
           opacity: 0.85;
         }
         .sg-photo-card[data-pos='right'] {
-          transform: translate(calc(-50% + 140px), calc(-50% + 4px)) rotate(3deg) scale(0.85);
-          width: 220px;
-          height: 340px;
+          transform: translate(calc(-50% + 90px), calc(-50% + 4px)) rotate(3deg) scale(0.85);
+          width: 170px;
+          height: 270px;
           z-index: 10;
           opacity: 0.85;
         }
@@ -627,6 +673,22 @@ export default function SizeGuidePage() {
           transform: translate(-50%, -50%) scale(0.6);
           opacity: 0;
           pointer-events: none;
+        }
+        @media (min-width: 1024px) {
+          .sg-photo-card[data-pos='active'] {
+            width: 350px;
+            height: 440px;
+          }
+          .sg-photo-card[data-pos='left'] {
+            transform: translate(calc(-50% - 140px), calc(-50% + 4px)) rotate(-3deg) scale(0.85);
+            width: 220px;
+            height: 340px;
+          }
+          .sg-photo-card[data-pos='right'] {
+            transform: translate(calc(-50% + 140px), calc(-50% + 4px)) rotate(3deg) scale(0.85);
+            width: 220px;
+            height: 340px;
+          }
         }
         :global(.sg-placeholder) {
           width: 100%;
