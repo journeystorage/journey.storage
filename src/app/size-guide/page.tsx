@@ -201,6 +201,32 @@ export default function SizeGuidePage() {
             Sizes are approximate and may vary by facility. Tap any size to see what fits, or let them cycle through on their own.
           </p>
 
+          {/* Mobile-only horizontal tabs (matches live Life Moments mobile) */}
+          <div className="sg-mobile-tabs" role="tablist" aria-label="Size selector">
+            {UNITS.map((u, i) => {
+              const isActive = i === activeIdx
+              return (
+                <button
+                  key={u.num}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  data-active={isActive}
+                  className="sg-mobile-tab"
+                  style={isActive ? { background: u.accent } : undefined}
+                  onClick={() => {
+                    setActiveIdx(i)
+                    if (timerRef.current) clearInterval(timerRef.current)
+                    timerRef.current = null
+                  }}
+                >
+                  <span className="sg-mobile-tab-num">{u.num}</span>
+                  {isActive && <span className="sg-mobile-tab-title">{u.size}</span>}
+                </button>
+              )
+            })}
+          </div>
+
           <div className="sg-grid">
             {/* Numbered list */}
             <ul className="sg-list">
@@ -547,15 +573,81 @@ export default function SizeGuidePage() {
           }
         }
 
-        /* Number list */
-        .sg-list {
+        /* Mobile-only horizontal tab strip (matches live Life Moments mobile) */
+        .sg-mobile-tabs {
+          display: flex;
+          align-items: stretch;
+          gap: 8px;
+          margin-bottom: 24px;
+          height: 106px;
+        }
+        @media (min-width: 768px) {
+          .sg-mobile-tabs { height: 114px; }
+        }
+        @media (min-width: 1024px) {
+          .sg-mobile-tabs { display: none; }
+        }
+        .sg-mobile-tab {
+          position: relative;
+          text-align: left;
+          border-radius: 14px;
+          border: 0;
+          cursor: pointer;
+          overflow: hidden;
+          transition: flex-grow 0.35s ease, background-color 0.35s ease, padding 0.35s ease;
+          font-family: inherit;
+          background: rgba(0, 0, 0, 0.04);
+          color: rgba(24, 24, 24, 0.5);
+          padding: 16px 14px;
+          flex: 0 0 56px;
           display: flex;
           flex-direction: column;
-          gap: 10px;
-          max-width: 460px;
-          margin: 0 auto;
-          list-style: none;
-          padding: 0;
+          align-items: flex-start;
+          justify-content: flex-end;
+        }
+        @media (min-width: 768px) {
+          .sg-mobile-tab { border-radius: 16px; flex-basis: 64px; padding: 18px 16px; }
+        }
+        .sg-mobile-tab[data-active='true'] {
+          flex: 1 1 auto;
+          color: var(--sg-site-dark);
+        }
+        .sg-mobile-tab-num {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          opacity: 0.85;
+        }
+        .sg-mobile-tab[data-active='true'] .sg-mobile-tab-num {
+          opacity: 1;
+        }
+        .sg-mobile-tab-title {
+          margin-top: 8px;
+          font-size: 22px;
+          font-weight: 900;
+          letter-spacing: -0.01em;
+          line-height: 1.1;
+          color: var(--sg-site-dark);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        /* Desktop number list (hidden on mobile, matches live `hidden lg:block`) */
+        .sg-list {
+          display: none;
+        }
+        @media (min-width: 1024px) {
+          .sg-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 460px;
+            margin: 0 auto;
+            list-style: none;
+            padding: 0;
+          }
         }
         .sg-num-button {
           position: relative;
@@ -628,7 +720,7 @@ export default function SizeGuidePage() {
         .sg-num-button[data-active='true'] .sg-row-title { color: var(--sg-site-dark); }
         .sg-num-button[data-active='true'] .sg-bg-num { color: rgba(24, 24, 24, 0.14); }
 
-        /* Collage, mobile sizing scaled down */
+        /* Collage — mobile sizing scaled down */
         .sg-collage {
           position: relative;
           height: 400px;
@@ -648,6 +740,7 @@ export default function SizeGuidePage() {
           transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.55s ease;
           box-shadow: 0 25px 50px -20px rgba(0, 0, 0, 0.35);
         }
+        /* Mobile: smaller active card and tighter offsets so cards stay on screen */
         .sg-photo-card[data-pos='active'] {
           transform: translate(-50%, -50%) scale(1);
           width: 260px;
