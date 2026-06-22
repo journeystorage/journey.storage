@@ -84,20 +84,35 @@ async function notifyTeam(row: Record<string, unknown>) {
     </table>
   `
 
-  await fetch('https://api.resend.com/emails', {
+  // Default to Resend's test sender + the account-owner inbox so notifications
+  // work without domain verification. Once journey.storage is verified in
+  // Resend, set LEAD_NOTIFY_FROM (e.g. "Journey.Direct <noreply@journey.storage>")
+  // and LEAD_NOTIFY_TO (comma-separated, e.g. "lyvia@journey.storage,jonah@journey.storage").
+  const from = process.env.LEAD_NOTIFY_FROM || 'Journey.Direct <onboarding@resend.dev>'
+  const to = (process.env.LEAD_NOTIFY_TO || 'lyvia@journey.storage')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+
+  const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${key}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'Journey.Direct <noreply@journey.storage>',
-      to: ['jonah@journey.storage', 'lyvia@journey.storage'],
+      from,
+      to,
       subject,
       reply_to: String(row.email ?? ''),
       html,
     }),
   })
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '')
+    console.error('[investor-contact] Resend send failed:', res.status, detail)
+  }
 }
 
 function escapeHtml(s: string) {
