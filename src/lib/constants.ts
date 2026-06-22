@@ -49,9 +49,9 @@ export const socialUrls = {
 
 // ─── Nav Configuration ───
 export const navLinks = [
-  { label: 'Spaces', href: `#${sectionIds.howItWorks}` },
   { label: 'Locations', href: `#${sectionIds.locations}` },
-  { label: 'About', href: `#${sectionIds.about}` },
+  { label: 'Size Guide', href: '/size-guide' },
+  { label: 'About Us', href: `#${sectionIds.about}` },
 ] as const
 
 export const ecosystemDropdownLinks = [

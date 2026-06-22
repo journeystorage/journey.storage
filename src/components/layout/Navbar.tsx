@@ -44,6 +44,19 @@ export default function Navbar() {
     [isHome, router],
   )
 
+  const handleNavClick = useCallback(
+    (href: string) => {
+      if (href.startsWith('#')) {
+        handleAnchor(href.slice(1))
+      } else {
+        setMobileOpen(false)
+        setDropdownOpen(false)
+        router.push(href)
+      }
+    },
+    [handleAnchor, router],
+  )
+
   const handleLogoClick = useCallback(() => {
     setMobileOpen(false)
     if (isHome) {
@@ -92,7 +105,7 @@ export default function Navbar() {
             {navLinks.map((link) => (
               <button
                 key={link.label}
-                onClick={() => handleAnchor(link.href.replace('#', ''))}
+                onClick={() => handleNavClick(link.href)}
                 className={`text-body-sm font-bold transition-opacity duration-150 hover:opacity-70 cursor-pointer ${isHome ? 'text-warm-white' : 'text-black'}`}
               >
                 {link.label}
@@ -250,7 +263,7 @@ export default function Navbar() {
               {navLinks.map((link, i) => (
                 <button
                   key={link.label}
-                  onClick={() => handleAnchor(link.href.replace('#', ''))}
+                  onClick={() => handleNavClick(link.href)}
                   className="group flex items-baseline gap-3 py-2.5 cursor-pointer text-left"
                   style={{ animationDelay: `${i * 50}ms` }}
                 >
