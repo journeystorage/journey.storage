@@ -189,7 +189,7 @@ export default function Navbar() {
               onClick={() => handleAnchor(sectionIds.waitlist)}
               className="!py-3 !px-6"
             >
-              Join the waitlist
+              Contact Us
             </Button>
           </div>
 
@@ -347,7 +347,7 @@ export default function Navbar() {
               onClick={() => handleAnchor(sectionIds.waitlist)}
               className="w-full"
             >
-              Join the waitlist
+              Contact Us
             </Button>
           </div>
         </div>

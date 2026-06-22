@@ -119,7 +119,7 @@ export default function Hero() {
                 variant="primary"
                 onClick={() => scrollToSection(sectionIds.waitlist)}
               >
-                Join the waitlist
+                Contact Us
               </Button>
             </motion.div>
           </div>

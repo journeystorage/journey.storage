@@ -8,7 +8,7 @@ import { sectionIds } from '@/lib/constants'
 const faqs = [
   {
     question: 'When is Journey opening?',
-    answer: "We're building our first facilities now. Join the waitlist and we'll notify you the moment we open near you. Early members get priority access.",
+    answer: "We're building our first facilities now. Contact us and we'll notify you the moment we open near you. Early members get priority access.",
   },
   {
     question: 'How does pricing work?',

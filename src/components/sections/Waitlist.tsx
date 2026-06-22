@@ -138,7 +138,7 @@ export default function Waitlist() {
                   />
                 </div>
                 <Button type="submit" variant="primary" disabled={isSubmitting} className="mt-3 w-full">
-                  {isSubmitting ? 'Submitting...' : 'Join the waitlist'}
+                  {isSubmitting ? 'Submitting...' : 'Contact Us'}
                 </Button>
               </motion.form>
             ) : (

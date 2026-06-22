@@ -110,7 +110,7 @@ const STEPS = [
 
 /* ── FAQ ─────────────────────────────────────────────────────────── */
 const FAQS = [
-  { q: 'When is Journey opening?', a: "We're building our first facilities now. Join the waitlist and we'll notify you the moment we open near you. Early members get priority access." },
+  { q: 'When is Journey opening?', a: "We're building our first facilities now. Contact us and we'll notify you the moment we open near you. Early members get priority access." },
   { q: 'How does pricing work?', a: 'Month-to-month. No lock-in contracts, no rate hikes after move-in. You see the price, you pay the price. If you need to leave, you leave. No penalties, no fees.' },
   { q: 'What sizes are available?', a: 'From compact 5×5 closets (~25 sq ft) for boxes and seasonal gear, to 10×25 garage-size spaces (~250 sq ft) that fit an entire household. Mid-range options like 5×10, 10×10, and 10×15 cover everything in between.' },
   { q: 'What types of storage do you offer?', a: 'Self storage, climate-controlled spaces, drive-up access, indoor storage, and vehicle & RV parking. Every facility is designed with digital locks, 24/7 access, and the same quality experience across all space types.' },
