@@ -14,10 +14,11 @@ const sectionLinks = [
 
 interface NavbarProps {
   onBookCall: () => void
+  onContact?: () => void
   showNavLinks?: boolean
 }
 
-export default function Navbar({ onBookCall, showNavLinks = false }: NavbarProps) {
+export default function Navbar({ onBookCall, onContact, showNavLinks = false }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -40,11 +41,11 @@ export default function Navbar({ onBookCall, showNavLinks = false }: NavbarProps
     window.location.href = 'https://journey.storage'
   }, [])
 
-  const handleBook = useCallback(() => {
+  const handleContact = useCallback(() => {
     setMobileOpen(false)
     setDropdownOpen(false)
-    onBookCall()
-  }, [onBookCall])
+    ;(onContact ?? onBookCall)()
+  }, [onContact, onBookCall])
 
   const handleNavClick = useCallback(() => {
     setMobileOpen(false)
@@ -165,10 +166,10 @@ export default function Navbar({ onBookCall, showNavLinks = false }: NavbarProps
 
             {/* CTA */}
             <button
-              onClick={handleBook}
+              onClick={handleContact}
               className="rounded-sm bg-orange px-5 py-2.5 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
-              Request access
+              Contact Us
             </button>
           </div>
 
@@ -297,10 +298,10 @@ export default function Navbar({ onBookCall, showNavLinks = false }: NavbarProps
           {/* CTA at bottom */}
           <div className="relative z-10 px-8 pb-8">
             <button
-              onClick={handleBook}
+              onClick={handleContact}
               className="block w-full rounded-sm bg-orange py-4 text-center text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
             >
-              Request access
+              Contact Us
             </button>
           </div>
         </div>

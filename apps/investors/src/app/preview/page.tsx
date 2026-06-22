@@ -12,6 +12,7 @@ import FAQ from '@/components/sections/FAQ'
 import FinalCTA from '@/components/sections/FinalCTA'
 import Footer from '@/components/sections/Footer'
 import LeadCaptureModal from '@/components/ui/LeadCaptureModal'
+import ContactModal from '@/components/ui/ContactModal'
 import { CALENDAR_URL } from '@/lib/constants'
 
 export default function PreviewPage() {
@@ -19,9 +20,13 @@ export default function PreviewPage() {
   const openModal = useCallback(() => setModalOpen(true), [])
   const closeModal = useCallback(() => setModalOpen(false), [])
 
+  const [contactOpen, setContactOpen] = useState(false)
+  const openContact = useCallback(() => setContactOpen(true), [])
+  const closeContact = useCallback(() => setContactOpen(false), [])
+
   return (
     <main>
-      <Navbar onBookCall={openModal} showNavLinks />
+      <Navbar onBookCall={openModal} onContact={openContact} showNavLinks />
       <Hero onBookCall={openModal} />
       <MarketThesis />
       <Strategy />
@@ -36,6 +41,7 @@ export default function PreviewPage() {
         onClose={closeModal}
         redirectUrl={CALENDAR_URL}
       />
+      <ContactModal open={contactOpen} onClose={closeContact} />
     </main>
   )
 }
