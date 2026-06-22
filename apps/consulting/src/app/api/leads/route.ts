@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase-server'
+import { sendLeadNotification } from '@/lib/lead-email'
 
 // Note: SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are read from this instance's
 // Hostinger environment at runtime. Updating them requires a redeploy (not just
@@ -61,6 +62,21 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error('[Lead] Server error:', err)
     return NextResponse.json({ success: false, error: 'server_error' }, { status: 500 })
+  }
+
+  // Best-effort email notification — the lead is already saved above, so a
+  // failure here must not affect the response the visitor receives.
+  try {
+    await sendLeadNotification({
+      name,
+      email,
+      phone,
+      company,
+      message,
+      formSource,
+    })
+  } catch (err) {
+    console.error('[Lead] Email notification failed:', err)
   }
 
   return NextResponse.json({ success: true })
