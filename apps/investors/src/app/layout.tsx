@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { Lato, IBM_Plex_Mono } from 'next/font/google'
 import '@/styles/globals.css'
 
-const GTM_ID = 'GTM-PK22Z6BM'
+const GTM_ID = 'GTM-5BKX85NC'
 
 const lato = Lato({
   subsets: ['latin'],
