@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { sectionIds, ecosystemDropdownLinks } from '@/lib/constants'
 import { scrollToSection } from '@/lib/utils'
+import { useContact } from '@/components/ui/ContactProvider'
 
 const links = [
   { label: 'Why Journey', id: sectionIds.problem },
@@ -14,6 +15,7 @@ const links = [
 ]
 
 export default function Navbar() {
+  const { openContact } = useContact()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -151,7 +153,7 @@ export default function Navbar() {
           </div>
 
           <button
-            onClick={() => handleNav(sectionIds.pricing)}
+            onClick={openContact}
             className="hidden lg:inline-flex rounded-sm bg-orange px-5 py-2.5 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           >
             Contact Us
@@ -286,7 +288,7 @@ export default function Navbar() {
           {/* CTA at bottom */}
           <div className="relative z-10 px-8 pb-8">
             <button
-              onClick={() => { handleNav(sectionIds.pricing); setMobileOpen(false) }}
+              onClick={() => { openContact(); setMobileOpen(false) }}
               className="block w-full rounded-sm bg-orange py-4 text-center text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
             >
               Contact Us

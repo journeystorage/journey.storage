@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { CALENDAR_URL, sectionIds } from '@/lib/constants'
+import ContactButton from '@/components/ui/ContactButton'
 
 export default function Hero() {
   return (
@@ -51,12 +52,11 @@ export default function Hero() {
         </p>
 
         <div className="hero-fade-up mt-8 flex flex-wrap items-center gap-4" style={{ animationDelay: '0.45s' }}>
-          <a
-            href={`#${sectionIds.pricing}`}
-            className="inline-flex items-center justify-center rounded-sm bg-orange px-7 py-4 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+          <ContactButton
+            className="inline-flex items-center justify-center rounded-sm bg-orange px-7 py-4 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2 focus-visible:ring-offset-black cursor-pointer"
           >
             Contact Us
-          </a>
+          </ContactButton>
         </div>
       </div>
     </section>

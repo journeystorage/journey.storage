@@ -6,6 +6,7 @@ const ALLOWED_FORM_SOURCES = new Set([
   'consulting-scout',
   'consulting-pursuit',
   'consulting-booking',
+  'consulting-contact',
 ])
 
 export async function POST(request: Request) {
@@ -20,6 +21,7 @@ export async function POST(request: Request) {
   const email = typeof payload.email === 'string' ? payload.email.trim().toLowerCase() : ''
   const phone = typeof payload.phone === 'string' ? payload.phone.trim() : ''
   const company = typeof payload.company === 'string' ? payload.company.trim() : ''
+  const message = typeof payload.message === 'string' ? payload.message.trim() : ''
   const formSource = typeof payload.form_source === 'string' && ALLOWED_FORM_SOURCES.has(payload.form_source)
     ? payload.form_source
     : null
@@ -43,6 +45,7 @@ export async function POST(request: Request) {
       email,
       phone: phone || null,
       company: company || null,
+      message: message || null,
       raw_payload: payload,
       user_agent: request.headers.get('user-agent'),
     })

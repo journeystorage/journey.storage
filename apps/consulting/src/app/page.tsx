@@ -5,10 +5,11 @@ import Solution from '@/components/sections/Solution'
 import Pricing from '@/components/sections/Pricing'
 import FAQ from '@/components/sections/FAQ'
 import Footer from '@/components/sections/Footer'
+import ContactProvider from '@/components/ui/ContactProvider'
 
 export default function Home() {
   return (
-    <>
+    <ContactProvider>
       <Navbar />
       <main>
         <Hero />
@@ -20,6 +21,6 @@ export default function Home() {
         <FAQ />
       </main>
       <Footer />
-    </>
+    </ContactProvider>
   )
 }
