@@ -55,7 +55,7 @@ export default function Hero() {
             href={`#${sectionIds.pricing}`}
             className="inline-flex items-center justify-center rounded-sm bg-orange px-7 py-4 text-body-sm font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
-            Get Started
+            Contact Us
           </a>
         </div>
       </div>
