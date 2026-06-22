@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
   try {
     const supabase = getSupabaseServer()
-    const { error } = await supabase.from('leads').insert({
+    const { error } = await supabase.from('waitlist_leads').insert({
       source_app: SOURCE_APP,
       form_source: formSource,
       name,
