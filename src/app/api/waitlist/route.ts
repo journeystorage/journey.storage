@@ -47,15 +47,7 @@ export async function POST(request: Request) {
 
     if (error) {
       console.error('[Lead] Supabase insert failed:', error)
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'insert_failed',
-          // TEMPORARY diagnostic detail — remove after debugging.
-          detail: { message: error.message, code: error.code, hint: error.hint, details: error.details },
-        },
-        { status: 502 },
-      )
+      return NextResponse.json({ success: false, error: 'insert_failed' }, { status: 502 })
     }
   } catch (err) {
     console.error('[Lead] Server error:', err)
