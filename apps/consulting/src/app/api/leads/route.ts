@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase-server'
 
+// Note: SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are read from this instance's
+// Hostinger environment at runtime. Updating them requires a redeploy (not just
+// a restart) for the standalone server to pick up the new values.
+
 const SOURCE_APP = 'consulting' as const
 const ALLOWED_FORM_SOURCES = new Set([
   'consulting-scout',
