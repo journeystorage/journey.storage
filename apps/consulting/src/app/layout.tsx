@@ -12,6 +12,7 @@ const lato = Lato({
 })
 
 const GTM_ID = 'GTM-54GBZ4GW'
+const GA4_ID = 'G-77Z6DN08S9'
 
 export const metadata: Metadata = {
   title: 'Journey.Advisory™ — Fractional Acquisitions & Advisory | Journey.Storage™',
@@ -45,6 +46,17 @@ export default function RootLayout({
         j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
         })(window,document,'script','dataLayer','${GTM_ID}');
+      `}</Script>
+      {/* Google Analytics 4 (gtag.js) — loaded directly so it does not depend on GTM */}
+      <Script
+        src={`https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`}
+        strategy="afterInteractive"
+      />
+      <Script id="ga4" strategy="afterInteractive">{`
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${GA4_ID}');
       `}</Script>
       <body className="bg-black text-warm-white font-sans antialiased">
         <noscript>
