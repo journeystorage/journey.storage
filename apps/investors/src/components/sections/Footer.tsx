@@ -64,7 +64,7 @@ export default function Footer() {
 
         {/* Disclaimer */}
         <div className="py-6 border-t border-warm-white/[0.04]">
-          <p className="text-[0.65rem] leading-[1.7] text-warm-white/25 max-w-[900px]">
+          <p className="text-[0.72rem] leading-[1.7] text-warm-white/55 max-w-[900px]">
             This website contains information that is privileged and confidential.
             It is for informational purposes only and is not intended as a general
             solicitation or a securities offering of any kind. The information
@@ -89,7 +89,7 @@ export default function Footer() {
           <span className="text-caption text-warm-white/30">
             &copy; 2026 Journey.Storage&trade;. All rights reserved.
           </span>
-          <span className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-warm-white/15">
+          <span className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-warm-white/45">
             Privileged &amp; Confidential
           </span>
         </div>

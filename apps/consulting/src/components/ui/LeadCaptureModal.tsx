@@ -181,7 +181,7 @@ export default function LeadCaptureModal({
               )}
             </form>
 
-            <p className="mt-4 text-center text-[0.65rem] text-stone/60 leading-relaxed">
+            <p className="mt-4 text-center text-[0.72rem] text-stone/75 leading-relaxed">
               Your information is only used to prepare for your engagement. We don&apos;t share or sell your data.
             </p>
           </motion.div>

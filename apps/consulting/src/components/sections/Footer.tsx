@@ -22,7 +22,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 pt-6 border-t border-warm-white/[0.04] text-center">
-          <p className="text-caption text-warm-white/15">
+          <p className="text-caption text-warm-white/45">
             &copy; {new Date().getFullYear()} Journey.Storage&trade;. All rights reserved. Privileged &amp; confidential.
           </p>
         </div>

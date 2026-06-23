@@ -215,7 +215,7 @@ export default function Pricing() {
                     ))}
                   </ul>
 
-                  <p className="mt-6 text-[0.65rem] text-warm-white/20 leading-relaxed">
+                  <p className="mt-6 text-[0.72rem] text-warm-white/55 leading-relaxed">
                     Monthly subscription. Cancel with 30 days&apos; notice.
                   </p>
 

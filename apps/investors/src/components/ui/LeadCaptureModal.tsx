@@ -194,7 +194,7 @@ export default function LeadCaptureModal({
               name="sms_opt_in"
               className="mt-1 h-4 w-4 shrink-0 rounded border-stone/30 accent-orange cursor-pointer"
             />
-            <span className="text-[0.7rem] leading-[1.5] text-stone/70">
+            <span className="text-[0.78rem] leading-[1.5] text-stone/85">
               I agree to receive occasional texts about new investment
               opportunities and updates from Journey.Direct&trade;. Message and
               data rates may apply. Approx. 4 messages/month.
@@ -216,7 +216,7 @@ export default function LeadCaptureModal({
           )}
         </form>
 
-        <p className="mt-4 text-center text-[0.65rem] text-stone/60 leading-relaxed">
+        <p className="mt-4 text-center text-[0.72rem] text-stone/75 leading-relaxed">
           Your information is only used to prepare for your call. We don&apos;t
           share or sell your data.
         </p>

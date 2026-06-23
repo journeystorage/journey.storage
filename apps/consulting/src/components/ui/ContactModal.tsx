@@ -225,7 +225,7 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
               )}
             </form>
 
-            <p className="mt-4 text-center text-[0.65rem] text-stone/60 leading-relaxed">
+            <p className="mt-4 text-center text-[0.72rem] text-stone/75 leading-relaxed">
               Your information is only used to get in touch. We don&apos;t share or
               sell your data.
             </p>
