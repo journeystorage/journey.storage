@@ -18,12 +18,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.9,
     },
-    {
-      url: `${BASE}/deck/granbury`,
-      lastModified: now,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
+    // The Granbury investor deck is intentionally excluded from the sitemap and
+    // marked noindex (see deck/granbury/layout.tsx) — it's investor material, not
+    // SEO content. It remains reachable by direct link.
   ]
 
   const insightsPages: MetadataRoute.Sitemap = []

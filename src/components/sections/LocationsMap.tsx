@@ -75,6 +75,14 @@ export default function LocationsMap() {
     return () => { document.body.style.overflow = '' }
   }, [showModal])
 
+  // Close on Escape (matches the other modals' behavior)
+  useEffect(() => {
+    if (!showModal) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowModal(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [showModal])
+
   const handleZipSubmit = (e: FormEvent) => { e.preventDefault(); if (zip.trim()) setShowModal(true) }
 
   const onModalSubmit = async (data: ModalForm) => {
@@ -169,6 +177,7 @@ export default function LocationsMap() {
       <AnimatePresence>
         {showModal && (
           <motion.div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm px-5"
+            role="dialog" aria-modal="true" aria-label="Notify me when Journey opens nearby"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} onClick={closeModal}>
             <motion.div className="relative w-full max-w-[420px] rounded-tl-[24px] rounded-tr-[4px] rounded-br-[4px] rounded-bl-[4px] bg-warm-white p-8 md:p-10"
               initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }}
