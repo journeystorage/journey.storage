@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -37,6 +37,7 @@ export default function LeadCaptureModal({
   redirectUrl,
 }: LeadCaptureModalProps) {
   const prefersReducedMotion = useReducedMotion()
+  const [submitError, setSubmitError] = useState(false)
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<LeadForm>({
     resolver: zodResolver(leadSchema),
   })
@@ -55,8 +56,9 @@ export default function LeadCaptureModal({
   }, [open, onClose])
 
   const onSubmit = async (data: LeadForm) => {
+    setSubmitError(false)
     try {
-      await fetch('/api/leads', {
+      const res = await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -64,12 +66,14 @@ export default function LeadCaptureModal({
           ...data,
         }),
       })
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+      reset()
+      onClose()
+      window.open(redirectUrl, '_blank', 'noopener,noreferrer')
     } catch {
-      // Non-blocking — redirect regardless
+      // Don't redirect on a lost lead — keep the modal open and show an error.
+      setSubmitError(true)
     }
-    reset()
-    onClose()
-    window.open(redirectUrl, '_blank', 'noopener,noreferrer')
   }
 
   const close = useCallback(() => {
@@ -167,6 +171,11 @@ export default function LeadCaptureModal({
               >
                 {isSubmitting ? 'Submitting...' : 'Continue to booking \u2192'}
               </button>
+              {submitError && (
+                <p className="text-caption text-[#D94A4A]" role="alert">
+                  Something went wrong. Please try again.
+                </p>
+              )}
             </form>
 
             <p className="mt-4 text-center text-[0.65rem] text-stone/60 leading-relaxed">

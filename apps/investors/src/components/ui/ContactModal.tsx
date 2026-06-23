@@ -71,22 +71,25 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
 
     setSubmitting(true)
     try {
-      await fetch('/api/investor-contact', {
+      const res = await fetch('/api/investor-contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ form_source: 'investors-contact', ...data }),
       })
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`)
       if (typeof window !== 'undefined') {
         const dl = (window as unknown as { dataLayer?: Array<Record<string, unknown>> }).dataLayer
         if (Array.isArray(dl)) {
           dl.push({ event: 'lead_submitted', form_source: 'investors-contact' })
         }
       }
+      setSubmitting(false)
+      setSubmitted(true)
     } catch {
-      // Non-blocking — still show the confirmation; the lead is best-effort.
+      // Keep the form open and surface the error — never a false success.
+      setSubmitting(false)
+      setErrors({ submit: 'Something went wrong. Please try again, or email us directly.' })
     }
-    setSubmitting(false)
-    setSubmitted(true)
   }
 
   if (!open) return null
@@ -195,6 +198,11 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
               >
                 {submitting ? 'Sending…' : 'Send message'}
               </button>
+              {errors.submit && (
+                <p className="text-caption text-[#D94A4A]" role="alert">
+                  {errors.submit}
+                </p>
+              )}
             </form>
 
             <p className="mt-4 text-center text-[0.65rem] text-stone/60 leading-relaxed">

@@ -68,20 +68,28 @@ export default function LeadCaptureModal({
 
     setSubmitting(true)
     try {
-      await fetch('/api/leads', {
+      // Map the booking-modal fields onto the working investor_leads endpoint.
+      // (This previously POSTed to a non-existent /api/leads and 404'd silently.)
+      const res = await fetch('/api/investor-contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           form_source: 'investors-booking',
-          ...data,
+          full_name: data.name,
+          email: data.email,
+          phone: data.phone,
+          message: `Company: ${data.company || '—'} · Accredited investor: ${data.accredited_investor || '—'} · SMS opt-in: ${data.sms_opt_in ? 'yes' : 'no'} · (via booking modal)`,
         }),
       })
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+      setSubmitting(false)
+      onClose()
+      window.open(redirectUrl, '_blank', 'noopener,noreferrer')
     } catch {
-      // Non-blocking — proceed regardless
+      // Don't redirect on a lost lead — keep the modal open and show an error.
+      setSubmitting(false)
+      setErrors({ submit: 'Something went wrong. Please try again.' })
     }
-    setSubmitting(false)
-    onClose()
-    window.open(redirectUrl, '_blank', 'noopener,noreferrer')
   }
 
   if (!open) return null
@@ -198,6 +206,11 @@ export default function LeadCaptureModal({
           >
             {submitting ? 'Submitting…' : 'Continue to booking →'}
           </button>
+          {errors.submit && (
+            <p className="text-caption text-[#D94A4A]" role="alert">
+              {errors.submit}
+            </p>
+          )}
         </form>
 
         <p className="mt-4 text-center text-[0.65rem] text-stone/60 leading-relaxed">

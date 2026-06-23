@@ -68,7 +68,7 @@ export default function LeadCaptureModal({
 
     setSubmitting(true)
     try {
-      await fetch('/api/waitlist', {
+      const res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -76,12 +76,15 @@ export default function LeadCaptureModal({
           ...data,
         }),
       })
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+      setSubmitting(false)
+      onClose()
+      window.open(redirectUrl, '_blank', 'noopener,noreferrer')
     } catch {
-      // Non-blocking — proceed regardless
+      // Keep the modal open and show an error — don't redirect on a lost lead.
+      setSubmitting(false)
+      setErrors({ submit: 'Something went wrong. Please try again.' })
     }
-    setSubmitting(false)
-    onClose()
-    window.open(redirectUrl, '_blank', 'noopener,noreferrer')
   }
 
   if (!open) return null
@@ -198,6 +201,11 @@ export default function LeadCaptureModal({
           >
             {submitting ? 'Submitting…' : 'Continue to booking →'}
           </button>
+          {errors.submit && (
+            <p className="text-caption text-[#D94A4A]" role="alert">
+              {errors.submit}
+            </p>
+          )}
         </form>
 
         <p className="mt-4 text-center text-[0.65rem] text-stone/60 leading-relaxed">

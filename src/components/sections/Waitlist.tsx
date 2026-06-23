@@ -53,26 +53,32 @@ export default function Waitlist() {
   const prefersReducedMotion = useReducedMotion()
   const ease = [0.22, 1, 0.36, 1] as const
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState(false)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<WaitlistForm>({
     resolver: zodResolver(waitlistSchema),
   })
 
   const onSubmit = async (data: WaitlistForm) => {
+    setError(false)
     try {
       const response = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ form_source: 'website-waitlist', ...data }),
       })
-      if (response.ok && typeof window !== 'undefined') {
+      if (!response.ok) throw new Error(`Request failed: ${response.status}`)
+      if (typeof window !== 'undefined') {
         const dl = (window as unknown as { dataLayer?: Array<Record<string, unknown>> }).dataLayer
         if (Array.isArray(dl)) {
           dl.push({ event: 'lead_submitted', form_source: 'website-waitlist' })
         }
       }
-    } catch { /* Phase 1 */ }
-    setSubmitted(true)
+      setSubmitted(true)
+    } catch {
+      // Keep the form open and tell the user — never show a false success.
+      setError(true)
+    }
   }
 
   return (
@@ -140,6 +146,11 @@ export default function Waitlist() {
                 <Button type="submit" variant="primary" disabled={isSubmitting} className="mt-3 w-full">
                   {isSubmitting ? 'Submitting...' : 'Contact Us'}
                 </Button>
+                {error && (
+                  <p className="text-caption text-[#E8865C]" role="alert">
+                    Something went wrong sending your message. Please try again, or email us at hello@journey.storage.
+                  </p>
+                )}
               </motion.form>
             ) : (
               <motion.div

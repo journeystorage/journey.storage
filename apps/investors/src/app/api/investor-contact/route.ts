@@ -24,6 +24,10 @@ export async function POST(req: Request) {
   const email = isStr(body.email, 320) ? (body.email as string).trim().toLowerCase() : ''
   const phone = isStr(body.phone, 50) ? (body.phone as string).trim() : ''
   const message = isStr(body.message) ? (body.message as string).trim() : ''
+  const ALLOWED_SOURCES = new Set(['investors-contact', 'investors-booking'])
+  const formSource = isStr(body.form_source, 40) && ALLOWED_SOURCES.has(body.form_source as string)
+    ? (body.form_source as string)
+    : 'investors-contact'
 
   if (!fullName) return bad('full_name required')
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return bad('email invalid')
@@ -44,7 +48,7 @@ export async function POST(req: Request) {
     email,
     phone: phone || null,
     message: message || null,
-    form_source: 'investors-contact',
+    form_source: formSource,
   }
 
   const { data, error } = await supabase

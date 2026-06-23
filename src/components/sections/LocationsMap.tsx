@@ -66,6 +66,7 @@ export default function LocationsMap() {
   const [zip, setZip] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState(false)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ModalForm>({ resolver: zodResolver(modalSchema) })
 
@@ -77,8 +78,15 @@ export default function LocationsMap() {
   const handleZipSubmit = (e: FormEvent) => { e.preventDefault(); if (zip.trim()) setShowModal(true) }
 
   const onModalSubmit = async (data: ModalForm) => {
-    try { await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ form_source: 'website-location', name: data.name, email: data.email, zip, message: data.message }) }) } catch { /* Phase 1 */ }
-    setShowModal(false); setSubmitted(true)
+    setError(false)
+    try {
+      const res = await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ form_source: 'website-location', name: data.name, email: data.email, zip, message: data.message }) })
+      if (!res.ok) throw new Error(`Request failed: ${res.status}`)
+      setShowModal(false); setSubmitted(true)
+    } catch {
+      // Keep the modal open and surface the error — never a false success.
+      setError(true)
+    }
   }
 
   const closeModal = useCallback(() => setShowModal(false), [])
@@ -182,6 +190,11 @@ export default function LocationsMap() {
                   />
                 </div>
                 <Button type="submit" variant="primary" disabled={isSubmitting} className="mt-2 w-full">{isSubmitting ? 'Submitting...' : 'Notify me'}</Button>
+                {error && (
+                  <p className="text-caption text-[#D94A4A]" role="alert">
+                    Something went wrong. Please try again, or email hello@journey.storage.
+                  </p>
+                )}
               </form>
             </motion.div>
           </motion.div>
