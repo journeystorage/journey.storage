@@ -6,6 +6,29 @@ import '@/styles/globals.css'
 const GTM_ID = 'GTM-5BKX85NC'
 const GA4_ID = 'G-Z02PE41PZ3'
 
+// Organization structured data — tells Google the official sub-brand name, logo,
+// parent company, and social profiles.
+const organizationJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Journey.Direct',
+  alternateName: 'Journey.Direct™',
+  url: 'https://direct.journey.storage',
+  logo: 'https://journey.storage/images/brand/logo-dark-TM.svg',
+  description:
+    'Operator-led direct investment in self-storage. Value-add acquisitions in high-demand U.S. markets, for accredited investors.',
+  parentOrganization: {
+    '@type': 'Organization',
+    name: 'Journey.Storage',
+    url: 'https://journey.storage',
+  },
+  sameAs: [
+    'https://www.instagram.com/storage.journey',
+    'https://www.linkedin.com/company/journey-storage%E2%84%A2',
+    'https://www.facebook.com/people/JourneyStorage/61587719385923/',
+  ],
+}
+
 const lato = Lato({
   subsets: ['latin'],
   weight: ['300', '400', '700', '900'],
@@ -65,6 +88,10 @@ export default function RootLayout({
         gtag('config', '${GA4_ID}');
       `}</Script>
       <body className="bg-black text-warm-white font-sans antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         <noscript>
           <iframe
             src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
