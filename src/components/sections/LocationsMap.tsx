@@ -11,6 +11,7 @@ import USMap from '@/components/map/USMap'
 import MapPin, { MapPinPulse } from '@/components/map/MapPin'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import { useFocusTrap } from '@/lib/use-focus-trap'
 
 type PinSize = 'sm' | 'md' | 'lg'
 const pins: { x: number; y: number; size: PinSize }[] = [
@@ -67,6 +68,7 @@ export default function LocationsMap() {
   const [showModal, setShowModal] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState(false)
+  const trapRef = useFocusTrap<HTMLDivElement>(showModal)
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<ModalForm>({ resolver: zodResolver(modalSchema) })
 
@@ -137,9 +139,13 @@ export default function LocationsMap() {
             animate={isInView ? { opacity: 1 } : undefined}
             transition={{ duration: 0.6, ease, delay: 0.3 }}
           >
-            <div className="relative overflow-hidden">
+            <div
+              className="relative overflow-hidden"
+              role="img"
+              aria-label="Map of the United States highlighting Journey.Storage's four initial markets — Dallas–Fort Worth, the Carolinas, the Pacific Northwest, and Oklahoma City — alongside planned metro areas nationwide."
+            >
               <USMap />
-              <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
                 {pins.map((pin, i) => (
                   <MapPin key={i} x={pin.x} y={pin.y} size={pin.size} delay={0.5 + i * 0.05} isInView={isInView} />
                 ))}
@@ -179,7 +185,7 @@ export default function LocationsMap() {
           <motion.div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm px-5"
             role="dialog" aria-modal="true" aria-label="Notify me when Journey opens nearby"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3 }} onClick={closeModal}>
-            <motion.div className="relative w-full max-w-[420px] rounded-tl-[24px] rounded-tr-[4px] rounded-br-[4px] rounded-bl-[4px] bg-warm-white p-8 md:p-10"
+            <motion.div ref={trapRef} className="relative w-full max-w-[420px] rounded-tl-[24px] rounded-tr-[4px] rounded-br-[4px] rounded-bl-[4px] bg-warm-white p-8 md:p-10"
               initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={prefersReducedMotion ? undefined : { opacity: 0, y: 20, scale: 0.98 }} transition={{ duration: 0.3, ease: 'easeOut' as const }} onClick={(e) => e.stopPropagation()}>
               <button onClick={closeModal} className="absolute top-4 right-4 text-stone hover:text-black transition-colors cursor-pointer" aria-label="Close"><X size={18} /></button>

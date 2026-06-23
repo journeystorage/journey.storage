@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
 import { X } from 'lucide-react'
 import Input from './Input'
+import { useFocusTrap } from '@/lib/use-focus-trap'
 
 const leadSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -38,6 +39,7 @@ export default function LeadCaptureModal({
 }: LeadCaptureModalProps) {
   const prefersReducedMotion = useReducedMotion()
   const [submitError, setSubmitError] = useState(false)
+  const trapRef = useFocusTrap<HTMLDivElement>(open)
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm<LeadForm>({
     resolver: zodResolver(leadSchema),
   })
@@ -95,6 +97,7 @@ export default function LeadCaptureModal({
           onClick={close}
         >
           <motion.div
+            ref={trapRef}
             className="relative w-full max-w-[440px] shrink-0 rounded-tl-[24px] rounded-tr-[4px] rounded-br-[4px] rounded-bl-[4px] bg-warm-white p-8 md:p-10"
             initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}

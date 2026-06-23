@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, type FormEvent } from 'react'
 import { X } from 'lucide-react'
+import { useFocusTrap } from '@/lib/use-focus-trap'
 
 interface LeadCaptureModalProps {
   open: boolean
@@ -16,6 +17,7 @@ export default function LeadCaptureModal({
 }: LeadCaptureModalProps) {
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const trapRef = useFocusTrap<HTMLDivElement>(open)
 
   // Lock body scroll when open
   useEffect(() => {
@@ -104,6 +106,7 @@ export default function LeadCaptureModal({
       style={{ animation: 'fadeIn 0.3s ease-out' }}
     >
       <div
+        ref={trapRef}
         className="relative w-full max-w-[440px] shrink-0 rounded-tl-[24px] rounded-tr-[4px] rounded-br-[4px] rounded-bl-[4px] bg-warm-white p-8 md:p-10"
         onClick={(e) => e.stopPropagation()}
       >

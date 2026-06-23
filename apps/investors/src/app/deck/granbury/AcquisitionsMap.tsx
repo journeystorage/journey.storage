@@ -2,9 +2,11 @@
 
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps'
 
-const GEO_URL = 'https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json'
+// Bundled locally so the map renders even if a third-party CDN is blocked or
+// offline (previously fetched from cdn.jsdelivr.net at render time).
+const GEO_URL = '/maps/states-10m.json'
 
-// 32 facilities acquired/developed by the sponsors
+// Facilities acquired/developed by the sponsors (count derived from the array)
 // Source: docs/journey.direct/acquired-facilities-addresses
 // Geocoded to city-level (national map, dots only — no street precision needed)
 const locations: { name: string; coords: [number, number] }[] = [
@@ -50,6 +52,13 @@ const locations: { name: string; coords: [number, number] }[] = [
 export default function AcquisitionsMap() {
   return (
     <div className="relative w-full h-full">
+      {/* Screen-reader alternative: a summary + the full list of locations,
+          since the SVG dots convey location data that AT cannot otherwise read. */}
+      <div
+        role="img"
+        aria-label={`Map of ${locations.length} self-storage facilities acquired or developed by the sponsors across Texas, Missouri, Iowa, Oklahoma, South Carolina, and Washington.`}
+        className="w-full h-full"
+      >
       <ComposableMap
         projection="geoAlbersUsa"
         projectionConfig={{ scale: 900 }}
@@ -82,6 +91,12 @@ export default function AcquisitionsMap() {
           </Marker>
         ))}
       </ComposableMap>
+      </div>
+      <ul className="sr-only">
+        {locations.map((loc, i) => (
+          <li key={i}>{loc.name}</li>
+        ))}
+      </ul>
     </div>
   )
 }
