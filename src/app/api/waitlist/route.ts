@@ -1,15 +1,25 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { sendLeadNotification } from '@/lib/lead-email'
+import { rateLimited, isValidEmail } from '@/lib/api-guard'
 
 const SOURCE_APP = 'main' as const
 
 export async function POST(request: Request) {
+  if (rateLimited(request)) {
+    return NextResponse.json({ success: false, error: 'rate_limited' }, { status: 429 })
+  }
+
   let payload: Record<string, unknown>
   try {
     payload = await request.json()
   } catch {
     return NextResponse.json({ success: false, error: 'invalid_json' }, { status: 400 })
+  }
+
+  // Honeypot — bots fill hidden fields; pretend success without storing.
+  if (payload.website) {
+    return NextResponse.json({ success: true })
   }
 
   const name = typeof payload.name === 'string' ? payload.name.trim() : ''
@@ -26,7 +36,7 @@ export async function POST(request: Request) {
   if (!name) {
     return NextResponse.json({ success: false, error: 'name_required' }, { status: 400 })
   }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!email || !isValidEmail(email)) {
     return NextResponse.json({ success: false, error: 'email_invalid' }, { status: 400 })
   }
 

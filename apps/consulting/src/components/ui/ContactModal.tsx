@@ -55,6 +55,7 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
       phone: String(formData.get('phone') || '').trim(),
       company: String(formData.get('company') || '').trim(),
       message: String(formData.get('message') || '').trim(),
+      website: String(formData.get('website') || '').trim(),
     }
 
     // Minimal client-side validation
@@ -157,6 +158,15 @@ export default function ContactModal({ open, onClose }: ContactModalProps) {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+              {/* Honeypot — hidden from people; bots that fill it are dropped server-side */}
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="hidden"
+              />
               <Field
                 label="Name"
                 name="name"

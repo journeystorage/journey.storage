@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { rateLimited, isValidEmail } from '@/lib/api-guard'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -13,6 +14,10 @@ function isStr(v: unknown, max = 2000): v is string {
 }
 
 export async function POST(req: Request) {
+  if (rateLimited(req)) {
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 })
+  }
+
   let body: Record<string, unknown>
   try {
     body = await req.json()
@@ -30,7 +35,7 @@ export async function POST(req: Request) {
     : 'investors-contact'
 
   if (!fullName) return bad('full_name required')
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return bad('email invalid')
+  if (!email || !isValidEmail(email)) return bad('email invalid')
 
   // Honeypot — if present, pretend success without storing.
   if (body.website) return NextResponse.json({ ok: true })

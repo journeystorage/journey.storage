@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { sendLeadNotification } from '@/lib/lead-email'
+import { rateLimited, isValidEmail } from '@/lib/api-guard'
 
 // Note: SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are read from this instance's
 // Hostinger environment at runtime. Updating them requires a redeploy (not just
@@ -15,11 +16,20 @@ const ALLOWED_FORM_SOURCES = new Set([
 ])
 
 export async function POST(request: Request) {
+  if (rateLimited(request)) {
+    return NextResponse.json({ success: false, error: 'rate_limited' }, { status: 429 })
+  }
+
   let payload: Record<string, unknown>
   try {
     payload = await request.json()
   } catch {
     return NextResponse.json({ success: false, error: 'invalid_json' }, { status: 400 })
+  }
+
+  // Honeypot — bots fill hidden fields; pretend success without storing.
+  if (payload.website) {
+    return NextResponse.json({ success: true })
   }
 
   const name = typeof payload.name === 'string' ? payload.name.trim() : ''
@@ -34,7 +44,7 @@ export async function POST(request: Request) {
   if (!name) {
     return NextResponse.json({ success: false, error: 'name_required' }, { status: 400 })
   }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!email || !isValidEmail(email)) {
     return NextResponse.json({ success: false, error: 'email_invalid' }, { status: 400 })
   }
   if (!formSource) {

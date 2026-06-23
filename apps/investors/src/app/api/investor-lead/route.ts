@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { rateLimited, isValidEmail } from '@/lib/api-guard'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -17,6 +18,10 @@ function isStr(v: unknown, max = 1000): v is string {
 }
 
 export async function POST(req: Request) {
+  if (rateLimited(req)) {
+    return NextResponse.json({ error: 'rate_limited' }, { status: 429 })
+  }
+
   let body: Record<string, unknown>
   try {
     body = await req.json()
@@ -25,7 +30,7 @@ export async function POST(req: Request) {
   }
 
   if (!isStr(body.full_name, 200)) return bad('full_name required')
-  if (!isStr(body.email, 320)) return bad('email required')
+  if (!isStr(body.email, 320) || !isValidEmail((body.email as string).trim())) return bad('email invalid')
   if (!isStr(body.phone, 50)) return bad('phone required')
   if (!isStr(body.state_code, 2)) return bad('state_code required')
   if (!isStr(body.accredited_status) || !ALLOWED.accredited_status.includes(body.accredited_status as string)) {
