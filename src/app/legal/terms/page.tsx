@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Terms of Service — Journey.Storage™',
+  // Placeholder stub — keep out of search until it carries real content.
+  robots: { index: false, follow: false },
 }
 
 export default function TermsPage() {

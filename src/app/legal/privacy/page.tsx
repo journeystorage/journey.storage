@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy — Journey.Storage™',
+  // Placeholder stub — keep out of search until it carries real content.
+  robots: { index: false, follow: false },
 }
 
 export default function PrivacyPage() {
