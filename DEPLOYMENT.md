@@ -88,6 +88,8 @@ The server is single-process and zero-dependency, so it stays well under Hosting
 
 **Replacing the bundle.** When the deck is rebuilt upstream, drop the new static export into `apps/springfield/public/` (replacing the previous contents) and commit. There is no `npm install` step needed for this app — the server has no dependencies.
 
+> **Optimize images on re-export.** The committed bundle's photo/map images were converted from PNG/JPG to WebP (135 MB → 32 MB). A fresh upstream export will likely ship PNG/JPG again — re-run a WebP pass before committing (e.g. a sharp script converting `public/images/**` and rewriting the `.png/.jpg` refs in `index.html` to `.webp`) or the bundle balloons back to ~135 MB.
+
 > **IMPORTANT:** Use the **Custom** preset (not Static / not Next.js). Hostinger's "Static" preset cannot run a Node start command, and the "Next.js" preset expects a `.next/standalone/server.js` artifact that this app does not produce.
 
 ---
