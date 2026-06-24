@@ -90,6 +90,8 @@ The server is single-process and zero-dependency, so it stays well under Hosting
 
 > **Optimize images on re-export.** The committed bundle's photo/map images were converted from PNG/JPG to WebP (135 MB → 32 MB). A fresh upstream export will likely ship PNG/JPG again — re-run a WebP pass before committing (e.g. a sharp script converting `public/images/**` and rewriting the `.png/.jpg` refs in `index.html` to `.webp`) or the bundle balloons back to ~135 MB.
 
+> **Mobile scroll fix.** The export sets `overflow-x: hidden` on the root, which forces `overflow-y` to compute to `auto` and breaks touch scrolling on mobile (the first full-height slides won't swipe-scroll). A `<style>` override is injected before `</head>` in `index.html`: `@media (max-width:1023px){html,body{overflow-x:clip!important;overflow-y:visible!important}}`. Re-add it after any upstream re-export, or fix it upstream by using `overflow-x: clip` instead of `hidden` on the root scroller.
+
 > **IMPORTANT:** Use the **Custom** preset (not Static / not Next.js). Hostinger's "Static" preset cannot run a Node start command, and the "Next.js" preset expects a `.next/standalone/server.js` artifact that this app does not produce.
 
 ---
