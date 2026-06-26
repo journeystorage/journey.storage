@@ -1,0 +1,48 @@
+name: Deploy portal to Hostinger
+
+# Publishes apps/portal (the static Internal Portal at portal.journey.storage) over FTP.
+# Path-filtered: only runs when the portal's own files change, so editing the Next.js
+# marketing apps never triggers a portal deploy. Can also be run by hand (workflow_dispatch).
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/portal/**'
+      - '.github/workflows/deploy-portal.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-portal
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy apps/portal via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          local-dir: ./apps/portal/
+          protocol: ftps
+          # SAFETY: the server keeps PHP + SQL that hold the real OpenAI key & data.
+          # Excluding them means the deploy never uploads OR deletes them. Do not remove.
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/extract.php
+            **/queue.php
+            **/sheets.php
+            **/*.sql
+            **/*.bak-*
+            **/portal-deploy.zip
+            **/README*
+            **/*.md
+            **/SETUP-GUIDE.html
+            **/HOSTINGER-DEPLOY.html
