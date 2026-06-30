@@ -206,10 +206,10 @@ export default function MoveOutPage() {
 
           <div className="hidden lg:block">
             <a
-              href="#moveout-form"
+              href="/#waitlist"
               className="inline-flex items-center justify-center gap-2 rounded-xl text-body font-bold min-h-[44px] !py-3 !px-6 transition-all duration-200 ease-out bg-orange text-warm-white shadow-[0_2px_8px_rgba(232,98,42,0.3)] hover:brightness-[1.1] hover:shadow-[0_4px_16px_rgba(232,98,42,0.4)] hover:-translate-y-px active:translate-y-0 no-underline"
             >
-              Start Move-Out
+              Rent a Space
             </a>
           </div>
 
