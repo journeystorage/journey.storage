@@ -24,6 +24,7 @@ import {
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import MarqueeBanner from '@/components/sections/MarqueeBanner'
+import Footer from '@/components/layout/Footer'
 import { MOVEOUT_PROPERTIES } from '@/lib/moveout-properties'
 
 /* ── How move-out works ──────────────────────────────────────────── */
@@ -166,6 +167,7 @@ export default function MoveOutPage() {
   }
 
   return (
+    <>
     <main className="bg-black text-warm-white" style={{ fontFamily: "var(--font-lato), 'Lato', system-ui, sans-serif" }}>
       {/* ── Header ── */}
       <header
@@ -601,37 +603,6 @@ export default function MoveOutPage() {
         </div>
       </section>
 
-      {/* ── Final note ── */}
-      <section className="relative bg-black px-3 md:px-6 lg:px-10 pb-20 lg:pb-28">
-        <div className="relative mx-auto max-w-[1340px] rounded-[24px] md:rounded-[32px] overflow-hidden" style={{ backgroundColor: '#F5F0E8' }}>
-          <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 z-[1] flex justify-center overflow-hidden select-none" aria-hidden="true">
-            <span className="text-[8rem] md:text-[14rem] lg:text-[18rem] font-black uppercase leading-none text-black/[0.025] whitespace-nowrap tracking-tight">JOURNEY</span>
-          </div>
-          <div className="relative z-[2] px-6 md:px-10 py-16 md:py-20 lg:py-24 text-center max-w-[640px] mx-auto">
-            <div className="flex items-center justify-center gap-3 mb-5">
-              <div className="h-px w-8 bg-orange" />
-              <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">Still here for you</span>
-              <div className="h-px w-8 bg-orange" />
-            </div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-black leading-[1.0] tracking-tight">Need a hand on your way out?</h2>
-            <p className="mt-5 mx-auto max-w-[480px] text-base leading-[1.6] text-black/60">
-              Whether it&apos;s a question about your final bill or you&apos;re not quite ready to leave, we&apos;re a message away.
-            </p>
-            <div className="mt-9 flex flex-col items-center gap-4">
-              <a href="#moveout-form" className="cta-btn inline-flex items-center gap-3 rounded-full text-xs font-bold uppercase tracking-[0.18em] no-underline" style={{ background: '#181818', color: '#f5f0e8', padding: '16px 32px' }}>
-                Submit my move-out
-                <svg className="cta-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                </svg>
-              </a>
-              <a href="mailto:hello@journey.storage?subject=Move-out%20question" className="text-[0.78rem] font-bold uppercase tracking-[0.18em] text-black/55 hover:text-black no-underline" style={{ borderBottom: '1px solid rgba(0,0,0,0.15)', paddingBottom: 2, transition: 'color .2s ease, border-color .2s ease' }}>
-                Or email our team →
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <style jsx global>{`
         .js-header {
           background: transparent;
@@ -711,5 +682,7 @@ export default function MoveOutPage() {
         .eco-here { font-size: 0.55rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.18em; color: rgb(232, 98, 42); margin-top: 4px; flex-shrink: 0; }
       `}</style>
     </main>
+    <Footer />
+    </>
   )
 }
