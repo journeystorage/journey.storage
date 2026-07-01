@@ -10,17 +10,17 @@ const locations = [
   {
     name: 'Temple Hall Hwy',
     address: '212 Temple Hall Hwy · Granbury, TX 76049',
-    img: '/images/granbury/temple-hall-aerial.jpg',
+    img: '/images/granbury/temple-hall-aerial-sm.webp',
   },
   {
     name: 'Western Hills Trl',
     address: '409 Western Hills Trl · Granbury, TX 76049',
-    img: '/images/granbury/western-hills-aerial-2.jpg',
+    img: '/images/granbury/western-hills-aerial-2-sm.webp',
   },
   {
     name: 'McCreary Rd',
     address: '3501 McCreary Rd · Granbury, TX 76049',
-    img: '/images/granbury/cleveland-aerial.jpg',
+    img: '/images/granbury/cleveland-aerial-sm.webp',
   },
 ] as const
 
@@ -47,7 +47,7 @@ export default function Locations() {
     >
       {/* Facility interior backdrop */}
       <Image
-        src="/images/granbury/hero-interior.jpg"
+        src="/images/granbury/hero-interior.webp"
         alt=""
         fill
         unoptimized
