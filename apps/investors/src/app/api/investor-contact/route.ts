@@ -102,12 +102,13 @@ async function notifyTeam(row: Record<string, unknown>) {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
-  // support@ is copied on every lead notification — but only once we send from a
-  // verified @journey.storage domain (resend.dev senders can only reach the
-  // account-owner inbox, and a non-owner recipient makes Resend reject the send).
+  // support@ receives via the dedicated dual-send below (its own Resend
+  // account), not as a cc here. LEAD_NOTIFY_ALWAYS_CC can add other always-cc
+  // addresses, and only from a verified domain (resend.dev senders can only
+  // reach the account-owner inbox).
   const verifiedSender = !/@resend\.dev/i.test(from)
   const cc = verifiedSender
-    ? (process.env.LEAD_NOTIFY_ALWAYS_CC ?? 'support@journey.storage')
+    ? (process.env.LEAD_NOTIFY_ALWAYS_CC ?? '')
         .split(',').map((s) => s.trim())
         .filter((addr) => addr && !to.some((t) => t.toLowerCase() === addr.toLowerCase()))
     : []
@@ -131,6 +132,24 @@ async function notifyTeam(row: Record<string, unknown>) {
   if (!res.ok) {
     const detail = await res.text().catch(() => '')
     console.error('[investor-contact] Resend send failed:', res.status, detail)
+  }
+
+  // Dual-send: an independent copy to support@ via its OWN Resend account, so
+  // support@ receives without forwarding or domain verification. Best-effort.
+  const supportKey = process.env.RESEND_API_KEY_SUPPORT
+  if (supportKey) {
+    try {
+      const supportTo = process.env.SUPPORT_NOTIFY_TO || 'support@journey.storage'
+      const supportFrom = process.env.SUPPORT_NOTIFY_FROM || 'Journey.Direct <onboarding@resend.dev>'
+      const sres = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${supportKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: supportFrom, to: supportTo, subject, reply_to: String(row.email ?? ''), html }),
+      })
+      if (!sres.ok) console.error('[investor-contact] support copy failed:', sres.status, await sres.text().catch(() => ''))
+    } catch (err) {
+      console.error('[investor-contact] support copy error:', err)
+    }
   }
 }
 

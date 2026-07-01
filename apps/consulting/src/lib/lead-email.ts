@@ -51,13 +51,13 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
   const to = process.env.LEAD_NOTIFY_TO || DEFAULT_TO
   const from = process.env.LEAD_NOTIFY_FROM || DEFAULT_FROM
 
-  // support@ is copied on every lead notification — but only once we send from a
-  // verified @journey.storage domain. While the sender is still resend.dev,
-  // Resend rejects any non-owner recipient, so drop the cc to keep the owner
-  // inbox (lyvia@) delivering. LEAD_NOTIFY_ALWAYS_CC overrides the address.
+  // support@ receives via the dedicated dual-send below (its own Resend
+  // account), not as a cc here. LEAD_NOTIFY_ALWAYS_CC can add other always-cc
+  // addresses, and only when sending from a verified domain (resend.dev senders
+  // can't reach non-owner recipients).
   const verifiedSender = !/@resend\.dev/i.test(from)
   const cc = verifiedSender
-    ? (process.env.LEAD_NOTIFY_ALWAYS_CC ?? 'support@journey.storage')
+    ? (process.env.LEAD_NOTIFY_ALWAYS_CC ?? '')
         .split(',').map((s) => s.trim())
         .filter((addr) => addr && addr.toLowerCase() !== to.toLowerCase())
     : []
@@ -89,7 +89,7 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
     .filter(Boolean)
     .join('\n')
 
-  const res = await fetch('https://api.resend.com/emails', {
+  const primary = fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -106,8 +106,49 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
     }),
   })
 
+  // Dual-send: an independent copy to support@ via its OWN Resend account, so
+  // support@ receives without forwarding or domain verification. Best-effort.
+  const [res] = await Promise.all([
+    primary,
+    sendSupportCopy({ subject, html, text, replyTo: lead.email }),
+  ])
+
   if (!res.ok) {
     const detail = await res.text().catch(() => '')
     throw new Error(`Resend responded ${res.status}: ${detail}`)
+  }
+}
+
+// Sends a second, standalone copy to support@ through the support@ Resend
+// account (RESEND_API_KEY_SUPPORT). No-op if the key isn't configured.
+async function sendSupportCopy(opts: {
+  subject: string
+  html: string
+  text?: string
+  replyTo?: string
+}): Promise<void> {
+  const key = process.env.RESEND_API_KEY_SUPPORT
+  if (!key) return
+  const to = process.env.SUPPORT_NOTIFY_TO || 'support@journey.storage'
+  const from = process.env.SUPPORT_NOTIFY_FROM || 'Journey.Advisory <onboarding@resend.dev>'
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from,
+        to,
+        subject: opts.subject,
+        html: opts.html,
+        ...(opts.text ? { text: opts.text } : {}),
+        ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
+      }),
+    })
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '')
+      console.error('[lead-email] support copy failed:', res.status, detail)
+    }
+  } catch (err) {
+    console.error('[lead-email] support copy error:', err)
   }
 }

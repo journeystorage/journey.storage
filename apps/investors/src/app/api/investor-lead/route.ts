@@ -120,11 +120,28 @@ async function notifyTeam(row: Record<string, unknown>) {
     body: JSON.stringify({
       from: 'Journey.Direct <noreply@journey.storage>',
       to: ['jonah@journey.storage', 'lyvia@journey.storage'],
-      cc: ['support@journey.storage'],
       subject,
       html,
     }),
   })
+
+  // Dual-send: an independent copy to support@ via its OWN Resend account, so
+  // support@ receives without forwarding or domain verification. Best-effort.
+  const supportKey = process.env.RESEND_API_KEY_SUPPORT
+  if (supportKey) {
+    try {
+      const supportTo = process.env.SUPPORT_NOTIFY_TO || 'support@journey.storage'
+      const supportFrom = process.env.SUPPORT_NOTIFY_FROM || 'Journey.Direct <onboarding@resend.dev>'
+      const sres = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${supportKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: supportFrom, to: supportTo, subject, html }),
+      })
+      if (!sres.ok) console.error('[investor-lead] support copy failed:', sres.status, await sres.text().catch(() => ''))
+    } catch (err) {
+      console.error('[investor-lead] support copy error:', err)
+    }
+  }
 }
 
 function escapeHtml(s: string) {
