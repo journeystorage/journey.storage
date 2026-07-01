@@ -59,10 +59,15 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
   const to = lead.to || process.env.LEAD_NOTIFY_TO || DEFAULT_TO
   const from = process.env.LEAD_NOTIFY_FROM || DEFAULT_FROM
 
-  // Never duplicate the primary recipient into cc (e.g. if a fallback routed
-  // the notification straight to the oversight inbox already).
-  const cc = (Array.isArray(lead.cc) ? lead.cc : lead.cc ? [lead.cc] : [])
+  // support@ is copied on every lead notification (all forms), plus any
+  // per-call cc (e.g. lyvia@ on move-out). Dedupe, and never cc the primary
+  // recipient. LEAD_NOTIFY_ALWAYS_CC (comma-separated) overrides the default.
+  const alwaysCc = (process.env.LEAD_NOTIFY_ALWAYS_CC ?? 'support@journey.storage')
+    .split(',').map((s) => s.trim()).filter(Boolean)
+  const perCallCc = Array.isArray(lead.cc) ? lead.cc : lead.cc ? [lead.cc] : []
+  const cc = [...alwaysCc, ...perCallCc]
     .filter((addr) => addr && addr.toLowerCase() !== to.toLowerCase())
+    .filter((addr, i, arr) => arr.findIndex((a) => a.toLowerCase() === addr.toLowerCase()) === i)
 
   const isMoveout = lead.formSource.includes('moveout')
   const subject = lead.subject || `New Contact Us submission — ${lead.name}`

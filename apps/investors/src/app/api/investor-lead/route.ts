@@ -120,6 +120,7 @@ async function notifyTeam(row: Record<string, unknown>) {
     body: JSON.stringify({
       from: 'Journey.Direct <noreply@journey.storage>',
       to: ['jonah@journey.storage', 'lyvia@journey.storage'],
+      cc: ['support@journey.storage'],
       subject,
       html,
     }),

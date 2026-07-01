@@ -102,6 +102,10 @@ async function notifyTeam(row: Record<string, unknown>) {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
+  // support@ is copied on every lead notification (override via LEAD_NOTIFY_ALWAYS_CC).
+  const cc = (process.env.LEAD_NOTIFY_ALWAYS_CC ?? 'support@journey.storage')
+    .split(',').map((s) => s.trim())
+    .filter((addr) => addr && !to.some((t) => t.toLowerCase() === addr.toLowerCase()))
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -112,6 +116,7 @@ async function notifyTeam(row: Record<string, unknown>) {
     body: JSON.stringify({
       from,
       to,
+      ...(cc.length ? { cc } : {}),
       subject,
       reply_to: String(row.email ?? ''),
       html,

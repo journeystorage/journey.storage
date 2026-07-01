@@ -51,6 +51,12 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
   const to = process.env.LEAD_NOTIFY_TO || DEFAULT_TO
   const from = process.env.LEAD_NOTIFY_FROM || DEFAULT_FROM
 
+  // support@ is copied on every lead notification. LEAD_NOTIFY_ALWAYS_CC
+  // (comma-separated) overrides the default.
+  const cc = (process.env.LEAD_NOTIFY_ALWAYS_CC ?? 'support@journey.storage')
+    .split(',').map((s) => s.trim())
+    .filter((addr) => addr && addr.toLowerCase() !== to.toLowerCase())
+
   const subject = `New Advisory contact — ${lead.name}`
 
   const html = `<div style="max-width:560px;margin:0 auto;padding:24px;background:#fff">
@@ -87,6 +93,7 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
     body: JSON.stringify({
       from,
       to,
+      ...(cc.length ? { cc } : {}),
       subject,
       html,
       text,
