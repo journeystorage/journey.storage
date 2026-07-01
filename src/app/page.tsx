@@ -5,7 +5,7 @@ import MarqueeBanner from '@/components/sections/MarqueeBanner'
 import LifeMoments from '@/components/sections/LifeMoments'
 import HowItWorks from '@/components/sections/HowItWorks'
 import Differentiators from '@/components/sections/Differentiators'
-import LocationsMap from '@/components/sections/LocationsMap'
+import Locations from '@/components/sections/Locations'
 import AboutFounder from '@/components/sections/AboutFounder'
 import FAQ from '@/components/sections/FAQ'
 import Waitlist from '@/components/sections/Waitlist'
@@ -20,7 +20,7 @@ export default function Home() {
         <LifeMoments />
         <HowItWorks />
         <Differentiators />
-        <LocationsMap />
+        <Locations />
         <AboutFounder />
         <FAQ />
         <Waitlist />
