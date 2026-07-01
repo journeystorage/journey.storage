@@ -16,7 +16,6 @@ import {
   CheckCircle2,
   Check,
   MapPin,
-  Phone,
   Upload,
   X,
   ArrowRight,
@@ -333,11 +332,11 @@ export default function MoveOutPage() {
         </div>
       </section>
 
-      {/* ── Move-out form (the primary action) ── */}
-      <section id="moveout-form" className="relative bg-black px-3 md:px-6 lg:px-10 pt-4 pb-20 lg:pb-28">
-        <div className="grain relative mx-auto max-w-[1040px] rounded-[24px] md:rounded-[32px] overflow-hidden" style={{ backgroundColor: '#0f0f0f', border: '1px solid rgba(245,240,232,0.07)' }}>
-          <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true" style={{ background: 'radial-gradient(ellipse 65% 55% at 50% 0%, rgba(232,98,42,0.07), transparent)' }} />
-          <div className="relative z-10 px-6 md:px-12 py-14 md:py-16 lg:py-20">
+      {/* ── Move-out form (the primary action) — warm panel, matches hero/CTA ── */}
+      <section id="moveout-form" className="relative bg-black px-3 md:px-6 lg:px-10 pt-6 pb-20 lg:pb-28">
+        <div className="relative mx-auto max-w-[880px] rounded-[24px] md:rounded-[32px] overflow-hidden" style={{ backgroundColor: '#F5F0E8' }}>
+          <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true" style={{ background: 'radial-gradient(ellipse 75% 55% at 50% -5%, rgba(232,98,42,0.09), transparent)' }} />
+          <div className="relative z-10 px-5 md:px-12 py-14 md:py-16 lg:py-20">
             {!submitted ? (
               <>
                 <div className="text-center mb-10">
@@ -346,10 +345,10 @@ export default function MoveOutPage() {
                     <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">Submit your notice</span>
                     <div className="h-px w-8 bg-orange" />
                   </div>
-                  <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-black text-warm-white leading-[1.0] tracking-tight">
+                  <h2 className="text-3xl md:text-4xl lg:text-[2.75rem] font-black text-black leading-[1.0] tracking-tight">
                     Tell us you&apos;re moving out.
                   </h2>
-                  <p className="mt-4 mx-auto max-w-[460px] text-[0.95rem] leading-[1.6] text-warm-white/55">
+                  <p className="mt-4 mx-auto max-w-[460px] text-[0.95rem] leading-[1.6] text-black/60">
                     Pick your location, add your details and a photo of the empty unit, and we&apos;ll close out your space — usually within seconds.
                   </p>
                 </div>
@@ -357,9 +356,9 @@ export default function MoveOutPage() {
                 {/* Step 1 — location picker */}
                 <div className="mb-4 flex items-center gap-2.5">
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange text-[0.72rem] font-black text-warm-white">1</span>
-                  <span className="text-[0.8rem] font-bold uppercase tracking-[0.18em] text-warm-white/70">Which location are you moving out of?</span>
+                  <span className="text-[0.8rem] font-bold uppercase tracking-[0.18em] text-black/70">Which location are you moving out of?</span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                   {MOVEOUT_PROPERTIES.map((p) => {
                     const active = selectedSlug === p.slug
                     return (
@@ -368,30 +367,26 @@ export default function MoveOutPage() {
                         type="button"
                         onClick={() => selectProperty(p.slug)}
                         aria-pressed={active}
-                        className={`loc-card group relative text-left rounded-2xl overflow-hidden bg-white transition-all duration-200 ${active ? 'ring-2 ring-orange border-transparent' : 'border border-black/[0.06]'} ${selectedSlug && !active ? 'opacity-55 hover:opacity-100' : ''}`}
+                        className={`loc-card group relative text-left rounded-xl overflow-hidden bg-white transition-all duration-200 ${active ? 'ring-2 ring-orange' : ''} ${selectedSlug && !active ? 'opacity-60 hover:opacity-100' : ''}`}
                       >
-                        <div className="relative h-36 overflow-hidden">
+                        <div className="relative h-24 overflow-hidden">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={p.image} alt={`${p.name} facility`} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" aria-hidden="true" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" aria-hidden="true" />
                           {p.badge && (
-                            <span className="absolute left-3 top-3 rounded-full bg-orange px-2.5 py-1 text-[0.68rem] font-bold text-warm-white shadow-[0_2px_8px_rgba(232,98,42,0.35)]">{p.badge}</span>
+                            <span className="absolute left-2.5 top-2.5 rounded-full bg-orange px-2 py-0.5 text-[0.62rem] font-bold text-warm-white shadow-[0_2px_8px_rgba(232,98,42,0.35)]">{p.badge}</span>
                           )}
                           {active && (
-                            <span className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-orange text-warm-white shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
-                              <Check size={16} strokeWidth={3} aria-hidden="true" />
+                            <span className="absolute right-2.5 top-2.5 flex h-6 w-6 items-center justify-center rounded-full bg-orange text-warm-white shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+                              <Check size={14} strokeWidth={3} aria-hidden="true" />
                             </span>
                           )}
                         </div>
-                        <div className="p-4">
-                          <h4 className="text-[1.05rem] font-black text-black leading-snug tracking-tight">{p.name}</h4>
-                          <p className="mt-2 flex items-start gap-1.5 text-[0.83rem] text-black/55 leading-snug">
-                            <MapPin size={14} className="mt-[2px] text-orange flex-shrink-0" aria-hidden="true" />
-                            <span>{p.street}<br />{p.cityState}</span>
-                          </p>
-                          <p className="mt-2 flex items-center gap-1.5 text-[0.83rem] font-bold text-black/70">
-                            <Phone size={13} className="text-orange flex-shrink-0" aria-hidden="true" />
-                            {p.phone}
+                        <div className="px-3.5 py-3">
+                          <h4 className="text-[0.9rem] font-black text-black leading-snug tracking-tight">{p.name}</h4>
+                          <p className="mt-1 flex items-start gap-1 text-[0.75rem] text-black/50 leading-snug">
+                            <MapPin size={12} className="mt-[2px] text-orange flex-shrink-0" aria-hidden="true" />
+                            <span>{p.street}, {p.cityState}</span>
                           </p>
                         </div>
                       </button>
@@ -400,47 +395,47 @@ export default function MoveOutPage() {
                 </div>
 
                 {!selectedProperty && (
-                  <p className="mt-5 text-center text-[0.85rem] text-warm-white/40">Select your location above to continue.</p>
+                  <p className="mt-5 text-center text-[0.85rem] text-black/40">Select your location above to continue.</p>
                 )}
 
                 {/* Step 2 — details form (revealed on selection) */}
                 {selectedProperty && (
-                <div ref={formRef} className="mt-12 scroll-mt-24">
+                <div ref={formRef} className="mt-11 scroll-mt-24">
                   <div className="mb-6 flex items-center gap-2.5">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange text-[0.72rem] font-black text-warm-white">2</span>
-                    <span className="text-[0.8rem] font-bold uppercase tracking-[0.18em] text-warm-white/70">Your move-out details</span>
+                    <span className="text-[0.8rem] font-bold uppercase tracking-[0.18em] text-black/70">Your move-out details</span>
                   </div>
 
                   {/* Selected-location summary */}
-                  <div className="mx-auto mb-6 flex max-w-[460px] items-center justify-between gap-3 rounded-xl border border-orange/30 bg-orange/[0.08] px-4 py-3">
+                  <div className="mx-auto mb-6 flex max-w-[460px] items-center justify-between gap-3 rounded-xl border border-orange/25 bg-orange/[0.1] px-4 py-3">
                     <span className="flex items-center gap-2.5 min-w-0">
                       <MapPin size={16} className="text-orange flex-shrink-0" aria-hidden="true" />
                       <span className="min-w-0">
-                        <span className="block text-[0.62rem] font-bold uppercase tracking-[0.2em] text-warm-white/45">Moving out of</span>
-                        <span className="block truncate text-[0.9rem] font-bold text-warm-white">{selectedProperty.name} · {selectedProperty.street}</span>
+                        <span className="block text-[0.62rem] font-bold uppercase tracking-[0.2em] text-black/45">Moving out of</span>
+                        <span className="block truncate text-[0.9rem] font-bold text-black">{selectedProperty.name} · {selectedProperty.street}</span>
                       </span>
                     </span>
                     <button
                       type="button"
                       onClick={() => setSelectedSlug(null)}
-                      className="flex-shrink-0 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-warm-white/50 hover:text-orange transition-colors"
+                      className="flex-shrink-0 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-black/45 hover:text-orange transition-colors"
                     >
                       Change
                     </button>
                   </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="mx-auto max-w-[460px] flex flex-col gap-4" noValidate>
-                  <Input label="Full name" placeholder="Your full name" required onDark {...register('name')} error={errors.name?.message} />
-                  <Input label="Email" type="email" placeholder="you@email.com" required onDark {...register('email')} error={errors.email?.message} />
-                  <Input label="Unit number" placeholder="e.g. B-114" required onDark {...register('unit')} error={errors.unit?.message} />
+                  <Input label="Full name" placeholder="Your full name" required {...register('name')} error={errors.name?.message} />
+                  <Input label="Email" type="email" placeholder="you@email.com" required {...register('email')} error={errors.email?.message} />
+                  <Input label="Unit number" placeholder="e.g. B-114" required {...register('unit')} error={errors.unit?.message} />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input label="Move-out date" type="date" required onDark style={{ colorScheme: 'dark' }} {...register('moveout_date')} error={errors.moveout_date?.message} />
-                    <Input label="Phone" type="tel" placeholder="(555) 000-0000" onDark {...register('phone')} error={errors.phone?.message} />
+                    <Input label="Move-out date" type="date" required {...register('moveout_date')} error={errors.moveout_date?.message} />
+                    <Input label="Phone" type="tel" placeholder="(555) 000-0000" {...register('phone')} error={errors.phone?.message} />
                   </div>
 
                   {/* Photo dropzone */}
                   <div className="flex flex-col gap-2">
-                    <label className="text-body-sm font-bold text-warm-white">
+                    <label className="text-body-sm font-bold text-black">
                       Photo of the empty unit<span className="text-orange ml-1" aria-hidden="true">*</span>
                     </label>
                     <input
@@ -455,39 +450,39 @@ export default function MoveOutPage() {
                       <button
                         type="button"
                         onClick={() => fileRef.current?.click()}
-                        className="photo-drop flex flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-stone/40 bg-white/[0.03] px-4 py-8 text-center cursor-pointer"
+                        className="photo-drop flex flex-col items-center justify-center gap-2 rounded-sm border border-dashed border-stone/50 bg-white/60 px-4 py-8 text-center cursor-pointer"
                       >
-                        <Upload size={22} className="text-warm-white/45" aria-hidden="true" />
-                        <span className="text-[0.9rem] font-bold text-warm-white/80">Add a photo</span>
-                        <span className="text-[0.75rem] text-warm-white/40">Tap to take or upload · JPG or PNG, up to 12 MB</span>
+                        <Upload size={22} className="text-black/40" aria-hidden="true" />
+                        <span className="text-[0.9rem] font-bold text-black/75">Add a photo</span>
+                        <span className="text-[0.75rem] text-black/40">Tap to take or upload · JPG or PNG, up to 12 MB</span>
                       </button>
                     ) : (
-                      <div className="flex items-center justify-between gap-3 rounded-sm border border-stone/30 bg-white/[0.06] px-4 py-3.5">
+                      <div className="flex items-center justify-between gap-3 rounded-sm border border-stone/40 bg-white px-4 py-3.5">
                         <span className="flex items-center gap-2.5 min-w-0">
                           <CheckCircle2 size={18} className="text-orange flex-shrink-0" aria-hidden="true" />
-                          <span className="truncate text-[0.85rem] text-warm-white/80">{photo.name}</span>
+                          <span className="truncate text-[0.85rem] text-black/75">{photo.name}</span>
                         </span>
                         <button
                           type="button"
                           onClick={() => { setPhoto(null); if (fileRef.current) fileRef.current.value = '' }}
-                          className="flex-shrink-0 text-warm-white/40 hover:text-orange transition-colors"
+                          className="flex-shrink-0 text-black/40 hover:text-orange transition-colors"
                           aria-label="Remove photo"
                         >
                           <X size={18} aria-hidden="true" />
                         </button>
                       </div>
                     )}
-                    {photoError && <p className="text-caption text-[#E8865C]" role="alert">{photoError}</p>}
+                    {photoError && <p className="text-caption text-[#C0442A] font-bold" role="alert">{photoError}</p>}
                   </div>
 
                   {/* Notes */}
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="moveout-notes" className="text-body-sm font-bold text-warm-white">Anything we should know?</label>
+                    <label htmlFor="moveout-notes" className="text-body-sm font-bold text-black">Anything we should know?</label>
                     <textarea
                       id="moveout-notes"
                       rows={3}
                       placeholder="Optional — questions, special circumstances, forwarding details..."
-                      className="w-full rounded-sm px-4 py-3.5 text-body font-normal placeholder:text-stone transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-0 bg-white/[0.06] text-warm-white border border-stone/30 focus:border-orange resize-none"
+                      className="w-full rounded-sm px-4 py-3.5 text-body font-normal placeholder:text-stone transition-colors duration-150 ease-out focus-visible:outline-none focus-visible:ring-0 bg-white text-black border border-stone/30 focus:border-orange resize-none"
                       {...register('notes')}
                     />
                   </div>
@@ -499,11 +494,11 @@ export default function MoveOutPage() {
                     {isSubmitting ? 'Submitting...' : 'Submit move-out'}
                   </Button>
                   {error && (
-                    <p className="text-caption text-[#E8865C]" role="alert">
+                    <p className="text-caption text-[#C0442A] font-bold" role="alert">
                       Something went wrong submitting your move-out. Please try again, or email us at hello@journey.storage.
                     </p>
                   )}
-                  <p className="text-center text-[0.72rem] leading-[1.5] text-warm-white/35">
+                  <p className="text-center text-[0.72rem] leading-[1.5] text-black/45">
                     By submitting, you confirm the unit is empty and ready for us to close out.
                   </p>
                 </form>
@@ -515,14 +510,14 @@ export default function MoveOutPage() {
                 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-orange/30 bg-orange/10">
                   <CheckCircle2 size={30} className="text-orange" aria-hidden="true" />
                 </div>
-                <h3 className="text-3xl md:text-4xl font-black text-warm-white tracking-tight">You&apos;re all set.</h3>
-                <p className="mx-auto mt-4 max-w-[420px] text-[0.95rem] leading-[1.6] text-warm-white/55">
+                <h3 className="text-3xl md:text-4xl font-black text-black tracking-tight">You&apos;re all set.</h3>
+                <p className="mx-auto mt-4 max-w-[420px] text-[0.95rem] leading-[1.6] text-black/60">
                   We&apos;ve got your move-out notice. We&apos;ll confirm your unit is empty and turn off your access — you&apos;ll get an email the moment it&apos;s done.
                 </p>
                 <p className="mt-7 text-subhead font-light italic text-stone">Thanks for storing with Journey.</p>
                 <a
                   href="/"
-                  className="mt-8 inline-flex items-center gap-2 text-[0.78rem] font-bold uppercase tracking-[0.18em] text-warm-white/55 hover:text-orange no-underline transition-colors"
+                  className="mt-8 inline-flex items-center gap-2 text-[0.78rem] font-bold uppercase tracking-[0.18em] text-black/55 hover:text-orange no-underline transition-colors"
                 >
                   Back to home <ArrowRight size={14} aria-hidden="true" />
                 </a>
@@ -657,13 +652,13 @@ export default function MoveOutPage() {
         .hero-cta-arrow { transition: transform 0.25s ease; }
 
         .photo-drop { transition: border-color 0.2s ease, background-color 0.2s ease; }
-        .photo-drop:hover { border-color: rgba(232, 98, 42, 0.5); background-color: rgba(245, 240, 232, 0.05); }
+        .photo-drop:hover { border-color: rgba(232, 98, 42, 0.55); background-color: #fff; }
         .photo-drop:focus-visible { outline: 2px solid var(--color-orange); outline-offset: 2px; }
 
-        .loc-card { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease; cursor: pointer; }
-        .loc-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.38); }
+        .loc-card { box-shadow: 0 4px 14px rgba(24, 24, 24, 0.10); transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease; cursor: pointer; }
+        .loc-card:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(24, 24, 24, 0.18); }
         .loc-card:focus-visible { outline: 2px solid var(--color-orange); outline-offset: 3px; }
-        .loc-card[aria-pressed='true'] { box-shadow: 0 10px 26px rgba(232, 98, 42, 0.25); }
+        .loc-card[aria-pressed='true'] { box-shadow: 0 10px 26px rgba(232, 98, 42, 0.28); }
 
         .feat-card { transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
         .feat-card:hover { transform: translateY(-3px); background-color: rgba(245, 240, 232, 0.03); border-color: rgba(245, 240, 232, 0.12); }
