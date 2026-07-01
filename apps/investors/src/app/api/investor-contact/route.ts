@@ -102,10 +102,15 @@ async function notifyTeam(row: Record<string, unknown>) {
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
-  // support@ is copied on every lead notification (override via LEAD_NOTIFY_ALWAYS_CC).
-  const cc = (process.env.LEAD_NOTIFY_ALWAYS_CC ?? 'support@journey.storage')
-    .split(',').map((s) => s.trim())
-    .filter((addr) => addr && !to.some((t) => t.toLowerCase() === addr.toLowerCase()))
+  // support@ is copied on every lead notification — but only once we send from a
+  // verified @journey.storage domain (resend.dev senders can only reach the
+  // account-owner inbox, and a non-owner recipient makes Resend reject the send).
+  const verifiedSender = !/@resend\.dev/i.test(from)
+  const cc = verifiedSender
+    ? (process.env.LEAD_NOTIFY_ALWAYS_CC ?? 'support@journey.storage')
+        .split(',').map((s) => s.trim())
+        .filter((addr) => addr && !to.some((t) => t.toLowerCase() === addr.toLowerCase()))
+    : []
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',

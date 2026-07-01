@@ -51,11 +51,16 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
   const to = process.env.LEAD_NOTIFY_TO || DEFAULT_TO
   const from = process.env.LEAD_NOTIFY_FROM || DEFAULT_FROM
 
-  // support@ is copied on every lead notification. LEAD_NOTIFY_ALWAYS_CC
-  // (comma-separated) overrides the default.
-  const cc = (process.env.LEAD_NOTIFY_ALWAYS_CC ?? 'support@journey.storage')
-    .split(',').map((s) => s.trim())
-    .filter((addr) => addr && addr.toLowerCase() !== to.toLowerCase())
+  // support@ is copied on every lead notification — but only once we send from a
+  // verified @journey.storage domain. While the sender is still resend.dev,
+  // Resend rejects any non-owner recipient, so drop the cc to keep the owner
+  // inbox (lyvia@) delivering. LEAD_NOTIFY_ALWAYS_CC overrides the address.
+  const verifiedSender = !/@resend\.dev/i.test(from)
+  const cc = verifiedSender
+    ? (process.env.LEAD_NOTIFY_ALWAYS_CC ?? 'support@journey.storage')
+        .split(',').map((s) => s.trim())
+        .filter((addr) => addr && addr.toLowerCase() !== to.toLowerCase())
+    : []
 
   const subject = `New Advisory contact — ${lead.name}`
 

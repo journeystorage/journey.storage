@@ -56,8 +56,18 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
     return
   }
 
-  const to = lead.to || process.env.LEAD_NOTIFY_TO || DEFAULT_TO
   const from = process.env.LEAD_NOTIFY_FROM || DEFAULT_FROM
+  const ownerInbox = process.env.LEAD_NOTIFY_TO || DEFAULT_TO
+
+  // Resend only delivers to the account-owner inbox (lyvia@) until
+  // journey.storage is a VERIFIED sending domain. While the sender is still a
+  // resend.dev address, sending to any other recipient makes Resend reject the
+  // whole message — so collapse every notification to the owner inbox (the
+  // facility still shows in the subject). Per-recipient routing (lead.to) and
+  // the support@ cc auto-activate the moment LEAD_NOTIFY_FROM is a verified
+  // @journey.storage sender.
+  const verifiedSender = !/@resend\.dev/i.test(from)
+  const to = verifiedSender ? (lead.to || ownerInbox) : ownerInbox
 
   // support@ is copied on every lead notification (all forms), plus any
   // per-call cc (e.g. lyvia@ on move-out). Dedupe, and never cc the primary
@@ -65,9 +75,11 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
   const alwaysCc = (process.env.LEAD_NOTIFY_ALWAYS_CC ?? 'support@journey.storage')
     .split(',').map((s) => s.trim()).filter(Boolean)
   const perCallCc = Array.isArray(lead.cc) ? lead.cc : lead.cc ? [lead.cc] : []
-  const cc = [...alwaysCc, ...perCallCc]
-    .filter((addr) => addr && addr.toLowerCase() !== to.toLowerCase())
-    .filter((addr, i, arr) => arr.findIndex((a) => a.toLowerCase() === addr.toLowerCase()) === i)
+  const cc = verifiedSender
+    ? [...alwaysCc, ...perCallCc]
+        .filter((addr) => addr && addr.toLowerCase() !== to.toLowerCase())
+        .filter((addr, i, arr) => arr.findIndex((a) => a.toLowerCase() === addr.toLowerCase()) === i)
+    : []
 
   const isMoveout = lead.formSource.includes('moveout')
   const subject = lead.subject || `New Contact Us submission — ${lead.name}`
