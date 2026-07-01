@@ -14,6 +14,9 @@ import {
   Lock,
   ShieldCheck,
   CheckCircle2,
+  Check,
+  MapPin,
+  Phone,
   Upload,
   X,
   ArrowRight,
@@ -22,6 +25,7 @@ import {
 import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import MarqueeBanner from '@/components/sections/MarqueeBanner'
+import { MOVEOUT_PROPERTIES } from '@/lib/moveout-properties'
 
 /* ── How move-out works ──────────────────────────────────────────── */
 const STEPS = [
@@ -59,7 +63,6 @@ const moveOutSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Please enter a valid email'),
   phone: z.string().optional(),
-  property: z.string().min(1, 'Facility is required'),
   unit: z.string().min(1, 'Unit number is required'),
   moveout_date: z.string().min(1, 'Pick a move-out date'),
   notes: z.string().optional(),
@@ -76,8 +79,20 @@ export default function MoveOutPage() {
   const [error, setError] = useState(false)
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoError, setPhotoError] = useState<string | null>(null)
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
   const ecoRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const formRef = useRef<HTMLDivElement>(null)
+
+  const selectedProperty = MOVEOUT_PROPERTIES.find((p) => p.slug === selectedSlug) ?? null
+
+  const selectProperty = (slug: string) => {
+    setSelectedSlug(slug)
+    // Reveal + scroll the details form into view after it mounts.
+    requestAnimationFrame(() => {
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
+  }
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<MoveOutForm>({
     resolver: zodResolver(moveOutSchema),
@@ -121,6 +136,11 @@ export default function MoveOutPage() {
 
   const onSubmit = async (data: MoveOutForm) => {
     setError(false)
+    if (!selectedProperty) {
+      setError(true)
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      return
+    }
     if (!photo) {
       setPhotoError('A photo of your empty unit is required.')
       return
@@ -128,6 +148,8 @@ export default function MoveOutPage() {
     try {
       const body = new FormData()
       Object.entries(data).forEach(([k, v]) => body.append(k, v ?? ''))
+      body.append('property_slug', selectedProperty.slug)
+      body.append('property', selectedProperty.name)
       body.append('photo', photo)
       body.append('website', '') // honeypot
 
@@ -313,7 +335,7 @@ export default function MoveOutPage() {
 
       {/* ── Move-out form (the primary action) ── */}
       <section id="moveout-form" className="relative bg-black px-3 md:px-6 lg:px-10 pt-4 pb-20 lg:pb-28">
-        <div className="grain relative mx-auto max-w-[760px] rounded-[24px] md:rounded-[32px] overflow-hidden" style={{ backgroundColor: '#0f0f0f', border: '1px solid rgba(245,240,232,0.07)' }}>
+        <div className="grain relative mx-auto max-w-[1040px] rounded-[24px] md:rounded-[32px] overflow-hidden" style={{ backgroundColor: '#0f0f0f', border: '1px solid rgba(245,240,232,0.07)' }}>
           <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true" style={{ background: 'radial-gradient(ellipse 65% 55% at 50% 0%, rgba(232,98,42,0.07), transparent)' }} />
           <div className="relative z-10 px-6 md:px-12 py-14 md:py-16 lg:py-20">
             {!submitted ? (
@@ -328,17 +350,89 @@ export default function MoveOutPage() {
                     Tell us you&apos;re moving out.
                   </h2>
                   <p className="mt-4 mx-auto max-w-[460px] text-[0.95rem] leading-[1.6] text-warm-white/55">
-                    Fill in your details, attach a photo of the empty unit, and we&apos;ll close out your space — usually within seconds.
+                    Pick your location, add your details and a photo of the empty unit, and we&apos;ll close out your space — usually within seconds.
                   </p>
                 </div>
+
+                {/* Step 1 — location picker */}
+                <div className="mb-4 flex items-center gap-2.5">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange text-[0.72rem] font-black text-warm-white">1</span>
+                  <span className="text-[0.8rem] font-bold uppercase tracking-[0.18em] text-warm-white/70">Which location are you moving out of?</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {MOVEOUT_PROPERTIES.map((p) => {
+                    const active = selectedSlug === p.slug
+                    return (
+                      <button
+                        key={p.slug}
+                        type="button"
+                        onClick={() => selectProperty(p.slug)}
+                        aria-pressed={active}
+                        className={`loc-card group relative text-left rounded-2xl overflow-hidden bg-white transition-all duration-200 ${active ? 'ring-2 ring-orange border-transparent' : 'border border-black/[0.06]'} ${selectedSlug && !active ? 'opacity-55 hover:opacity-100' : ''}`}
+                      >
+                        <div className="relative h-36 overflow-hidden">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={p.image} alt={`${p.name} facility`} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" aria-hidden="true" />
+                          {p.badge && (
+                            <span className="absolute left-3 top-3 rounded-full bg-orange px-2.5 py-1 text-[0.68rem] font-bold text-warm-white shadow-[0_2px_8px_rgba(232,98,42,0.35)]">{p.badge}</span>
+                          )}
+                          {active && (
+                            <span className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-orange text-warm-white shadow-[0_2px_8px_rgba(0,0,0,0.3)]">
+                              <Check size={16} strokeWidth={3} aria-hidden="true" />
+                            </span>
+                          )}
+                        </div>
+                        <div className="p-4">
+                          <h4 className="text-[1.05rem] font-black text-black leading-snug tracking-tight">{p.name}</h4>
+                          <p className="mt-2 flex items-start gap-1.5 text-[0.83rem] text-black/55 leading-snug">
+                            <MapPin size={14} className="mt-[2px] text-orange flex-shrink-0" aria-hidden="true" />
+                            <span>{p.street}<br />{p.cityState}</span>
+                          </p>
+                          <p className="mt-2 flex items-center gap-1.5 text-[0.83rem] font-bold text-black/70">
+                            <Phone size={13} className="text-orange flex-shrink-0" aria-hidden="true" />
+                            {p.phone}
+                          </p>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {!selectedProperty && (
+                  <p className="mt-5 text-center text-[0.85rem] text-warm-white/40">Select your location above to continue.</p>
+                )}
+
+                {/* Step 2 — details form (revealed on selection) */}
+                {selectedProperty && (
+                <div ref={formRef} className="mt-12 scroll-mt-24">
+                  <div className="mb-6 flex items-center gap-2.5">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange text-[0.72rem] font-black text-warm-white">2</span>
+                    <span className="text-[0.8rem] font-bold uppercase tracking-[0.18em] text-warm-white/70">Your move-out details</span>
+                  </div>
+
+                  {/* Selected-location summary */}
+                  <div className="mx-auto mb-6 flex max-w-[460px] items-center justify-between gap-3 rounded-xl border border-orange/30 bg-orange/[0.08] px-4 py-3">
+                    <span className="flex items-center gap-2.5 min-w-0">
+                      <MapPin size={16} className="text-orange flex-shrink-0" aria-hidden="true" />
+                      <span className="min-w-0">
+                        <span className="block text-[0.62rem] font-bold uppercase tracking-[0.2em] text-warm-white/45">Moving out of</span>
+                        <span className="block truncate text-[0.9rem] font-bold text-warm-white">{selectedProperty.name} · {selectedProperty.street}</span>
+                      </span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedSlug(null)}
+                      className="flex-shrink-0 text-[0.7rem] font-bold uppercase tracking-[0.16em] text-warm-white/50 hover:text-orange transition-colors"
+                    >
+                      Change
+                    </button>
+                  </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="mx-auto max-w-[460px] flex flex-col gap-4" noValidate>
                   <Input label="Full name" placeholder="Your full name" required onDark {...register('name')} error={errors.name?.message} />
                   <Input label="Email" type="email" placeholder="you@email.com" required onDark {...register('email')} error={errors.email?.message} />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Input label="Facility" placeholder="e.g. Springfield" required onDark {...register('property')} error={errors.property?.message} />
-                    <Input label="Unit number" placeholder="e.g. B-114" required onDark {...register('unit')} error={errors.unit?.message} />
-                  </div>
+                  <Input label="Unit number" placeholder="e.g. B-114" required onDark {...register('unit')} error={errors.unit?.message} />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input label="Move-out date" type="date" required onDark style={{ colorScheme: 'dark' }} {...register('moveout_date')} error={errors.moveout_date?.message} />
                     <Input label="Phone" type="tel" placeholder="(555) 000-0000" onDark {...register('phone')} error={errors.phone?.message} />
@@ -413,6 +507,8 @@ export default function MoveOutPage() {
                     By submitting, you confirm the unit is empty and ready for us to close out.
                   </p>
                 </form>
+                </div>
+                )}
               </>
             ) : (
               <div className="py-12 md:py-16 text-center">
@@ -563,6 +659,11 @@ export default function MoveOutPage() {
         .photo-drop { transition: border-color 0.2s ease, background-color 0.2s ease; }
         .photo-drop:hover { border-color: rgba(232, 98, 42, 0.5); background-color: rgba(245, 240, 232, 0.05); }
         .photo-drop:focus-visible { outline: 2px solid var(--color-orange); outline-offset: 2px; }
+
+        .loc-card { box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease; cursor: pointer; }
+        .loc-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.38); }
+        .loc-card:focus-visible { outline: 2px solid var(--color-orange); outline-offset: 3px; }
+        .loc-card[aria-pressed='true'] { box-shadow: 0 10px 26px rgba(232, 98, 42, 0.25); }
 
         .feat-card { transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease; }
         .feat-card:hover { transform: translateY(-3px); background-color: rgba(245, 240, 232, 0.03); border-color: rgba(245, 240, 232, 0.12); }

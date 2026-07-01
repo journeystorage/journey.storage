@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { sendLeadNotification } from '@/lib/lead-email'
 import { rateLimited, isValidEmail } from '@/lib/api-guard'
+import { getMoveOutProperty } from '@/lib/moveout-properties'
 
 // Move-out requests land in the same `waitlist_leads` table as every other
 // lead (distinguished by form_source), so this needs no new schema. The
@@ -9,6 +10,17 @@ import { rateLimited, isValidEmail } from '@/lib/api-guard'
 // raw_payload and in the email notification.
 const SOURCE_APP = 'main' as const
 const FORM_SOURCE = 'moveout-request' as const
+
+// Per-property notification routing. Each facility's move-out request emails
+// its own address so the team can triage by location. Set these in the main
+// site's Hostinger env (per-instance, like the other secrets); any unset slug
+// falls back to LEAD_NOTIFY_TO / the default recipient. Keys must match the
+// slugs in src/lib/moveout-properties.ts.
+const PROPERTY_NOTIFY: Record<string, string | undefined> = {
+  'temple-hall': process.env.MOVEOUT_NOTIFY_TEMPLE_HALL,
+  'western-hills': process.env.MOVEOUT_NOTIFY_WESTERN_HILLS,
+  'cleveland-road': process.env.MOVEOUT_NOTIFY_CLEVELAND_ROAD,
+}
 
 // Proof-of-empty photos are uploaded here. Create a PUBLIC bucket named
 // `moveout-photos` in the Supabase project for uploads to persist; if it's
@@ -40,7 +52,7 @@ export async function POST(request: Request) {
   const name = str(form.get('name'))
   const email = str(form.get('email')).toLowerCase()
   const phone = str(form.get('phone'))
-  const property = str(form.get('property'))
+  const propertySlug = str(form.get('property_slug'))
   const unit = str(form.get('unit'))
   const moveOutDate = str(form.get('moveout_date'))
   const notes = str(form.get('notes'))
@@ -51,9 +63,13 @@ export async function POST(request: Request) {
   if (!email || !isValidEmail(email)) {
     return NextResponse.json({ success: false, error: 'email_invalid' }, { status: 400 })
   }
-  if (!property) {
+  // Property is chosen from the on-page picker; trust the server's own list
+  // (not client-sent text) for the label and email routing.
+  const selectedProperty = getMoveOutProperty(propertySlug)
+  if (!selectedProperty) {
     return NextResponse.json({ success: false, error: 'property_required' }, { status: 400 })
   }
+  const property = `${selectedProperty.name} — ${selectedProperty.street}, ${selectedProperty.cityState}`
   if (!unit) {
     return NextResponse.json({ success: false, error: 'unit_required' }, { status: 400 })
   }
@@ -97,6 +113,7 @@ export async function POST(request: Request) {
     email,
     phone,
     property,
+    property_slug: selectedProperty.slug,
     unit,
     moveout_date: moveOutDate,
     notes,
@@ -147,6 +164,8 @@ export async function POST(request: Request) {
       phone,
       message: summary,
       formSource: FORM_SOURCE,
+      to: PROPERTY_NOTIFY[selectedProperty.slug] || undefined,
+      subject: `Move-out request — ${selectedProperty.name} — ${name}`,
     })
   } catch (err) {
     console.error('[Moveout] Email notification failed:', err)

@@ -21,6 +21,10 @@ export type LeadNotification = {
   phone?: string
   message?: string
   formSource: string
+  /** Override recipient (e.g. per-property move-out routing). Falls back to LEAD_NOTIFY_TO. */
+  to?: string
+  /** Overrides the email subject line when set. */
+  subject?: string
 }
 
 const DEFAULT_TO = 'lyvia@journey.storage'
@@ -50,13 +54,15 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
     return
   }
 
-  const to = process.env.LEAD_NOTIFY_TO || DEFAULT_TO
+  const to = lead.to || process.env.LEAD_NOTIFY_TO || DEFAULT_TO
   const from = process.env.LEAD_NOTIFY_FROM || DEFAULT_FROM
 
-  const subject = `New Contact Us submission — ${lead.name}`
+  const isMoveout = lead.formSource.includes('moveout')
+  const subject = lead.subject || `New Contact Us submission — ${lead.name}`
+  const eyebrow = isMoveout ? 'Move-out request' : 'New contact'
 
   const html = `<div style="max-width:560px;margin:0 auto;padding:24px;background:#fff">
-    <p style="margin:0 0 4px;color:#e0531f;font:700 12px/1.4 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase">New contact</p>
+    <p style="margin:0 0 4px;color:#e0531f;font:700 12px/1.4 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase">${eyebrow}</p>
     <h1 style="margin:0 0 20px;color:#111;font:800 22px/1.3 system-ui,sans-serif">${escapeHtml(lead.name)}</h1>
     <table style="border-collapse:collapse;width:100%">
       ${row('Email', lead.email)}
