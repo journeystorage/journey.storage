@@ -12,14 +12,13 @@ const SOURCE_APP = 'main' as const
 const FORM_SOURCE = 'moveout-request' as const
 
 // Per-property notification routing. Each facility's move-out request emails
-// its own address so the team can triage by location. Set these in the main
-// site's Hostinger env (per-instance, like the other secrets); any unset slug
-// falls back to LEAD_NOTIFY_TO / the default recipient. Keys must match the
-// slugs in src/lib/moveout-properties.ts.
-const PROPERTY_NOTIFY: Record<string, string | undefined> = {
-  'temple-hall': process.env.MOVEOUT_NOTIFY_TEMPLE_HALL,
-  'western-hills': process.env.MOVEOUT_NOTIFY_WESTERN_HILLS,
-  'cleveland-road': process.env.MOVEOUT_NOTIFY_CLEVELAND_ROAD,
+// its own address so the team can triage by location. Defaults below can be
+// overridden per-instance via Hostinger env (no code change needed). Keys must
+// match the slugs in src/lib/moveout-properties.ts.
+const PROPERTY_NOTIFY: Record<string, string> = {
+  'temple-hall': process.env.MOVEOUT_NOTIFY_TEMPLE_HALL || 'templehallhwy@journey.storage',
+  'western-hills': process.env.MOVEOUT_NOTIFY_WESTERN_HILLS || 'westernhillstrl@journey.storage',
+  'cleveland-road': process.env.MOVEOUT_NOTIFY_CLEVELAND_ROAD || 'mccrearyrd@journey.storage',
 }
 
 // Proof-of-empty photos are uploaded here. Create a PUBLIC bucket named
