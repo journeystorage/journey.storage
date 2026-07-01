@@ -23,6 +23,8 @@ export type LeadNotification = {
   formSource: string
   /** Override recipient (e.g. per-property move-out routing). Falls back to LEAD_NOTIFY_TO. */
   to?: string
+  /** Copy these address(es) on the notification (e.g. always keep an oversight inbox in the loop). */
+  cc?: string | string[]
   /** Overrides the email subject line when set. */
   subject?: string
 }
@@ -56,6 +58,11 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
 
   const to = lead.to || process.env.LEAD_NOTIFY_TO || DEFAULT_TO
   const from = process.env.LEAD_NOTIFY_FROM || DEFAULT_FROM
+
+  // Never duplicate the primary recipient into cc (e.g. if a fallback routed
+  // the notification straight to the oversight inbox already).
+  const cc = (Array.isArray(lead.cc) ? lead.cc : lead.cc ? [lead.cc] : [])
+    .filter((addr) => addr && addr.toLowerCase() !== to.toLowerCase())
 
   const isMoveout = lead.formSource.includes('moveout')
   const subject = lead.subject || `New Contact Us submission — ${lead.name}`
@@ -95,6 +102,7 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
     body: JSON.stringify({
       from,
       to,
+      ...(cc.length ? { cc } : {}),
       subject,
       html,
       text,

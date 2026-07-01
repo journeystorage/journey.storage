@@ -21,6 +21,10 @@ const PROPERTY_NOTIFY: Record<string, string> = {
   'cleveland-road': process.env.MOVEOUT_NOTIFY_CLEVELAND_ROAD || 'mccrearyrd@journey.storage',
 }
 
+// Oversight copy — every move-out request is CC'd here regardless of facility,
+// so a central inbox always keeps a copy. Env-overridable.
+const MOVEOUT_ALWAYS_CC = process.env.MOVEOUT_ALWAYS_CC || 'lyvia@journey.storage'
+
 // Proof-of-empty photos are uploaded here. Create a PUBLIC bucket named
 // `moveout-photos` in the Supabase project for uploads to persist; if it's
 // missing, the request still saves (photo upload is best-effort, like email).
@@ -164,6 +168,7 @@ export async function POST(request: Request) {
       message: summary,
       formSource: FORM_SOURCE,
       to: PROPERTY_NOTIFY[selectedProperty.slug] || undefined,
+      cc: MOVEOUT_ALWAYS_CC,
       subject: `Move-out request — ${selectedProperty.name} — ${name}`,
     })
   } catch (err) {
