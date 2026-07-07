@@ -30,7 +30,9 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: ${{ secrets.FTP_SERVER_DIR }}
           local-dir: ./apps/portal/
-          protocol: ftps
+          # Plain FTP (passive). Hostinger's FTPS STORs the ~95KB index.html with a 450;
+          # plain FTP passive uploads it fine. See portal deploy notes.
+          protocol: ftp
           # SAFETY: the server keeps PHP + SQL that hold the real OpenAI key & data.
           # Excluding them means the deploy never uploads OR deletes them. Do not remove.
           exclude: |
