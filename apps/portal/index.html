@@ -242,6 +242,65 @@
   .empty{text-align:center;color:var(--ink-soft);padding:60px 20px;font-size:15px;}
   .loading{text-align:center;color:var(--ink-soft);padding:60px;font-size:14px;letter-spacing:.04em;}
   footer{margin-top:50px;text-align:center;color:var(--ink-faint);font-size:12px;letter-spacing:.04em;}
+
+  /* ───── MARKETING · unified pipeline ───── */
+  .mkt-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:26px 0 26px;}
+  .mkt-stat{background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:16px 18px;}
+  .mkt-stat.flag{border-color:#4a3526;}
+  .mkt-stat .row1{display:flex;align-items:baseline;justify-content:space-between;}
+  .mkt-stat .num{font-size:26px;font-weight:900;letter-spacing:-.02em;line-height:1;color:var(--ink);}
+  .mkt-stat .lab{font-size:12px;color:var(--ink-soft);margin-top:9px;font-weight:700;}
+  .mkt-stat .note{font-size:11.5px;margin-top:5px;color:var(--ink-faint);}
+  .mkt-stat .note.warn{color:#d0895a;font-weight:700;}
+  .mkt-stat .note.ok{color:var(--done);font-weight:700;}
+  .mkt-controls{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;}
+  .mkt-controls .lead{font-size:12px;color:var(--ink-faint);}
+  .mkt-controls .lead b{color:var(--ink-soft);}
+  .mkt-filters{display:flex;gap:6px;flex-wrap:wrap;}
+  .mkt-fbtn{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--line);border-radius:99px;font-size:12.5px;font-weight:700;color:var(--ink-faint);padding:6px 13px;cursor:pointer;transition:color .15s,border-color .15s,background .15s;}
+  .mkt-fbtn:hover{color:var(--ink-soft);border-color:#52483f;}
+  .mkt-fbtn.on{color:var(--ink);border-color:#5a5148;background:var(--surface-2);}
+  .mkt-fbtn svg{width:12px;height:12px;}
+  .mkt-board{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start;}
+  .mkt-colhead{display:flex;align-items:center;gap:10px;padding:0 2px 14px;margin-bottom:16px;border-bottom:1px solid var(--line);}
+  .mkt-colhead .sw{width:9px;height:9px;border-radius:2px;background:var(--wf);flex:none;}
+  .mkt-colhead h3{font-size:13px;font-weight:900;letter-spacing:.02em;color:var(--ink);}
+  .mkt-colhead .step{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;}
+  .mkt-colhead .cnt{margin-left:auto;font-size:12px;font-weight:900;color:var(--ink-soft);}
+  .mkt-colbody{display:flex;flex-direction:column;gap:11px;}
+  .mkt-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 15px;transition:border-color .16s,background .16s;}
+  .mkt-card:hover{border-color:#52483f;background:var(--surface-2);}
+  .mkt-card.posted{opacity:.66;}
+  .mkt-card .top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;}
+  .mkt-chan{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;letter-spacing:.04em;color:var(--ink-soft);}
+  .mkt-chan svg{width:13px;height:13px;color:var(--ink-faint);}
+  .mkt-chan .cd{width:6px;height:6px;border-radius:50%;background:var(--ink-faint);}
+  .mkt-flagchip{font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:99px;white-space:nowrap;}
+  .mkt-flagchip.ready{color:var(--done);background:#16211a;}
+  .mkt-flagchip.warn{color:#d0895a;background:#2a1e14;}
+  .mkt-flagchip.neutral{color:var(--ink-soft);border:1px solid var(--line);}
+  .mkt-flagchip.muted{color:var(--ink-faint);}
+  .mkt-card h4{font-size:14.5px;font-weight:700;line-height:1.35;color:var(--ink);cursor:pointer;margin-top:0;}
+  .mkt-card h4:hover{color:var(--accent);}
+  .mkt-card .fmt{font-size:11.5px;color:var(--ink-faint);font-style:italic;margin-top:3px;}
+  .mkt-pipe{display:flex;align-items:center;gap:5px;margin-top:13px;}
+  .mkt-pipe .d{width:8px;height:8px;border-radius:50%;background:#332f2a;flex:none;}
+  .mkt-pipe .d.done{background:var(--done);}
+  .mkt-pipe .d.active{background:var(--accent);box-shadow:0 0 0 3px var(--accent-tint);}
+  .mkt-pipe .ln{width:14px;height:2px;background:#332f2a;border-radius:2px;}
+  .mkt-pipe .ln.done{background:var(--done);}
+  .mkt-pipe .nx{margin-left:auto;font-size:10px;letter-spacing:.05em;color:var(--ink-faint);font-weight:700;}
+  .mkt-pipe .nx b{color:var(--ink-soft);}
+  .mkt-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px;padding-top:12px;border-top:1px solid var(--line);}
+  .mkt-date{font-size:11px;color:var(--ink-faint);}
+  .mkt-act{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s;}
+  .mkt-act:hover{background:var(--accent-press);}
+  .mkt-act.ghost{background:transparent;border:1px solid var(--line);color:var(--ink-soft);}
+  .mkt-act.ghost:hover{border-color:var(--accent);color:var(--accent);}
+  .mkt-add{border:1px dashed #4a443d;border-radius:11px;color:var(--ink-faint);font-size:12.5px;font-weight:700;text-align:center;padding:12px;background:transparent;cursor:pointer;transition:border-color .15s,color .15s;}
+  .mkt-add:hover{border-color:var(--accent);color:var(--accent);}
+  .mkt-empty{color:var(--ink-faint);font-size:12px;font-style:italic;padding:14px 2px;text-align:center;border:1px dashed var(--line);border-radius:11px;}
+  @media (max-width:900px){ .mkt-board{grid-template-columns:1fr;} .mkt-summary{grid-template-columns:repeat(2,1fr);} }
 </style>
 </head>
 <body>
@@ -292,6 +351,8 @@
   const checkSVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
   const sb = configured ? supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
   let mode = null, liveChannel = null, ctx = {};
+  // Ids of ledger rows currently being read (Gemini/parse in flight) — drives the "Reading…" badge.
+  let ledgerReading = {};
   // PDF.js is only needed when a user uploads a PDF (post-login). Load it on demand
   // so the login screen and dashboard don't pay for ~90KB up front.
   let _pdfjsPromise=null;
@@ -406,7 +467,17 @@
         {id:'ac_inv',department_id:'d5',name:'Invoices',stage:'ledger',kind:'invoice',cover:'Ledger',description:'Vendor invoices to pay. Drop a file — we read the details.'},
         {id:'ac_rec',department_id:'d5',name:'Receipts',stage:'ledger',kind:'receipt',cover:'Ledger',description:'Receipts for paid expenses. Drop a file — we read the details.'}
       ],
-      tasks: POSTS.map((p,i)=>({id:'t'+i,stream:'IG',position:i+1,title:p[0],meta:p[1],visual:p[2],body:p[3],copy_done:false,copy_date:'',design_done:false,design_date:'',posted:false,posted_date:'',assets:[],added:new Date().toISOString().slice(0,10)}))
+      tasks: POSTS.map((p,i)=>{
+        const t={id:'t'+i,stream:'IG',position:i+1,title:p[0],meta:p[1],visual:p[2],body:p[3],copy_done:false,copy_date:'',design_done:false,design_date:'',posted:false,posted_date:'',assets:[],asset_link:'',added:new Date().toISOString().slice(0,10)};
+        // Spread the seed across the pipeline so the Marketing board demos all three columns (preview only).
+        if(i>=3 && i<6){ t.copy_done=true; t.copy_date='2026-06-30'; t.design_date='2026-07-0'+(i-2); t.asset_link='https://example.com/asset'; }
+        else if(i>=6 && i<8){ t.copy_done=true; t.copy_date='2026-06-28'; t.design_done=true; t.design_date='2026-06-30'; t.asset_link='https://example.com/asset'; }
+        else if(i===8){ t.copy_done=true; t.copy_date='2026-06-25'; t.design_done=true; t.design_date='2026-06-27'; t.posted=true; t.posted_date='2026-07-01'; t.asset_link='https://example.com/asset'; }
+        return t;
+      }).concat([
+        {id:'li1',stream:'LinkedIn',position:1,title:"Starting over isn't always loud.",meta:'Photo / Typographic',visual:'',body:'',copy_done:false,copy_date:'',design_done:false,design_date:'',posted:false,posted_date:'',assets:[],asset_link:'',added:'2026-06-30'},
+        {id:'li2',stream:'LinkedIn',position:2,title:'You can tell a lot by what people keep.',meta:'Photo · Overhead unit',visual:'',body:'',copy_done:true,copy_date:'2026-06-25',design_done:true,design_date:'2026-06-27',posted:true,posted_date:'2026-07-01',assets:[],asset_link:'https://example.com/a',added:'2026-06-20'}
+      ])
     };
   }
 
@@ -541,19 +612,33 @@
     if(liveChannel){ sb.removeChannel(liveChannel); liveChannel=null; }
     setActiveNav();
     $('#view').innerHTML='<div class="loading">Loading teams…</div>';
-    let depts, counts;
-    try{ depts=await getDepartments(); counts=await deptProjectCounts(); }
+    let depts, counts, allProjects;
+    try{ depts=await getDepartments(); counts=await deptProjectCounts(); allProjects=await getProjects(); }
     catch(e){ $('#view').innerHTML='<div class="empty">Could not load teams: '+esc(e.message)+'</div>'; return; }
     depts = depts.filter(d=> !isAccounting(d.name) || canAccounting());
+    // Fold the content-pipeline teams (Copy / Graphic Design / Social Media) into a single
+    // Marketing team. A department counts as "content" when it exists only to hold copy/design/
+    // social stage projects — Accounting (ledger) and any mixed/other teams are left untouched.
+    const projByDept={}; allProjects.forEach(p=>{ (projByDept[p.department_id]=projByDept[p.department_id]||[]).push(p); });
+    const isContentDept=d=>{ const ps=projByDept[d.id]||[]; return ps.length>0 && ps.every(p=>CONTENT_STAGES.includes(stageOf(p))); };
+    const contentStreams=[...new Set(allProjects.filter(p=>CONTENT_STAGES.includes(stageOf(p))).map(p=>streamOf(p)).filter(Boolean))];
+    const hasMarketing=contentStreams.length>0;
+    const others=depts.filter(d=>!isContentDept(d));
     let html='<div class="page-head"><div>'+
       '<div class="kicker">Journey.storage · Internal</div>'+
       '<h2>Your <b>Teams</b></h2>'+
-      '<p class="sub">Open a team to see the projects inside it.</p>'+
+      '<p class="sub">Open a team to see the work inside it.</p>'+
       '</div><button class="btn-accent" id="newDeptBtn">+ New team</button></div>';
-    if(!depts.length) html+='<div class="empty">No teams yet.</div>';
+    if(!hasMarketing && !others.length) html+='<div class="empty">No teams yet.</div>';
     else{
       html+='<div class="proj-grid">';
-      depts.forEach(d=>{ const n=counts[d.id]||0;
+      if(hasMarketing){
+        html+='<div class="dept-card" id="mktCard" style="border-color:#4a3526;">'+
+          '<div class="tag">Team · Pipeline</div><h3>Marketing</h3>'+
+          '<p>Content, graphic design, and social — one pipeline. Watch every post move Content → Design → Social.</p>'+
+          '<div class="cnt">'+contentStreams.length+' channel'+(contentStreams.length===1?'':'s')+' · Content · Design · Social</div></div>';
+      }
+      others.forEach(d=>{ const n=counts[d.id]||0;
         html+='<div class="dept-card" data-id="'+esc(d.id)+'" data-name="'+esc(d.name)+'">'+
           '<div class="tag">Team</div><h3>'+esc(d.name)+'</h3>'+
           '<p>'+esc(d.description||'')+'</p>'+
@@ -561,8 +646,9 @@
       html+='</div>';
     }
     $('#view').innerHTML=html;
-    $('#newDeptBtn').addEventListener('click', openNewDepartment);
-    document.querySelectorAll('.dept-card').forEach(card=> card.addEventListener('click', ()=>showProjects(card.dataset.id, card.dataset.name)));
+    const nd=$('#newDeptBtn'); if(nd) nd.addEventListener('click', openNewDepartment);
+    const mc=$('#mktCard'); if(mc) mc.addEventListener('click', showMarketing);
+    document.querySelectorAll('.dept-card[data-id]').forEach(card=> card.addEventListener('click', ()=>showProjects(card.dataset.id, card.dataset.name)));
   }
 
   async function showProjects(deptId, deptName){
@@ -734,14 +820,36 @@
   }
   async function addLedgerDocs(proj, fileList){
     const files=[...fileList]; if(!files.length) return;
-    for(const f of files){
-      const tasks=await getStreamTasks(streamOf(proj));
-      const id=await createTask({stream:streamOf(proj), title:f.name, position:tasks.length+1});
-      await addFiles(id, [f]);
-      const ex=await extractFromFile(f, proj.kind);
-      await updateTask(id, {vendor:ex.vendor, doc_date:ex.doc_date, descr:ex.descr, amount:ex.amount});
+    const stream=streamOf(proj);
+    // Baseline position once, not one DB round-trip per file.
+    let base=0; try{ base=(await getStreamTasks(stream)).length; }catch(e){}
+    // Debounced, focus-safe repaint so optimistic rows show up without stealing focus
+    // from a field someone is editing (mirrors the realtime liveRender guard).
+    let pending=null;
+    const soon=()=>{ clearTimeout(pending); pending=setTimeout(function tick(){
+      const el=document.activeElement;
+      if(el && $('#view').contains(el) && /^(INPUT|TEXTAREA)$/.test(el.tagName)){ pending=setTimeout(tick,500); return; }
+      renderLedger(proj);
+    }, 120); };
+    // Process every file concurrently: each row is created + shown immediately, then
+    // uploaded and read in the background, so dropping N files reads them in parallel
+    // instead of one-after-another — and the table never sits blank while reads run.
+    await Promise.all(files.map(async (f,i)=>{
+      let id;
+      try{ id=await createTask({stream, title:f.name, position:base+i+1}); }
+      catch(e){ return; }
+      ledgerReading[id]=true; soon();            // row appears instantly, marked "Reading…"
+      try{ await addFiles(id, [f]); }catch(e){}
+      soon();                                     // thumbnail appears once uploaded
+      let ex;
+      try{ ex=await extractFromFile(f, proj.kind); }
+      catch(e){ ex={vendor:'',doc_date:'',descr:'',amount:''}; }
+      try{ await updateTask(id, {vendor:ex.vendor, doc_date:ex.doc_date, descr:ex.descr, amount:ex.amount}); }catch(e){}
+      delete ledgerReading[id];
       logToSheet(f, ex, proj.kind);
-    }
+      soon();                                     // fields fill in the moment the read returns
+    }));
+    clearTimeout(pending);
     renderLedger(proj);
   }
   async function renderLedger(proj){
@@ -771,7 +879,7 @@
         const a=(t.assets||[])[0];
         const doc = a? (isImg(a)? '<a href="'+esc(a.url)+'" target="_blank"><img loading="lazy" decoding="async" class="asset-thumb" src="'+esc(a.url)+'" alt=""></a>' : '<a class="asset-chip" href="'+esc(a.url)+'" target="_blank">'+esc(a.name)+'</a>') : '<span class="asset-more">—</span>';
         html+='<tr data-id="'+esc(t.id)+'">'+
-          '<td class="doc">'+doc+'</td>'+
+          '<td class="doc">'+doc+(ledgerReading[t.id]?'<span class="scan">Reading…</span>':'')+'</td>'+
           '<td><input class="led" data-f="vendor" data-id="'+esc(t.id)+'" value="'+esc(t.vendor||'')+'" placeholder="Vendor"></td>'+
           '<td><input class="led" data-f="doc_date" data-id="'+esc(t.id)+'" value="'+esc(t.doc_date||'')+'" placeholder="YYYY-MM-DD"></td>'+
           '<td><input class="led" data-f="descr" data-id="'+esc(t.id)+'" value="'+esc(t.descr||'')+'" placeholder="Description"></td>'+
@@ -941,8 +1049,8 @@
       '<footer>Journey.storage · Dallas, Texas'+(mode==='preview'?' · Preview mode: changes are not saved.':'')+'</footer>';
     $('#view').innerHTML=html;
     $('.goDepts').addEventListener('click', showDepartments);
-    $('.goProjects').addEventListener('click', ()=>showProjects(ctx.deptId, ctx.deptName));
-    $('#view').querySelectorAll('.goBoard').forEach(el=> el.addEventListener('click', ()=>showProject(projectId, projectName)));
+    $('.goProjects').addEventListener('click', ()=> ctx.fromMarketing? showMarketing() : showProjects(ctx.deptId, ctx.deptName));
+    $('#view').querySelectorAll('.goBoard').forEach(el=> el.addEventListener('click', ()=> ctx.fromMarketing? showMarketing() : showProject(projectId, projectName)));
     $('#dStatus').addEventListener('change', async e=>{
       if(st==='copy' && e.target.checked && !ensureApprover()){ e.target.checked=false; return; }
       if(st==='design' && e.target.checked){
@@ -977,6 +1085,163 @@
     const t=await getTask(taskId); const a=(t&&t.assets)||[]; const g=$('#gallery'); if(!g) return;
     g.innerHTML=a.map((x,i)=>'<div class="gitem">'+(isImg(x)?'<a href="'+esc(x.url)+'" target="_blank"><img loading="lazy" decoding="async" src="'+esc(x.url)+'" alt=""></a>':'<a class="file" href="'+esc(x.url)+'" target="_blank">'+esc(x.name)+'</a>')+'<div class="name">'+esc(x.name)+'</div><button class="rm" data-i="'+i+'" title="Remove">×</button></div>').join('');
     g.querySelectorAll('.rm').forEach(b=> b.addEventListener('click', async ()=>{ await removeAsset(taskId, parseInt(b.dataset.i)); renderGallery(taskId); }));
+  }
+
+  // ───── MARKETING · unified content pipeline ─────
+  // The three stage-teams (Copy → Graphic Design → Social) are the SAME task records at
+  // different points in their flags. This view reads those tasks and places each in the
+  // stage it is waiting on, so the whole pipeline is visible — and editable — in one place.
+  const CONTENT_STAGES=['copy','design','social'];
+  const MKT_ICON={
+    ig:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5.2"></rect><circle cx="12" cy="12" r="3.8"></circle><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"></circle></svg>',
+    li:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3zM9 9h3.83v1.64h.05c.53-1 1.84-2.06 3.79-2.06 4.05 0 4.8 2.67 4.8 6.14V21h-4v-5.44c0-1.3-.02-2.97-1.81-2.97-1.81 0-2.09 1.42-2.09 2.88V21H9z"></path></svg>'
+  };
+  const MKT_COLS=[
+    {key:'content',name:'Content',step:'Step 1 · Copy',c:'#c9a24b'},
+    {key:'design',name:'Graphic Design',step:'Step 2 · Design',c:'#8f8f8f'},
+    {key:'social',name:'Social Media',step:'Step 3 · Publish',c:'var(--done)'}
+  ];
+  const MKT_NEXT={content:'Design',design:'Publish',social:'Live'};
+  let mktChannel='all';
+  function chanMeta(stream){
+    const s=String(stream||'').toLowerCase();
+    if(s==='ig'||/insta|(^|[^a-z])ig([^a-z]|$)/.test(s)) return {icon:MKT_ICON.ig,label:'Instagram'};
+    if(/link|(^|[^a-z])li([^a-z]|$)/.test(s)) return {icon:MKT_ICON.li,label:'LinkedIn'};
+    return {icon:'',label:String(stream||'—')};
+  }
+  function taskStage(t){ if(!t.copy_done) return 'content'; if(!t.design_done) return 'design'; if(!t.posted) return 'social'; return 'posted'; }
+  function mktHasAsset(t){ return !!(String(t.asset_link||'').trim() || (t.assets&&t.assets.length)); }
+  function mktBoardTasks(tasks){ return tasks.filter(t=> !(t.rejected && !t.copy_done)); }
+  async function marketingData(){
+    const projects=(await getProjects()).filter(p=>CONTENT_STAGES.includes(stageOf(p)));
+    const streams=[...new Set(projects.map(p=>streamOf(p)).filter(Boolean))];
+    const projByStageStream={}; projects.forEach(p=>{ projByStageStream[stageOf(p)+'|'+streamOf(p)]=p; });
+    let tasks=[]; const seen={};
+    for(const s of streams){ try{ const ts=await getStreamTasks(s); ts.forEach(t=>{ if(!seen[t.id]){ seen[t.id]=1; tasks.push(t); } }); }catch(e){} }
+    return {projects,streams,projByStageStream,tasks};
+  }
+  async function showMarketing(){
+    ctx={marketing:true};
+    if(liveChannel){ sb.removeChannel(liveChannel); liveChannel=null; }
+    setActiveNav();
+    $('#view').innerHTML='<div class="loading">Loading marketing…</div>';
+    let data; try{ data=await marketingData(); }catch(e){ $('#view').innerHTML='<div class="empty">Could not load marketing: '+esc(e.message)+'</div>'; return; }
+    ctx.mkt=data; renderMarketing();
+    if(mode==='auth'){
+      let pending=null;
+      const live=()=>{ clearTimeout(pending); pending=setTimeout(async function tick(){
+        const el=document.activeElement; if(el && $('#view').contains(el) && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)){ pending=setTimeout(tick,600); return; }
+        try{ ctx.mkt=await marketingData(); }catch(e){} if(ctx.marketing) renderMarketing();
+      },300); };
+      liveChannel=sb.channel('mkt-tasks').on('postgres_changes',{event:'*',schema:'public',table:'tasks'},live).subscribe();
+    }
+  }
+  async function refreshMarketing(){ try{ ctx.mkt=await marketingData(); }catch(e){} renderMarketing(); }
+  function mktPipe(stage){
+    const idx={content:0,design:1,social:2,posted:3}[stage];
+    let h='<div class="mkt-pipe">';
+    for(let i=0;i<3;i++){ const cls=i<idx?'done':(i===idx?'active':''); h+='<span class="d '+cls+'"></span>'+(i<2?'<span class="ln '+(i<idx?'done':'')+'"></span>':''); }
+    h+='<span class="nx">'+(stage==='posted'?'<b>Done</b>':'Next → <b>'+MKT_NEXT[stage]+'</b>')+'</span></div>';
+    return h;
+  }
+  function mktStatus(t,stage){
+    if(stage==='posted') return {cls:'muted',label:'Posted'+(t.posted_date?' · '+t.posted_date:'')};
+    if(stage==='content') return {cls:'neutral',label:'Awaiting approval'};
+    if(stage==='design'){ if(mktHasAsset(t)&&t.design_date) return {cls:'ready',label:'Ready to finish'}; return {cls:'warn',label: mktHasAsset(t)?'Needs date':'Needs asset'}; }
+    return {cls:'ready',label:'Ready to post'};
+  }
+  function mktCard(t){
+    const stage=taskStage(t), s=mktStatus(t,stage), cm=chanMeta(t.stream);
+    const dateTxt = stage==='posted'? (t.posted_date||'')
+      : stage==='social'? (t.design_date?'Designed '+t.design_date:'')
+      : stage==='design'? (t.design_date?'Target '+t.design_date:'In design')
+      : (t.added?'Added '+t.added:'');
+    let action;
+    if(stage==='content') action='<button class="mkt-act" data-act="approve" data-id="'+esc(t.id)+'">Approve</button>';
+    else if(stage==='design'){ const ready=mktHasAsset(t)&&t.design_date; action= ready? '<button class="mkt-act" data-act="design" data-id="'+esc(t.id)+'">Mark done</button>' : '<button class="mkt-act ghost" data-act="open" data-id="'+esc(t.id)+'">Add asset →</button>'; }
+    else if(stage==='social') action='<button class="mkt-act" data-act="post" data-id="'+esc(t.id)+'">Mark posted</button>';
+    else action='<button class="mkt-act ghost" data-act="open" data-id="'+esc(t.id)+'">View</button>';
+    return '<div class="mkt-card'+(stage==='posted'?' posted':'')+'">'+
+      '<div class="top"><span class="mkt-chan">'+(cm.icon||'<span class="cd"></span>')+esc(cm.label)+'</span><span class="mkt-flagchip '+s.cls+'">'+esc(s.label)+'</span></div>'+
+      '<h4 data-open="'+esc(t.id)+'">'+esc(t.title)+'</h4>'+
+      '<div class="fmt">'+esc(t.meta||'')+(t.position?' · '+String(t.position).padStart(2,'0'):'')+'</div>'+
+      mktPipe(stage)+
+      '<div class="mkt-foot"><span class="mkt-date">'+esc(dateTxt)+'</span>'+action+'</div>'+
+      '</div>';
+  }
+  function renderMarketing(){
+    const data=ctx.mkt||{tasks:[],streams:[]};
+    const all=mktBoardTasks(data.tasks||[]);
+    const list = mktChannel==='all'? all : all.filter(t=> String(t.stream)===mktChannel);
+    const byStage=s=> list.filter(t=> taskStage(t)===s);
+    const content=byStage('content'), design=byStage('design'), social=byStage('social'), posted=byStage('posted');
+    const designReady=design.filter(t=>mktHasAsset(t)&&t.design_date).length;
+    const needAssets=design.length-designReady;
+    const tiles=[
+      {num:content.length,lab:'Drafting',note:'in Content'},
+      {num:design.length,lab:'In design',note: needAssets? needAssets+' need assets':(design.length?'all have assets':'—'), warn:!!needAssets, flag:!!needAssets},
+      {num:social.length,lab:'Ready to publish',note: social.length?'awaiting post':'—', ok:social.length>0},
+      {num:posted.length,lab:'Published',note:'this cycle'}
+    ];
+    let sum='<div class="mkt-summary">'+tiles.map(t=>'<div class="mkt-stat'+(t.flag?' flag':'')+'"><div class="row1"><span class="num">'+t.num+'</span></div><div class="lab">'+t.lab+'</div><div class="note'+(t.warn?' warn':(t.ok?' ok':''))+'">'+esc(t.note)+'</div></div>').join('')+'</div>';
+    let filt='<button class="mkt-fbtn'+(mktChannel==='all'?' on':'')+'" data-c="all">All</button>';
+    (data.streams||[]).forEach(s=>{ const cm=chanMeta(s); filt+='<button class="mkt-fbtn'+(mktChannel===s?' on':'')+'" data-c="'+esc(s)+'">'+(cm.icon||'')+esc(cm.label)+'</button>'; });
+    const cols=[content, design, social.concat(posted)];
+    let board='<div class="mkt-board">';
+    MKT_COLS.forEach((col,ci)=>{
+      const items=cols[ci];
+      board+='<section><div class="mkt-colhead" style="--wf:'+col.c+'"><span class="sw"></span><div><h3>'+col.name+'</h3><div class="step">'+col.step+'</div></div><span class="cnt">'+items.length+'</span></div><div class="mkt-colbody">';
+      items.forEach(t=> board+=mktCard(t));
+      if(col.key==='content') board+='<button class="mkt-add" id="mktAdd">+ New post</button>';
+      else if(!items.length) board+='<div class="mkt-empty">Nothing here yet</div>';
+      board+='</div></section>';
+    });
+    board+='</div>';
+    const html='<div class="crumb"><a class="goDepts">Teams</a><span class="sep">›</span><span>Marketing</span></div>'+
+      '<div class="page-head"><div><div class="kicker">Marketing · Production pipeline</div>'+
+      '<h2>The <b>Marketing</b> board</h2>'+
+      '<p class="sub">Content, design, and social in one team. Every post moves Content → Design → Social — see what it needs and what’s next.</p></div>'+
+      '<button class="btn-accent" id="mktNew">+ New post</button></div>'+
+      sum+
+      '<div class="mkt-controls"><div class="lead"><b>'+list.length+'</b> post'+(list.length===1?'':'s')+' in the pipeline</div><div class="mkt-filters" id="mktFilters">'+filt+'</div></div>'+
+      board+
+      '<footer>Journey.storage · Dallas, Texas'+(mode==='preview'?' · Preview mode: changes are not saved.':' · Updates save to the shared workspace in real time.')+'</footer>';
+    $('#view').innerHTML=html;
+    $('.goDepts').addEventListener('click', showDepartments);
+    $('#mktFilters').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b) return; mktChannel=b.dataset.c; renderMarketing(); });
+    const nb=$('#mktNew'); if(nb) nb.addEventListener('click', openMarketingAdd);
+    const ab=$('#mktAdd'); if(ab) ab.addEventListener('click', openMarketingAdd);
+    $('#view').querySelectorAll('[data-open]').forEach(el=> el.addEventListener('click', ()=> openMarketingPost(el.dataset.open)));
+    $('#view').querySelectorAll('.mkt-act').forEach(b=> b.addEventListener('click', ()=> mktAction(b.dataset.act, b.dataset.id)));
+  }
+  async function mktAction(act, id){
+    const t=await getTask(id); if(!t) return;
+    const today=new Date().toISOString().slice(0,10), now=new Date().toISOString();
+    if(act==='open'){ openMarketingPost(id); return; }
+    if(act==='approve'){ if(!ensureApprover()) return; await updateTask(id,{copy_done:true, copy_date:t.copy_date||today, updated_at:now}); }
+    else if(act==='design'){ if(!(mktHasAsset(t)&&t.design_date)){ openMarketingPost(id); return; } await updateTask(id,{design_done:true, design_date:t.design_date||today, updated_at:now}); const t2=await getTask(id); if(t2) logDesignToSheet(t2); }
+    else if(act==='post'){ await updateTask(id,{posted:true, posted_date:t.posted_date||today, updated_at:now}); }
+    refreshMarketing();
+  }
+  async function openMarketingPost(id){
+    const data=ctx.mkt||await marketingData();
+    let t=(data.tasks||[]).find(x=>x.id===id); if(!t) t=await getTask(id); if(!t) return;
+    const stage=taskStage(t), wantStage= stage==='content'?'copy':(stage==='posted'?'social':stage);
+    const proj=(data.projByStageStream&&data.projByStageStream[wantStage+'|'+t.stream]) || {id:'mkt-'+t.stream, stage:wantStage, stream:t.stream, name:'Marketing'};
+    if(liveChannel){ sb.removeChannel(liveChannel); liveChannel=null; }
+    ctx.deptName='Marketing'; ctx.projectId=proj.id; ctx.projectName='Marketing board'; ctx.proj=proj; ctx.fromMarketing=true;
+    showPost(id);
+  }
+  function openMarketingAdd(){
+    const streams=(ctx.mkt&&ctx.mkt.streams&&ctx.mkt.streams.length)? ctx.mkt.streams : ['IG'];
+    const opts=streams.map(s=>'<option value="'+esc(s)+'">'+esc(chanMeta(s).label)+'</option>').join('');
+    mountModal('New post',
+      '<div class="field"><label>Channel</label><select id="mStream" style="width:100%;font-family:inherit;font-size:15px;color:var(--ink);border:1px solid var(--line);background:#1a1917;border-radius:10px;padding:12px 14px;">'+opts+'</select></div>'+
+      '<div class="field"><label>Post header</label><input id="tTitle" type="text" placeholder="The post title"></div>'+
+      '<div class="field"><label>Format note</label><input id="tMeta" type="text" placeholder="e.g. Carousel · 5 slides"></div>'+
+      '<div class="field"><label>The visual</label><textarea id="tVisual" placeholder="Visual direction"></textarea></div>'+
+      '<div class="field"><label>The caption</label><textarea id="tBody" placeholder="Caption / body copy"></textarea></div>',
+      async ()=>{ const title=$('#tTitle').value.trim(); if(!title) return; const stream=$('#mStream').value; const tasks=await getStreamTasks(stream); await createTask({stream,title,meta:$('#tMeta').value.trim(),visual:$('#tVisual').value.trim(),body:$('#tBody').value.trim(),position:tasks.length+1,added:new Date().toISOString().slice(0,10)}); closeModal(); refreshMarketing(); });
   }
 
   // ───── MODALS ─────
