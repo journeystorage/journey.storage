@@ -566,84 +566,86 @@
     </h2>
     <p class="text-[0.85rem] text-[color:var(--mid)] mb-6">Net-to-investor targets · <span class="font-600 text-[color:rgba(234,241,242,0.72)]">Balanced Case</span> on a 5-year hold.</p>
 
-    <!-- hero metrics — Balanced (net to investor) -->
-    <div class="grid grid-cols-2 gap-3 mb-6 max-w-[620px]">
-      <div class="rounded-2xl border p-5 text-center" style="border-color:rgba(47,182,193,0.22);background:rgba(47,182,193,0.05)">
-        <div class="font-mono font-700 leading-none teal" style="font-size:clamp(1.6rem,3.2vw,2.6rem)">20.25%</div>
-        <div class="mt-2 text-[0.62rem] font-700 uppercase tracking-[0.16em] text-[color:var(--mid)]">Targeted IRR</div>
+    <div class="grid gap-6 lg:grid-cols-2 items-stretch">
+      <!-- LEFT: Balanced metrics (compact) + term sheet -->
+      <div class="flex flex-col">
+        <!-- hero metrics — Balanced (net to investor), compact -->
+        <div class="grid grid-cols-2 gap-3 mb-5">
+          <div class="rounded-2xl border p-4 text-center" style="border-color:rgba(47,182,193,0.22);background:rgba(47,182,193,0.05)">
+            <div class="font-mono font-700 leading-none teal" style="font-size:clamp(1.3rem,2.4vw,1.9rem)">20.25%</div>
+            <div class="mt-1.5 text-[0.58rem] font-700 uppercase tracking-[0.14em] text-[color:var(--mid)]">Targeted IRR</div>
+          </div>
+          <div class="rounded-2xl border p-4 text-center" style="border-color:rgba(47,182,193,0.22);background:rgba(47,182,193,0.05)">
+            <div class="font-mono font-700 leading-none teal" style="font-size:clamp(1.3rem,2.4vw,1.9rem)">2.07x</div>
+            <div class="mt-1.5 text-[0.58rem] font-700 uppercase tracking-[0.14em] text-[color:var(--mid)]">Equity Multiple</div>
+          </div>
+        </div>
+        <!-- term sheet -->
+        <table class="w-full text-[0.9rem]">
+          <tbody>
+            <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top w-[150px]">DES Raise</td><td class="py-2 font-700 text-[color:var(--text)]">$2,000,000 <span class="font-400 text-[color:var(--mid)] ml-1">— LP allocation in the Granbury deal</span></td></tr>
+            <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Waterfall</td><td class="py-2 font-700 text-[color:var(--text)]">Return of equity first, then 70 / 30 in favor of LPs</td></tr>
+            <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Operator</td><td class="py-2 font-700 text-[color:var(--text)]">Journey.Storage™ <span class="font-400 text-[color:var(--mid)] ml-1">— acquisition &amp; asset management</span></td></tr>
+            <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Strategy</td><td class="py-2 font-700 text-[color:var(--text)]">Lease-up · revenue optimization · expense reduction via automation</td></tr>
+            <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Hold</td><td class="py-2 font-700 text-[color:var(--text)]">~5 years <span class="font-400 text-[color:var(--mid)] ml-1">— refi ~Month 36 returns ~70% of equity</span></td></tr>
+            <tr><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Tax</td><td class="py-2 font-700 text-[color:var(--text)]">Cost segregation &amp; bonus depreciation available</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div class="rounded-2xl border p-5 text-center" style="border-color:rgba(47,182,193,0.22);background:rgba(47,182,193,0.05)">
-        <div class="font-mono font-700 leading-none teal" style="font-size:clamp(1.6rem,3.2vw,2.6rem)">2.07x</div>
-        <div class="mt-2 text-[0.62rem] font-700 uppercase tracking-[0.16em] text-[color:var(--mid)]">Equity Multiple</div>
-      </div>
-    </div>
 
-    <div class="grid gap-6 lg:grid-cols-[1.15fr_1fr] items-start">
-      <!-- term sheet -->
-      <table class="w-full text-[0.9rem]">
-        <tbody>
-          <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top w-[150px]">DES Raise</td><td class="py-2 font-700 text-[color:var(--text)]">$2,000,000 <span class="font-400 text-[color:var(--mid)] ml-1">— LP allocation in the Granbury deal</span></td></tr>
-          <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Waterfall</td><td class="py-2 font-700 text-[color:var(--text)]">Return of equity first, then 70 / 30 in favor of LPs</td></tr>
-          <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Operator</td><td class="py-2 font-700 text-[color:var(--text)]">Journey.Storage™ <span class="font-400 text-[color:var(--mid)] ml-1">— acquisition &amp; asset management</span></td></tr>
-          <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Strategy</td><td class="py-2 font-700 text-[color:var(--text)]">Lease-up · revenue optimization · expense reduction via automation</td></tr>
-          <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Hold</td><td class="py-2 font-700 text-[color:var(--text)]">~5 years <span class="font-400 text-[color:var(--mid)] ml-1">— refi ~Month 36 returns ~70% of equity</span></td></tr>
-          <tr><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Tax</td><td class="py-2 font-700 text-[color:var(--text)]">Cost segregation &amp; bonus depreciation available</td></tr>
-        </tbody>
-      </table>
-
-      <!-- case cards: Upside + Conservative -->
-      <div class="flex flex-col gap-3">
+      <!-- RIGHT: Upside + Conservative cards fill the column height -->
+      <div class="flex flex-col gap-4">
         <!-- Upside -->
-        <div class="rounded-2xl border p-4" style="border-color:rgba(47,182,193,0.25);background:rgba(47,182,193,0.04)">
-          <div class="flex items-center justify-between mb-2.5">
-            <span class="rounded px-2.5 py-1 text-[0.62rem] font-700 uppercase tracking-[0.1em] text-[color:var(--bg-deep)]" style="background:var(--teal)">Upside Case</span>
+        <div class="flex-1 rounded-2xl border p-5 flex flex-col justify-center" style="border-color:rgba(47,182,193,0.25);background:rgba(47,182,193,0.04)">
+          <div class="flex items-center justify-between mb-4">
+            <span class="rounded px-3 py-1 text-[0.68rem] font-700 uppercase tracking-[0.1em] text-[color:var(--bg-deep)]" style="background:var(--teal)">Upside Case</span>
             <div class="text-right">
-              <div class="font-mono font-700 teal text-xl leading-none">222%</div>
-              <div class="text-[0.52rem] font-700 uppercase tracking-[0.12em] text-[color:var(--mid)] mt-0.5">Cum. CoC · Yr 5</div>
+              <div class="font-mono font-700 teal text-2xl leading-none">222%</div>
+              <div class="text-[0.55rem] font-700 uppercase tracking-[0.12em] text-[color:var(--mid)] mt-1">Cum. CoC · Yr 5</div>
             </div>
           </div>
-          <table class="w-full text-[0.8rem] font-mono">
+          <table class="w-full text-[0.92rem] font-mono">
             <thead><tr><th></th>
-              <th class="py-0.5 px-1 text-right text-[0.58rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y1</th>
-              <th class="py-0.5 px-1 text-right text-[0.58rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y2</th>
-              <th class="py-0.5 px-1 text-right text-[0.58rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y3</th>
-              <th class="py-0.5 px-1 text-right text-[0.58rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y4</th>
-              <th class="py-0.5 px-1 text-right text-[0.58rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y5</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y1</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y2</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y3</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y4</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y5</th>
             </tr></thead>
             <tbody><tr>
-              <td class="py-1 pr-2 font-sans text-[0.74rem] text-[color:rgba(234,241,242,0.6)]">Cum. CoC</td>
-              <td class="py-1 px-1 text-right text-[color:var(--text)]">2.23%</td>
-              <td class="py-1 px-1 text-right text-[color:var(--text)]">9.09%</td>
-              <td class="py-1 px-1 text-right text-[color:var(--text)]">86.70%</td>
-              <td class="py-1 px-1 text-right text-[color:var(--text)]">91.89%</td>
-              <td class="py-1 px-1 text-right font-700 teal">221.77%</td>
+              <td class="py-2 pr-2 font-sans text-[0.82rem] text-[color:rgba(234,241,242,0.6)]">Cum. CoC</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">2.23%</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">9.09%</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">86.70%</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">91.89%</td>
+              <td class="py-2 px-2 text-right font-700 teal">221.77%</td>
             </tr></tbody>
           </table>
         </div>
         <!-- Conservative -->
-        <div class="rounded-2xl border p-4" style="border-color:var(--line);background:var(--surface)">
-          <div class="flex items-center justify-between mb-2.5">
-            <span class="rounded px-2.5 py-1 text-[0.62rem] font-700 uppercase tracking-[0.1em] text-[color:var(--text)]" style="background:rgba(233,241,242,0.08)">Conservative Case</span>
+        <div class="flex-1 rounded-2xl border p-5 flex flex-col justify-center" style="border-color:var(--line);background:var(--surface)">
+          <div class="flex items-center justify-between mb-4">
+            <span class="rounded px-3 py-1 text-[0.68rem] font-700 uppercase tracking-[0.1em] text-[color:var(--text)]" style="background:rgba(233,241,242,0.08)">Conservative Case</span>
             <div class="text-right">
-              <div class="font-mono font-700 text-[color:var(--text)] text-xl leading-none">184%</div>
-              <div class="text-[0.52rem] font-700 uppercase tracking-[0.12em] text-[color:var(--mid)] mt-0.5">Cum. CoC · Yr 5</div>
+              <div class="font-mono font-700 text-[color:var(--text)] text-2xl leading-none">184%</div>
+              <div class="text-[0.55rem] font-700 uppercase tracking-[0.12em] text-[color:var(--mid)] mt-1">Cum. CoC · Yr 5</div>
             </div>
           </div>
-          <table class="w-full text-[0.8rem] font-mono">
+          <table class="w-full text-[0.92rem] font-mono">
             <thead><tr><th></th>
-              <th class="py-0.5 px-1 text-right text-[0.58rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y1</th>
-              <th class="py-0.5 px-1 text-right text-[0.58rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y2</th>
-              <th class="py-0.5 px-1 text-right text-[0.58rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y3</th>
-              <th class="py-0.5 px-1 text-right text-[0.58rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y4</th>
-              <th class="py-0.5 px-1 text-right text-[0.58rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y5</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y1</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y2</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y3</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y4</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y5</th>
             </tr></thead>
             <tbody><tr>
-              <td class="py-1 pr-2 font-sans text-[0.74rem] text-[color:rgba(234,241,242,0.6)]">Cum. CoC</td>
-              <td class="py-1 px-1 text-right text-[color:var(--text)]">2.16%</td>
-              <td class="py-1 px-1 text-right text-[color:var(--text)]">8.75%</td>
-              <td class="py-1 px-1 text-right text-[color:var(--text)]">78.61%</td>
-              <td class="py-1 px-1 text-right text-[color:var(--text)]">85.31%</td>
-              <td class="py-1 px-1 text-right font-700 text-[color:var(--text)]">183.75%</td>
+              <td class="py-2 pr-2 font-sans text-[0.82rem] text-[color:rgba(234,241,242,0.6)]">Cum. CoC</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">2.16%</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">8.75%</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">78.61%</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">85.31%</td>
+              <td class="py-2 px-2 text-right font-700 text-[color:var(--text)]">183.75%</td>
             </tr></tbody>
           </table>
         </div>
