@@ -301,6 +301,21 @@
   .mkt-add:hover{border-color:var(--accent);color:var(--accent);}
   .mkt-empty{color:var(--ink-faint);font-size:12px;font-style:italic;padding:14px 2px;text-align:center;border:1px dashed var(--line);border-radius:11px;}
   @media (max-width:900px){ .mkt-board{grid-template-columns:1fr;} .mkt-summary{grid-template-columns:repeat(2,1fr);} }
+  .mkt-actions{display:flex;align-items:center;gap:8px;}
+  .mkt-del{background:transparent;border:1px solid var(--line);color:var(--ink-faint);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;transition:border-color .15s,color .15s;}
+  .mkt-del:hover{border-color:#a2453a;color:#d0574a;}
+  /* delete-team affordance on dashboard cards */
+  .dept-card{position:relative;}
+  .dept-del{position:absolute;top:12px;right:12px;width:26px;height:26px;border:1px solid var(--line);background:var(--bg-2);color:var(--ink-faint);border-radius:7px;font-size:16px;line-height:1;cursor:pointer;opacity:0;transition:opacity .15s,color .15s,border-color .15s,background .15s;display:flex;align-items:center;justify-content:center;z-index:2;}
+  .dept-card:hover .dept-del{opacity:1;}
+  .dept-del:hover{border-color:#a2453a;color:#d0574a;background:#221614;}
+  /* combined accounting ledger */
+  .ledger-dz-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px;}
+  .ledger-dz-row .ledger-dz{margin-top:0;}
+  .kind-chip{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.05em;padding:3px 9px;border-radius:99px;text-transform:uppercase;white-space:nowrap;}
+  .kind-chip.invoice{color:var(--accent);background:var(--accent-tint);}
+  .kind-chip.receipt{color:var(--done);background:#16211a;}
+  @media (max-width:640px){ .ledger-dz-row{grid-template-columns:1fr;} }
 </style>
 </head>
 <body>
@@ -476,7 +491,10 @@
         return t;
       }).concat([
         {id:'li1',stream:'LinkedIn',position:1,title:"Starting over isn't always loud.",meta:'Photo / Typographic',visual:'',body:'',copy_done:false,copy_date:'',design_done:false,design_date:'',posted:false,posted_date:'',assets:[],asset_link:'',added:'2026-06-30'},
-        {id:'li2',stream:'LinkedIn',position:2,title:'You can tell a lot by what people keep.',meta:'Photo · Overhead unit',visual:'',body:'',copy_done:true,copy_date:'2026-06-25',design_done:true,design_date:'2026-06-27',posted:true,posted_date:'2026-07-01',assets:[],asset_link:'https://example.com/a',added:'2026-06-20'}
+        {id:'li2',stream:'LinkedIn',position:2,title:'You can tell a lot by what people keep.',meta:'Photo · Overhead unit',visual:'',body:'',copy_done:true,copy_date:'2026-06-25',design_done:true,design_date:'2026-06-27',posted:true,posted_date:'2026-07-01',assets:[],asset_link:'https://example.com/a',added:'2026-06-20'},
+        {id:'iv1',stream:'ac_inv',position:1,title:'acme-invoice.pdf',vendor:'Acme Supplies',doc_date:'2026-06-15',descr:'Shelving units',amount:'1240.00',paid:false,assets:[]},
+        {id:'iv2',stream:'ac_inv',position:2,title:'citypower.pdf',vendor:'CityPower',doc_date:'2026-06-20',descr:'Electricity',amount:'380.50',paid:true,assets:[]},
+        {id:'rc1',stream:'ac_rec',position:1,title:'homedepot.pdf',vendor:'Home Depot',doc_date:'2026-06-18',descr:'Hardware',amount:'86.20',assets:[]}
       ])
     };
   }
@@ -502,6 +520,7 @@
     const { data } = await sb.from('projects').select('*').eq('id',id).single(); return data;
   }
   async function createDepartment(d){ if(mode==='preview'){ previewData.departments.push({id:'d'+Date.now(),...d}); return;} await sb.from('departments').insert(d); }
+  async function deleteDepartment(id){ if(mode==='preview'){ previewData.departments=previewData.departments.filter(d=>d.id!==id); previewData.projects=previewData.projects.filter(p=>p.department_id!==id); return; } const { error }=await sb.from('departments').delete().eq('id',id); if(error) throw error; }
   async function getStreamTasks(stream){
     if(mode==='preview') return previewData.tasks.filter(t=>t.stream===stream).sort((a,b)=>(a.position||0)-(b.position||0));
     const { data, error } = await sb.from('tasks').select('*').eq('stream',stream).order('position'); if(error) throw error; return data||[];
@@ -640,6 +659,7 @@
       }
       others.forEach(d=>{ const n=counts[d.id]||0;
         html+='<div class="dept-card" data-id="'+esc(d.id)+'" data-name="'+esc(d.name)+'">'+
+          '<button class="dept-del" data-del="'+esc(d.id)+'" data-name="'+esc(d.name)+'" data-count="'+n+'" title="Delete team">×</button>'+
           '<div class="tag">Team</div><h3>'+esc(d.name)+'</h3>'+
           '<p>'+esc(d.description||'')+'</p>'+
           '<div class="cnt">'+n+' project'+(n===1?'':'s')+'</div></div>'; });
@@ -648,6 +668,15 @@
     $('#view').innerHTML=html;
     const nd=$('#newDeptBtn'); if(nd) nd.addEventListener('click', openNewDepartment);
     const mc=$('#mktCard'); if(mc) mc.addEventListener('click', showMarketing);
+    document.querySelectorAll('.dept-del').forEach(b=> b.addEventListener('click', async e=>{
+      e.stopPropagation();
+      const nm=b.dataset.name, cnt=parseInt(b.dataset.count||'0',10);
+      let msg='Delete the "'+nm+'" team? This cannot be undone.';
+      if(cnt>0) msg='The "'+nm+'" team still has '+cnt+' project'+(cnt===1?'':'s')+'. Delete it anyway? This cannot be undone.';
+      if(!confirm(msg)) return;
+      try{ await deleteDepartment(b.dataset.del); }catch(err){ alert('Could not delete this team: '+err.message); return; }
+      showDepartments();
+    }));
     document.querySelectorAll('.dept-card[data-id]').forEach(card=> card.addEventListener('click', ()=>showProjects(card.dataset.id, card.dataset.name)));
   }
 
@@ -665,6 +694,9 @@
     let projects;
     try{ projects=await getProjects(deptId); }
     catch(e){ $('#view').innerHTML='<div class="empty">Could not load projects: '+esc(e.message)+'</div>'; return; }
+    // Accounting shows its invoice + receipt ledgers together on one combined page.
+    const ledgerProjects=projects.filter(p=>stageOf(p)==='ledger');
+    if(isAccounting(deptName) && ledgerProjects.length){ ctx.ledgerProjects=ledgerProjects; return renderCombinedLedger(deptName, ledgerProjects); }
     let html='<div class="crumb"><a class="goDepts">Teams</a><span class="sep">›</span><span>'+esc(deptName)+'</span></div>'+
       '<div class="page-head"><div>'+
       '<div class="kicker">'+esc(deptName)+'</div>'+
@@ -818,7 +850,8 @@
       fetch(cfg.SHEETS_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) }).catch(()=>{});
     }catch(e){}
   }
-  async function addLedgerDocs(proj, fileList){
+  async function addLedgerDocs(proj, fileList, paint){
+    paint = paint || (()=>renderLedger(proj));
     const files=[...fileList]; if(!files.length) return;
     const stream=streamOf(proj);
     // Baseline position once, not one DB round-trip per file.
@@ -829,7 +862,7 @@
     const soon=()=>{ clearTimeout(pending); pending=setTimeout(function tick(){
       const el=document.activeElement;
       if(el && $('#view').contains(el) && /^(INPUT|TEXTAREA)$/.test(el.tagName)){ pending=setTimeout(tick,500); return; }
-      renderLedger(proj);
+      paint();
     }, 120); };
     // Process every file concurrently: each row is created + shown immediately, then
     // uploaded and read in the background, so dropping N files reads them in parallel
@@ -850,7 +883,7 @@
       soon();                                     // fields fill in the moment the read returns
     }));
     clearTimeout(pending);
-    renderLedger(proj);
+    paint();
   }
   async function renderLedger(proj){
     const isInv=(proj.kind||'')==='invoice';
@@ -867,9 +900,8 @@
       '<input type="file" id="ledgerFile" multiple accept=".pdf,image/*" style="display:none"></div>'+
       '<div class="bar ledger-totals">'+
         (isInv
-          ? '<div><div class="lt-label">Total to pay</div><div class="lt-val accent">'+money(unpaid)+'</div></div>'+
-            '<div><div class="lt-label">Paid</div><div class="lt-val">'+money(paidTotal)+'</div></div>'+
-            '<div><div class="lt-label">All invoices</div><div class="lt-val">'+money(total)+'</div></div>'
+          ? '<div><div class="lt-label">Paid</div><div class="lt-val">'+money(paidTotal)+'</div></div>'+
+            '<div><div class="lt-label">All invoices</div><div class="lt-val accent">'+money(total)+'</div></div>'
           : '<div><div class="lt-label">Total paid</div><div class="lt-val accent">'+money(total)+'</div></div>')+
         '<div style="margin-left:auto" class="lt-label">'+tasks.length+' document'+(tasks.length===1?'':'s')+'</div></div>';
     if(!tasks.length){ html+='<div class="empty">No '+(isInv?'invoices':'receipts')+' yet. Drop a file above to start.</div>'; }
@@ -902,6 +934,66 @@
     $('#view').querySelectorAll('input.led').forEach(inp=> inp.addEventListener('change', async e=>{ const patch={}; patch[e.target.dataset.f]=e.target.value; await updateTask(e.target.dataset.id, patch); if(e.target.dataset.f==='amount') renderLedger(proj); }));
     $('#view').querySelectorAll('input.paid').forEach(cb=> cb.addEventListener('change', async e=>{ await updateTask(e.target.dataset.id,{paid:e.target.checked}); renderLedger(proj); }));
     $('#view').querySelectorAll('.del').forEach(b=> b.addEventListener('click', async ()=>{ await deleteTask(b.dataset.id); renderLedger(proj); }));
+  }
+  // ───── ACCOUNTING · combined ledger (invoices + receipts in one) ─────
+  async function renderCombinedLedger(deptName, ledgerProjects){
+    const paint=()=>renderCombinedLedger(deptName, ledgerProjects);
+    // Load every ledger project's docs and tag each row with its kind + owning project (for drop routing / delete).
+    let rows=[];
+    for(const p of ledgerProjects){
+      try{ const ts=await getStreamTasks(streamOf(p)); ts.forEach(t=>{ t._kind=(p.kind||'invoice'); t._proj=p; }); rows=rows.concat(ts); }catch(e){}
+    }
+    rows.sort((a,b)=> String(b.doc_date||'').localeCompare(String(a.doc_date||'')));
+    const invTotal=rows.filter(t=>t._kind==='invoice').reduce((a,t)=>a+moneyNum(t.amount),0);
+    const recTotal=rows.filter(t=>t._kind==='receipt').reduce((a,t)=>a+moneyNum(t.amount),0);
+    const invProj=ledgerProjects.find(p=>(p.kind||'')==='invoice')||ledgerProjects[0];
+    const recProj=ledgerProjects.find(p=>(p.kind||'')==='receipt')||ledgerProjects[0];
+    let html='<div class="crumb"><a class="goDepts">Teams</a><span class="sep">›</span><span>'+esc(deptName)+'</span></div>'+
+      '<div class="page-head"><div><div class="kicker">Accounting</div>'+
+      '<h2>Invoices &amp; <b>Receipts</b></h2>'+
+      '<p class="sub">Drop a PDF and we read the vendor, date, description, and amount. Invoices and receipts live together here.</p></div></div>'+
+      '<div class="ledger-dz-row">'+
+        '<div class="ledger-dz" id="dzInv"><div class="big">⬆ Drop invoices</div><div class="small">Auto-read vendor, date, description &amp; amount. Click to browse.</div><input type="file" id="fiInv" multiple accept=".pdf,image/*" style="display:none"></div>'+
+        '<div class="ledger-dz" id="dzRec"><div class="big">⬆ Drop receipts</div><div class="small">Auto-read vendor, date, description &amp; amount. Click to browse.</div><input type="file" id="fiRec" multiple accept=".pdf,image/*" style="display:none"></div>'+
+      '</div>'+
+      '<div class="bar ledger-totals">'+
+        '<div><div class="lt-label">Invoices</div><div class="lt-val accent">'+money(invTotal)+'</div></div>'+
+        '<div><div class="lt-label">Receipts</div><div class="lt-val">'+money(recTotal)+'</div></div>'+
+        '<div style="margin-left:auto" class="lt-label">'+rows.length+' document'+(rows.length===1?'':'s')+'</div></div>';
+    if(!rows.length){ html+='<div class="empty">No documents yet. Drop an invoice or receipt above to start.</div>'; }
+    else{
+      html+='<div class="table-wrap"><table><thead><tr><th>Doc</th><th>Type</th><th>Vendor</th><th>Date</th><th>Description</th><th>Amount</th><th class="c">Paid</th><th></th></tr></thead><tbody>';
+      rows.forEach(t=>{
+        const a=(t.assets||[])[0];
+        const doc = a? (isImg(a)? '<a href="'+esc(a.url)+'" target="_blank"><img loading="lazy" decoding="async" class="asset-thumb" src="'+esc(a.url)+'" alt=""></a>' : '<a class="asset-chip" href="'+esc(a.url)+'" target="_blank">'+esc(a.name)+'</a>') : '<span class="asset-more">—</span>';
+        const isInv=t._kind==='invoice';
+        html+='<tr data-id="'+esc(t.id)+'">'+
+          '<td class="doc">'+doc+(ledgerReading[t.id]?'<span class="scan">Reading…</span>':'')+'</td>'+
+          '<td><span class="kind-chip '+t._kind+'">'+(isInv?'Invoice':'Receipt')+'</span></td>'+
+          '<td><input class="led" data-f="vendor" data-id="'+esc(t.id)+'" value="'+esc(t.vendor||'')+'" placeholder="Vendor"></td>'+
+          '<td><input class="led" data-f="doc_date" data-id="'+esc(t.id)+'" value="'+esc(t.doc_date||'')+'" placeholder="YYYY-MM-DD"></td>'+
+          '<td><input class="led" data-f="descr" data-id="'+esc(t.id)+'" value="'+esc(t.descr||'')+'" placeholder="Description"></td>'+
+          '<td><input class="led amt" data-f="amount" data-id="'+esc(t.id)+'" value="'+esc(t.amount||'')+'" placeholder="0.00"></td>'+
+          (isInv?'<td class="status"><label class="check"><input type="checkbox" class="paid" data-id="'+esc(t.id)+'" '+(t.paid?'checked':'')+'><span class="box">'+checkSVG+'</span></label></td>':'<td class="status"><span class="asset-more">—</span></td>')+
+          '<td class="reopen-cell"><button class="reopen del" data-id="'+esc(t.id)+'">Remove</button></td></tr>';
+      });
+      html+='</tbody></table></div>';
+    }
+    html+='<footer>Journey.storage · Dallas, Texas'+(mode==='preview'?' · Preview mode: changes are not saved.':'')+'</footer>';
+    $('#view').innerHTML=html;
+    $('.goDepts').addEventListener('click', showDepartments);
+    function wireDz(dzId, fiId, proj){
+      const dz=$('#'+dzId), fi=$('#'+fiId); if(!dz||!fi) return;
+      dz.addEventListener('click', e=>{ if(e.target!==fi) fi.click(); });
+      fi.addEventListener('change', ()=> addLedgerDocs(proj, fi.files, paint));
+      dz.addEventListener('dragover', e=>{ e.preventDefault(); dz.classList.add('over'); });
+      dz.addEventListener('dragleave', ()=> dz.classList.remove('over'));
+      dz.addEventListener('drop', e=>{ e.preventDefault(); dz.classList.remove('over'); addLedgerDocs(proj, e.dataTransfer.files, paint); });
+    }
+    wireDz('dzInv','fiInv',invProj); wireDz('dzRec','fiRec',recProj);
+    $('#view').querySelectorAll('input.led').forEach(inp=> inp.addEventListener('change', async e=>{ const patch={}; patch[e.target.dataset.f]=e.target.value; await updateTask(e.target.dataset.id, patch); if(e.target.dataset.f==='amount') paint(); }));
+    $('#view').querySelectorAll('input.paid').forEach(cb=> cb.addEventListener('change', async e=>{ await updateTask(e.target.dataset.id,{paid:e.target.checked}); }));
+    $('#view').querySelectorAll('.del').forEach(b=> b.addEventListener('click', async ()=>{ if(!confirm('Remove this document?')) return; await deleteTask(b.dataset.id); paint(); }));
   }
   async function renderStageBoard(proj){
     const cfg=STAGES[stageOf(proj)], st=stageOf(proj), stream=streamOf(proj);
@@ -1021,7 +1113,7 @@
     const pos=String(t.position||'').padStart(2,'0');
     let html='<div class="crumb"><a class="goDepts">Teams</a><span class="sep">›</span><a class="goProjects">'+esc(ctx.deptName||'')+'</a><span class="sep">›</span><a class="goBoard">'+esc(projectName)+'</a><span class="sep">›</span><span>'+esc(t.title)+'</span></div>'+
       '<div class="page-head"><div><div class="kicker">Post '+pos+' · '+esc(t.meta||'')+'</div>'+
-      '<h2>'+esc(t.title)+'</h2></div><button class="btn-accent goBoard">← Back to board</button></div>'+
+      '<h2>'+esc(t.title)+'</h2></div><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn-rej" id="delPost">Delete post</button><button class="btn-accent goBoard">← Back to board</button></div></div>'+
       '<div class="detail-status">'+
         (st==='copy' ? '<div class="dt"><label>Added</label><input type="date" value="'+esc(t.added||'')+'" disabled></div>' : '')+
         '<label class="check"><input type="checkbox" id="dStatus" '+(t[cfg.doneKey]?'checked':'')+'><span class="box">'+checkSVG+'</span><span class="lbl">'+esc(cfg.action)+'</span></label>'+
@@ -1051,6 +1143,7 @@
     $('.goDepts').addEventListener('click', showDepartments);
     $('.goProjects').addEventListener('click', ()=> ctx.fromMarketing? showMarketing() : showProjects(ctx.deptId, ctx.deptName));
     $('#view').querySelectorAll('.goBoard').forEach(el=> el.addEventListener('click', ()=> ctx.fromMarketing? showMarketing() : showProject(projectId, projectName)));
+    { const dp=$('#delPost'); if(dp) dp.addEventListener('click', async ()=>{ if(!confirm('Delete this post? This cannot be undone.')) return; await deleteTask(taskId); if(ctx.fromMarketing) showMarketing(); else showProject(projectId, projectName); }); }
     $('#dStatus').addEventListener('change', async e=>{
       if(st==='copy' && e.target.checked && !ensureApprover()){ e.target.checked=false; return; }
       if(st==='design' && e.target.checked){
@@ -1166,7 +1259,7 @@
       '<h4 data-open="'+esc(t.id)+'">'+esc(t.title)+'</h4>'+
       '<div class="fmt">'+esc(t.meta||'')+(t.position?' · '+String(t.position).padStart(2,'0'):'')+'</div>'+
       mktPipe(stage)+
-      '<div class="mkt-foot"><span class="mkt-date">'+esc(dateTxt)+'</span>'+action+'</div>'+
+      '<div class="mkt-foot"><span class="mkt-date">'+esc(dateTxt)+'</span><span class="mkt-actions"><button class="mkt-del" data-del="'+esc(t.id)+'" title="Delete post">Delete</button>'+action+'</span></div>'+
       '</div>';
   }
   function renderMarketing(){
@@ -1213,6 +1306,7 @@
     const ab=$('#mktAdd'); if(ab) ab.addEventListener('click', openMarketingAdd);
     $('#view').querySelectorAll('[data-open]').forEach(el=> el.addEventListener('click', ()=> openMarketingPost(el.dataset.open)));
     $('#view').querySelectorAll('.mkt-act').forEach(b=> b.addEventListener('click', ()=> mktAction(b.dataset.act, b.dataset.id)));
+    $('#view').querySelectorAll('.mkt-del').forEach(b=> b.addEventListener('click', async ()=>{ if(!confirm('Delete this post? This cannot be undone.')) return; await deleteTask(b.dataset.del); refreshMarketing(); }));
   }
   async function mktAction(act, id){
     const t=await getTask(id); if(!t) return;
