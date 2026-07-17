@@ -28,63 +28,71 @@ type SizeCard = {
   tint: string
   title: string
   caption: string
+  video?: string
 }
 
 const SIZES: SizeCard[] = [
   {
-    num: '01', size: "5' × 5'", label: 'STORAGE CLOSET', sqft: 25,
+    num: '01', size: "5' × 5'", label: 'XS STORAGE LOCKER', sqft: 25,
     accent: 'rgb(74, 144, 217)', tint: 'rgba(74,144,217,0.12)',
-    title: "5' × 5', fits a storage closet",
+    title: "5' × 5', fits an XS storage locker",
     caption: "Just enough room for the things you can't quite let go of.",
+    video: 'storage-5x5',
   },
   {
-    num: '02', size: "5' × 10'", label: 'STUDIO APARTMENT', sqft: 50,
+    num: '02', size: "5' × 5'", label: 'EXTRA BEDROOM CLOSET', sqft: 25,
     accent: 'rgb(122, 175, 110)', tint: 'rgba(122,175,110,0.12)',
-    title: "5' × 10', fits a studio apartment",
-    caption: 'Room for the studio you outgrew, with space to breathe.',
+    title: "5' × 5', fits an extra bedroom closet",
+    caption: 'The overflow of a single room, tucked neatly away.',
+    video: 'storage-5x5-closet',
   },
   {
-    num: '03', size: "5' × 15'", label: 'ONE-BEDROOM', sqft: 75,
+    num: '03', size: "5' × 10'", label: 'WALK-IN CLOSET', sqft: 50,
     accent: 'rgb(232, 197, 71)', tint: 'rgba(232,197,71,0.14)',
-    title: "5' × 15', fits a one-bedroom apartment",
-    caption: 'A clean transition between chapters of life.',
+    title: "5' × 10', fits a walk-in closet",
+    caption: "A season's wardrobe, waiting for its turn.",
+    video: 'storage-5x10',
   },
   {
-    num: '04', size: "10' × 10'", label: 'TWO BEDROOMS', sqft: 100,
+    num: '04', size: "10' × 10'", label: 'SMALL BEDROOM', sqft: 100,
     accent: 'rgb(212, 149, 106)', tint: 'rgba(212,149,106,0.14)',
-    title: "10' × 10', fits two small bedrooms",
-    caption: 'Two rooms, packed and waiting for what comes next.',
+    title: "10' × 10', fits a small bedroom",
+    caption: 'One room, packed and ready for what comes next.',
+    video: 'storage-10x10',
   },
   {
-    num: '05', size: "10' × 15'", label: 'TWO-BEDROOM HOME', sqft: 150,
+    num: '05', size: "10' × 15'", label: 'LARGE BEDROOM', sqft: 150,
     accent: 'rgb(185, 108, 82)', tint: 'rgba(185,108,82,0.14)',
-    title: "10' × 15', fits a two-bedroom home",
-    caption: 'Your growth should not wait for square footage.',
+    title: "10' × 15', fits a large bedroom",
+    caption: "Room to grow without the move you're not ready for.",
+    video: 'storage-10x15',
   },
   {
-    num: '06', size: "10' × 20'", label: 'THREE-BEDROOM HOME', sqft: 200,
+    num: '06', size: "10' × 20'", label: 'ONE-CAR GARAGE', sqft: 200,
     accent: 'rgb(138, 122, 165)', tint: 'rgba(138,122,165,0.14)',
-    title: "10' × 20', fits a three-bedroom home",
-    caption: 'Big enough for the home you are building toward.',
+    title: "10' × 20', fits a one-car garage",
+    caption: 'Everything a garage holds, minus the garage.',
+    video: 'storage-10x20',
   },
   {
-    num: '07', size: "10' × 30'", label: 'FOUR/FIVE-BEDROOM', sqft: 300,
+    num: '07', size: "10' × 30'", label: 'TWO-CAR GARAGE', sqft: 300,
     accent: 'rgb(93, 138, 133)', tint: 'rgba(93,138,133,0.16)',
-    title: "10' × 30', fits a four or five-bedroom home",
-    caption: 'A whole life, ready for its next move.',
+    title: "10' × 30', fits a two-car garage",
+    caption: 'A whole household, ready for its next move.',
+    video: 'storage-10x30',
   },
 ]
 
 /* ── Comparison table data ───────────────────────────────────────── */
 type Unit = { num: string; size: string; sqft: number; cubicFt: number; fits: string }
 const UNITS: Unit[] = [
-  { num: '01', size: "5' × 5'", sqft: 25, cubicFt: 200, fits: 'Fits a storage closet' },
-  { num: '02', size: "5' × 10'", sqft: 50, cubicFt: 400, fits: 'Fits a studio apartment' },
-  { num: '03', size: "5' × 15'", sqft: 75, cubicFt: 600, fits: 'Fits a one-bedroom apartment' },
-  { num: '04', size: "10' × 10'", sqft: 100, cubicFt: 800, fits: 'Fits two small bedrooms' },
-  { num: '05', size: "10' × 15'", sqft: 150, cubicFt: 1200, fits: 'Fits a two-bedroom home' },
-  { num: '06', size: "10' × 20'", sqft: 200, cubicFt: 1600, fits: 'Fits a three-bedroom home' },
-  { num: '07', size: "10' × 30'", sqft: 300, cubicFt: 2400, fits: 'Fits a four or five-bedroom home' },
+  { num: '01', size: "5' × 5'", sqft: 25, cubicFt: 200, fits: 'An XS locker of boxes and seasonal gear' },
+  { num: '02', size: "5' × 5'", sqft: 25, cubicFt: 200, fits: "An extra bedroom's closet, boxed up" },
+  { num: '03', size: "5' × 10'", sqft: 50, cubicFt: 400, fits: 'A walk-in closet or a compact studio' },
+  { num: '04', size: "10' × 10'", sqft: 100, cubicFt: 800, fits: 'A small, fully furnished bedroom' },
+  { num: '05', size: "10' × 15'", sqft: 150, cubicFt: 1200, fits: 'A large bedroom or one-bedroom apartment' },
+  { num: '06', size: "10' × 20'", sqft: 200, cubicFt: 1600, fits: 'A one-car garage, packed wall to wall' },
+  { num: '07', size: "10' × 30'", sqft: 300, cubicFt: 2400, fits: 'A two-car garage — a whole household' },
 ]
 const fmt = (n: number) => n.toLocaleString('en-US')
 
@@ -461,6 +469,8 @@ export default function SizeGuidePage() {
                 {SIZES.map((d, j) => {
                   const active = j === idx
                   const st = cardStyle(j)
+                  const offset = (j - idx + N) % N
+                  const near = offset === 0 || offset === 1 || offset === N - 1
                   return (
                     <div
                       key={d.num}
@@ -469,11 +479,31 @@ export default function SizeGuidePage() {
                       onClick={() => select(j)}
                     >
                       <div className="relative overflow-hidden rounded-[20px] shadow-[0_18px_50px_-10px_rgba(0,0,0,0.4)]">
-                        <div
-                          className="aspect-[3/4] relative"
-                          style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${d.tint} 100%)` }}
-                          dangerouslySetInnerHTML={{ __html: cardSVG(d, j) }}
-                        />
+                        {d.video ? (
+                          <div
+                            className="aspect-[3/4] relative"
+                            style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${d.tint} 100%)` }}
+                          >
+                            {near && (
+                              <video
+                                src={`/videos/${d.video}.webm`}
+                                autoPlay
+                                muted
+                                loop
+                                playsInline
+                                preload={active ? 'auto' : 'metadata'}
+                                aria-hidden="true"
+                                className="absolute inset-0 h-full w-full object-cover"
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <div
+                            className="aspect-[3/4] relative"
+                            style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${d.tint} 100%)` }}
+                            dangerouslySetInnerHTML={{ __html: cardSVG(d, j) }}
+                          />
+                        )}
                         {active && (
                           <div
                             className="absolute bottom-0 inset-x-0 z-10"
