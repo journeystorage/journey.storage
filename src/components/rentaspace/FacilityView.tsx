@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { MapPin, Phone, Menu, Star, Check, ChevronRight, ChevronLeft, ChevronDown, X, Ruler, Sparkles } from 'lucide-react'
 import { socialUrls } from '@/lib/constants'
-import { SIZE_ART, SizeArt, getSizeArt } from '@/lib/sizeArt'
+import { SIZE_ART, getSizeArt } from '@/lib/sizeArt'
 
 /* Brand social glyphs (lucide dropped brand icons) */
 const IgIcon = ({ className }: { className?: string }) => (
@@ -62,7 +62,7 @@ const SCOPED_CSS = `
 #facility .unit:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(24,24,24,.05),0 22px 44px -18px rgba(232,98,42,.24)}
 `
 
-function Nav() {
+function Nav({ onSizeGuide }: { onSizeGuide: () => void }) {
   return (
     <header className="absolute left-0 right-0 top-0 z-50">
       <nav className="mx-auto flex h-[72px] max-w-content items-center justify-between px-5 lg:px-16">
@@ -72,7 +72,7 @@ function Nav() {
         </a>
         <div className="hidden items-center gap-8 lg:flex">
           <a href="/rentaspace" className="text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">Locations</a>
-          <a href="/size-guide" className="text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">Size Guide</a>
+          <button onClick={onSizeGuide} className="cursor-pointer text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">Size Guide</button>
           <a href="/#about" className="text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">About Us</a>
           <a href="tel:+18175790607" className="flex items-center gap-2 text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">
             <Phone className="h-4 w-4" strokeWidth={2} aria-hidden />(817) 579-0607
@@ -108,7 +108,7 @@ function SizeVideo({ art, tint }: { art: string; tint: string }) {
     return () => io.disconnect()
   }, [])
   return (
-    <div ref={ref} className="aspect-[3/4] w-[70px] shrink-0 overflow-hidden rounded-xl" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${tint} 100%)` }}>
+    <div ref={ref} className="relative aspect-[3/4] w-[86px] shrink-0 cursor-pointer overflow-hidden rounded-xl shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)] transition-transform duration-300 ease-out will-change-transform hover:z-30 hover:scale-[1.35]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${tint} 100%)` }}>
       {show && (
         <video src={`/videos/storage-${art}-sm.webm`} autoPlay muted loop playsInline preload="none" aria-hidden className="h-full w-full object-cover" />
       )}
@@ -148,7 +148,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
   return (
     <div id="facility" className="bg-warm-white text-black antialiased">
       <style dangerouslySetInnerHTML={{ __html: SCOPED_CSS }} />
-      <Nav />
+      <Nav onSizeGuide={() => setGuideOpen(true)} />
 
       {/* ── HERO CAROUSEL ── */}
       <section className="relative h-[460px] overflow-hidden bg-black lg:h-[540px]">
@@ -220,8 +220,8 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                   {group.units.map((u) => {
                     const art = getSizeArt(u.art)
                     return (
-                      <div key={u.size} className="unit flex flex-col rounded-2xl border border-black/[0.06] bg-warm-white p-5">
-                        <div className="flex items-start gap-4">
+                      <div key={u.size} className="unit flex h-full flex-col rounded-2xl border border-black/[0.06] bg-warm-white p-5">
+                        <div className="mb-5 flex items-start gap-4">
                           <SizeVideo art={u.art} tint={art?.tint ?? 'rgba(232,98,42,0.1)'} />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-start justify-between gap-2">
@@ -234,12 +234,12 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                                 <p className="leading-none"><span className="text-[1.625rem] font-black text-orange">${u.online}</span><span className="text-[0.8125rem] font-bold text-stone">/mo</span></p>
                               </div>
                             </div>
-                            <div className="mt-3 flex flex-wrap gap-1.5">
-                              {u.tags.map((t) => (<span key={t} className={`rounded-full px-2.5 py-1 text-[0.75rem] font-bold ${t === 'Climate-controlled' ? 'bg-sage-green/15 text-[#5c8a52]' : 'bg-sand/25 text-charcoal'}`}>{t}</span>))}
+                            <div className="mt-3 flex min-h-[3.25rem] flex-wrap content-start gap-1.5">
+                              {u.tags.map((t) => (<span key={t} className={`h-fit rounded-full px-2.5 py-1 text-[0.75rem] font-bold ${t === 'Climate-controlled' ? 'bg-sage-green/15 text-[#5c8a52]' : 'bg-sand/25 text-charcoal'}`}>{t}</span>))}
                             </div>
                           </div>
                         </div>
-                        <a href="#" className="btn-spring shadow-cta mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></a>
+                        <a href="#" className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></a>
                       </div>
                     )
                   })}
@@ -347,9 +347,9 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
             <div className="overflow-y-auto p-6">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {SIZE_ART.map((s) => (
-                  <div key={s.key} className="rounded-xl border border-black/[0.06] bg-warm-white p-4 shadow-card">
-                    <div className="grid h-28 place-items-center overflow-hidden rounded-lg" style={{ background: s.tint }}>
-                      <SizeArt artKey={s.key} className="h-full w-full" />
+                  <div key={s.key} className="group/card rounded-xl border border-black/[0.06] bg-warm-white p-4 text-center shadow-card">
+                    <div className="mx-auto aspect-[3/4] w-full max-w-[150px] overflow-hidden rounded-lg shadow-[0_3px_12px_-4px_rgba(24,24,24,0.3)] transition-transform duration-300 ease-out will-change-transform group-hover/card:scale-[1.12]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${s.tint} 100%)` }}>
+                      <video src={`/videos/storage-${s.key}-sm.webm`} autoPlay muted loop playsInline preload="metadata" aria-hidden className="h-full w-full object-cover" />
                     </div>
                     <p className="mt-3 text-[1.25rem] font-black tracking-[-0.02em] text-black">{s.size.replace(/'/g, '')}</p>
                     <p className="text-[0.6875rem] font-bold uppercase tracking-wide text-stone">{s.label}</p>
