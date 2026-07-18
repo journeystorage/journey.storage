@@ -43,6 +43,7 @@ export type Facility = {
   reviews: number
   slides: { src: string; alt: string }[]
   promo?: string
+  gallery: { thumb: string; full: string; alt: string }[]
   mapQuery: string
   amenities: string[]
   about: string[]
@@ -108,7 +109,7 @@ function SizeVideo({ art, tint }: { art: string; tint: string }) {
     return () => io.disconnect()
   }, [])
   return (
-    <div ref={ref} className="relative aspect-[3/4] w-[86px] shrink-0 cursor-pointer overflow-hidden rounded-xl shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)] transition-transform duration-300 ease-out will-change-transform hover:z-30 hover:scale-[1.35]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${tint} 100%)` }}>
+    <div ref={ref} className="relative aspect-[3/4] w-[86px] shrink-0 cursor-pointer overflow-hidden rounded-xl shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)] transition-transform duration-300 ease-out will-change-transform hover:z-30 hover:scale-[1.85] hover:shadow-[0_16px_40px_-10px_rgba(24,24,24,0.5)]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${tint} 100%)` }}>
       {show && (
         <video src={`/videos/storage-${art}-sm.webm`} autoPlay muted loop playsInline preload="none" aria-hidden className="h-full w-full object-cover" />
       )}
@@ -119,7 +120,9 @@ function SizeVideo({ art, tint }: { art: string; tint: string }) {
 export default function FacilityView({ facility: f }: { facility: Facility }) {
   const [slide, setSlide] = useState(0)
   const [guideOpen, setGuideOpen] = useState(false)
+  const [lightbox, setLightbox] = useState<number | null>(null)
   const n = f.slides.length
+  const gLen = f.gallery.length
 
   // auto-advance the hero
   useEffect(() => {
@@ -138,6 +141,19 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
     window.addEventListener('keydown', onKey)
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
   }, [guideOpen])
+
+  // lightbox: lock scroll + Escape/arrow keys
+  useEffect(() => {
+    if (lightbox === null) return
+    document.body.style.overflow = 'hidden'
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightbox(null)
+      else if (e.key === 'ArrowRight') setLightbox((i) => (i === null ? i : (i + 1) % gLen))
+      else if (e.key === 'ArrowLeft') setLightbox((i) => (i === null ? i : (i - 1 + gLen) % gLen))
+    }
+    window.addEventListener('keydown', onKey)
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
+  }, [lightbox, gLen])
 
   const socials = [
     { Icon: IgIcon, href: socialUrls.instagram, label: 'Instagram' },
@@ -168,13 +184,24 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
             <span className="text-warm-white">{f.short}</span>
           </nav>
 
-          <div className="mt-auto max-w-2xl pb-14">
+          <div className="mt-auto max-w-2xl pb-10">
             <h1 className="track-tighter text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3.25rem]">{f.name}</h1>
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
               <span className="flex items-center gap-2 text-warm-white"><Stars /><span className="font-bold">{f.rating}</span><span className="text-warm-white/70">({f.reviews} reviews)</span></span>
               <a href={`https://www.google.com/maps?q=${encodeURIComponent(f.mapQuery)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 font-bold text-warm-white/90 transition-colors hover:text-terracotta">
                 <MapPin className="h-4 w-4" strokeWidth={2} aria-hidden />{f.address}, {f.city}
               </a>
+            </div>
+
+            {/* facility photo gallery — click to enlarge */}
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              {f.gallery.map((g, i) => (
+                <button key={g.thumb} onClick={() => setLightbox(i)} aria-label={`View photo: ${g.alt}`} className="btn-spring relative h-12 w-16 overflow-hidden rounded-lg ring-2 ring-warm-white/40 hover:ring-warm-white lg:h-14 lg:w-20">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={g.thumb} alt={g.alt} className="h-full w-full object-cover" />
+                </button>
+              ))}
+              <button onClick={() => setLightbox(0)} className="ml-1 text-[0.8125rem] font-bold text-warm-white/90 underline-offset-4 transition-colors hover:text-terracotta hover:underline">View all photos</button>
             </div>
           </div>
         </div>
@@ -348,7 +375,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {SIZE_ART.map((s) => (
                   <div key={s.key} className="group/card rounded-xl border border-black/[0.06] bg-warm-white p-4 text-center shadow-card">
-                    <div className="mx-auto aspect-[3/4] w-full max-w-[150px] overflow-hidden rounded-lg shadow-[0_3px_12px_-4px_rgba(24,24,24,0.3)] transition-transform duration-300 ease-out will-change-transform group-hover/card:scale-[1.12]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${s.tint} 100%)` }}>
+                    <div className="mx-auto aspect-[3/4] w-full max-w-[150px] overflow-hidden rounded-lg shadow-[0_3px_12px_-4px_rgba(24,24,24,0.3)] transition-transform duration-300 ease-out will-change-transform group-hover/card:scale-[1.28] group-hover/card:shadow-[0_16px_40px_-10px_rgba(24,24,24,0.4)]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${s.tint} 100%)` }}>
                       <video src={`/videos/storage-${s.key}-sm.webm`} autoPlay muted loop playsInline preload="metadata" aria-hidden className="h-full w-full object-cover" />
                     </div>
                     <p className="mt-3 text-[1.25rem] font-black tracking-[-0.02em] text-black">{s.size.replace(/'/g, '')}</p>
@@ -363,6 +390,23 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
               <button onClick={() => setGuideOpen(false)} className="btn-spring shadow-cta rounded-xl bg-orange px-5 py-2.5 font-bold text-warm-white">Got it</button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── PHOTO LIGHTBOX ── */}
+      {lightbox !== null && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/90" onClick={() => setLightbox(null)} aria-hidden />
+          <button onClick={() => setLightbox(null)} aria-label="Close" className="btn-spring absolute right-4 top-4 z-20 grid h-11 w-11 place-items-center rounded-full bg-white/10 text-warm-white backdrop-blur hover:bg-white/20"><X className="h-6 w-6" aria-hidden /></button>
+          {gLen > 1 && (
+            <>
+              <button onClick={() => setLightbox((i) => (i === null ? i : (i - 1 + gLen) % gLen))} aria-label="Previous photo" className="btn-spring absolute left-4 top-1/2 z-20 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-warm-white backdrop-blur hover:bg-white/20"><ChevronLeft className="h-7 w-7" aria-hidden /></button>
+              <button onClick={() => setLightbox((i) => (i === null ? i : (i + 1) % gLen))} aria-label="Next photo" className="btn-spring absolute right-4 top-1/2 z-20 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-warm-white backdrop-blur hover:bg-white/20"><ChevronRight className="h-7 w-7" aria-hidden /></button>
+            </>
+          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={f.gallery[lightbox].full} alt={f.gallery[lightbox].alt} className="relative z-10 max-h-[85vh] max-w-[92vw] rounded-xl object-contain shadow-2xl" />
+          <div className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/50 px-4 py-1.5 text-[0.8125rem] font-bold text-warm-white backdrop-blur">{lightbox + 1} / {gLen}</div>
         </div>
       )}
     </div>

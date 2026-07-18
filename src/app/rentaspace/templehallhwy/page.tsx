@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import FacilityView, { type Facility } from '@/components/rentaspace/FacilityView'
 
 const templeHall: Facility = {
-  name: 'JOURNEY.STORAGE™ — Temple Hall Hwy',
+  name: 'Temple Hall Hwy',
   short: 'Temple Hall Hwy',
   address: '212 Temple Hall Hwy',
   city: 'Granbury, TX 76049',
@@ -18,6 +18,14 @@ const templeHall: Facility = {
     { src: '/images/granbury/th-slide-5.webp', alt: 'Indoor storage spaces' },
   ],
   promo: '50% off your first month',
+  gallery: [
+    { thumb: '/images/granbury/th-t-1.webp', full: '/images/granbury/th-p-1.webp', alt: 'Rental office at Temple Hall Hwy' },
+    { thumb: '/images/granbury/th-t-2.webp', full: '/images/granbury/th-p-2.webp', alt: 'Aerial view of the facility' },
+    { thumb: '/images/granbury/th-t-3.webp', full: '/images/granbury/th-p-3.webp', alt: 'Drive-up storage spaces' },
+    { thumb: '/images/granbury/th-t-4.webp', full: '/images/granbury/th-p-4.webp', alt: 'Climate-controlled interior spaces' },
+    { thumb: '/images/granbury/th-t-5.webp', full: '/images/granbury/th-p-5.webp', alt: 'Front office interior' },
+    { thumb: '/images/granbury/th-t-6.webp', full: '/images/granbury/th-p-6.webp', alt: 'Gated entry' },
+  ],
   mapQuery: '212 Temple Hall Hwy, Granbury, TX 76049',
   amenities: [
     'Climate-controlled spaces',
