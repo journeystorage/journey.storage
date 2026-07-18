@@ -60,7 +60,7 @@ export default function Hero({ onBookCall }: HeroProps) {
 
         {/* Headline */}
         <h1
-          className="hero-fade-up mt-8 lg:mt-10 font-black leading-[0.88] tracking-[-0.045em] text-warm-white"
+          className="hero-fade-up mt-8 lg:mt-10 font-black uppercase leading-[0.86] text-warm-white"
           style={{ animationDelay: '0.14s', fontSize: 'clamp(2.8rem, 8.5vw, 7rem)' }}
         >
           Direct access to<br />self-storage
@@ -78,7 +78,7 @@ export default function Hero({ onBookCall }: HeroProps) {
 
         {/* CTA: exploratory, not "book a call" */}
         <a
-          href="#market"
+          href="#opportunities"
           className="hero-fade-up group mt-10 lg:mt-12 inline-flex items-center gap-3 rounded-sm border border-warm-white/20 bg-warm-white/[0.04] backdrop-blur-sm px-10 py-4 text-body-sm font-bold uppercase tracking-[0.18em] text-warm-white transition-colors duration-200 hover:border-orange hover:bg-orange/[0.08] hover:text-orange"
           style={{ animationDelay: '0.30s' }}
         >
