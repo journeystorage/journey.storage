@@ -27,8 +27,9 @@ const locations = [
 const popularSizes = ['5×10', '10×10', '10×20', 'Climate-controlled'] as const
 const springEase = [0.22, 1, 0.36, 1] as const
 
-export default function Locations() {
+export default function Locations({ seeAllHref }: { seeAllHref?: string } = {}) {
   const prefersReducedMotion = useReducedMotion()
+  const seeAll = seeAllHref ?? `#${sectionIds.locations}`
 
   const fadeUp = (delay: number) =>
     prefersReducedMotion
@@ -121,7 +122,7 @@ export default function Locations() {
         <div className="mt-[52px] flex items-center justify-center gap-3.5">
           <span className="h-px w-11 bg-warm-white/[0.28]" />
           <a
-            href={`#${sectionIds.locations}`}
+            href={seeAll}
             className="group inline-flex items-center gap-2 text-caption font-bold uppercase tracking-[0.16em] text-warm-white/[0.78] transition-colors duration-200 hover:text-terracotta"
           >
             See our locations
