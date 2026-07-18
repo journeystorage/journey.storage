@@ -61,7 +61,7 @@ export default function Hero({ onBookCall }: HeroProps) {
         {/* Headline */}
         <h1
           className="hero-fade-up mt-8 lg:mt-10 font-black uppercase leading-[0.86] text-warm-white"
-          style={{ animationDelay: '0.14s', fontSize: 'clamp(2.8rem, 8.5vw, 7rem)' }}
+          style={{ animationDelay: '0.14s', fontSize: 'clamp(2.2rem, 6vw, 4.5rem)' }}
         >
           Direct access to<br />self-storage
         </h1>
