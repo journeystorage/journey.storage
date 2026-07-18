@@ -82,7 +82,7 @@ export default function Hero({ onBookCall }: HeroProps) {
           className="hero-fade-up group mt-10 lg:mt-12 inline-flex items-center gap-3 rounded-sm border border-warm-white/20 bg-warm-white/[0.04] backdrop-blur-sm px-10 py-4 text-body-sm font-bold uppercase tracking-[0.18em] text-warm-white transition-colors duration-200 hover:border-orange hover:bg-orange/[0.08] hover:text-orange"
           style={{ animationDelay: '0.30s' }}
         >
-          Explore the platform
+          See current opportunities
           <span className="transition-transform duration-200 group-hover:translate-y-0.5">&darr;</span>
         </a>
 
