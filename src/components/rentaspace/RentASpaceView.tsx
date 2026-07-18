@@ -145,7 +145,7 @@ export default function RentASpaceView() {
               </div>
               <div className="mt-6 flex flex-1 items-end gap-2">
                 <a href="#temple-hall" className="btn-spring flex-1 rounded-xl border-2 border-black/85 py-3 text-center font-bold text-black hover:bg-black hover:text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Tour</a>
-                <a href="#" className="btn-spring shadow-cta flex-[1.4] rounded-xl bg-orange py-3 text-center font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent online</a>
+                <a href="/rentaspace/templehallhwy" className="btn-spring shadow-cta flex-[1.4] rounded-xl bg-orange py-3 text-center font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent online</a>
               </div>
             </div>
           </article>
@@ -227,7 +227,7 @@ export default function RentASpaceView() {
                 ))}
               </ul>
               <div className="mt-8 flex flex-wrap gap-3">
-                <a href="#" className="btn-spring shadow-cta rounded-xl bg-orange px-7 py-3.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent a unit here</a>
+                <a href="/rentaspace/templehallhwy" className="btn-spring shadow-cta rounded-xl bg-orange px-7 py-3.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent a unit here</a>
                 <a href="tel:+18175790607" className="btn-spring rounded-xl border-2 border-black/85 px-7 py-3.5 font-bold text-black hover:bg-black hover:text-warm-white">Call (817) 579-0607</a>
               </div>
             </div>
