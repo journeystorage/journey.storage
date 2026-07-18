@@ -1,8 +1,5 @@
 import type { Metadata } from 'next'
-import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
-import Locations from '@/components/sections/Locations'
-import RentContent from '@/components/rentaspace/RentContent'
+import RentASpaceView from '@/components/rentaspace/RentASpaceView'
 
 export const metadata: Metadata = {
   title: 'Rent a Space in Granbury, TX | Journey Storage',
@@ -12,14 +9,5 @@ export const metadata: Metadata = {
 }
 
 export default function RentASpacePage() {
-  return (
-    <>
-      <Navbar />
-      <main>
-        <Locations seeAllHref="#properties" />
-        <RentContent />
-      </main>
-      <Footer />
-    </>
-  )
+  return <RentASpaceView />
 }
