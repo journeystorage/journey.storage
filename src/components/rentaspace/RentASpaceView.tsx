@@ -129,7 +129,7 @@ export default function RentASpaceView() {
               <span className="shadow-cta absolute left-4 top-4 rounded-full bg-orange px-3 py-1 text-[0.8125rem] font-bold text-warm-white">350+ units</span>
             </div>
             <div className="flex flex-1 flex-col p-6">
-              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">Journey Storage — Temple Hall</h3>
+              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">JOURNEY.STORAGE™ — Temple Hall</h3>
               <div className="mt-2 flex items-center gap-2 text-[0.875rem]">
                 <span className="inline-flex items-center gap-1.5 font-bold text-sage-green"><span className="h-2 w-2 rounded-full bg-sage-green" />Open today</span>
                 <span className="text-stone">· until 5:00 PM</span>
@@ -159,7 +159,7 @@ export default function RentASpaceView() {
               <span className="absolute left-4 top-4 rounded-full bg-charcoal px-3 py-1 text-[0.8125rem] font-bold text-warm-white">100+ units</span>
             </div>
             <div className="flex flex-1 flex-col p-6">
-              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">Journey Storage — Western Hills</h3>
+              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">JOURNEY.STORAGE™ — Western Hills</h3>
               <div className="mt-2 flex items-center gap-2 text-[0.875rem]">
                 <span className="inline-flex items-center gap-1.5 font-bold text-sage-green"><span className="h-2 w-2 rounded-full bg-sage-green" />Open today</span>
                 <span className="text-stone">· until 5:00 PM</span>
@@ -188,7 +188,7 @@ export default function RentASpaceView() {
               <span className="absolute left-4 top-4 rounded-full bg-charcoal px-3 py-1 text-[0.8125rem] font-bold text-warm-white">Newest</span>
             </div>
             <div className="flex flex-1 flex-col p-6">
-              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">Journey Storage — Cleveland Rd</h3>
+              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">JOURNEY.STORAGE™ — Cleveland Rd</h3>
               <div className="mt-2 flex items-center gap-2 text-[0.875rem]">
                 <span className="inline-flex items-center gap-1.5 font-bold text-sage-green"><span className="h-2 w-2 rounded-full bg-sage-green" />Open today</span>
                 <span className="text-stone">· until 5:00 PM</span>

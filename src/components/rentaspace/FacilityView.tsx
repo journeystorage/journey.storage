@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { MapPin, Phone, Menu, Star, Check, ChevronRight, ChevronLeft, ChevronDown, X, Ruler, Sparkles } from 'lucide-react'
 import { socialUrls } from '@/lib/constants'
 import { SIZE_ART, SizeArt, getSizeArt } from '@/lib/sizeArt'
@@ -93,6 +93,29 @@ function Stars() {
   )
 }
 
+/* Size-guide animation for a space — loads/plays only once its box scrolls into view. */
+function SizeVideo({ art, tint }: { art: string; tint: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [show, setShow] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      (entries) => { if (entries[0].isIntersecting) { setShow(true); io.disconnect() } },
+      { rootMargin: '300px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+  return (
+    <div ref={ref} className="aspect-[3/4] w-[70px] shrink-0 overflow-hidden rounded-xl" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${tint} 100%)` }}>
+      {show && (
+        <video src={`/videos/storage-${art}.webm`} autoPlay muted loop playsInline preload="none" aria-hidden className="h-full w-full object-cover" />
+      )}
+    </div>
+  )
+}
+
 export default function FacilityView({ facility: f }: { facility: Facility }) {
   const [slide, setSlide] = useState(0)
   const [guideOpen, setGuideOpen] = useState(false)
@@ -101,7 +124,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
   // auto-advance the hero
   useEffect(() => {
     if (n < 2) return
-    const t = setInterval(() => setSlide((s) => (s + 1) % n), 6000)
+    const t = setInterval(() => setSlide((s) => (s + 1) % n), 3000)
     return () => clearInterval(t)
   }, [n])
 
@@ -199,9 +222,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                     return (
                       <div key={u.size} className="unit flex flex-col rounded-2xl border border-black/[0.06] bg-warm-white p-5">
                         <div className="flex items-start gap-4">
-                          <div className="grid h-[64px] w-[80px] shrink-0 place-items-center overflow-hidden rounded-xl" style={{ background: art?.tint ?? 'rgba(232,98,42,0.1)' }}>
-                            <SizeArt artKey={u.art} className="h-full w-full" />
-                          </div>
+                          <SizeVideo art={u.art} tint={art?.tint ?? 'rgba(232,98,42,0.1)'} />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-start justify-between gap-2">
                               <div>
@@ -218,7 +239,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                             </div>
                           </div>
                         </div>
-                        <a href="#" className="btn-spring shadow-cta mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this unit<span aria-hidden>→</span></a>
+                        <a href="#" className="btn-spring shadow-cta mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></a>
                       </div>
                     )
                   })}
@@ -294,9 +315,9 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
         <div className="absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 50% 0%, rgba(232,98,42,0.22) 0%, transparent 60%)' }} />
         <div className="relative mx-auto max-w-content px-5 py-16 text-center lg:px-16 lg:py-20">
           <h2 className="track-tighter text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3rem]">Space to move on.</h2>
-          <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] font-light text-warm-white/70 lg:text-[1.25rem]">Reserve your unit at {f.short} today — clear pricing, month-to-month, rented online in minutes.</p>
+          <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] font-light text-warm-white/70 lg:text-[1.25rem]">Reserve your space at {f.short} today — clear pricing, month-to-month, rented online in minutes.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <a href="#" className="btn-spring shadow-cta rounded-xl bg-orange px-8 py-3.5 font-bold text-warm-white">Rent a unit</a>
+            <a href="#" className="btn-spring shadow-cta rounded-xl bg-orange px-8 py-3.5 font-bold text-warm-white">Rent a space</a>
             <a href={f.tel} className="btn-spring rounded-xl border-2 border-warm-white/70 px-8 py-3.5 font-bold text-warm-white hover:bg-warm-white hover:text-black">Call us</a>
           </div>
         </div>
