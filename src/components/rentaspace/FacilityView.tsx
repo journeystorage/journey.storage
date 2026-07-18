@@ -110,7 +110,7 @@ function SizeVideo({ art, tint }: { art: string; tint: string }) {
   return (
     <div ref={ref} className="aspect-[3/4] w-[70px] shrink-0 overflow-hidden rounded-xl" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${tint} 100%)` }}>
       {show && (
-        <video src={`/videos/storage-${art}.webm`} autoPlay muted loop playsInline preload="none" aria-hidden className="h-full w-full object-cover" />
+        <video src={`/videos/storage-${art}-sm.webm`} autoPlay muted loop playsInline preload="none" aria-hidden className="h-full w-full object-cover" />
       )}
     </div>
   )
