@@ -63,7 +63,7 @@ export default function RentASpaceView() {
               Space to move on.
             </h1>
             <p className="mt-5 text-[1.0625rem] font-light leading-relaxed text-warm-white/85 lg:text-[1.25rem]">
-              Storage built for people in motion — not for boxes sitting still. Find a clean, secure unit near you and reserve online in minutes.
+              Storage built for people in motion — not for boxes sitting still. Find a clean, secure space near you and reserve online in minutes.
             </p>
 
             <form className="mx-auto mt-9 max-w-xl" onSubmit={(e) => e.preventDefault()}>
@@ -74,7 +74,7 @@ export default function RentASpaceView() {
                 </div>
                 <button type="submit" className="btn-spring shadow-cta flex shrink-0 items-center gap-2 rounded-xl bg-orange px-6 py-3 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">
                   <Search className="h-5 w-5" strokeWidth={2.2} aria-hidden />
-                  <span className="hidden sm:inline">Find units</span>
+                  <span className="hidden sm:inline">Find spaces</span>
                 </button>
               </div>
               <div className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[0.875rem] text-warm-white/70">
@@ -174,7 +174,7 @@ export default function RentASpaceView() {
                 <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Gated</span>
               </div>
               <div className="mt-6 flex flex-1 items-end">
-                <a href="#" className="btn-spring w-full rounded-xl border-2 border-black/85 py-3 text-center font-bold text-black hover:bg-black hover:text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">View units</a>
+                <a href="/rentaspace/westernhillstrl" className="btn-spring w-full rounded-xl border-2 border-black/85 py-3 text-center font-bold text-black hover:bg-black hover:text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">View spaces</a>
               </div>
             </div>
           </article>
@@ -203,7 +203,7 @@ export default function RentASpaceView() {
                 <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Cameras</span>
               </div>
               <div className="mt-6 flex flex-1 items-end">
-                <a href="#" className="btn-spring w-full rounded-xl border-2 border-black/85 py-3 text-center font-bold text-black hover:bg-black hover:text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">View units</a>
+                <a href="/rentaspace/mccrearyrd" className="btn-spring w-full rounded-xl border-2 border-black/85 py-3 text-center font-bold text-black hover:bg-black hover:text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">View spaces</a>
               </div>
             </div>
           </article>
