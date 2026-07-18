@@ -17,7 +17,10 @@ const viewports = [
 ]
 
 async function run() {
-  const browser = await puppeteer.launch({ headless: true })
+  const browser = await puppeteer.launch({
+    headless: true,
+    executablePath: process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  })
   const page = await browser.newPage()
 
   for (const vp of viewports) {
