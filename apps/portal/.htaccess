@@ -16,7 +16,7 @@
   # ── Caching ──
   # App shell + config always revalidated, so edits go live immediately
   # (this is why the config.js cache-buster is no longer needed).
-  <FilesMatch "(index\.html|config\.js)$">
+  <FilesMatch "(index\.html|investors\.html|config\.js)$">
     Header set Cache-Control "no-cache, must-revalidate"
   </FilesMatch>
   # Fonts are content-stable — cache hard for a year.
