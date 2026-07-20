@@ -1,6 +1,7 @@
 'use client'
 
 import { Search, MapPin, Phone, CheckCircle2, CalendarDays, Zap, Check, Menu } from 'lucide-react'
+import RentFooter from '@/components/rentaspace/RentFooter'
 
 const SCOPED_CSS = `
 #rentaspace .track-tight{letter-spacing:-.03em}
@@ -25,7 +26,7 @@ export default function RentASpaceView() {
       {/* ── NAV ── */}
       <header className="absolute left-0 right-0 top-0 z-50">
         <nav className="mx-auto flex h-[72px] max-w-content items-center justify-between px-5 lg:px-16">
-          <a href="#" className="min-w-[150px] lg:min-w-[180px]">
+          <a href="https://journey.storage" className="min-w-[150px] lg:min-w-[180px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/images/brand/logo-white-TM.svg" alt="Journey.Storage™" className="w-[150px] lg:w-[180px]" style={{ height: 'auto' }} />
           </a>
@@ -37,7 +38,7 @@ export default function RentASpaceView() {
               {phoneIcon('h-4 w-4')}
               (817) 579-0607
             </a>
-            <a href="#" className="btn-spring rounded-full border-2 border-warm-white/80 px-5 py-2 text-[0.9375rem] font-bold text-warm-white hover:bg-warm-white hover:text-black">Pay Bill</a>
+            <a href="tel:+18175790607" className="btn-spring rounded-full border-2 border-warm-white/80 px-5 py-2 text-[0.9375rem] font-bold text-warm-white hover:bg-warm-white hover:text-black">Pay Bill</a>
           </div>
           <button className="text-warm-white lg:hidden" aria-label="Menu">
             <Menu className="h-7 w-7" strokeWidth={2} aria-hidden />
@@ -66,7 +67,7 @@ export default function RentASpaceView() {
               Storage built for people in motion — not for boxes sitting still. Find a clean, secure space near you and reserve online in minutes.
             </p>
 
-            <form className="mx-auto mt-9 max-w-xl" onSubmit={(e) => e.preventDefault()}>
+            <form className="mx-auto mt-9 max-w-xl" onSubmit={(e) => { e.preventDefault(); document.getElementById('locations')?.scrollIntoView({ behavior: 'smooth' }) }}>
               <div className="flex items-stretch gap-2 rounded-2xl bg-warm-white p-2 shadow-[0_20px_60px_-20px_rgba(24,24,24,0.6)]">
                 <div className="flex flex-1 items-center gap-3 pl-4">
                   <MapPin className="h-5 w-5 shrink-0 text-orange" strokeWidth={2} aria-hidden />
@@ -79,10 +80,10 @@ export default function RentASpaceView() {
               </div>
               <div className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[0.875rem] text-warm-white/70">
                 <span>Popular sizes:</span>
-                <button type="button" className="font-bold text-warm-white transition-colors hover:text-terracotta">5×10</button><span className="opacity-40">·</span>
-                <button type="button" className="font-bold text-warm-white transition-colors hover:text-terracotta">10×10</button><span className="opacity-40">·</span>
-                <button type="button" className="font-bold text-warm-white transition-colors hover:text-terracotta">10×20</button><span className="opacity-40">·</span>
-                <button type="button" className="font-bold text-warm-white transition-colors hover:text-terracotta">Climate-controlled</button>
+                <button type="button" onClick={() => document.getElementById('locations')?.scrollIntoView({ behavior: 'smooth' })} className="font-bold text-warm-white transition-colors hover:text-terracotta">5×10</button><span className="opacity-40">·</span>
+                <button type="button" onClick={() => document.getElementById('locations')?.scrollIntoView({ behavior: 'smooth' })} className="font-bold text-warm-white transition-colors hover:text-terracotta">10×10</button><span className="opacity-40">·</span>
+                <button type="button" onClick={() => document.getElementById('locations')?.scrollIntoView({ behavior: 'smooth' })} className="font-bold text-warm-white transition-colors hover:text-terracotta">10×20</button><span className="opacity-40">·</span>
+                <button type="button" onClick={() => document.getElementById('locations')?.scrollIntoView({ behavior: 'smooth' })} className="font-bold text-warm-white transition-colors hover:text-terracotta">Climate-controlled</button>
               </div>
             </form>
           </div>
@@ -126,13 +127,13 @@ export default function RentASpaceView() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/images/granbury/rs-card-th-aerial.webp" alt="Temple Hall facility aerial" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
-              <span className="shadow-cta absolute left-4 top-4 rounded-full bg-orange px-3 py-1 text-[0.8125rem] font-bold text-warm-white">350+ units</span>
+              <span className="shadow-cta absolute left-4 top-4 rounded-full bg-orange px-3 py-1 text-[0.8125rem] font-bold text-warm-white">350+ spaces</span>
             </div>
             <div className="flex flex-1 flex-col p-6">
-              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">JOURNEY.STORAGE™ — Temple Hall</h3>
+              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">JOURNEY.STORAGE™ — Temple Hall Hwy</h3>
               <div className="mt-2 flex items-center gap-2 text-[0.875rem]">
-                <span className="inline-flex items-center gap-1.5 font-bold text-sage-green"><span className="h-2 w-2 rounded-full bg-sage-green" />Open today</span>
-                <span className="text-stone">· until 5:00 PM</span>
+                <span className="inline-flex items-center gap-1.5 font-bold text-sage-green"><span className="h-2 w-2 rounded-full bg-sage-green" />Open 24/7</span>
+                <span className="text-stone">· gate access</span>
               </div>
               <p className="mt-3 text-[0.9375rem] leading-relaxed text-stone">212 Temple Hall Hwy<br />Granbury, TX 76049</p>
               <a href="tel:+18175790607" className="mt-2 inline-flex items-center gap-2 text-[0.9375rem] font-bold text-black transition-colors hover:text-orange">
@@ -143,9 +144,8 @@ export default function RentASpaceView() {
                 <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Drive-up</span>
                 <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Gated</span>
               </div>
-              <div className="mt-6 flex flex-1 items-end gap-2">
-                <a href="#temple-hall" className="btn-spring flex-1 rounded-xl border-2 border-black/85 py-3 text-center font-bold text-black hover:bg-black hover:text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Tour</a>
-                <a href="/rentaspace/templehallhwy" className="btn-spring shadow-cta flex-[1.4] rounded-xl bg-orange py-3 text-center font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent online</a>
+              <div className="mt-6 flex flex-1 items-end">
+                <a href="/rentaspace/templehallhwy" className="btn-spring shadow-cta w-full rounded-xl bg-orange py-3 text-center font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">See sizes &amp; prices</a>
               </div>
             </div>
           </article>
@@ -159,10 +159,10 @@ export default function RentASpaceView() {
               <span className="absolute left-4 top-4 rounded-full bg-charcoal px-3 py-1 text-[0.8125rem] font-bold text-warm-white">100+ units</span>
             </div>
             <div className="flex flex-1 flex-col p-6">
-              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">JOURNEY.STORAGE™ — Western Hills</h3>
+              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">JOURNEY.STORAGE™ — Western Hills Trl</h3>
               <div className="mt-2 flex items-center gap-2 text-[0.875rem]">
-                <span className="inline-flex items-center gap-1.5 font-bold text-sage-green"><span className="h-2 w-2 rounded-full bg-sage-green" />Open today</span>
-                <span className="text-stone">· until 5:00 PM</span>
+                <span className="inline-flex items-center gap-1.5 font-bold text-sage-green"><span className="h-2 w-2 rounded-full bg-sage-green" />Open 24/7</span>
+                <span className="text-stone">· gate access</span>
               </div>
               <p className="mt-3 text-[0.9375rem] leading-relaxed text-stone">409 Western Hills Trail<br />Granbury, TX 76049</p>
               <a href="tel:+18175790607" className="mt-2 inline-flex items-center gap-2 text-[0.9375rem] font-bold text-black transition-colors hover:text-orange">
@@ -174,7 +174,7 @@ export default function RentASpaceView() {
                 <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Gated</span>
               </div>
               <div className="mt-6 flex flex-1 items-end">
-                <a href="/rentaspace/westernhillstrl" className="btn-spring w-full rounded-xl border-2 border-black/85 py-3 text-center font-bold text-black hover:bg-black hover:text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">View spaces</a>
+                <a href="/rentaspace/westernhillstrl" className="btn-spring shadow-cta w-full rounded-xl bg-orange py-3 text-center font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">See sizes &amp; prices</a>
               </div>
             </div>
           </article>
@@ -188,10 +188,10 @@ export default function RentASpaceView() {
               <span className="absolute left-4 top-4 rounded-full bg-charcoal px-3 py-1 text-[0.8125rem] font-bold text-warm-white">Newest</span>
             </div>
             <div className="flex flex-1 flex-col p-6">
-              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">JOURNEY.STORAGE™ — Cleveland Rd</h3>
+              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">JOURNEY.STORAGE™ — McCreary Rd</h3>
               <div className="mt-2 flex items-center gap-2 text-[0.875rem]">
-                <span className="inline-flex items-center gap-1.5 font-bold text-sage-green"><span className="h-2 w-2 rounded-full bg-sage-green" />Open today</span>
-                <span className="text-stone">· until 5:00 PM</span>
+                <span className="inline-flex items-center gap-1.5 font-bold text-sage-green"><span className="h-2 w-2 rounded-full bg-sage-green" />Open 24/7</span>
+                <span className="text-stone">· gate access</span>
               </div>
               <p className="mt-3 text-[0.9375rem] leading-relaxed text-stone">3501 McCreary Rd<br />Granbury, TX 76049</p>
               <a href="tel:+18175790607" className="mt-2 inline-flex items-center gap-2 text-[0.9375rem] font-bold text-black transition-colors hover:text-orange">
@@ -203,7 +203,7 @@ export default function RentASpaceView() {
                 <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Cameras</span>
               </div>
               <div className="mt-6 flex flex-1 items-end">
-                <a href="/rentaspace/mccrearyrd" className="btn-spring w-full rounded-xl border-2 border-black/85 py-3 text-center font-bold text-black hover:bg-black hover:text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">View spaces</a>
+                <a href="/rentaspace/mccrearyrd" className="btn-spring shadow-cta w-full rounded-xl bg-orange py-3 text-center font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">See sizes &amp; prices</a>
               </div>
             </div>
           </article>
@@ -216,10 +216,10 @@ export default function RentASpaceView() {
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
               <span className="text-[0.8125rem] font-bold uppercase tracking-[0.2em] text-orange">Featured facility</span>
-              <h2 className="track-tight mt-3 text-[2rem] font-black leading-[1.05] text-black lg:text-[2.5rem]">Not a container.<br />A partner on Temple Hall.</h2>
-              <p className="mt-4 text-[1.0625rem] leading-relaxed text-stone">Our flagship Granbury facility: 350+ clean, secure units set on landscaped grounds — from breezy drive-up spaces to fully climate-controlled interior storage. Wide, well-lit aisles, a friendly front office, and a gated perimeter watched around the clock.</p>
+              <h2 className="track-tight mt-3 text-[2rem] font-black leading-[1.05] text-black lg:text-[2.5rem]">More than a space.<br />Our flagship on Temple Hall.</h2>
+              <p className="mt-4 text-[1.0625rem] leading-relaxed text-stone">Our flagship Granbury facility: 350+ clean, secure spaces set on landscaped grounds — from breezy drive-up spaces to fully climate-controlled interior storage. Wide, well-lit aisles, a friendly front office, and a gated perimeter watched around the clock.</p>
               <ul className="mt-6 space-y-3">
-                {['Climate-controlled & drive-up units', 'Gated access, 6 AM–10 PM daily', 'Sizes from 5×10 to 10×30'].map((item) => (
+                {['Climate-controlled & drive-up spaces', '24/7 gated access', 'Sizes from 5×10 to 10×30'].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-[1rem] font-bold text-charcoal">
                     <span className="grid h-6 w-6 place-items-center rounded-full bg-orange/[0.12] text-orange"><Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden /></span>
                     {item}
@@ -227,7 +227,7 @@ export default function RentASpaceView() {
                 ))}
               </ul>
               <div className="mt-8 flex flex-wrap gap-3">
-                <a href="/rentaspace/templehallhwy" className="btn-spring shadow-cta rounded-xl bg-orange px-7 py-3.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent a unit here</a>
+                <a href="/rentaspace/templehallhwy" className="btn-spring shadow-cta rounded-xl bg-orange px-7 py-3.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent a space here</a>
                 <a href="tel:+18175790607" className="btn-spring rounded-xl border-2 border-black/85 px-7 py-3.5 font-bold text-black hover:bg-black hover:text-warm-white">Call (817) 579-0607</a>
               </div>
             </div>
@@ -265,7 +265,7 @@ export default function RentASpaceView() {
             <p className="mt-1 text-[0.9375rem] leading-relaxed text-charcoal">Month-to-month · no deposit<br />Rent &amp; pay online 24/7</p>
           </div>
         </div>
-        <p className="mt-6 text-center text-[0.8125rem] italic text-stone/70">Live unit availability &amp; pricing will load from the Tenant Inc API.</p>
+        
       </section>
 
       {/* ── CTA BAND ── */}
@@ -273,22 +273,15 @@ export default function RentASpaceView() {
         <div className="absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 50% 0%, rgba(232,98,42,0.22) 0%, transparent 60%)' }} />
         <div className="relative mx-auto max-w-content px-5 py-16 text-center lg:px-16 lg:py-20">
           <h2 className="track-tighter text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3rem]">Space to move on.</h2>
-          <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] font-light text-warm-white/70 lg:text-[1.25rem]">Find your unit in Granbury today. Clear pricing, no lock-in, and a team that gets your moment.</p>
+          <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] font-light text-warm-white/70 lg:text-[1.25rem]">Find your space in Granbury today. Clear pricing, no lock-in, and a team that gets your moment.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <a href="#locations" className="btn-spring shadow-cta rounded-xl bg-orange px-8 py-3.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Find a unit</a>
+            <a href="#locations" className="btn-spring shadow-cta rounded-xl bg-orange px-8 py-3.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Find a space</a>
             <a href="tel:+18175790607" className="btn-spring rounded-xl border-2 border-warm-white/70 px-8 py-3.5 font-bold text-warm-white hover:bg-warm-white hover:text-black">Call us</a>
           </div>
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer className="bg-charcoal text-warm-white/70">
-        <div className="mx-auto flex max-w-content flex-col items-center justify-between gap-4 px-5 py-8 text-[0.875rem] sm:flex-row lg:px-16">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/brand/logo-white-TM.svg" alt="Journey.Storage™" className="w-[140px]" style={{ height: 'auto' }} />
-          <span>Space to move on.</span>
-        </div>
-      </footer>
+      <RentFooter />
     </div>
   )
 }

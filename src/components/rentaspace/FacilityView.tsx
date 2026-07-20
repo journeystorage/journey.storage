@@ -1,26 +1,9 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, type FormEvent } from 'react'
 import { MapPin, Phone, Menu, Star, Check, ChevronRight, ChevronLeft, ChevronDown, X, Ruler, Sparkles } from 'lucide-react'
-import { socialUrls } from '@/lib/constants'
-import { SIZE_ART, getSizeArt } from '@/lib/sizeArt'
-
-/* Brand social glyphs (lucide dropped brand icons) */
-const IgIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className} aria-hidden>
-    <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" /><circle cx="12" cy="12" r="4.3" /><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none" />
-  </svg>
-)
-const InIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
-    <path d="M4.98 3.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.4c0-1.3-.02-2.96-1.8-2.96-1.8 0-2.08 1.4-2.08 2.86V21H9z" />
-  </svg>
-)
-const FbIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
-    <path d="M22 12a10 10 0 10-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0022 12z" />
-  </svg>
-)
+import { SIZE_ART, SizeArt, getSizeArt } from '@/lib/sizeArt'
+import RentFooter from '@/components/rentaspace/RentFooter'
 
 export type Unit = {
   size: string
@@ -33,8 +16,10 @@ export type Unit = {
 }
 export type UnitGroup = { category: string; blurb: string; units: Unit[] }
 export type Facility = {
+  slug: string
   name: string
   short: string
+  formerly?: string
   address: string
   city: string
   phone: string
@@ -50,6 +35,8 @@ export type Facility = {
   groups: UnitGroup[]
   faqs: { q: string; a: string }[]
 }
+
+const PHONE_TEL = 'tel:+18175790607'
 
 const SCOPED_CSS = `
 #facility .track-tight{letter-spacing:-.03em}
@@ -67,7 +54,7 @@ function Nav({ onSizeGuide }: { onSizeGuide: () => void }) {
   return (
     <header className="absolute left-0 right-0 top-0 z-50">
       <nav className="mx-auto flex h-[72px] max-w-content items-center justify-between px-5 lg:px-16">
-        <a href="/rentaspace" className="min-w-[150px] lg:min-w-[180px]">
+        <a href="https://journey.storage" className="min-w-[150px] lg:min-w-[180px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/brand/logo-white-TM.svg" alt="Journey.Storage™" className="w-[150px] lg:w-[180px]" style={{ height: 'auto' }} />
         </a>
@@ -75,10 +62,10 @@ function Nav({ onSizeGuide }: { onSizeGuide: () => void }) {
           <a href="/rentaspace" className="text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">Locations</a>
           <button onClick={onSizeGuide} className="cursor-pointer text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">Size Guide</button>
           <a href="/#about" className="text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">About Us</a>
-          <a href="tel:+18175790607" className="flex items-center gap-2 text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">
+          <a href={PHONE_TEL} className="flex items-center gap-2 text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">
             <Phone className="h-4 w-4" strokeWidth={2} aria-hidden />(817) 579-0607
           </a>
-          <a href="#" className="btn-spring rounded-full border-2 border-warm-white/80 px-5 py-2 text-[0.9375rem] font-bold text-warm-white hover:bg-warm-white hover:text-black">Pay Bill</a>
+          <a href={PHONE_TEL} className="btn-spring rounded-full border-2 border-warm-white/80 px-5 py-2 text-[0.9375rem] font-bold text-warm-white hover:bg-warm-white hover:text-black">Pay Bill</a>
         </div>
         <button className="text-warm-white lg:hidden" aria-label="Menu"><Menu className="h-7 w-7" strokeWidth={2} aria-hidden /></button>
       </nav>
@@ -94,7 +81,7 @@ function Stars() {
   )
 }
 
-/* Size-guide animation for a space — loads/plays only once its box scrolls into view. */
+/* Size-guide animation for a space — SVG art shows as a poster; video loads/plays when scrolled into view. */
 function SizeVideo({ art, tint }: { art: string; tint: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const [show, setShow] = useState(false)
@@ -110,8 +97,9 @@ function SizeVideo({ art, tint }: { art: string; tint: string }) {
   }, [])
   return (
     <div ref={ref} className="relative aspect-[3/4] w-[86px] shrink-0 cursor-pointer overflow-hidden rounded-xl shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)] transition-transform duration-300 ease-out will-change-transform hover:z-30 hover:scale-[1.85] hover:shadow-[0_16px_40px_-10px_rgba(24,24,24,0.5)]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${tint} 100%)` }}>
+      <SizeArt artKey={art} className="absolute inset-0 h-full w-full" />
       {show && (
-        <video src={`/videos/storage-${art}-sm.webm`} autoPlay muted loop playsInline preload="none" aria-hidden className="h-full w-full object-cover" />
+        <video src={`/videos/storage-${art}-sm.webm`} autoPlay muted loop playsInline preload="none" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
       )}
     </div>
   )
@@ -121,10 +109,12 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
   const [slide, setSlide] = useState(0)
   const [guideOpen, setGuideOpen] = useState(false)
   const [lightbox, setLightbox] = useState<number | null>(null)
+  const [reserveSize, setReserveSize] = useState<string | null>(null)
+  const [reserveStatus, setReserveStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const n = f.slides.length
   const gLen = f.gallery.length
+  const reviewsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Journey Storage ${f.short} Granbury TX`)}`
 
-  // auto-advance the hero
   useEffect(() => {
     if (n < 2) return
     const t = setInterval(() => setSlide((s) => (s + 1) % n), 3000)
@@ -133,7 +123,6 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
 
   const go = useCallback((d: number) => setSlide((s) => (s + d + n) % n), [n])
 
-  // size-guide board: lock scroll + close on Escape
   useEffect(() => {
     if (!guideOpen) return
     document.body.style.overflow = 'hidden'
@@ -142,7 +131,6 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
   }, [guideOpen])
 
-  // lightbox: lock scroll + Escape/arrow keys
   useEffect(() => {
     if (lightbox === null) return
     document.body.style.overflow = 'hidden'
@@ -155,15 +143,62 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
   }, [lightbox, gLen])
 
-  const socials = [
-    { Icon: IgIcon, href: socialUrls.instagram, label: 'Instagram' },
-    { Icon: InIcon, href: socialUrls.linkedin, label: 'LinkedIn' },
-    { Icon: FbIcon, href: socialUrls.facebook, label: 'Facebook' },
-  ]
+  useEffect(() => {
+    if (reserveSize === null) return
+    document.body.style.overflow = 'hidden'
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setReserveSize(null) }
+    window.addEventListener('keydown', onKey)
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
+  }, [reserveSize])
+
+  const openReserve = (size: string) => { setReserveStatus('idle'); setReserveSize(size) }
+
+  async function submitReserve(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const fd = new FormData(e.currentTarget)
+    if (fd.get('website')) { setReserveStatus('done'); return } // honeypot
+    const name = String(fd.get('name') || '').trim()
+    const phone = String(fd.get('phone') || '').trim()
+    const email = String(fd.get('email') || '').trim()
+    const moveIn = String(fd.get('moveIn') || '').trim()
+    const size = String(fd.get('size') || '').trim()
+    setReserveStatus('sending')
+    try {
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name, email, phone,
+          form_source: `reserve-${f.slug}`,
+          message: `Reserve/hold request — ${f.short}${size ? `, size ${size}` : ''}${moveIn ? `, move-in ${moveIn}` : ''}`,
+          facility: f.short, size, move_in: moveIn,
+        }),
+      })
+      const j = await res.json()
+      setReserveStatus(j.success ? 'done' : 'error')
+    } catch {
+      setReserveStatus('error')
+    }
+  }
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SelfStorage',
+    name: `Journey.Storage — ${f.short}`,
+    image: `https://journey.storage${f.slides[0]?.src ?? ''}`,
+    telephone: '+18175790607',
+    url: `https://journey.storage/rentaspace/${f.slug}`,
+    priceRange: '$',
+    address: { '@type': 'PostalAddress', streetAddress: f.address, addressLocality: 'Granbury', addressRegion: 'TX', postalCode: '76049', addressCountry: 'US' },
+    openingHoursSpecification: [
+      { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '00:00', closes: '23:59', description: 'Gate access' },
+    ],
+  }
 
   return (
-    <div id="facility" className="bg-warm-white text-black antialiased">
+    <div id="facility" className="bg-warm-white pb-16 text-black antialiased lg:pb-0">
       <style dangerouslySetInnerHTML={{ __html: SCOPED_CSS }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Nav onSizeGuide={() => setGuideOpen(true)} />
 
       {/* ── HERO CAROUSEL ── */}
@@ -185,9 +220,12 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
           </nav>
 
           <div className="mt-auto max-w-2xl pb-10">
-            <h1 className="track-tighter text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3.25rem]">{f.name}</h1>
+            <h1 className="track-tighter text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3rem]">{f.name}</h1>
+            {f.formerly && <p className="mt-1.5 text-[0.9375rem] font-bold text-warm-white/70">Formerly {f.formerly}</p>}
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-              <span className="flex items-center gap-2 text-warm-white"><Stars /><span className="font-bold">{f.rating}</span><span className="text-warm-white/70">({f.reviews} reviews)</span></span>
+              <a href={reviewsUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-warm-white transition-colors hover:text-terracotta">
+                <Stars /><span className="font-bold underline-offset-4 hover:underline">Read our Google reviews</span>
+              </a>
               <a href={`https://www.google.com/maps?q=${encodeURIComponent(f.mapQuery)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 font-bold text-warm-white/90 transition-colors hover:text-terracotta">
                 <MapPin className="h-4 w-4" strokeWidth={2} aria-hidden />{f.address}, {f.city}
               </a>
@@ -201,12 +239,11 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                   <img src={g.thumb} alt={g.alt} className="h-full w-full object-cover" />
                 </button>
               ))}
-              <button onClick={() => setLightbox(0)} className="ml-1 text-[0.8125rem] font-bold text-warm-white/90 underline-offset-4 transition-colors hover:text-terracotta hover:underline">View all photos</button>
+              <button onClick={() => setLightbox(0)} className="ml-1 text-[0.8125rem] font-bold text-warm-white underline-offset-4 transition-colors hover:text-terracotta hover:underline">View all photos</button>
             </div>
           </div>
         </div>
 
-        {/* slide controls */}
         {n > 1 && (
           <>
             <button onClick={() => go(-1)} aria-label="Previous photo" className="btn-spring absolute left-4 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 text-warm-white backdrop-blur hover:bg-black/70"><ChevronLeft className="h-6 w-6" aria-hidden /></button>
@@ -223,19 +260,18 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       {/* ── PROMO BANNER ── */}
       <div className="bg-orange text-warm-white">
         <div className="mx-auto flex max-w-content flex-wrap items-center justify-center gap-x-3 gap-y-1 px-5 py-3.5 text-center lg:px-16">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-warm-white/20 px-3 py-1 text-[0.75rem] font-black uppercase tracking-wide"><Sparkles className="h-3.5 w-3.5" aria-hidden />Limited time</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-warm-white/25 px-3 py-1 text-[0.75rem] font-black uppercase tracking-wide"><Sparkles className="h-3.5 w-3.5" aria-hidden />Limited time</span>
           <span className="text-[1.0625rem] font-black tracking-tight lg:text-[1.25rem]">{f.promo ?? '50% off your first month'}</span>
-          <span className="text-[0.9375rem] font-light text-warm-white/85">when you rent online</span>
+          <span className="text-[0.9375rem] font-semibold text-warm-white">when you rent online</span>
         </div>
       </div>
 
-      {/* ── MAIN: units + sidebar ── */}
+      {/* ── MAIN: spaces + sidebar ── */}
       <section className="mx-auto max-w-content px-5 py-12 lg:px-16 lg:py-16">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:gap-12">
-          {/* units */}
           <div>
             <h2 className="track-tight text-[1.75rem] font-black text-black lg:text-[2.25rem]">Choose your space</h2>
-            <p className="mt-2 text-[1.0625rem] leading-relaxed text-stone">Reserve online in minutes — lock in the online rate, move in when you like. No long-term commitment.</p>
+            <p className="mt-2 text-[1.0625rem] leading-relaxed text-stone">Reserve online in minutes — lock in the online rate, move in when you like. Month-to-month, no deposit, no long-term commitment.</p>
 
             {f.groups.map((group) => (
               <div key={group.category} className="mt-10">
@@ -256,9 +292,10 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                                 <h4 className="text-[1.375rem] font-black tracking-[-0.02em] text-black">{u.size}</h4>
                                 <p className="mt-0.5 text-[0.8125rem] text-stone">{u.sqft} sq ft · {u.fits}</p>
                               </div>
-                              <div className="text-right">
-                                <p className="text-[0.6875rem] font-bold uppercase tracking-wide text-stone">Walk-in <span className="line-through">${u.walkIn}</span></p>
-                                <p className="leading-none"><span className="text-[1.625rem] font-black text-orange">${u.online}</span><span className="text-[0.8125rem] font-bold text-stone">/mo</span></p>
+                              <div className="shrink-0 text-right">
+                                <p className="text-[0.6875rem] font-bold uppercase tracking-wide text-stone">In store <span className="line-through">${u.walkIn}</span></p>
+                                <p className="leading-none"><span className="text-[1.625rem] font-black text-orange">${u.online}</span><span className="text-[0.8125rem] font-bold text-stone">/mo online</span></p>
+                                <p className="mt-1 text-[0.6875rem] font-bold text-[#5c8a52]">1st month ${Math.round(u.online / 2)}</p>
                               </div>
                             </div>
                             <div className="mt-3 flex min-h-[3.25rem] flex-wrap content-start gap-1.5">
@@ -266,7 +303,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                             </div>
                           </div>
                         </div>
-                        <a href="#" className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></a>
+                        <button onClick={() => openReserve(u.size)} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>
                       </div>
                     )
                   })}
@@ -274,26 +311,20 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
               </div>
             ))}
 
-            <p className="mt-8 text-[0.8125rem] italic text-stone/70">Intro online rates shown. Live availability &amp; final pricing will load from the Tenant Inc reservation system.</p>
+            <p className="mt-8 text-[0.8125rem] italic text-stone/70">Online rates shown — final price is confirmed at checkout. First-month offer applies to new rentals on select sizes.</p>
           </div>
 
           {/* sidebar */}
           <aside className="flex flex-col gap-6 lg:sticky lg:top-6 lg:self-start">
-            {/* map + contact + socials */}
             <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-warm-white shadow-card">
-              <iframe title={`Map of ${f.name}`} src={`https://www.google.com/maps?q=${encodeURIComponent(f.mapQuery)}&output=embed`} className="h-44 w-full border-0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+              <iframe title={`Map of Journey.Storage ${f.short}, ${f.address}`} src={`https://www.google.com/maps?q=${encodeURIComponent(f.mapQuery)}&output=embed`} className="h-44 w-full border-0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
               <div className="p-5">
                 <p className="flex items-start gap-2 text-[0.9375rem] font-bold text-black"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange" strokeWidth={2} aria-hidden /><span>{f.address}<br /><span className="font-normal text-stone">{f.city}</span></span></p>
+                <p className="mt-3 text-[0.8125rem] text-stone"><span className="font-bold text-charcoal">Gate access:</span> 24/7 · <span className="font-bold text-charcoal">Office:</span> Mon–Fri 8:30–5, Sat 8:30–3</p>
                 <a href={f.tel} className="btn-spring shadow-cta mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-3 font-bold text-warm-white"><Phone className="h-4 w-4" strokeWidth={2} aria-hidden />Call {f.phone}</a>
-                <div className="mt-4 flex items-center justify-center gap-3 border-t border-black/[0.06] pt-4">
-                  {socials.map(({ Icon, href, label }) => (
-                    <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="btn-spring grid h-10 w-10 place-items-center rounded-full bg-charcoal text-warm-white hover:bg-orange"><Icon className="h-5 w-5" /></a>
-                  ))}
-                </div>
               </div>
             </div>
 
-            {/* size guide button — opens board, does not navigate */}
             <button onClick={() => setGuideOpen(true)} className="btn-spring flex w-full items-center justify-between gap-3 rounded-2xl border border-black/[0.06] bg-warm-white p-5 text-left shadow-card hover:border-orange/40">
               <span className="flex items-center gap-3">
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-orange/[0.12] text-orange"><Ruler className="h-5 w-5" strokeWidth={2} aria-hidden /></span>
@@ -302,7 +333,6 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
               <ChevronRight className="h-5 w-5 shrink-0 text-orange" aria-hidden />
             </button>
 
-            {/* amenities */}
             <div className="rounded-2xl border border-black/[0.06] bg-warm-white p-5 shadow-card">
               <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Amenities</p>
               <ul className="mt-3 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
@@ -310,7 +340,6 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
               </ul>
             </div>
 
-            {/* FAQ dropdown */}
             <div className="rounded-2xl border border-black/[0.06] bg-warm-white p-5 shadow-card">
               <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Common questions</p>
               <div className="mt-2 divide-y divide-black/[0.07]">
@@ -330,8 +359,8 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       <section className="border-y border-black/[0.06] bg-warm-white">
         <div className="mx-auto max-w-content px-5 py-14 lg:px-16 lg:py-20">
           <div className="max-w-3xl">
-            <span className="text-[0.8125rem] font-bold uppercase tracking-[0.2em] text-orange">About this facility</span>
-            <h2 className="track-tight mt-3 text-[1.75rem] font-black leading-tight text-black lg:text-[2.25rem]">Self storage in Granbury, done right.</h2>
+            <span className="text-[0.8125rem] font-bold uppercase tracking-[0.2em] text-orange">About this location</span>
+            <h2 className="track-tight mt-3 text-[1.75rem] font-black leading-tight text-black lg:text-[2.25rem]">Self storage on {f.short}, Granbury.</h2>
             <div className="mt-5 space-y-4 text-[1.0625rem] leading-relaxed text-stone">{f.about.map((p, i) => (<p key={i}>{p}</p>))}</div>
           </div>
         </div>
@@ -344,20 +373,19 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
           <h2 className="track-tighter text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3rem]">Space to move on.</h2>
           <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] font-light text-warm-white/70 lg:text-[1.25rem]">Reserve your space at {f.short} today — clear pricing, month-to-month, rented online in minutes.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <a href="#" className="btn-spring shadow-cta rounded-xl bg-orange px-8 py-3.5 font-bold text-warm-white">Rent a space</a>
+            <button onClick={() => openReserve('')} className="btn-spring shadow-cta rounded-xl bg-orange px-8 py-3.5 font-bold text-warm-white">Reserve a space</button>
             <a href={f.tel} className="btn-spring rounded-xl border-2 border-warm-white/70 px-8 py-3.5 font-bold text-warm-white hover:bg-warm-white hover:text-black">Call us</a>
           </div>
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer className="bg-charcoal text-warm-white/70">
-        <div className="mx-auto flex max-w-content flex-col items-center justify-between gap-4 px-5 py-8 text-[0.875rem] sm:flex-row lg:px-16">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/brand/logo-white-TM.svg" alt="Journey.Storage™" className="w-[140px]" style={{ height: 'auto' }} />
-          <span>Space to move on.</span>
-        </div>
-      </footer>
+      <RentFooter />
+
+      {/* ── STICKY MOBILE CTA ── */}
+      <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-black/10 bg-warm-white/95 p-3 backdrop-blur lg:hidden">
+        <a href={f.tel} className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-black/85 py-3 font-bold text-black"><Phone className="h-4 w-4" strokeWidth={2} aria-hidden />Call</a>
+        <button onClick={() => openReserve('')} className="shadow-cta flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-orange py-3 font-bold text-warm-white">Reserve a space</button>
+      </div>
 
       {/* ── SIZE GUIDE BOARD (modal) ── */}
       {guideOpen && (
@@ -407,6 +435,42 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={f.gallery[lightbox].full} alt={f.gallery[lightbox].alt} className="relative z-10 max-h-[85vh] max-w-[92vw] rounded-xl object-contain shadow-2xl" />
           <div className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full bg-black/50 px-4 py-1.5 text-[0.8125rem] font-bold text-warm-white backdrop-blur">{lightbox + 1} / {gLen}</div>
+        </div>
+      )}
+
+      {/* ── RESERVE / HOLD MODAL ── */}
+      {reserveSize !== null && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setReserveSize(null)} aria-hidden />
+          <div role="dialog" aria-modal="true" aria-label="Reserve a space" className="relative w-full max-w-md overflow-hidden rounded-2xl border border-black/[0.06] bg-warm-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)]">
+            <button onClick={() => setReserveSize(null)} aria-label="Close" className="btn-spring absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-black/[0.06] text-black hover:bg-black/[0.12]"><X className="h-5 w-5" aria-hidden /></button>
+            {reserveStatus === 'done' ? (
+              <div className="px-6 py-10 text-center">
+                <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-sage-green/20 text-[#5c8a52]"><Check className="h-7 w-7" strokeWidth={3} aria-hidden /></div>
+                <h3 className="track-tight mt-4 text-[1.375rem] font-black text-black">You&rsquo;re on the list</h3>
+                <p className="mt-2 text-[0.9375rem] leading-relaxed text-stone">Thanks! We&rsquo;ll hold a {reserveSize || 'space'} at {f.short} and reach out shortly to finish your rental. Need it now? Call <a href={f.tel} className="font-bold text-orange">{f.phone}</a>.</p>
+                <button onClick={() => setReserveSize(null)} className="btn-spring shadow-cta mt-6 rounded-xl bg-orange px-6 py-2.5 font-bold text-warm-white">Done</button>
+              </div>
+            ) : (
+              <form onSubmit={submitReserve} className="px-6 py-6">
+                <h3 className="track-tight text-[1.375rem] font-black text-black">Reserve your space</h3>
+                <p className="mt-1 text-[0.875rem] text-stone">{reserveSize ? `Hold a ${reserveSize} at ${f.short}` : `Hold a space at ${f.short}`} — no payment now, no obligation.</p>
+                <input type="hidden" name="size" value={reserveSize ?? ''} />
+                <div className="hidden"><label>Leave blank<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
+                <div className="mt-5 space-y-3">
+                  <input name="name" required placeholder="Full name" className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 text-[0.9375rem] text-black placeholder:text-stone focus:border-orange focus:outline-none" />
+                  <input name="phone" required type="tel" placeholder="Phone" className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 text-[0.9375rem] text-black placeholder:text-stone focus:border-orange focus:outline-none" />
+                  <input name="email" required type="email" placeholder="Email" className="w-full rounded-xl border border-black/15 bg-white px-4 py-3 text-[0.9375rem] text-black placeholder:text-stone focus:border-orange focus:outline-none" />
+                  <label className="block text-[0.8125rem] font-bold text-stone">Preferred move-in date
+                    <input name="moveIn" type="date" className="mt-1 w-full rounded-xl border border-black/15 bg-white px-4 py-3 text-[0.9375rem] font-normal text-black focus:border-orange focus:outline-none" />
+                  </label>
+                </div>
+                {reserveStatus === 'error' && <p className="mt-3 text-[0.8125rem] font-bold text-[#D94A4A]">Something went wrong — please call {f.phone} or try again.</p>}
+                <button type="submit" disabled={reserveStatus === 'sending'} className="btn-spring shadow-cta mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-3 font-bold text-warm-white disabled:opacity-60">{reserveStatus === 'sending' ? 'Sending…' : 'Hold this space'}</button>
+                <p className="mt-3 text-center text-[0.75rem] text-stone">We&rsquo;ll call or text to finish your rental. By submitting you agree to be contacted about your reservation.</p>
+              </form>
+            )}
+          </div>
         </div>
       )}
     </div>
