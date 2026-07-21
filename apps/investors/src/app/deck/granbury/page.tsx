@@ -961,10 +961,6 @@ function SlideInvestmentSummary() {
               <div className="text-[1.1rem] font-black leading-tight text-warm-white mb-2">We do cost segregation.</div>
               <div className="text-[0.85rem] leading-[1.4] text-warm-white/75">Ask about accelerated<br />&ldquo;bonus&rdquo; depreciation</div>
             </div>
-            <div className="rounded-xl border border-orange/40 px-5 py-3 text-center">
-              <div className="text-[0.65rem] font-bold uppercase tracking-[0.15em] text-deck-text/50 mb-1">Investment Window</div>
-              <div className="text-sm font-bold text-orange">Until May 15, 2026</div>
-            </div>
           </div>
         </div>
       </div>
