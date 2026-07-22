@@ -209,7 +209,7 @@ body:not(.authed) .topbar,body:not(.authed) #page{display:none}
 </div>
 
 <div class="topbar">
-  <div class="wordmark">JOURNEY<span>.STORAGE</span></div>
+  <a class="wordmark" href="index.html" title="Back to Teams" style="text-decoration:none">JOURNEY<span>.STORAGE</span></a>
   <nav class="nav" id="nav"></nav>
   <div class="top-right">
     <span id="whoami" style="font-size:12px;color:var(--ink3)"></span>
@@ -304,7 +304,7 @@ function followUpItems(){
 
 /* ================= VIEWS ================= */
 function pagehead(kicker,titleHtml,sub,extra=''){
-  return `<div class="crumb"><a onclick="go('dash')">Teams</a> › Investors</div>
+  return `<div class="crumb"><a href="index.html">Teams</a> › <a onclick="go('dash')">Investors</a></div>
   <div class="pagehead"><div><div class="kicker">${kicker}</div><h1 class="pagetitle">${titleHtml}</h1><div class="pagesub">${sub}</div></div>${extra}</div>`;
 }
 

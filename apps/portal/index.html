@@ -643,12 +643,13 @@
     const contentStreams=[...new Set(allProjects.filter(p=>CONTENT_STAGES.includes(stageOf(p))).map(p=>streamOf(p)).filter(Boolean))];
     const hasMarketing=contentStreams.length>0;
     const others=depts.filter(d=>!isContentDept(d));
+    const showInvestors=canAccounting();
     let html='<div class="page-head"><div>'+
       '<div class="kicker">Journey.storage · Internal</div>'+
       '<h2>Your <b>Teams</b></h2>'+
       '<p class="sub">Open a team to see the work inside it.</p>'+
       '</div><button class="btn-accent" id="newDeptBtn">+ New team</button></div>';
-    if(!hasMarketing && !others.length) html+='<div class="empty">No teams yet.</div>';
+    if(!hasMarketing && !others.length && !showInvestors) html+='<div class="empty">No teams yet.</div>';
     else{
       html+='<div class="proj-grid">';
       if(hasMarketing){
@@ -663,11 +664,18 @@
           '<div class="tag">Team</div><h3>'+esc(d.name)+'</h3>'+
           '<p>'+esc(d.description||'')+'</p>'+
           '<div class="cnt">'+n+' project'+(n===1?'':'s')+'</div></div>'; });
+      if(showInvestors){
+        html+='<div class="dept-card" id="invCard" style="border-color:#4a3526;">'+
+          '<div class="tag">Team · Private</div><h3>Investors</h3>'+
+          '<p>Capital-raise CRM — deal pipeline, follow-ups, and thank-yous for Granbury &amp; Springfield. Visible only to you and Jonah.</p>'+
+          '<div class="cnt">Open workspace ↗</div></div>';
+      }
       html+='</div>';
     }
     $('#view').innerHTML=html;
     const nd=$('#newDeptBtn'); if(nd) nd.addEventListener('click', openNewDepartment);
     const mc=$('#mktCard'); if(mc) mc.addEventListener('click', showMarketing);
+    const iv=$('#invCard'); if(iv) iv.addEventListener('click', ()=>{ window.location.href='investors.html'; });
     document.querySelectorAll('.dept-del').forEach(b=> b.addEventListener('click', async e=>{
       e.stopPropagation();
       const nm=b.dataset.name, cnt=parseInt(b.dataset.count||'0',10);
