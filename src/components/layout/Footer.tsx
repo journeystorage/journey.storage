@@ -31,6 +31,7 @@ function IconFacebook({ size = 18 }: { size?: number }) {
 const companyLinks = [
   { label: 'About', action: () => scrollToSection(sectionIds.about) },
   { label: 'How it works', action: () => scrollToSection(sectionIds.howItWorks) },
+  { label: 'Manage With Us', href: '/managed' },
   { label: 'Blog', href: '#', title: 'Coming soon' },
   { label: 'Locations', action: () => scrollToSection(sectionIds.locations) },
 ]
@@ -73,6 +74,12 @@ export default function Footer() {
             <p className="mt-3 text-body-sm font-light italic text-warm-white/30">
               Space to move on.
             </p>
+            <a
+              href="mailto:hello@journey.storage"
+              className="mt-4 block text-body-sm text-warm-white/40 transition-colors duration-200 hover:text-orange"
+            >
+              hello@journey.storage
+            </a>
             <div className="mt-5 flex gap-4">
               {socialLinks.map(({ label, href, Icon }) => (
                 <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}

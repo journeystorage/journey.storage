@@ -50,6 +50,7 @@ export const socialUrls = {
 // ─── Nav Configuration ───
 export const navLinks = [
   { label: 'Locations', href: `#${sectionIds.locations}` },
+  { label: 'Manage With Us', href: '/managed' },
   { label: 'Size Guide', href: '/size-guide' },
   { label: 'About Us', href: `#${sectionIds.about}` },
 ] as const
