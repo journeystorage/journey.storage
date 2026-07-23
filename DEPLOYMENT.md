@@ -71,6 +71,27 @@ Each app is deployed as a **separate Hostinger instance** from the same GitHub r
 
 > **IMPORTANT:** Investors uses **Custom** preset (not "Next.js" preset) because it needs an explicit Start command to run the standalone server. Same rationale as consulting.
 
+### Managed (managed.journey.storage)
+
+| Field              | Value                      |
+|--------------------|----------------------------|
+| Framework preset   | Custom                     |
+| Branch             | main                       |
+| Node version       | 20                         |
+| Install command    | `npm ci`                   |
+| Build command      | `npm run build:managed`    |
+| Start command      | `npm run start -- -p $PORT`|
+
+**How it works:** identical to consulting/investors. `build:managed` replaces `src/`, `public/`, and `next.config.ts` at the root with managed's files (which include `output: 'standalone'`), then runs `next build`, then copies `public/` and `.next/static/` into `.next/standalone/`. The start command runs `node .next/standalone/server.js` — single lightweight process.
+
+**Env vars required on the instance** (lead form posts to its own `/api/waitlist`, inserts with `source_app: 'managed'`):
+- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+- `RESEND_API_KEY`, `LEAD_NOTIFY_FROM`, `LEAD_NOTIFY_TO` (optional CC: `LEAD_NOTIFY_ALWAYS_CC`)
+
+> **IMPORTANT:** Custom preset (not "Next.js") — same rationale as consulting.
+
+> **Relationship to the main site:** the page originally shipped at `journey.storage/managed`. Once this instance is live, the main site's `/managed` route becomes a 301 redirect to `https://managed.journey.storage` (see changelog) — do not maintain two live copies.
+
 ### Springfield (SGF11 deck)
 
 | Field              | Value                              |
@@ -119,6 +140,8 @@ These files control deployment. Changing them incorrectly **will break productio
 | `package.json` `"build"` script | Main site build | **NO** — must be plain `next build` |
 | `package.json` `"build:consulting"` script | Consulting build | Only if you understand the file replacement flow |
 | `package.json` `"build:investors"` script | Investors build | Only if you understand the file replacement flow |
+| `package.json` `"build:managed"` script | Managed build | Only if you understand the file replacement flow |
+| `apps/managed/next.config.ts` | Managed config (has standalone) | Only if you understand the build:managed flow |
 | `apps/investors/next.config.ts` | Investors config (has standalone) | Only if you understand the build:investors flow |
 | `package.json` `"start"` script | Used by consulting only | **NO** — main site ignores this (Framework preset) |
 | `package.json` `"build:springfield"` script | Springfield build (no-op) | Safe to edit only if you understand the static-export flow |
@@ -235,6 +258,14 @@ npm run dev:springfield
 ---
 
 ## Changelog
+
+### 2026-07-22 — Managed app (managed.journey.storage)
+- Created `apps/managed/` — standalone app serving the Journey Managed third-party-management page at `managed.journey.storage` (mirrors consulting's structure: own `src/`, trimmed `public/`, standalone `next.config.ts`)
+- Added `build:managed` + `dev:managed` (port 3005, `--webpack`) to root `package.json`
+- Own `/api/waitlist` route with `source_app: 'managed'` — instance needs its own Supabase/Resend env vars (see Managed section above)
+- All nav/footer links on the subdomain are absolute URLs back to the ecosystem; facility cards link to `journey.storage/rentaspace/*`
+- Rollout sequence: (1) this scaffold is inert until a Hostinger instance uses `build:managed`; (2) create instance + subdomain DNS + env vars; (3) once live, flip main site's `/managed` to a 301 → `https://managed.journey.storage` and update nav/sitemap
+- ⚠ This is a 5th git-deploy instance — every push now triggers 5 simultaneous builds; watch the 120-process limit (see "Deploy can cause 503")
 
 ### 2026-04-25 — Tenant Lab (API integration testing)
 - Created `apps/tenant-lab/` — local-only app for testing Tenant Inc. / Nectar API integration
