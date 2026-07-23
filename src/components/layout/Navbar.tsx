@@ -12,10 +12,10 @@ export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const isHome = pathname === '/'
-  // Pages that open with a full-bleed dark photographic hero want the same
-  // transparent-over-dark nav treatment as home (white logo/links at the top,
-  // solid black once scrolled) rather than the default solid warm-white bar.
-  const darkHero = isHome || pathname === '/managed'
+  // Home opens with a full-bleed dark hero, so the nav is transparent over it
+  // (white logo/links at the top, solid black once scrolled). Every other route
+  // gets the default solid warm-white bar.
+  const darkHero = isHome
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)

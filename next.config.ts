@@ -40,6 +40,14 @@ const nextConfig: NextConfig = {
     async headers() {
         return [{ source: '/:path*', headers: securityHeaders }]
     },
+    // Journey Managed now lives at its own subdomain. Preserve any existing or
+    // indexed links to the old /managed path with a permanent redirect.
+    async redirects() {
+        return [
+            { source: '/managed', destination: 'https://managed.journey.storage', permanent: true },
+            { source: '/managed/:path*', destination: 'https://managed.journey.storage/:path*', permanent: true },
+        ]
+    },
 }
 
 export default nextConfig

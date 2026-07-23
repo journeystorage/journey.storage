@@ -35,6 +35,7 @@ export const sectionIds = {
 export const externalUrls = {
   investors: 'https://direct.journey.storage',
   consulting: 'https://advisory.journey.storage',
+  managed: 'https://managed.journey.storage',
   mainSite: 'https://journey.storage',
 } as const
 
@@ -50,13 +51,13 @@ export const socialUrls = {
 // ─── Nav Configuration ───
 export const navLinks = [
   { label: 'Locations', href: `#${sectionIds.locations}` },
-  { label: 'Manage With Us', href: '/managed' },
   { label: 'Size Guide', href: '/size-guide' },
   { label: 'About Us', href: `#${sectionIds.about}` },
 ] as const
 
 export const ecosystemDropdownLinks = [
   { label: 'Storage', description: 'Self-storage built for life in motion', href: externalUrls.mainSite, current: true },
+  { label: 'Managed', description: 'Third-party management', href: externalUrls.managed },
   { label: 'Advisory', description: 'Consulting & operations', href: externalUrls.consulting },
   { label: 'Direct', description: 'Investment platform', href: externalUrls.investors },
 ] as const

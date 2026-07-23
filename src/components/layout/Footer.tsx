@@ -31,7 +31,6 @@ function IconFacebook({ size = 18 }: { size?: number }) {
 const companyLinks = [
   { label: 'About', action: () => scrollToSection(sectionIds.about) },
   { label: 'How it works', action: () => scrollToSection(sectionIds.howItWorks) },
-  { label: 'Manage With Us', href: '/managed' },
   { label: 'Blog', href: '#', title: 'Coming soon' },
   { label: 'Locations', action: () => scrollToSection(sectionIds.locations) },
 ]
