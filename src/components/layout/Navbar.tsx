@@ -12,6 +12,10 @@ export default function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const isHome = pathname === '/'
+  // Pages that open with a full-bleed dark photographic hero want the same
+  // transparent-over-dark nav treatment as home (white logo/links at the top,
+  // solid black once scrolled) rather than the default solid warm-white bar.
+  const darkHero = isHome || pathname === '/managed'
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -72,8 +76,8 @@ export default function Navbar() {
         className={[
           'fixed top-0 left-0 right-0 z-50',
           'transition-all duration-300 ease-out',
-          scrolled || !isHome
-            ? isHome
+          scrolled || !darkHero
+            ? darkHero
               ? 'bg-black/95 backdrop-blur-[12px] border-b border-white/[0.04]'
               : 'bg-warm-white border-b border-black/[0.06]'
             : 'bg-transparent border-b border-transparent',
@@ -90,7 +94,7 @@ export default function Navbar() {
             aria-label="Scroll to top"
           >
             <Image
-              src={isHome ? '/images/brand/logo-white-TM.svg' : '/images/brand/logo-dark-TM.svg'}
+              src={darkHero ? '/images/brand/logo-white-TM.svg' : '/images/brand/logo-dark-TM.svg'}
               alt="Journey.Storage™ logo"
               width={180}
               height={40}
@@ -106,7 +110,7 @@ export default function Navbar() {
               <button
                 key={link.label}
                 onClick={() => handleNavClick(link.href)}
-                className={`text-body-sm font-bold transition-opacity duration-150 hover:opacity-70 cursor-pointer ${isHome ? 'text-warm-white' : 'text-black'}`}
+                className={`text-body-sm font-bold transition-opacity duration-150 hover:opacity-70 cursor-pointer ${darkHero ? 'text-warm-white' : 'text-black'}`}
               >
                 {link.label}
               </button>
@@ -114,7 +118,7 @@ export default function Navbar() {
 
             {/* Blog — Phase 2 */}
             <span
-              className={`text-body-sm font-bold cursor-default ${isHome ? 'text-warm-white/40' : 'text-black/30'}`}
+              className={`text-body-sm font-bold cursor-default ${darkHero ? 'text-warm-white/40' : 'text-black/30'}`}
               title="Coming soon"
             >
               Blog
@@ -130,7 +134,7 @@ export default function Navbar() {
                 onClick={() => setDropdownOpen((prev) => !prev)}
                 aria-expanded={dropdownOpen}
                 aria-haspopup="true"
-                className={`flex items-center gap-1 text-body-sm font-bold transition-opacity duration-150 hover:opacity-70 cursor-pointer ${isHome ? 'text-warm-white' : 'text-black'}`}
+                className={`flex items-center gap-1 text-body-sm font-bold transition-opacity duration-150 hover:opacity-70 cursor-pointer ${darkHero ? 'text-warm-white' : 'text-black'}`}
               >
                 Ecosystem
                 <ChevronDown
@@ -211,7 +215,7 @@ export default function Navbar() {
             onClick={() => setMobileOpen(true)}
             className={[
               'lg:hidden cursor-pointer rounded-lg p-2 transition-all duration-300',
-              isHome
+              darkHero
                 ? scrolled
                   ? 'text-warm-white'
                   : 'text-warm-white bg-black/40 backdrop-blur-sm'
