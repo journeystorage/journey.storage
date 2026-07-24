@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Plus, Minus } from 'lucide-react'
 import ScrollReveal from '@/components/ui/ScrollReveal'
+import { renderBrand } from '@/components/ui/BrandMark'
 
 const faqs = [
   {
@@ -96,7 +97,7 @@ export default function FAQ() {
                           : 'text-black/80 group-hover:text-black'
                       }`}
                     >
-                      {faq.q}
+                      {renderBrand(faq.q)}
                     </span>
                     <span className="shrink-0 mt-0.5">
                       {isOpen ? (
@@ -109,7 +110,7 @@ export default function FAQ() {
                   <div className={`faq-content ${isOpen ? 'open' : ''}`}>
                     <div>
                       <p className="pb-5 text-body-sm leading-[1.7] text-charcoal/70 pr-8">
-                        {faq.a}
+                        {renderBrand(faq.a)}
                       </p>
                     </div>
                   </div>

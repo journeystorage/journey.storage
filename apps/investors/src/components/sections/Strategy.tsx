@@ -1,4 +1,5 @@
 import ScrollReveal from '@/components/ui/ScrollReveal'
+import { BrandMark, renderBrand } from '@/components/ui/BrandMark'
 
 const pillars = [
   {
@@ -72,10 +73,10 @@ export default function Strategy() {
         <ScrollReveal delay={160}>
           <div className="max-w-[680px] mb-16 lg:mb-20">
             <p className="text-body leading-[1.7] text-warm-white/60">
-              Journey.Direct&trade; doesn&apos;t buy one deal and move on.
-              We&apos;re building a regional portfolio. Programmatically.
+              <BrandMark brand="Direct" />{' '}doesn&apos;t buy one deal and move on.
+              We&apos;re building a large-scale portfolio. Programmatically.
               As the portfolio grows, so does its strategic value.
-              Regional portfolios attract a different class of buyer,
+              Large-scale portfolios attract a different class of buyer,
               and a different pricing structure, than individual assets sold piecemeal.
               <strong className="text-warm-white/80"> This is the long game.</strong>
             </p>
@@ -108,7 +109,7 @@ export default function Strategy() {
                         {pillar.subtitle}
                       </p>
                       <p className="mt-3 text-body-sm leading-[1.6] text-warm-white/45">
-                        {pillar.desc}
+                        {renderBrand(pillar.desc)}
                       </p>
                     </div>
                   </div>
@@ -159,7 +160,7 @@ export default function Strategy() {
               to buy on the other side of it.
             </p>
             <p className="text-body-sm leading-[1.7] text-warm-white/65 mt-2 font-bold not-italic">
-              That&apos;s why we built Journey.Direct&trade;.
+              That&apos;s why we built <BrandMark brand="Direct" />.
             </p>
           </div>
         </ScrollReveal>

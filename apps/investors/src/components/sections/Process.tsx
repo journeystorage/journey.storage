@@ -4,12 +4,12 @@ const steps = [
   {
     number: '01',
     title: 'Explore',
-    desc: 'Review the platform thesis, operator track record, and current opportunities on this site. Get a clear picture of how we invest and why.',
+    desc: 'Review the platform thesis, operator track record, and our current opportunities. Get a clear picture of how we invest and why.',
   },
   {
     number: '02',
     title: 'Connect',
-    desc: 'Book a call with our team to discuss your investment objectives, answer questions, and determine alignment. No pressure. No pitch until you\u2019re ready.',
+    desc: 'Book a call with our team to discuss your investment objectives, get your questions answered, and determine alignment. No pressure. No pitch until you\u2019re ready.',
   },
   {
     number: '03',

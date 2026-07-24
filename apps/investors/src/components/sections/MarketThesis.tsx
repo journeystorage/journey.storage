@@ -56,7 +56,7 @@ export default function MarketThesis() {
               >
                 A new golden age of self-storage{' '}
                 <br className="hidden lg:block" />
-                is starting.
+                is beginning.
               </h2>
             </ScrollReveal>
 
@@ -158,7 +158,7 @@ export default function MarketThesis() {
 
         {/* Golden Age callout */}
         <ScrollReveal delay={360}>
-          <div className="mt-16 border-l-2 border-orange/40 pl-6 lg:pl-8 max-w-[800px]">
+          <div className="mt-16 border-l-2 border-orange/40 pl-6 lg:pl-8 max-w-[1000px] [text-wrap:pretty]">
             <p className="text-body leading-[1.7] text-warm-white/60 mb-4">
               In markets that weren&apos;t overdeveloped, the supply dip creates
               room to push revenue without new competition diluting demand.

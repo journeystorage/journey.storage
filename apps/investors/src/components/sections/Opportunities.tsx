@@ -25,11 +25,11 @@ const DEALS: Deal[] = [
     name: 'Granbury',
     location: 'Granbury, TX',
     photo: '/images/deals/granbury/granbury-2.jpg',
-    photoAlt: 'Granbury self-storage facility, 773 units across 17 buildings',
+    photoAlt: 'Granbury self-storage facility, 773 spaces across 17 buildings',
     imageClassName: 'object-cover scale-[1.4] object-[50%_70%] lg:object-[50%_30%]',
-    caption: '773-unit facility across 17 buildings in a supply-constrained Texas market.',
+    caption: '773-space facility across 17 buildings in a supply-constrained Texas market.',
     stats: [
-      { label: 'Units', value: '773' },
+      { label: 'Spaces', value: '773' },
       { label: 'NRSF', value: '126,000' },
       { label: 'Buildings', value: '17' },
     ],
@@ -47,7 +47,7 @@ const DEALS: Deal[] = [
     caption: '11-facility, 640,000 NRSF portfolio across the Springfield, Missouri MSA.',
     stats: [
       { label: 'Properties', value: '11' },
-      { label: 'Units', value: '3,766' },
+      { label: 'Spaces', value: '3,766' },
       { label: 'NRSF', value: '640,000' },
     ],
     types: ['Drive-up', 'Climate', 'Boat & RV', 'Retail'],
@@ -93,8 +93,8 @@ function DealCard({ deal, onBookCall }: { deal: Deal; onBookCall: () => void }) 
         <div className="px-6 lg:px-8 pt-6 lg:pt-8 pb-5 border-b border-warm-white/[0.06]">
           <div className="flex items-start justify-between flex-wrap gap-3">
             <div>
-              <span className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/40">
-                Journey.Storage&trade;
+              <span className="text-[0.7rem] font-black uppercase tracking-[0.2em] text-warm-white/55">
+                Journey.<span className="font-light">Storage</span>&trade;
               </span>
               <h3 className="mt-1 text-h3 font-black text-warm-white tracking-[-0.02em]">
                 {deal.name}
@@ -216,10 +216,10 @@ export default function Opportunities({ onBookCall }: OpportunitiesProps) {
 
         {/* Below cards */}
         <ScrollReveal delay={160 + DEALS.length * 80}>
-          <p className="mt-8 max-w-[600px] text-body-sm leading-[1.6] text-warm-white/45">
+          <p className="mt-8 max-w-[760px] text-body-sm leading-[1.6] text-warm-white/45">
             Each opportunity is presented in detail during a private call.
             We share the full platform overview: market analysis, financial
-            projections, and investment terms. Directly with qualified investors.
+            projections, and investment terms, directly with qualified investors.
           </p>
         </ScrollReveal>
       </div>
