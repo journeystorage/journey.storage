@@ -30,24 +30,24 @@ import { MOVEOUT_PROPERTIES } from '@/lib/moveout-properties'
 /* ── How move-out works ──────────────────────────────────────────── */
 const STEPS = [
   { Icon: PackageOpen, num: '01', title: 'Empty your space', body: 'Clear everything out and give it a quick sweep. Broom-clean, nothing left behind.' },
-  { Icon: Camera, num: '02', title: 'Snap a photo', body: 'Take one clear photo of the empty unit — that’s your proof, and your peace of mind.' },
-  { Icon: Send, num: '03', title: 'Submit your notice', body: 'Fill in your unit and date below, attach the photo, and send. Takes under a minute.' },
+  { Icon: Camera, num: '02', title: 'Snap a photo', body: 'Take one clear photo of the empty space — that’s your proof, and your peace of mind.' },
+  { Icon: Send, num: '03', title: 'Submit your notice', body: 'Fill in your space and date below, attach the photo, and send. Takes under a minute.' },
   { Icon: Lock, num: '04', title: 'Access turns off', body: 'We confirm in seconds. Billing stops, your access ends, and you’re officially done.' },
 ]
 
 /* ── What we need (reassurance cards) ────────────────────────────── */
 const NEED = [
-  { Icon: PackageOpen, title: 'A fully empty unit', body: 'Everything removed and swept clean. Leave it the way you’d want to find it.' },
+  { Icon: PackageOpen, title: 'A fully empty space', body: 'Everything removed and swept clean. Leave it the way you’d want to find it.' },
   { Icon: Camera, title: 'One clear photo', body: 'A single well-lit shot of the empty space is all the proof we need.' },
-  { Icon: ShieldCheck, title: 'Your unit details', body: 'Your facility and unit number so we can match your notice to the right space.' },
+  { Icon: ShieldCheck, title: 'Your space details', body: 'Your facility and space number so we can match your notice to the right space.' },
 ]
 
 /* ── FAQ ─────────────────────────────────────────────────────────── */
 const FAQS = [
-  { q: 'When does my billing stop?', a: 'The moment we confirm your unit is empty. Submit your move-out with a photo and you won’t be charged for the next cycle. No notice period, no trailing fees.' },
+  { q: 'When does my billing stop?', a: 'The moment we confirm your space is empty. Submit your move-out with a photo and you won’t be charged for the next cycle. No notice period, no trailing fees.' },
   { q: 'How much notice do I need to give?', a: 'None. Journey is month-to-month with no lock-in. Empty your space and submit whenever you’re ready — same day is fine.' },
   { q: 'What counts as "empty"?', a: 'Everything removed and the floor swept clean. No furniture, no boxes, no trash. Leave it broom-clean and you’re set.' },
-  { q: 'Why do you need a photo?', a: 'One clear photo of the empty unit lets us confirm and close out your space instantly — no in-person inspection, no waiting on an office visit. It protects you, too.' },
+  { q: 'Why do you need a photo?', a: 'One clear photo of the empty space lets us confirm and close out your space instantly — no in-person inspection, no waiting on an office visit. It protects you, too.' },
   { q: 'When does my access turn off?', a: 'Right after we confirm. Your digital access credential is deactivated automatically, so there’s nothing to return and no keys to drop off.' },
   { q: 'Can I change my mind after submitting?', a: 'If you haven’t moved out yet, just email us at hello@journey.storage and we’ll cancel the notice. Once access is turned off, you’d simply rent again — no penalty either way.' },
 ]
@@ -63,7 +63,7 @@ const moveOutSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Please enter a valid email'),
   phone: z.string().optional(),
-  unit: z.string().min(1, 'Unit number is required'),
+  unit: z.string().min(1, 'Space number is required'),
   moveout_date: z.string().min(1, 'Pick a move-out date'),
   notes: z.string().optional(),
 })
@@ -142,7 +142,7 @@ export default function MoveOutPage() {
       return
     }
     if (!photo) {
-      setPhotoError('A photo of your empty unit is required.')
+      setPhotoError('A photo of your empty space is required.')
       return
     }
     try {
@@ -262,10 +262,26 @@ export default function MoveOutPage() {
               <div className="h-px w-8 bg-orange" />
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-black leading-[0.95] tracking-tight">
-              Moving out is<br /><span className="font-light text-black/40">the easy part.</span>
+              Moving out is<br /><span className="font-light text-black/40">as simple as 1, 2, 3.</span>
             </h1>
             <p className="mx-auto mt-[18px] max-w-[560px] text-center text-[16px] md:text-[17px] leading-[1.6] text-black/65">
-              No notice periods, no office visits, no waiting on hold. Empty your space, snap a photo, submit it below, and your access turns off the moment we confirm.
+              No notice periods, no office visits, no waiting on hold.
+            </p>
+            <ol className="mx-auto mt-6 flex max-w-[520px] flex-col items-stretch gap-2.5 text-left sm:flex-row sm:justify-center sm:gap-3">
+              {['Sweep your empty space', 'Snap a photo', 'Submit it below'].map((step, i) => (
+                <li
+                  key={step}
+                  className="flex items-center gap-2.5 rounded-full border border-black/[0.07] bg-white/50 px-4 py-2.5 sm:flex-1"
+                >
+                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-orange text-[0.72rem] font-black text-warm-white">
+                    {i + 1}
+                  </span>
+                  <span className="text-[0.9rem] font-bold leading-tight text-black/75">{step}</span>
+                </li>
+              ))}
+            </ol>
+            <p className="mx-auto mt-6 max-w-[560px] text-center text-[16px] md:text-[17px] leading-[1.6] text-black/65">
+              Your access turns off the moment we confirm.
             </p>
             <div className="mt-9 flex flex-col items-center gap-4">
               <a
@@ -351,7 +367,7 @@ export default function MoveOutPage() {
                     Tell us you&apos;re moving out.
                   </h2>
                   <p className="mt-4 mx-auto max-w-[460px] text-[0.95rem] leading-[1.6] text-black/60">
-                    Pick your location, add your details and a photo of the empty unit, and we&apos;ll close out your space — usually within seconds.
+                    Pick your location, add your details and a photo of the empty space, and we&apos;ll close out your space — usually within minutes.
                   </p>
                 </div>
 
@@ -429,7 +445,7 @@ export default function MoveOutPage() {
                 <form onSubmit={handleSubmit(onSubmit)} className="mx-auto max-w-[460px] flex flex-col gap-4" noValidate>
                   <Input label="Full name" placeholder="Your full name" required {...register('name')} error={errors.name?.message} />
                   <Input label="Email" type="email" placeholder="you@email.com" required {...register('email')} error={errors.email?.message} />
-                  <Input label="Unit number" placeholder="e.g. B-114" required {...register('unit')} error={errors.unit?.message} />
+                  <Input label="Space number" placeholder="e.g. B-114" required {...register('unit')} error={errors.unit?.message} />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input label="Move-out date" type="date" required {...register('moveout_date')} error={errors.moveout_date?.message} />
                     <Input label="Phone" type="tel" placeholder="(555) 000-0000" {...register('phone')} error={errors.phone?.message} />
@@ -438,7 +454,7 @@ export default function MoveOutPage() {
                   {/* Photo dropzone */}
                   <div className="flex flex-col gap-2">
                     <label className="text-body-sm font-bold text-black">
-                      Photo of the empty unit<span className="text-orange ml-1" aria-hidden="true">*</span>
+                      Photo of the empty space<span className="text-orange ml-1" aria-hidden="true">*</span>
                     </label>
                     <input
                       ref={fileRef}
@@ -501,7 +517,7 @@ export default function MoveOutPage() {
                     </p>
                   )}
                   <p className="text-center text-[0.72rem] leading-[1.5] text-black/45">
-                    By submitting, you confirm the unit is empty and ready for us to close out.
+                    By submitting, you confirm the space is empty and ready for us to close out.
                   </p>
                 </form>
                 </div>
@@ -514,7 +530,7 @@ export default function MoveOutPage() {
                 </div>
                 <h3 className="text-3xl md:text-4xl font-black text-black tracking-tight">You&apos;re all set.</h3>
                 <p className="mx-auto mt-4 max-w-[420px] text-[0.95rem] leading-[1.6] text-black/60">
-                  We&apos;ve got your move-out notice. We&apos;ll confirm your unit is empty and turn off your access — you&apos;ll get an email the moment it&apos;s done.
+                  We&apos;ve got your move-out notice. We&apos;ll confirm your space is empty and turn off your access — you&apos;ll get an email the moment it&apos;s done.
                 </p>
                 <p className="mt-7 text-subhead font-light italic text-stone">Thanks for storing with Journey.</p>
                 <a

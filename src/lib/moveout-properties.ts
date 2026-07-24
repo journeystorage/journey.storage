@@ -24,7 +24,7 @@ export const MOVEOUT_PROPERTIES: MoveOutProperty[] = [
     phone: '(817) 579-0607',
     phoneHref: '+18175790607',
     image: '/images/granbury/temple-hall-aerial.jpg',
-    badge: '350+ units',
+    badge: '350+ spaces',
   },
   {
     slug: 'western-hills',
@@ -34,11 +34,11 @@ export const MOVEOUT_PROPERTIES: MoveOutProperty[] = [
     phone: '(817) 579-0607',
     phoneHref: '+18175790607',
     image: '/images/granbury/western-hills-aerial-2.jpg',
-    badge: '100+ units',
+    badge: '100+ spaces',
   },
   {
     slug: 'cleveland-road',
-    name: 'Cleveland Rd',
+    name: 'McCreary Rd',
     street: '3501 McCreary Rd',
     cityState: 'Granbury, TX 76049',
     phone: '(817) 579-0607',
