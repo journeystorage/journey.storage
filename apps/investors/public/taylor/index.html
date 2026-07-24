@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Direct Equity Source — Granbury Self-Storage</title>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-5BKX85NC');</script>
+  <!-- End Google Tag Manager -->
+  <!-- Google Analytics 4 (gtag.js) — same property as direct.journey.storage -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z02PE41PZ3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-Z02PE41PZ3');
+  </script>
+  <!-- End Google Analytics 4 -->
+  <link rel="icon" href="assets/favicon.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --bg:#0E1316;           /* cool near-black */
+      --bg-deep:#090C0E;
+      --surface:#151E22;
+      --line:rgba(233,241,242,0.08);
+      --text:#EAF1F2;
+      --mid:#8CA0A4;
+      --teal:#2FB6C1;          /* DES accent — from business card */
+      --teal-bright:#54D6DF;
+      --teal-deep:#0C5A61;
+      --teal-ink:#0A2C2F;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;background:var(--bg-deep)}
+    body{
+      margin:0;background:var(--bg-deep);color:var(--text);
+      font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;
+    }
+    .font-serif{font-family:'Source Serif 4',Georgia,serif}
+    .font-mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+    .teal{color:var(--teal)}
+    /* Grain */
+    .grain::before{
+      content:'';position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0.045;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat:repeat;background-size:256px 256px;
+    }
+    .slide{scroll-snap-align:start}
+    @media(min-width:1024px){
+      .deck{height:100dvh;scroll-snap-type:y mandatory;overflow-y:auto}
+      .slide{height:100dvh}
+    }
+    /* focus + interactive */
+    a:focus-visible,button:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+    .lift{transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s cubic-bezier(.22,1,.36,1),border-color .35s cubic-bezier(.22,1,.36,1)}
+    .lift:hover{transform:translateY(-3px);border-color:rgba(47,182,193,0.35);box-shadow:0 18px 40px -18px rgba(12,90,97,0.55)}
+    .cta{transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s cubic-bezier(.22,1,.36,1),background-color .3s}
+    .cta:hover{transform:translateY(-2px);box-shadow:0 16px 34px -14px rgba(47,182,193,0.6)}
+    .cta:active{transform:translateY(0)}
+    ::selection{background:rgba(47,182,193,0.3)}
+    /* nav dots */
+    .navdot{transition:transform .3s,background-color .3s}
+    .navdot:hover{transform:scale(1.4)}
+    /* number ticker underline */
+    .kbar{background:linear-gradient(to right,var(--teal),transparent)}
+  </style>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5BKX85NC" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<!-- Side nav -->
+<nav class="hidden lg:flex fixed right-6 top-1/2 -translate-y-1/2 z-50 flex-col gap-3" aria-label="Slide navigation">
+  <a href="#s1" class="navdot h-2.5 w-2.5 rounded-full" style="background:rgba(233,241,242,0.25)" aria-label="Cover"></a>
+  <a href="#s2" class="navdot h-2.5 w-2.5 rounded-full" style="background:rgba(233,241,242,0.25)" aria-label="Why DES"></a>
+  <a href="#s3" class="navdot h-2.5 w-2.5 rounded-full" style="background:rgba(233,241,242,0.25)" aria-label="Structure"></a>
+  <a href="#s5" class="navdot h-2.5 w-2.5 rounded-full" style="background:rgba(233,241,242,0.25)" aria-label="The Deal"></a>
+  <a href="#sg" class="navdot h-2.5 w-2.5 rounded-full" style="background:rgba(233,241,242,0.25)" aria-label="Portfolio"></a>
+  <a href="#s6" class="navdot h-2.5 w-2.5 rounded-full" style="background:rgba(233,241,242,0.25)" aria-label="Market"></a>
+  <a href="#s7" class="navdot h-2.5 w-2.5 rounded-full" style="background:rgba(233,241,242,0.25)" aria-label="Returns"></a>
+  <a href="#s8" class="navdot h-2.5 w-2.5 rounded-full" style="background:rgba(233,241,242,0.25)" aria-label="Contact"></a>
+</nav>
+
+<main class="deck overflow-x-hidden">
+
+<!-- ══════════════ SLIDE 1 — COVER ══════════════ -->
+<section id="s1" class="slide relative flex min-h-screen flex-col overflow-hidden" style="background:var(--bg)">
+  <div class="relative z-10 flex flex-1 flex-col p-3 lg:p-8">
+    <div class="grain relative flex flex-1 flex-col overflow-hidden rounded-2xl lg:rounded-3xl border" style="border-color:rgba(47,182,193,0.22)">
+      <img src="assets/temple-hall-aerial.jpg" alt="" class="absolute inset-0 h-full w-full object-cover" style="filter:grayscale(35%) contrast(1.12) brightness(0.42);object-position:50% 55%" />
+      <div class="absolute inset-0" style="background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(0,0,0,0.45),rgba(0,0,0,0.2))"></div>
+      <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(9,12,14,0.55),rgba(9,12,14,0.25) 40%,rgba(9,12,14,0.7))"></div>
+      <div class="absolute inset-0 mix-blend-overlay" style="background:radial-gradient(ellipse 55% 50% at 50% 42%,rgba(47,182,193,0.18),transparent)"></div>
+
+      <!-- DES wordmark -->
+      <div class="absolute top-5 left-5 lg:top-8 lg:left-10 z-10">
+        <img src="assets/des-logo.png" alt="Direct Equity Source" class="h-9 lg:h-11 w-auto" />
+      </div>
+      <div class="absolute top-5 right-5 lg:top-8 lg:right-10 z-10 hidden md:block text-right">
+        <div class="text-[0.55rem] uppercase tracking-[0.24em] text-[color:var(--mid)]">Operating Partner</div>
+        <img src="assets/logo-white-TM.svg" alt="Journey.Storage" width="112" height="28" class="opacity-70 mt-1.5 ml-auto" />
+      </div>
+
+      <div class="relative z-10 flex flex-1 flex-col items-center justify-center text-center px-6">
+        <span class="mb-3 text-[0.7rem] font-700 uppercase tracking-[0.32em] text-[color:var(--teal)]">— Private Placement · Self-Storage —</span>
+        <h1 class="font-serif font-600 leading-[0.9] tracking-[-0.015em] text-[color:var(--text)]" style="font-size:clamp(2.6rem,8vw,6.5rem)">
+          Granbury Portfolio
+        </h1>
+        <p class="mt-4 max-w-[640px] text-base md:text-lg leading-[1.7] text-[color:rgba(234,241,242,0.72)]">
+          An institutional-grade self-storage acquisition — sourced, structured, and presented by
+          <span class="font-600 text-[color:var(--text)]">Direct&nbsp;Equity&nbsp;Source</span>.
+        </p>
+        <div class="mt-7 flex flex-wrap items-center justify-center gap-3">
+          <span class="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-[0.7rem] font-700 uppercase tracking-[0.18em] text-[color:rgba(234,241,242,0.6)]" style="border-color:rgba(233,241,242,0.12);background:rgba(233,241,242,0.03)">For Accredited Investors</span>
+          <span class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[0.7rem] font-700 uppercase tracking-[0.18em] text-[color:var(--bg-deep)]" style="background:var(--teal)">$2.875M Raise · 2026</span>
+        </div>
+      </div>
+
+      <div class="relative z-10 flex items-center justify-center pb-6 lg:pb-8">
+        <span class="font-serif italic text-[0.95rem] text-[color:rgba(234,241,242,0.55)]">Institutional Expertise. Operational Discipline.</span>
+      </div>
+      <div class="absolute bottom-0 left-0 right-0 h-px z-10 hidden lg:block" style="background:linear-gradient(to right,transparent 5%,rgba(47,182,193,0.5) 30%,rgba(47,182,193,0.5) 70%,transparent 95%)"></div>
+    </div>
+  </div>
+  <div class="relative z-10 flex items-center justify-center px-5 py-4">
+    <span class="text-[0.6rem] uppercase tracking-[0.14em] text-[color:rgba(234,241,242,0.28)]">Privileged &amp; Confidential · Direct Equity Source · 2026</span>
+  </div>
+</section>
+
+<!-- ══════════════ SLIDE 2 — WHY DIRECT EQUITY SOURCE ══════════════ -->
+<section id="s2" class="slide grain relative flex min-h-screen flex-col overflow-hidden" style="background:var(--bg)">
+  <div class="absolute inset-0" style="background:radial-gradient(ellipse 60% 80% at 28% 50%,rgba(47,182,193,0.05),transparent)"></div>
+  <div class="relative z-10 flex-1 flex flex-col justify-center mx-auto w-full max-w-[1200px] px-5 py-10 md:px-8 lg:px-12">
+    <div class="flex items-start justify-between mb-8">
+      <div class="flex items-center gap-3">
+        <span class="h-px w-8" style="background:rgba(47,182,193,0.6)"></span>
+        <span class="text-[0.7rem] font-700 uppercase tracking-[0.25em] text-[color:var(--teal)]">The Opportunity</span>
+      </div>
+      <span class="font-serif text-[0.85rem] text-[color:var(--mid)]">Direct Equity Source</span>
+    </div>
+
+    <h2 class="font-serif font-600 leading-[1.05] tracking-[-0.01em] text-[color:var(--text)] mb-4" style="font-size:clamp(2rem,4.4vw,3.4rem)">
+      Own essential real assets.<br />
+      <span style="color:rgba(234,241,242,0.42)">Backed by an operator</span><br />
+      <span class="italic teal">who actually runs them.</span>
+    </h2>
+    <p class="max-w-[680px] text-[0.98rem] md:text-[1.05rem] leading-[1.7] text-[color:rgba(234,241,242,0.6)] mb-10">
+      Direct Equity Source gives its investors curated access to durable, income-producing real
+      assets — placed alongside a best-in-class operating partner, and managed by a team that
+      co-invests in every deal. You get direct exposure to hard assets without sourcing,
+      underwriting, or operating them yourself.
+    </p>
+
+    <div class="grid gap-8 lg:grid-cols-3 border-t pt-8" style="border-color:var(--line)">
+      <div>
+        <div class="h-[3px] w-8 rounded-full mb-3" style="background:var(--teal)"></div>
+        <h3 class="text-[1rem] font-700 leading-snug text-[color:var(--text)] mb-1.5">Curated, vetted access</h3>
+        <p class="text-[0.9rem] leading-[1.65] text-[color:rgba(234,241,242,0.55)]">We source and screen the deal, then present only what clears our institutional underwriting standard.</p>
+      </div>
+      <div>
+        <div class="h-[3px] w-8 rounded-full mb-3" style="background:var(--teal)"></div>
+        <h3 class="text-[1rem] font-700 leading-snug text-[color:var(--text)] mb-1.5">Aligned with the operator</h3>
+        <p class="text-[0.9rem] leading-[1.65] text-[color:rgba(234,241,242,0.55)]">Value is created through operations — lease-up, automation, revenue optimization — not market timing.</p>
+      </div>
+      <div>
+        <div class="h-[3px] w-8 rounded-full mb-3" style="background:var(--teal)"></div>
+        <h3 class="text-[1rem] font-700 leading-snug text-[color:var(--text)] mb-1.5">One relationship</h3>
+        <p class="text-[0.9rem] leading-[1.65] text-[color:rgba(234,241,242,0.55)]">You invest through Direct Equity Source and deal with us directly — from first call to final distribution.</p>
+      </div>
+    </div>
+
+    <div class="mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 border-t pt-6" style="border-color:var(--line)">
+      <div><span class="font-mono font-700 text-2xl text-[color:var(--text)]">$700M<span class="teal">+</span></span> <span class="text-[0.85rem] text-[color:var(--mid)] ml-1">in assets transacted</span></div>
+      <span class="hidden md:block h-6 w-px" style="background:var(--line)"></span>
+      <div><span class="font-mono font-700 text-2xl text-[color:var(--text)]">25<span class="teal">+</span> yrs</span> <span class="text-[0.85rem] text-[color:var(--mid)] ml-1">private-equity experience</span></div>
+      <span class="hidden md:block h-6 w-px" style="background:var(--line)"></span>
+      <div><span class="font-mono font-700 text-2xl text-[color:var(--text)]">GP &amp; LP</span> <span class="text-[0.85rem] text-[color:var(--mid)] ml-1">across asset classes</span></div>
+    </div>
+  </div>
+  <div class="relative z-10 flex items-center justify-center px-5 py-4"><span class="text-[0.6rem] uppercase tracking-[0.14em] text-[color:rgba(234,241,242,0.28)]">Privileged &amp; Confidential · Direct Equity Source · 2026</span></div>
+</section>
+
+<!-- ══════════════ SLIDE 3 — HOW YOUR INVESTMENT IS STRUCTURED ══════════════ -->
+<section id="s3" class="slide grain relative flex min-h-screen flex-col overflow-hidden" style="background:var(--bg)">
+  <div class="absolute inset-0" style="background:radial-gradient(ellipse 55% 60% at 60% 45%,rgba(47,182,193,0.055),transparent)"></div>
+  <div class="relative z-10 flex-1 flex flex-col justify-center mx-auto w-full max-w-[1200px] px-5 py-10 md:px-8 lg:px-12">
+    <div class="flex items-start justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <span class="h-px w-8" style="background:rgba(47,182,193,0.6)"></span>
+        <span class="text-[0.7rem] font-700 uppercase tracking-[0.25em] text-[color:var(--teal)]">The Structure</span>
+      </div>
+      <span class="font-serif text-[0.85rem] text-[color:var(--mid)]">Direct Equity Source</span>
+    </div>
+
+    <h2 class="font-serif font-600 leading-[1.02] tracking-[-0.01em] text-[color:var(--text)] mb-2" style="font-size:clamp(2rem,4.2vw,3.2rem)">
+      How your investment is structured
+    </h2>
+    <p class="max-w-[720px] text-[0.95rem] leading-[1.7] text-[color:rgba(234,241,242,0.6)] mb-9">
+      You invest with <span class="font-600 text-[color:var(--text)]">Direct Equity Source</span> — not with the
+      operator directly. We aggregate investor commitments into a single entity that holds the limited-partner
+      position in the deal. Journey operates the asset; we manage your relationship, reporting, and distributions.
+    </p>
+
+    <!-- Flow -->
+    <div class="grid gap-4 lg:grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch mb-8">
+      <!-- Tier 1 -->
+      <div class="lift rounded-2xl border p-5 flex flex-col" style="border-color:var(--line);background:var(--surface)">
+        <span class="text-[0.6rem] font-700 uppercase tracking-[0.2em] text-[color:var(--mid)] mb-2">Tier 1</span>
+        <h3 class="font-serif text-[1.35rem] font-600 text-[color:var(--text)] leading-tight">You</h3>
+        <p class="text-[0.8rem] text-[color:rgba(234,241,242,0.5)] mt-0.5 mb-3">Accredited investors</p>
+        <p class="text-[0.85rem] leading-[1.55] text-[color:rgba(234,241,242,0.6)] mt-auto">Commit capital and receive a membership interest in the DES entity.</p>
+      </div>
+      <div class="hidden lg:flex items-center justify-center"><span class="text-2xl" style="color:var(--teal)">→</span></div>
+      <!-- Tier 2 -->
+      <div class="lift rounded-2xl border-2 p-5 flex flex-col relative overflow-hidden" style="border-color:rgba(47,182,193,0.45);background:linear-gradient(160deg,rgba(47,182,193,0.09),rgba(21,30,34,0.6))">
+        <span class="absolute top-0 right-0 text-[0.55rem] font-700 uppercase tracking-[0.16em] px-2.5 py-1 rounded-bl-lg text-[color:var(--bg-deep)]" style="background:var(--teal)">Your counterparty</span>
+        <span class="text-[0.6rem] font-700 uppercase tracking-[0.2em] text-[color:var(--teal)] mb-2">Tier 2</span>
+        <h3 class="font-serif text-[1.35rem] font-600 text-[color:var(--text)] leading-tight">Direct Equity Source</h3>
+        <p class="text-[0.8rem] text-[color:rgba(234,241,242,0.55)] mt-0.5 mb-3">Granbury SPV, LLC</p>
+        <p class="text-[0.85rem] leading-[1.55] text-[color:rgba(234,241,242,0.65)] mt-auto">Aggregates commitments and holds a single <span class="font-600 text-[color:var(--text)]">LP position</span> in the deal. Derek is your point of contact.</p>
+      </div>
+      <div class="hidden lg:flex items-center justify-center"><span class="text-2xl" style="color:var(--teal)">→</span></div>
+      <!-- Tier 3 -->
+      <div class="lift rounded-2xl border p-5 flex flex-col" style="border-color:var(--line);background:var(--surface)">
+        <span class="text-[0.6rem] font-700 uppercase tracking-[0.2em] text-[color:var(--mid)] mb-2">Tier 3</span>
+        <h3 class="font-serif text-[1.35rem] font-600 text-[color:var(--text)] leading-tight">Journey Granbury</h3>
+        <p class="text-[0.8rem] text-[color:rgba(234,241,242,0.5)] mt-0.5 mb-3">Operator &amp; asset manager</p>
+        <p class="text-[0.85rem] leading-[1.55] text-[color:rgba(234,241,242,0.6)] mt-auto">Acquires and operates the portfolio under the Journey.Storage™ brand.</p>
+      </div>
+    </div>
+
+    <!-- role split -->
+    <div class="grid gap-4 md:grid-cols-2 border-t pt-6" style="border-color:var(--line)">
+      <div class="flex gap-3">
+        <span class="mt-1 inline-block h-3 w-3 rounded-full shrink-0" style="background:var(--teal)"></span>
+        <p class="text-[0.9rem] leading-[1.6] text-[color:rgba(234,241,242,0.6)]"><span class="font-700 text-[color:var(--text)]">Direct Equity Source</span> — your sponsor, single point of contact, investor reporting, and distributions.</p>
+      </div>
+      <div class="flex gap-3">
+        <span class="mt-1 inline-block h-3 w-3 rounded-full shrink-0" style="background:rgba(233,241,242,0.4)"></span>
+        <p class="text-[0.9rem] leading-[1.6] text-[color:rgba(234,241,242,0.6)]"><span class="font-700 text-[color:var(--text)]">Journey.Storage™</span> — vetted operating partner: acquisitions, lease-up, technology, and day-to-day asset management.</p>
+      </div>
+    </div>
+  </div>
+  <div class="relative z-10 flex items-center justify-center px-5 py-4"><span class="text-[0.6rem] uppercase tracking-[0.14em] text-[color:rgba(234,241,242,0.28)]">Illustrative structure — final terms per the Direct Equity Source offering documents.</span></div>
+</section>
+
+<!-- ══════════════ SLIDE 5 — THE GRANBURY DEAL ══════════════ -->
+<section id="s5" class="slide grain relative flex min-h-screen flex-col overflow-hidden" style="background:var(--bg)">
+  <div class="relative z-10 flex-1 flex flex-col justify-center mx-auto w-full max-w-[1200px] px-5 py-10 md:px-8 lg:px-12">
+    <div class="flex items-start justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <span class="h-px w-8" style="background:rgba(47,182,193,0.6)"></span>
+        <span class="text-[0.7rem] font-700 uppercase tracking-[0.25em] text-[color:var(--teal)]">The Deal</span>
+      </div>
+      <span class="font-serif text-[0.85rem] text-[color:var(--mid)]">Direct Equity Source</span>
+    </div>
+    <h2 class="font-serif font-600 leading-[1.0] tracking-[-0.01em] text-[color:var(--text)] mb-4" style="font-size:clamp(1.9rem,4vw,3rem)">
+      Granbury, TX — three-facility portfolio
+    </h2>
+
+    <!-- snapshot -->
+    <div class="border-y py-4 mb-2" style="border-color:var(--line)">
+      <div class="grid grid-cols-3 gap-y-3 lg:flex lg:items-center lg:gap-6 font-mono">
+        <div><span class="text-lg font-700 text-[color:var(--text)]">773</span> <span class="text-[0.88rem] text-[color:var(--mid)]">Units</span></div>
+        <div class="h-4 w-px hidden lg:block" style="background:var(--line)"></div>
+        <div><span class="text-lg font-700 text-[color:var(--text)]">126K</span> <span class="text-[0.88rem] text-[color:var(--mid)]">NRSF</span></div>
+        <div class="h-4 w-px hidden lg:block" style="background:var(--line)"></div>
+        <div><span class="text-lg font-700 teal">$85</span><span class="text-[0.88rem] text-[color:var(--mid)]">/NRSF price</span></div>
+        <div class="h-4 w-px hidden lg:block" style="background:var(--line)"></div>
+        <div><span class="text-lg font-700 teal">$96</span><span class="text-[0.88rem] text-[color:var(--mid)]">/NRSF all-in</span></div>
+        <div class="h-4 w-px hidden lg:block" style="background:var(--line)"></div>
+        <div class="col-span-3 lg:col-auto"><span class="text-lg font-700 text-[color:var(--text)]">~15%</span> <span class="text-[0.88rem] text-[color:var(--mid)]">below replacement cost</span></div>
+      </div>
+    </div>
+    <div class="flex flex-wrap gap-2 mb-8 text-[0.7rem] text-[color:rgba(234,241,242,0.3)]">
+      <span>Granbury, TX</span><span class="hidden md:inline">·</span>
+      <span><span class="teal font-700">#1</span> Temple Hall Hwy</span><span class="hidden md:inline">·</span>
+      <span><span class="teal font-700">#2</span> Western Hills Trl</span><span class="hidden md:inline">·</span>
+      <span><span class="teal font-700">#3</span> McCreary Rd</span>
+    </div>
+
+    <div class="grid gap-8 lg:grid-cols-2 mb-8">
+      <div>
+        <h3 class="mb-4 text-[0.8rem] font-700 uppercase tracking-[0.15em] text-[color:var(--text)]">The operator&rsquo;s value-add plan</h3>
+        <ul class="space-y-3">
+          <li class="flex gap-3 text-[0.9rem] leading-[1.6] text-[color:rgba(234,241,242,0.62)]"><span class="font-mono teal font-700">01</span>Add ancillary revenue streams — ~$50k/yr topline lift, immediately.</li>
+          <li class="flex gap-3 text-[0.9rem] leading-[1.6] text-[color:rgba(234,241,242,0.62)]"><span class="font-mono teal font-700">02</span>Drive occupancy from 70% to ~90% over the first 24 months.</li>
+          <li class="flex gap-3 text-[0.9rem] leading-[1.6] text-[color:rgba(234,241,242,0.62)]"><span class="font-mono teal font-700">03</span>Raise in-place rates ~$0.87 → ~$1.02/SF via disciplined ECRIs.</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="mb-4 text-[0.8rem] font-700 uppercase tracking-[0.15em] text-[color:rgba(234,241,242,0.6)]">Result</h3>
+        <ul class="space-y-3">
+          <li class="flex gap-3 text-[0.9rem] leading-[1.6] text-[color:rgba(234,241,242,0.62)]"><span class="teal">•</span>Effective Gross Income grows $970k → ~$1.48M.</li>
+          <li class="flex gap-3 text-[0.9rem] leading-[1.6] text-[color:rgba(234,241,242,0.62)]"><span class="teal">•</span>Operating margin held healthy at ~29%.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-6 border-t pt-6" style="border-color:var(--line)">
+      <div class="font-mono font-700 leading-none teal" style="font-size:clamp(2rem,4vw,3.4rem)">+$7.36M</div>
+      <div>
+        <p class="text-[0.98rem] font-700 text-[color:var(--text)]">in value created</p>
+        <p class="text-[0.88rem] text-[color:var(--mid)]">NOI grows by ~$460k over the 60-month hold</p>
+      </div>
+    </div>
+  </div>
+  <div class="relative z-10 flex items-center justify-center px-5 py-4"><span class="text-[0.6rem] uppercase tracking-[0.14em] text-[color:rgba(234,241,242,0.28)]">Projections only — see disclaimer &amp; offering documents.</span></div>
+</section>
+
+<!-- ══════════════ SLIDE 5B — THE PORTFOLIO (photo gallery) ══════════════ -->
+<section id="sg" class="slide grain relative flex min-h-screen flex-col overflow-hidden" style="background:var(--bg)">
+  <div class="relative z-10 flex-1 flex flex-col justify-center mx-auto w-full max-w-[1300px] px-5 py-10 md:px-8 lg:px-12">
+    <div class="flex items-start justify-between mb-5">
+      <div class="flex items-center gap-3">
+        <span class="h-px w-8" style="background:rgba(47,182,193,0.6)"></span>
+        <span class="text-[0.7rem] font-700 uppercase tracking-[0.25em] text-[color:var(--teal)]">The Portfolio</span>
+      </div>
+      <span class="font-serif text-[0.85rem] text-[color:var(--mid)]">Direct Equity Source</span>
+    </div>
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+      <h2 class="font-serif font-600 leading-[1.0] tracking-[-0.01em] text-[color:var(--text)]" style="font-size:clamp(1.8rem,3.8vw,2.9rem)">
+        Three facilities, one market
+      </h2>
+      <p class="font-mono text-[0.82rem] text-[color:var(--mid)]"><span class="teal font-700">773</span> units · <span class="teal font-700">126K</span> NRSF · built 2005</p>
+    </div>
+
+    <div class="grid gap-5 lg:grid-cols-3">
+      <!-- Facility 1 — Temple Hall -->
+      <div>
+        <div class="flex items-center gap-2 mb-2.5">
+          <span class="font-mono text-[0.7rem] font-700 text-[color:var(--bg-deep)] rounded px-1.5 py-0.5" style="background:var(--teal)">#1</span>
+          <span class="text-[0.8rem] font-700 text-[color:var(--text)]">Temple Hall Hwy</span>
+        </div>
+        <div class="relative aspect-[16/10] overflow-hidden rounded-xl mb-2.5 lift border" style="border-color:var(--line)">
+          <img src="assets/temple-hall-aerial.jpg" alt="Temple Hall aerial" class="h-full w-full object-cover" />
+          <div class="absolute inset-0" style="background:linear-gradient(to top,rgba(0,0,0,0.35),transparent 55%)"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="relative aspect-[4/3] overflow-hidden rounded-lg">
+            <img src="assets/temple-hall-office.jpg" alt="Temple Hall office" class="h-full w-full object-cover" />
+          </div>
+          <div class="relative aspect-[4/3] overflow-hidden rounded-lg">
+            <img src="assets/temple-hall-climate.jpg" alt="Temple Hall climate hallway" class="h-full w-full object-cover" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Facility 2 — Western Hills -->
+      <div>
+        <div class="flex items-center gap-2 mb-2.5">
+          <span class="font-mono text-[0.7rem] font-700 text-[color:var(--bg-deep)] rounded px-1.5 py-0.5" style="background:var(--teal)">#2</span>
+          <span class="text-[0.8rem] font-700 text-[color:var(--text)]">Western Hills Trl</span>
+        </div>
+        <div class="relative aspect-[16/10] overflow-hidden rounded-xl mb-2.5 lift border" style="border-color:var(--line)">
+          <img src="assets/western-hills-aerial-2.jpg" alt="Western Hills aerial" class="h-full w-full object-cover" />
+          <div class="absolute inset-0" style="background:linear-gradient(to top,rgba(0,0,0,0.35),transparent 55%)"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="relative aspect-[4/3] overflow-hidden rounded-lg">
+            <img src="assets/western-hills-rows.jpg" alt="Western Hills rows" class="h-full w-full object-cover" />
+          </div>
+          <div class="relative aspect-[4/3] overflow-hidden rounded-lg">
+            <img src="assets/western-hills-sign.jpg" alt="Granbury Self Storage signage" class="h-full w-full object-cover" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Facility 3 — McCreary / Cleveland -->
+      <div>
+        <div class="flex items-center gap-2 mb-2.5">
+          <span class="font-mono text-[0.7rem] font-700 text-[color:var(--bg-deep)] rounded px-1.5 py-0.5" style="background:var(--teal)">#3</span>
+          <span class="text-[0.8rem] font-700 text-[color:var(--text)]">McCreary Rd</span>
+        </div>
+        <div class="relative aspect-[16/10] overflow-hidden rounded-xl mb-2.5 lift border" style="border-color:var(--line)">
+          <img src="assets/cleveland-aerial.jpg" alt="McCreary Rd aerial" class="h-full w-full object-cover" />
+          <div class="absolute inset-0" style="background:linear-gradient(to top,rgba(0,0,0,0.35),transparent 55%)"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="relative aspect-[4/3] overflow-hidden rounded-lg">
+            <img src="assets/cleveland-indoor.jpg" alt="McCreary Rd climate interior" class="h-full w-full object-cover" />
+          </div>
+          <div class="relative aspect-[4/3] overflow-hidden rounded-lg">
+            <img src="assets/cleveland-units.jpg" alt="McCreary Rd drive-up units" class="h-full w-full object-cover" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-t pt-4 font-mono text-[0.8rem]" style="border-color:var(--line)">
+      <span><strong class="font-700 text-[color:var(--text)]">449</strong> <span class="text-[color:var(--mid)]">Drive-Up</span></span>
+      <span class="hidden lg:inline text-[color:rgba(234,241,242,0.15)]">·</span>
+      <span><strong class="font-700 text-[color:var(--text)]">315</strong> <span class="text-[color:var(--mid)]">Climate</span></span>
+      <span class="hidden lg:inline text-[color:rgba(234,241,242,0.15)]">·</span>
+      <span><strong class="font-700 text-[color:var(--text)]">17</strong> <span class="text-[color:var(--mid)]">Buildings</span></span>
+      <span class="hidden lg:inline text-[color:rgba(234,241,242,0.15)]">·</span>
+      <span><strong class="font-700 text-[color:var(--text)]">5.37</strong> <span class="text-[color:var(--mid)]">Acres</span></span>
+      <span class="ml-auto text-[0.72rem] text-[color:rgba(234,241,242,0.4)]">Pristine condition · recent expansion mid-2025</span>
+    </div>
+  </div>
+  <div class="relative z-10 flex items-center justify-center px-5 py-4"><span class="text-[0.6rem] uppercase tracking-[0.14em] text-[color:rgba(234,241,242,0.28)]">Privileged &amp; Confidential · Direct Equity Source · 2026</span></div>
+</section>
+
+<!-- ══════════════ SLIDE 6 — MARKET & PROPERTY ══════════════ -->
+<section id="s6" class="slide grain relative flex min-h-screen flex-col overflow-hidden" style="background:var(--bg)">
+  <div class="relative z-10 flex-1 flex flex-col justify-center mx-auto w-full max-w-[1200px] px-5 py-10 md:px-8 lg:px-12">
+    <div class="flex items-start justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <span class="h-px w-8" style="background:rgba(47,182,193,0.6)"></span>
+        <span class="text-[0.7rem] font-700 uppercase tracking-[0.25em] text-[color:var(--teal)]">Market &amp; Asset</span>
+      </div>
+      <span class="font-serif text-[0.85rem] text-[color:var(--mid)]">Direct Equity Source</span>
+    </div>
+    <h2 class="font-serif font-600 leading-[1.0] tracking-[-0.01em] text-[color:var(--text)] mb-6" style="font-size:clamp(1.9rem,4vw,3rem)">
+      A protected market, a pristine asset
+    </h2>
+
+    <div class="grid gap-6 lg:grid-cols-[1fr_1.15fr] items-stretch">
+      <!-- left: market stats -->
+      <div class="flex flex-col gap-5">
+        <div class="flex flex-wrap items-center gap-5 border-y py-4" style="border-color:var(--line)">
+          <div><div class="font-mono font-700 text-2xl teal">0</div><div class="mt-1 text-[0.58rem] font-700 uppercase tracking-[0.14em] text-[color:var(--mid)]">New supply since 2005</div></div>
+          <div class="h-9 w-px" style="background:var(--line)"></div>
+          <div><div class="font-mono font-700 text-2xl text-[color:var(--text)]">$91K</div><div class="mt-1 text-[0.58rem] font-700 uppercase tracking-[0.14em] text-[color:var(--mid)]">Median HHI</div></div>
+          <div class="h-9 w-px" style="background:var(--line)"></div>
+          <div><div class="font-mono font-700 text-2xl text-[color:var(--text)]">3.1%</div><div class="mt-1 text-[0.58rem] font-700 uppercase tracking-[0.14em] text-[color:var(--mid)]">Pop. growth</div></div>
+        </div>
+        <div>
+          <p class="text-[0.72rem] font-700 uppercase tracking-[0.15em] teal mb-2">Demand drivers</p>
+          <p class="text-[0.9rem] leading-[1.65] text-[color:rgba(234,241,242,0.62)]">No new competitive supply has entered the 5-mile radius since 2005. Most competitors are lower-quality — many lack security or online rentals. Journey enters with A+ operations against a market that can&rsquo;t compete after 5&nbsp;PM.</p>
+        </div>
+        <div>
+          <p class="text-[0.72rem] font-700 uppercase tracking-[0.15em] teal mb-2">Nearby growth</p>
+          <div class="flex flex-wrap gap-1.5">
+            <span class="rounded-md border px-2.5 py-1 text-[0.82rem] text-[color:rgba(234,241,242,0.55)]" style="border-color:var(--line);background:rgba(233,241,242,0.03)">47-acre mixed-use</span>
+            <span class="rounded-md border px-2.5 py-1 text-[0.82rem] text-[color:rgba(234,241,242,0.55)]" style="border-color:var(--line);background:rgba(233,241,242,0.03)">500+ housing units</span>
+            <span class="rounded-md border px-2.5 py-1 text-[0.82rem] text-[color:rgba(234,241,242,0.55)]" style="border-color:var(--line);background:rgba(233,241,242,0.03)">Academy Sports</span>
+            <span class="rounded-md border px-2.5 py-1 text-[0.82rem] text-[color:rgba(234,241,242,0.55)]" style="border-color:var(--line);background:rgba(233,241,242,0.03)">Hobby Lobby</span>
+            <span class="rounded-md border px-2.5 py-1 text-[0.82rem] text-[color:rgba(234,241,242,0.55)]" style="border-color:var(--line);background:rgba(233,241,242,0.03)">HomeGoods · Ulta</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- right: photo grid -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="relative col-span-2 aspect-[16/8] overflow-hidden rounded-xl">
+          <img src="assets/temple-hall-aerial-2.jpg" alt="Temple Hall aerial" class="h-full w-full object-cover" />
+          <div class="absolute inset-0" style="background:linear-gradient(to top,rgba(0,0,0,0.5),transparent 60%)"></div>
+          <span class="absolute left-3 bottom-3 rounded bg-black/40 backdrop-blur-sm px-2.5 py-1 text-[0.6rem] font-700 text-[color:rgba(234,241,242,0.85)]">Temple Hall Hwy</span>
+        </div>
+        <div class="relative aspect-[4/3] overflow-hidden rounded-xl">
+          <img src="assets/temple-hall-drive-up.jpg" alt="Drive-up units" class="h-full w-full object-cover" />
+          <div class="absolute inset-0" style="background:linear-gradient(to top,rgba(0,0,0,0.4),transparent 60%)"></div>
+          <span class="absolute left-3 bottom-3 rounded px-2.5 py-1 text-[0.6rem] font-700 text-[color:var(--bg-deep)]" style="background:var(--teal)">Drive-Up</span>
+        </div>
+        <div class="relative aspect-[4/3] overflow-hidden rounded-xl">
+          <img src="assets/temple-hall-unit-climate.jpg" alt="Climate units" class="h-full w-full object-cover" />
+          <div class="absolute inset-0" style="background:linear-gradient(to top,rgba(0,0,0,0.4),transparent 60%)"></div>
+          <span class="absolute left-3 bottom-3 rounded px-2.5 py-1 text-[0.6rem] font-700 text-[color:var(--bg-deep)]" style="background:var(--teal)">Climate</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 border-t pt-4" style="border-color:var(--line)">
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-1.5 font-mono text-[0.82rem]">
+        <span><strong class="font-700 text-[color:var(--text)]">773</strong> <span class="text-[color:var(--mid)]">Units</span></span>
+        <span class="hidden lg:inline text-[color:rgba(234,241,242,0.15)]">·</span>
+        <span><strong class="font-700 text-[color:var(--text)]">126K</strong> <span class="text-[color:var(--mid)]">NRSF</span></span>
+        <span class="hidden lg:inline text-[color:rgba(234,241,242,0.15)]">·</span>
+        <span><strong class="font-700 text-[color:var(--text)]">17</strong> <span class="text-[color:var(--mid)]">Bldgs</span></span>
+        <span class="hidden lg:inline text-[color:rgba(234,241,242,0.15)]">·</span>
+        <span><strong class="font-700 text-[color:var(--text)]">5.37</strong> <span class="text-[color:var(--mid)]">Acres</span></span>
+        <span class="hidden lg:inline text-[color:rgba(234,241,242,0.15)]">·</span>
+        <span><strong class="font-700 text-[color:var(--text)]">449</strong> <span class="text-[color:var(--mid)]">Drive-Up</span></span>
+        <span class="hidden lg:inline text-[color:rgba(234,241,242,0.15)]">·</span>
+        <span><strong class="font-700 text-[color:var(--text)]">315</strong> <span class="text-[color:var(--mid)]">Climate</span></span>
+        <span class="ml-auto text-[0.72rem] text-[color:rgba(234,241,242,0.4)]">Built 2005 · pristine · recent expansion mid-2025</span>
+      </div>
+    </div>
+  </div>
+  <div class="relative z-10 flex items-center justify-center px-5 py-4"><span class="text-[0.6rem] uppercase tracking-[0.14em] text-[color:rgba(234,241,242,0.28)]">Privileged &amp; Confidential · Direct Equity Source · 2026</span></div>
+</section>
+
+<!-- ══════════════ SLIDE 7 — RETURNS ══════════════ -->
+<section id="s7" class="slide grain relative flex min-h-screen flex-col overflow-hidden" style="background:var(--bg)">
+  <div class="absolute inset-0" style="background:radial-gradient(ellipse 50% 60% at 50% 40%,rgba(47,182,193,0.05),transparent)"></div>
+  <div class="relative z-10 flex-1 flex flex-col justify-center mx-auto w-full max-w-[1200px] px-5 py-10 md:px-8 lg:px-12">
+    <div class="flex items-start justify-between mb-6">
+      <div class="flex items-center gap-3">
+        <span class="h-px w-8" style="background:rgba(47,182,193,0.6)"></span>
+        <span class="text-[0.7rem] font-700 uppercase tracking-[0.25em] text-[color:var(--teal)]">Projected Returns</span>
+      </div>
+      <span class="font-serif text-[0.85rem] text-[color:var(--mid)]">Direct Equity Source</span>
+    </div>
+    <h2 class="font-serif font-600 leading-[1.0] tracking-[-0.01em] text-[color:var(--text)] mb-2" style="font-size:clamp(1.9rem,4vw,3rem)">
+      Investment summary
+    </h2>
+    <p class="text-[0.85rem] text-[color:var(--mid)] mb-6">Net-to-investor targets · <span class="font-600 text-[color:rgba(234,241,242,0.72)]">Balanced Case</span>.</p>
+
+    <div class="grid gap-6 lg:grid-cols-2 items-stretch">
+      <!-- LEFT: Balanced metrics (compact) + term sheet -->
+      <div class="flex flex-col">
+        <!-- hero metrics — Balanced (net to investor), compact -->
+        <div class="grid grid-cols-2 gap-3 mb-5">
+          <div class="rounded-2xl border p-4 text-center" style="border-color:rgba(47,182,193,0.22);background:rgba(47,182,193,0.05)">
+            <div class="font-mono font-700 leading-none teal" style="font-size:clamp(1.3rem,2.4vw,1.9rem)">20.25%</div>
+            <div class="mt-1.5 text-[0.58rem] font-700 uppercase tracking-[0.14em] text-[color:var(--mid)]">Targeted IRR</div>
+          </div>
+          <div class="rounded-2xl border p-4 text-center" style="border-color:rgba(47,182,193,0.22);background:rgba(47,182,193,0.05)">
+            <div class="font-mono font-700 leading-none teal" style="font-size:clamp(1.3rem,2.4vw,1.9rem)">2.07x</div>
+            <div class="mt-1.5 text-[0.58rem] font-700 uppercase tracking-[0.14em] text-[color:var(--mid)]">Equity Multiple</div>
+          </div>
+        </div>
+        <!-- term sheet -->
+        <table class="w-full text-[0.9rem]">
+          <tbody>
+            <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top w-[150px]">DES Raise</td><td class="py-2 font-700 text-[color:var(--text)]">$2,875,000</td></tr>
+            <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Waterfall</td><td class="py-2 font-700 text-[color:var(--text)]">Return of equity first, then 70 / 30 in favor of LPs</td></tr>
+            <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Operator</td><td class="py-2 font-700 text-[color:var(--text)]">Journey.Storage™ <span class="font-400 text-[color:var(--mid)] ml-1">— acquisition &amp; asset management</span></td></tr>
+            <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Strategy</td><td class="py-2 font-700 text-[color:var(--text)]">Lease-up · revenue optimization · expense reduction via automation</td></tr>
+            <tr class="border-b" style="border-color:var(--line)"><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Hold</td><td class="py-2 font-700 text-[color:var(--text)]">~3–5 years <span class="font-400 text-[color:var(--mid)] ml-1">— refi ~Month 36 returns ~70% of equity</span></td></tr>
+            <tr><td class="py-2 pr-4 text-[0.68rem] font-700 uppercase tracking-[0.1em] teal align-top">Tax</td><td class="py-2 font-700 text-[color:var(--text)]">Cost segregation &amp; bonus depreciation available</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- RIGHT: Upside + Conservative cards fill the column height -->
+      <div class="flex flex-col gap-4">
+        <!-- Upside -->
+        <div class="flex-1 rounded-2xl border p-5 flex flex-col justify-center" style="border-color:rgba(47,182,193,0.25);background:rgba(47,182,193,0.04)">
+          <div class="flex items-center justify-between mb-4">
+            <span class="rounded px-3 py-1 text-[0.68rem] font-700 uppercase tracking-[0.1em] text-[color:var(--bg-deep)]" style="background:var(--teal)">Case #1 · 5.75% CR Exit</span>
+            <div class="text-right">
+              <div class="font-mono font-700 teal text-2xl leading-none">222%</div>
+              <div class="text-[0.55rem] font-700 uppercase tracking-[0.12em] text-[color:var(--mid)] mt-1">Cum. CoC · Yr 5</div>
+            </div>
+          </div>
+          <table class="w-full text-[0.92rem] font-mono">
+            <thead><tr><th></th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y1</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y2</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y3</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y4</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y5</th>
+            </tr></thead>
+            <tbody><tr>
+              <td class="py-2 pr-2 font-sans text-[0.82rem] text-[color:rgba(234,241,242,0.6)]">Cum. CoC</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">2.23%</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">9.09%</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">86.70%</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">91.89%</td>
+              <td class="py-2 px-2 text-right font-700 teal">221.77%</td>
+            </tr></tbody>
+          </table>
+        </div>
+        <!-- Conservative -->
+        <div class="flex-1 rounded-2xl border p-5 flex flex-col justify-center" style="border-color:rgba(47,182,193,0.25);background:rgba(47,182,193,0.04)">
+          <div class="flex items-center justify-between mb-4">
+            <span class="rounded px-3 py-1 text-[0.68rem] font-700 uppercase tracking-[0.1em] text-[color:var(--bg-deep)]" style="background:var(--teal)">Case #2 · 6.25% CR Exit</span>
+            <div class="text-right">
+              <div class="font-mono font-700 teal text-2xl leading-none">184%</div>
+              <div class="text-[0.55rem] font-700 uppercase tracking-[0.12em] text-[color:var(--mid)] mt-1">Cum. CoC · Yr 5</div>
+            </div>
+          </div>
+          <table class="w-full text-[0.92rem] font-mono">
+            <thead><tr><th></th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y1</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y2</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y3</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y4</th>
+              <th class="py-1.5 px-2 text-right text-[0.6rem] font-700 uppercase text-[color:var(--mid)] font-sans">Y5</th>
+            </tr></thead>
+            <tbody><tr>
+              <td class="py-2 pr-2 font-sans text-[0.82rem] text-[color:rgba(234,241,242,0.6)]">Cum. CoC</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">2.16%</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">8.75%</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">78.61%</td>
+              <td class="py-2 px-2 text-right text-[color:var(--text)]">85.31%</td>
+              <td class="py-2 px-2 text-right font-700 teal">183.75%</td>
+            </tr></tbody>
+          </table>
+        </div>
+        <p class="text-[0.66rem] leading-[1.5] text-[color:rgba(234,241,242,0.4)]">Cumulative cash-on-cash to the investor on a $1.0M investment. Final terms &amp; fees per the Direct Equity Source offering documents.</p>
+      </div>
+    </div>
+    <p class="mt-5 text-[0.72rem] italic text-[color:rgba(234,241,242,0.42)]">*All cases assume a cash-out refinance at ~Month 36 and a sale at ~Month 60.</p>
+  </div>
+  <div class="relative z-10 flex items-center justify-center px-5 py-4"><span class="text-[0.6rem] uppercase tracking-[0.14em] text-[color:rgba(234,241,242,0.28)]">Targets only. Past performance does not guarantee future results. See offering documents.</span></div>
+</section>
+
+<!-- ══════════════ SLIDE 8 — INVEST THROUGH DES / CONTACT ══════════════ -->
+<section id="s8" class="slide relative flex min-h-screen flex-col overflow-hidden" style="background:var(--bg)">
+  <img src="assets/cleveland-aerial.jpg" alt="" class="absolute inset-0 h-full w-full object-cover" style="filter:grayscale(35%) contrast(1.1) brightness(0.35);object-position:50% 55%" />
+  <div class="absolute inset-0" style="background:linear-gradient(180deg,rgba(9,12,14,0.72),rgba(9,12,14,0.5) 40%,rgba(9,12,14,0.82))"></div>
+  <div class="absolute inset-0 mix-blend-overlay" style="background:radial-gradient(ellipse 55% 50% at 50% 45%,rgba(47,182,193,0.14),transparent)"></div>
+
+  <div class="relative z-10 flex flex-1 flex-col px-5 py-10 md:px-8 lg:px-16 lg:py-14">
+    <div class="flex items-center justify-between">
+      <img src="assets/des-logo.png" alt="Direct Equity Source" class="h-9 w-auto" />
+      <img src="assets/logo-white-TM.svg" alt="Journey.Storage" width="112" height="28" class="opacity-55" />
+    </div>
+
+    <div class="flex flex-1 flex-col lg:flex-row lg:items-center lg:gap-16 justify-center">
+      <!-- next steps -->
+      <div class="lg:flex-1 lg:max-w-[560px]">
+        <h2 class="font-serif font-600 leading-[0.98] tracking-[-0.015em] text-[color:var(--text)] mb-8" style="font-size:clamp(2rem,4.5vw,3.6rem)">
+          Invest through<br /><span class="italic teal">Direct Equity Source</span>
+        </h2>
+        <div class="space-y-4">
+          <div class="flex gap-4"><span class="font-mono font-700 teal text-lg leading-none pt-0.5 shrink-0">1.</span><div><p class="text-[0.95rem] font-700 uppercase tracking-[0.05em] text-[color:var(--text)]">Talk with Derek</p><p class="text-[0.8rem] text-[color:rgba(234,241,242,0.5)] mt-1">A conversation about your goals, portfolio, and fit.</p></div></div>
+          <div class="flex gap-4"><span class="font-mono font-700 teal text-lg leading-none pt-0.5 shrink-0">2.</span><div><p class="text-[0.95rem] font-700 uppercase tracking-[0.05em] text-[color:var(--text)]">Review DES offering documents</p><p class="text-[0.8rem] text-[color:rgba(234,241,242,0.5)] mt-1">Subscription agreement, PPM, and operating agreement.</p></div></div>
+          <div class="flex gap-4"><span class="font-mono font-700 teal text-lg leading-none pt-0.5 shrink-0">3.</span><div><p class="text-[0.95rem] font-700 uppercase tracking-[0.05em] text-[color:var(--text)]">Reserve your allocation</p><p class="text-[0.8rem] text-[color:rgba(234,241,242,0.5)] mt-1">Complete the subscription to secure your position.</p></div></div>
+          <div class="flex gap-4"><span class="font-mono font-700 teal text-lg leading-none pt-0.5 shrink-0">4.</span><div><p class="text-[0.95rem] font-700 uppercase tracking-[0.05em] text-[color:var(--text)]">Fund to Direct Equity Source</p><p class="text-[0.8rem] text-[color:rgba(234,241,242,0.5)] mt-1">Wire / ACH to the DES entity ahead of the closing date.</p></div></div>
+        </div>
+        <div class="mt-8 inline-flex w-fit items-center rounded-sm px-5 py-2.5" style="background:var(--teal)">
+          <span class="text-[0.75rem] font-700 tracking-[0.1em] uppercase text-[color:var(--bg-deep)]">Now accepting commitments · $2.875M</span>
+        </div>
+      </div>
+
+      <!-- contact card -->
+      <div class="mt-12 lg:mt-0 w-full lg:w-auto">
+        <div class="rounded-2xl border p-6 lg:min-w-[320px]" style="border-color:rgba(47,182,193,0.25);background:rgba(9,12,14,0.55);backdrop-filter:blur(6px)">
+          <div class="flex items-center gap-4 mb-5 pb-5 border-b" style="border-color:var(--line)">
+            <div class="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl">
+              <img src="assets/derek-taylor.webp" alt="Derek Taylor" class="h-full w-full object-cover" style="object-position:50% 18%" />
+            </div>
+            <div>
+              <p class="font-serif text-xl font-600 text-[color:var(--text)] leading-tight">Derek Taylor</p>
+              <p class="text-[0.7rem] teal font-700 uppercase tracking-[0.1em] mt-1">Investor Relations</p>
+            </div>
+          </div>
+          <div class="space-y-3.5">
+            <a href="tel:+12145588868" class="flex items-center gap-3 group">
+              <span class="flex h-8 w-8 items-center justify-center rounded-full shrink-0" style="background:rgba(47,182,193,0.15)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--teal)"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+              <span class="text-[0.95rem] text-[color:rgba(234,241,242,0.85)] group-hover:text-[color:var(--teal)] transition-colors">(214) 558-8868</span>
+            </a>
+            <a href="mailto:Derek@directequitysource.com" class="flex items-center gap-3 group">
+              <span class="flex h-8 w-8 items-center justify-center rounded-full shrink-0" style="background:rgba(47,182,193,0.15)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--teal)"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+              <span class="text-[0.9rem] text-[color:rgba(234,241,242,0.85)] group-hover:text-[color:var(--teal)] transition-colors break-all">Derek@directequitysource.com</span>
+            </a>
+            <a href="https://directequitysource.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 group">
+              <span class="flex h-8 w-8 items-center justify-center rounded-full shrink-0" style="background:rgba(47,182,193,0.15)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--teal)"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+              <span class="text-[0.95rem] text-[color:rgba(234,241,242,0.85)] group-hover:text-[color:var(--teal)] transition-colors">directequitysource.com</span>
+            </a>
+          </div>
+          <a href="mailto:Derek@directequitysource.com?subject=Granbury%20Self-Storage%20%E2%80%94%20Investor%20Inquiry" class="cta mt-5 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-[0.8rem] font-700 uppercase tracking-[0.08em] text-[color:var(--bg-deep)]" style="background:var(--teal)">
+            Request the offering documents
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="relative z-10 mt-auto flex items-center justify-center px-5 py-4">
+    <span class="text-[0.6rem] uppercase tracking-[0.13em] text-[color:rgba(234,241,242,0.3)]">Privileged &amp; Confidential · Not an offer to sell securities · Direct Equity Source · 2026</span>
+  </div>
+</section>
+
+</main>
+
+<!-- ══════════════ LIGHTBOX ══════════════ -->
+<div id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged photo"
+     style="position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(6,9,10,0.93);backdrop-filter:blur(6px);cursor:zoom-out;padding:4vh 4vw">
+  <img id="lightbox-img" alt="" style="max-width:92vw;max-height:90vh;border-radius:14px;box-shadow:0 40px 90px -25px rgba(0,0,0,0.85);border:1px solid rgba(47,182,193,0.25)" />
+  <div id="lightbox-cap" style="position:absolute;left:0;right:0;bottom:2.4vh;text-align:center;font-family:'Inter',sans-serif;font-size:0.8rem;letter-spacing:0.02em;color:rgba(234,241,242,0.6)"></div>
+  <button id="lightbox-close" aria-label="Close"
+     style="position:absolute;top:18px;right:22px;width:42px;height:42px;border:1px solid rgba(233,241,242,0.2);background:rgba(9,12,14,0.6);color:#EAF1F2;border-radius:999px;font-size:22px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background-color .2s,border-color .2s">&times;</button>
+  <div style="position:absolute;top:22px;left:24px;display:flex;align-items:center;gap:9px;font-family:'Inter',sans-serif;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.2em;color:rgba(234,241,242,0.4)">
+    <span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:linear-gradient(135deg,#54D6DF,#0C5A61)"></span>Direct Equity Source
+  </div>
+</div>
+
+<script>
+(function(){
+  var lb=document.getElementById('lightbox'),
+      lbImg=document.getElementById('lightbox-img'),
+      lbCap=document.getElementById('lightbox-cap'),
+      lbClose=document.getElementById('lightbox-close');
+  function open(src,alt){lbImg.src=src;lbImg.alt=alt||'';lbCap.textContent=alt||'';lb.style.display='flex';document.body.style.overflow='hidden';}
+  function close(){lb.style.display='none';lbImg.src='';document.body.style.overflow='';}
+  // Every photo in the deck is zoomable (skip the lightbox's own image and the logos)
+  Array.prototype.forEach.call(document.querySelectorAll('img'),function(img){
+    if(img.closest('#lightbox')) return;
+    if(/logo/.test(img.getAttribute('src')||'')) return;
+    img.style.cursor='zoom-in';
+    img.setAttribute('tabindex','0');
+    img.setAttribute('role','button');
+    img.addEventListener('click',function(e){e.stopPropagation();open(img.currentSrc||img.src,img.alt);});
+    img.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open(img.currentSrc||img.src,img.alt);}});
+  });
+  lb.addEventListener('click',close);
+  lbImg.addEventListener('click',function(e){e.stopPropagation();});
+  lbClose.addEventListener('click',close);
+  lbClose.addEventListener('mouseenter',function(){lbClose.style.background='rgba(47,182,193,0.25)';lbClose.style.borderColor='rgba(47,182,193,0.5)';});
+  lbClose.addEventListener('mouseleave',function(){lbClose.style.background='rgba(9,12,14,0.6)';lbClose.style.borderColor='rgba(233,241,242,0.2)';});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
+</script>
+</body>
+</html>
