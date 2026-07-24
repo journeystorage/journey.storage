@@ -67,9 +67,9 @@ const templeHall: Facility = {
   faqs: [
     { q: 'What’s the cheapest space here?', a: 'Our smallest 5×5 spaces start at $29/mo online. Prices vary by size, features (climate-controlled vs. drive-up), and current availability.' },
     { q: 'Do I need a reservation?', a: 'No — you can rent online in minutes, any time of day. Reserving online locks in your online rate and holds the space until you move in.' },
-    { q: 'What are the access hours?', a: 'Gate access is 24/7, every day of the year. The front office is open Mon–Fri 8:30 AM–5:00 PM and Sat 8:30 AM–3:00 PM (closed Sunday).' },
+    { q: 'What are the access hours?', a: 'We’re open 24/7 — gate access every day of the year, any hour. Rent and pay online any time, no office visit required.' },
     { q: 'Climate-controlled vs. drive-up — what’s the difference?', a: 'Climate-controlled spaces sit inside an insulated building with regulated temperature and humidity — ideal for furniture, electronics, and keepsakes. Drive-up spaces let you pull your vehicle right up to a roll-up door for fast, easy loading.' },
-    { q: 'Do I need my own lock?', a: 'You’re welcome to bring your own, or pick up a disc lock in the office when you move in.' },
+    { q: 'Do I need my own lock?', a: 'Yes — please bring your own lock so you’re the only one with a key. A standard disc lock works best and is available at any hardware store or online. We don’t use smart or electronic locks.' },
     { q: 'Is insurance or a protection plan required?', a: 'Your belongings should be covered. You can use your own homeowner’s or renter’s policy with proof of coverage, or add an affordable tenant protection plan at checkout.' },
     { q: 'Can I store a car, boat, or RV?', a: 'Yes — Temple Hall offers drive-up spaces and vehicle & RV parking. Larger 10×20 and 10×30 spaces fit a car plus household goods.' },
     { q: 'What can’t I store?', a: 'No hazardous, flammable, or perishable items, and nothing living (people, animals, or plants). If you’re unsure about something, just ask.' },

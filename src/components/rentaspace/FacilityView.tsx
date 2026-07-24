@@ -320,7 +320,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
               <iframe title={`Map of Journey.Storage ${f.short}, ${f.address}`} src={`https://www.google.com/maps?q=${encodeURIComponent(f.mapQuery)}&output=embed`} className="h-44 w-full border-0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
               <div className="p-5">
                 <p className="flex items-start gap-2 text-[0.9375rem] font-bold text-black"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange" strokeWidth={2} aria-hidden /><span>{f.address}<br /><span className="font-normal text-stone">{f.city}</span></span></p>
-                <p className="mt-3 text-[0.8125rem] text-stone"><span className="font-bold text-charcoal">Gate access:</span> 24/7 · <span className="font-bold text-charcoal">Office:</span> Mon–Fri 8:30–5, Sat 8:30–3</p>
+                <p className="mt-3 text-[0.8125rem] text-stone"><span className="font-bold text-charcoal">Open 24/7:</span> gate access every day of the year</p>
                 <a href={f.tel} className="btn-spring shadow-cta mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-3 font-bold text-warm-white"><Phone className="h-4 w-4" strokeWidth={2} aria-hidden />Call {f.phone}</a>
               </div>
             </div>

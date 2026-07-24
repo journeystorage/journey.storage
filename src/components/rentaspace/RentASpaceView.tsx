@@ -253,16 +253,16 @@ export default function RentASpaceView() {
       <section className="mx-auto max-w-content px-5 py-16 lg:px-16 lg:py-20">
         <div className="shadow-card grid grid-cols-1 gap-6 rounded-2xl border border-black/[0.05] bg-white p-6 text-center sm:grid-cols-3 lg:p-8">
           <div>
-            <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Office hours</p>
-            <p className="mt-1 text-[0.9375rem] leading-relaxed text-charcoal">Mon–Fri 8:30 AM – 5:00 PM<br />Sat 8:30 AM – 3:00 PM · Sun closed</p>
+            <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Open 24/7</p>
+            <p className="mt-1 text-[0.9375rem] leading-relaxed text-charcoal">Gate access any hour<br />Every day of the year</p>
           </div>
           <div className="border-black/[0.06] sm:border-x">
-            <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Gate access</p>
-            <p className="mt-1 text-[0.9375rem] leading-relaxed text-charcoal">Every day<br />6:00 AM – 10:00 PM</p>
+            <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Rentals</p>
+            <p className="mt-1 text-[0.9375rem] leading-relaxed text-charcoal">Month-to-month · no deposit<br />Rent &amp; pay online, any time</p>
           </div>
           <div>
-            <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Rentals</p>
-            <p className="mt-1 text-[0.9375rem] leading-relaxed text-charcoal">Month-to-month · no deposit<br />Rent &amp; pay online 24/7</p>
+            <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Contact</p>
+            <p className="mt-1 text-[0.9375rem] leading-relaxed text-charcoal">Questions? Call us<br />(817) 579-0607</p>
           </div>
         </div>
         

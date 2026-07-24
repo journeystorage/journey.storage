@@ -66,9 +66,8 @@ export default function RentFooter() {
           <div>
             <p className="text-[0.75rem] font-bold uppercase tracking-wide text-warm-white/50">Hours &amp; contact</p>
             <dl className="mt-3 space-y-1.5 text-[0.875rem]">
-              <dd><span className="font-bold text-warm-white">Gate access:</span> 24/7, every day</dd>
-              <dd><span className="font-bold text-warm-white">Office:</span> Mon–Fri 8:30 AM–5:00 PM</dd>
-              <dd>Sat 8:30 AM–3:00 PM · Sun closed</dd>
+              <dd><span className="font-bold text-warm-white">Open 24/7</span> — gate access every day of the year</dd>
+              <dd>Rent &amp; pay online any time</dd>
               <dd className="pt-2"><a href="tel:+18175790607" className="font-bold text-warm-white transition-colors hover:text-terracotta">(817) 579-0607</a></dd>
             </dl>
           </div>

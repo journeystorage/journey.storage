@@ -66,9 +66,9 @@ const westernHills: Facility = {
   faqs: [
     { q: 'What’s the cheapest space here?', a: 'Our smallest 5×5 drive-up spaces start at $25/mo online. Prices vary by size and current availability.' },
     { q: 'Do I need a reservation?', a: 'No — you can rent online in minutes, any time of day. Reserving online locks in your online rate and holds the space until you move in.' },
-    { q: 'What are the access hours?', a: 'Gate access is 24/7, every day of the year. The front office is open Mon–Fri 8:30 AM–5:00 PM and Sat 8:30 AM–3:00 PM (closed Sunday).' },
+    { q: 'What are the access hours?', a: 'We’re open 24/7 — gate access every day of the year, any hour. Rent and pay online any time, no office visit required.' },
     { q: 'Are all spaces drive-up?', a: 'Yes — Western Hills is a drive-up facility. Every space is ground-level with a roll-up door, so you can pull your vehicle right up and load in minutes. Need climate control? See our Temple Hall Hwy or McCreary Rd locations.' },
-    { q: 'Do I need my own lock?', a: 'You’re welcome to bring your own, or pick up a disc lock in the office when you move in.' },
+    { q: 'Do I need my own lock?', a: 'Yes — please bring your own lock so you’re the only one with a key. A standard disc lock works best and is available at any hardware store or online. We don’t use smart or electronic locks.' },
     { q: 'Is insurance or a protection plan required?', a: 'Your belongings should be covered. Use your own homeowner’s or renter’s policy with proof of coverage, or add an affordable tenant protection plan at checkout.' },
     { q: 'Can I store a boat, trailer, or vehicle?', a: 'Yes — with drive-up access and vehicle & trailer parking, Western Hills is a great fit for lake and outdoor gear. Larger 10×20 and 10×30 spaces fit a vehicle plus household goods.' },
     { q: 'What can’t I store?', a: 'No hazardous, flammable, or perishable items, and nothing living (people, animals, or plants). If you’re unsure about something, just ask.' },
