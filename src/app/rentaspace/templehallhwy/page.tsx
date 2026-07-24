@@ -69,7 +69,7 @@ const templeHall: Facility = {
     { q: 'Do I need a reservation?', a: 'No — you can rent online in minutes, any time of day. Reserving online locks in your online rate and holds the space until you move in.' },
     { q: 'What are the access hours?', a: 'We’re open 24/7 — gate access every day of the year, any hour. Rent and pay online any time, no office visit required.' },
     { q: 'Climate-controlled vs. drive-up — what’s the difference?', a: 'Climate-controlled spaces sit inside an insulated building with regulated temperature and humidity — ideal for furniture, electronics, and keepsakes. Drive-up spaces let you pull your vehicle right up to a roll-up door for fast, easy loading.' },
-    { q: 'Do I need my own lock?', a: 'Yes — please bring your own lock so you’re the only one with a key. A standard disc lock works best and is available at any hardware store or online. We don’t use smart or electronic locks.' },
+    { q: 'Do I need my own lock?', a: 'No — every space comes with a built-in smart lock. There’s nothing to buy or bring; you unlock your space right from your phone, and only you have access.' },
     { q: 'Is insurance or a protection plan required?', a: 'Your belongings should be covered. You can use your own homeowner’s or renter’s policy with proof of coverage, or add an affordable tenant protection plan at checkout.' },
     { q: 'Can I store a car, boat, or RV?', a: 'Yes — Temple Hall offers drive-up spaces and vehicle & RV parking. Larger 10×20 and 10×30 spaces fit a car plus household goods.' },
     { q: 'What can’t I store?', a: 'No hazardous, flammable, or perishable items, and nothing living (people, animals, or plants). If you’re unsure about something, just ask.' },
