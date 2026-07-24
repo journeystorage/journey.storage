@@ -31,6 +31,7 @@ const westernHills: Facility = {
   amenities: [
     'Drive-up access',
     '24/7 gated access',
+    'Keyless smart-lock entry',
     '24/7 security cameras',
     'Well-lit drive aisles',
     'Roll-up doors',

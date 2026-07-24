@@ -143,6 +143,7 @@ export default function RentASpaceView() {
                 <span className="rounded-full bg-sage-green/15 px-2.5 py-1 text-[#5c8a52]">Climate-controlled</span>
                 <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Drive-up</span>
                 <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Gated</span>
+                <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Keyless</span>
               </div>
               <div className="mt-6 flex flex-1 items-end">
                 <a href="/rentaspace/templehallhwy" className="btn-spring shadow-cta w-full rounded-xl bg-orange py-3 text-center font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">See sizes &amp; prices</a>
@@ -172,6 +173,7 @@ export default function RentASpaceView() {
                 <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Drive-up</span>
                 <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Roll-up doors</span>
                 <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Gated</span>
+                <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Keyless</span>
               </div>
               <div className="mt-6 flex flex-1 items-end">
                 <a href="/rentaspace/westernhillstrl" className="btn-spring shadow-cta w-full rounded-xl bg-orange py-3 text-center font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">See sizes &amp; prices</a>
@@ -201,6 +203,7 @@ export default function RentASpaceView() {
                 <span className="rounded-full bg-sage-green/15 px-2.5 py-1 text-[#5c8a52]">Climate-controlled</span>
                 <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Drive-up</span>
                 <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Cameras</span>
+                <span className="rounded-full bg-sand/25 px-2.5 py-1 text-charcoal">Keyless</span>
               </div>
               <div className="mt-6 flex flex-1 items-end">
                 <a href="/rentaspace/mccrearyrd" className="btn-spring shadow-cta w-full rounded-xl bg-orange py-3 text-center font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">See sizes &amp; prices</a>
@@ -219,7 +222,7 @@ export default function RentASpaceView() {
               <h2 className="track-tight mt-3 text-[2rem] font-black leading-[1.05] text-black lg:text-[2.5rem]">More than a space.<br />Our flagship on Temple Hall.</h2>
               <p className="mt-4 text-[1.0625rem] leading-relaxed text-stone">Our flagship Granbury facility: 350+ clean, secure spaces set on landscaped grounds — from breezy drive-up spaces to fully climate-controlled interior storage. Wide, well-lit aisles, a friendly front office, and a gated perimeter watched around the clock.</p>
               <ul className="mt-6 space-y-3">
-                {['Climate-controlled & drive-up spaces', '24/7 gated access', 'Sizes from 5×10 to 10×30'].map((item) => (
+                {['Climate-controlled & drive-up spaces', '24/7 gated access', 'Keyless smart-lock entry from your phone', 'Sizes from 5×10 to 10×30'].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-[1rem] font-bold text-charcoal">
                     <span className="grid h-6 w-6 place-items-center rounded-full bg-orange/[0.12] text-orange"><Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden /></span>
                     {item}

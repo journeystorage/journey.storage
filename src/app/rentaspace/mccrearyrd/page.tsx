@@ -30,6 +30,7 @@ const mcCreary: Facility = {
     'Climate-controlled spaces',
     'Drive-up access',
     '24/7 gated access',
+    'Keyless smart-lock entry',
     '24/7 security cameras',
     'Bright LED lighting',
     'Roll-up doors',
