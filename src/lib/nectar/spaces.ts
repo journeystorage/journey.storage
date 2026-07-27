@@ -70,6 +70,7 @@ function toOption(e: SpaceMixEntry): SpaceOption {
 }
 
 export async function getSpaceMix(propertyId: string, opts?: { revalidate?: number }): Promise<SpaceOption[]> {
+  if (!propertyId || !COMPANY_ID) throw new Error("Nectar company/property not configured");
   const { data } = await nectarV2<{ space_mix?: SpaceMixEntry[] }>(
     `companies/${COMPANY_ID}/properties/${propertyId}/space-mix`,
     { next: { revalidate: opts?.revalidate ?? 120, tags: [`spaces-${propertyId}`] } },
