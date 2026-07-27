@@ -15,6 +15,8 @@ export type Unit = {
   tags: string[]
 }
 export type UnitGroup = { category: string; blurb: string; units: Unit[] }
+// Live availability card from GET /api/nectar/spaces/[facility] (preview-only).
+type LiveSpace = { id: string; size: string | null; available: number; inStock: boolean; onlinePrice: number | null; fromPrice: number | null; category: string | null }
 export type Facility = {
   slug: string
   name: string
@@ -111,6 +113,8 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
   const [lightbox, setLightbox] = useState<number | null>(null)
   const [reserveSize, setReserveSize] = useState<string | null>(null)
   const [reserveStatus, setReserveStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
+  const [preview, setPreview] = useState(false)
+  const [live, setLive] = useState<{ status: 'off' | 'loading' | 'ok' | 'error'; spaces: LiveSpace[]; error?: string }>({ status: 'off', spaces: [] })
   const n = f.slides.length
   const gLen = f.gallery.length
   const reviewsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Journey Storage ${f.short} Granbury TX`)}`
@@ -122,6 +126,23 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
   }, [n])
 
   const go = useCallback((d: number) => setSlide((s) => (s + d + n) % n), [n])
+
+  // Hidden live-data preview: /rentaspace/<slug>?preview=live pulls real availability
+  // from the Nectar API into the page, so you can see the integration render without
+  // touching the public page. No-op unless the flag is present.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('preview') !== 'live') return
+    setPreview(true)
+    setLive({ status: 'loading', spaces: [] })
+    fetch(`/api/nectar/spaces/${f.slug}`)
+      .then(async (r) => {
+        const j = await r.json().catch(() => ({}))
+        if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`)
+        return j
+      })
+      .then((j) => setLive({ status: 'ok', spaces: (j.spaces ?? []) as LiveSpace[] }))
+      .catch((e: unknown) => setLive({ status: 'error', spaces: [], error: e instanceof Error ? e.message : String(e) }))
+  }, [f.slug])
 
   useEffect(() => {
     if (!guideOpen) return
@@ -272,6 +293,44 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
           <div>
             <h2 className="track-tight text-[1.75rem] font-black text-black lg:text-[2.25rem]">Choose your space</h2>
             <p className="mt-2 text-[1.0625rem] leading-relaxed text-stone">Reserve online in minutes — lock in the online rate, move in when you like. Month-to-month, no deposit, no long-term commitment.</p>
+
+            {preview && (
+              <div className="mt-8 rounded-2xl border-2 border-dashed border-orange/50 bg-orange/[0.04] p-5 lg:p-6">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-orange px-3 py-1 text-[0.6875rem] font-black uppercase tracking-wide text-warm-white"><Sparkles className="h-3.5 w-3.5" aria-hidden />Live preview</span>
+                  <span className="text-[0.875rem] font-bold text-charcoal">Real-time availability &amp; pricing from the Tenant Inc API</span>
+                </div>
+                <p className="mt-2 text-[0.8125rem] leading-relaxed text-stone">Sandbox data — the sizes look odd because it&rsquo;s a shared test facility. On go-live this becomes your real Granbury spaces. This panel is only visible with <span className="font-bold">?preview=live</span>; the public page is untouched.</p>
+
+                {live.status === 'loading' && <p className="mt-4 text-[0.9375rem] font-bold text-stone">Loading live availability…</p>}
+                {live.status === 'error' && (
+                  <p className="mt-4 text-[0.9375rem] font-bold text-[#D94A4A]">Live feed unavailable: {live.error}. <span className="font-normal text-stone">(Expected on the production URL until API keys are set in Hostinger — works locally where the sandbox key is set.)</span></p>
+                )}
+                {live.status === 'ok' && (() => {
+                  const inStock = live.spaces.filter((s) => s.inStock)
+                  const shown = inStock.slice(0, 12)
+                  return (
+                    <>
+                      <p className="mt-4 text-[0.75rem] font-bold uppercase tracking-wide text-orange">{inStock.length} sizes available now · {live.spaces.length} total returned</p>
+                      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                        {shown.map((s) => (
+                          <div key={s.id} className="rounded-xl border border-black/[0.06] bg-warm-white p-3 shadow-card">
+                            <p className="text-[1.125rem] font-black tracking-[-0.02em] text-black">{s.size ?? '—'}</p>
+                            <p className="mt-0.5 text-[0.75rem] font-bold text-[#5c8a52]">{s.available} available</p>
+                            <p className="mt-2 leading-none">
+                              {s.onlinePrice != null
+                                ? <><span className="text-[1.25rem] font-black text-orange">${s.onlinePrice}</span><span className="text-[0.75rem] font-bold text-stone">/mo</span></>
+                                : <span className="text-[0.8125rem] font-bold text-stone">Call for price</span>}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      {inStock.length > shown.length && <p className="mt-3 text-[0.8125rem] text-stone">+{inStock.length - shown.length} more available sizes returned by the API…</p>}
+                    </>
+                  )
+                })()}
+              </div>
+            )}
 
             {f.groups.map((group) => (
               <div key={group.category} className="mt-10">
