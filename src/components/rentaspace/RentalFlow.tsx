@@ -92,16 +92,16 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
     <div className="fixed inset-0 z-[130] flex items-stretch justify-center overflow-y-auto bg-black/70 backdrop-blur-sm sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Rent a ${space.size} space`}>
       <div className="relative flex min-h-full w-full max-w-4xl flex-col bg-warm-white text-black antialiased sm:min-h-0 sm:max-h-[92vh] sm:rounded-2xl sm:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)]">
 
-        {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-black/[0.07] bg-warm-white/95 px-5 py-4 backdrop-blur sm:rounded-t-2xl lg:px-8">
+        {/* Header — Journey black bookend */}
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 bg-black px-5 py-4 sm:rounded-t-2xl lg:px-8">
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-orange px-2.5 py-1 text-[0.625rem] font-black uppercase tracking-wide text-warm-white"><Sparkles className="h-3 w-3" aria-hidden />Preview</span>
             <div>
-              <p className="text-[0.9375rem] font-black leading-tight tracking-[-0.02em]">Rent a {space.size} space</p>
-              <p className="text-[0.75rem] text-stone">Journey.Storage™ — {facility.short}, Granbury TX</p>
+              <p className="text-[0.9375rem] font-black leading-tight tracking-[-0.02em] text-warm-white">Rent a {space.size} space</p>
+              <p className="text-[0.75rem] text-warm-white/55">Journey.Storage™ — {facility.short}, Granbury TX</p>
             </div>
           </div>
-          <button onClick={onClose} aria-label="Close" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-black/[0.06] text-black transition-colors hover:bg-black/[0.12]"><X className="h-5 w-5" aria-hidden /></button>
+          <button onClick={onClose} aria-label="Close" className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-warm-white/10 text-warm-white transition-colors hover:bg-warm-white/20"><X className="h-5 w-5" aria-hidden /></button>
         </div>
 
         {/* Progress rail */}
@@ -267,15 +267,17 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
               <h2 className="mt-5 text-[1.75rem] font-black tracking-[-0.02em]">You&rsquo;re all moved in{details.name ? `, ${details.name.split(' ')[0]}` : ''}!</h2>
               <p className="mt-2 text-[0.9375rem] text-stone">Your {space.size} space at {facility.short} is reserved. A confirmation and lease PDF are on the way to {details.email || 'your email'}.</p>
               <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-black/[0.06] bg-white p-5 text-left shadow-[0_1px_2px_rgba(24,24,24,.04),0_12px_32px_-12px_rgba(24,24,24,.14)]">
-                  <p className="flex items-center gap-2 text-[0.75rem] font-bold uppercase tracking-wide text-stone"><KeyRound className="h-3.5 w-3.5 text-orange" aria-hidden />Gate code</p>
-                  <p className="mt-1 text-[1.75rem] font-black tracking-[0.1em] text-black">{gateCode}#</p>
-                  <p className="text-[0.75rem] text-stone">24/7 access · non-transferable</p>
+                <div className="relative overflow-hidden rounded-2xl bg-black p-5 text-left shadow-[0_1px_2px_rgba(24,24,24,.04),0_18px_40px_-16px_rgba(24,24,24,.5)]">
+                  <div className="absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(232,98,42,0.22) 0%, transparent 60%)' }} />
+                  <p className="relative flex items-center gap-2 text-[0.75rem] font-bold uppercase tracking-wide text-warm-white/50"><KeyRound className="h-3.5 w-3.5 text-orange" aria-hidden />Gate code</p>
+                  <p className="relative mt-1 text-[1.75rem] font-black tracking-[0.1em] text-warm-white">{gateCode}#</p>
+                  <p className="relative text-[0.75rem] text-warm-white/55">24/7 access · non-transferable</p>
                 </div>
-                <div className="rounded-2xl border border-black/[0.06] bg-white p-5 text-left shadow-[0_1px_2px_rgba(24,24,24,.04),0_12px_32px_-12px_rgba(24,24,24,.14)]">
-                  <p className="text-[0.75rem] font-bold uppercase tracking-wide text-stone">Your space</p>
-                  <p className="mt-1 text-[1.75rem] font-black text-black">{unitNo}</p>
-                  <p className="text-[0.75rem] text-stone">{space.size} · {facility.address}</p>
+                <div className="relative overflow-hidden rounded-2xl bg-black p-5 text-left shadow-[0_1px_2px_rgba(24,24,24,.04),0_18px_40px_-16px_rgba(24,24,24,.5)]">
+                  <div className="absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(232,98,42,0.22) 0%, transparent 60%)' }} />
+                  <p className="relative text-[0.75rem] font-bold uppercase tracking-wide text-warm-white/50">Your space</p>
+                  <p className="relative mt-1 text-[1.75rem] font-black text-warm-white">{unitNo}</p>
+                  <p className="relative text-[0.75rem] text-warm-white/55">{space.size} · {facility.address}</p>
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[0.8125rem]">
@@ -289,14 +291,14 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
           )}
         </div>
 
-        {/* Footer nav */}
+        {/* Footer nav — Journey black bookend */}
         {stepName !== 'Done' && (
-          <div className="sticky bottom-0 flex items-center justify-between gap-3 border-t border-black/[0.07] bg-warm-white/95 px-5 py-4 backdrop-blur sm:rounded-b-2xl lg:px-8">
-            <button onClick={step === 0 ? onClose : back} className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 font-bold text-charcoal transition-colors hover:bg-black/[0.05]">
+          <div className="sticky bottom-0 flex items-center justify-between gap-3 bg-black px-5 py-4 sm:rounded-b-2xl lg:px-8">
+            <button onClick={step === 0 ? onClose : back} className="inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 font-bold text-warm-white/75 transition-colors hover:bg-warm-white/10 hover:text-warm-white">
               <ChevronLeft className="h-4 w-4" aria-hidden />{step === 0 ? 'Cancel' : 'Back'}
             </button>
             <div className="flex items-center gap-3">
-              {stepName === 'Review' && <span className="hidden text-[0.9375rem] font-black text-orange sm:inline">{money(dueToday)} due today</span>}
+              {stepName === 'Review' && <span className="hidden text-[0.9375rem] font-black text-warm-white sm:inline">{money(dueToday)} due today</span>}
               <button onClick={next} disabled={!canNext() || processing} className={primaryBtn}>
                 {processing ? 'Processing…' : stepName === 'Payment' ? `Pay ${money(dueToday)}` : stepName === 'Sign lease' ? 'Sign & continue' : stepName === 'Review' ? 'Looks good' : 'Continue'}
                 {!processing && <ChevronRight className="h-4 w-4" aria-hidden />}
