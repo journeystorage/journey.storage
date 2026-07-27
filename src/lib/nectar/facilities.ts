@@ -1,39 +1,50 @@
-// Facility slug -> ID map for Journey.Storage's three Granbury locations.
-// Fill in the real IDs from your tenant.dev App Dashboard (or GET /facilities/{id}).
-// GDS ids are needed for everything; Hummingbird ids only for the move-out passthrough.
+// Facility slug -> Tenant Inc v2 identifiers for Journey.Storage's Granbury locations.
+//
+// The live API is v2, app-scoped and company/property-scoped:
+//   {NECTAR_BASE_URL}/companies/{company}/properties/{property}/space-mix
+//
+// COMPANY_ID is one value for the whole account (NECTAR_COMPANY_ID).
+// Each facility needs its production PROPERTY id (FACILITY_*_ID). Those are not
+// yet live under our production company — until they are, every slug falls back
+// to NECTAR_SANDBOX_PROPERTY_ID (the "UC Irvine Storage" demo property Tenant Inc
+// gave us for testing; it carries real prod codes, so go-live is an ID swap only).
 
 export interface FacilityConfig {
   slug: string;
   displayName: string;
-  gdsFacilityId: string; // fac...
-  hbPropertyId?: string; // Hummingbird short id (move-out / passthrough only)
+  propertyId: string; // v2 property id (short id like "85B73ubBGy")
 }
 
-export const OWNER_ID = process.env.NECTAR_OWNER_ID ?? "ownXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+export const COMPANY_ID = process.env.NECTAR_COMPANY_ID ?? "";
 export const HB_COMPANY_ID = process.env.HB_COMPANY_ID ?? ""; // Hummingbird company id (move-out)
+
+// Testing sandbox — all slugs resolve here until the real Granbury property ids exist.
+const SANDBOX_PROPERTY_ID = process.env.NECTAR_SANDBOX_PROPERTY_ID ?? "";
+
+function resolve(envId: string | undefined): string {
+  return (envId && envId.trim()) || SANDBOX_PROPERTY_ID;
+}
 
 export const FACILITIES: Record<string, FacilityConfig> = {
   templehallhwy: {
     slug: "templehallhwy",
     displayName: "Temple Hall Hwy",
-    gdsFacilityId: process.env.FACILITY_TEMPLEHALL_ID ?? "facXXXXXXXXXXXXXXXXXXXXXXXXXXXX0001",
+    propertyId: resolve(process.env.FACILITY_TEMPLEHALL_ID),
   },
   westernhillstrl: {
     slug: "westernhillstrl",
     displayName: "Western Hills Trl",
-    gdsFacilityId: process.env.FACILITY_WESTERNHILLS_ID ?? "facXXXXXXXXXXXXXXXXXXXXXXXXXXXX0002",
+    propertyId: resolve(process.env.FACILITY_WESTERNHILLS_ID),
   },
   mccrearyrd: {
     slug: "mccrearyrd",
     displayName: "McCreary Rd",
-    gdsFacilityId: process.env.FACILITY_MCCREARY_ID ?? "facXXXXXXXXXXXXXXXXXXXXXXXXXXXX0003",
+    propertyId: resolve(process.env.FACILITY_MCCREARY_ID),
   },
 };
 
 export function facilityBySlug(slug: string): FacilityConfig | undefined {
-  return FACILITIES[slug];
-}
-
-export function facilityById(gdsFacilityId: string): FacilityConfig | undefined {
-  return Object.values(FACILITIES).find((f) => f.gdsFacilityId === gdsFacilityId);
+  const cfg = FACILITIES[slug];
+  if (!cfg || !cfg.propertyId) return undefined;
+  return cfg;
 }

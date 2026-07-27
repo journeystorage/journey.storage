@@ -1,37 +1,12 @@
-// POST /api/nectar/account/moveout
-// { leaseId, contactId, spaceNumber, moveOutDate: "YYYY-MM-DD", note? }
-// Hummingbird-passthrough move-out: metrics -> deposit -> note -> close.
-// leaseId/contactId here are HUMMINGBIRD ids (from the tenant's pmsId fields),
-// not GDS ids. The documented flow assumes no outstanding balance — check the
-// tenant balance via /account/lookup first and route to Pay Bill if non-zero.
+// Move-out — deferred.
+// The online-rental / account flows target v2 endpoints not yet verified against the
+// live API, and require the production Granbury property ids (still pending from Tenant Inc).
+// Until then these return 503 so the reserve-by-phone fallback stays the path of record.
 
-import { NextRequest, NextResponse } from "next/server";
-import { getLeaseMetrics, getSecurityDeposit, addMoveOutNote, closeLease } from "@/lib/nectar/moveout";
-import { NectarError } from "@/lib/nectar/client";
+import { NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
-  const { leaseId, contactId, spaceNumber, moveOutDate, note } = await req.json();
-  if (!leaseId || !contactId || !moveOutDate) {
-    return NextResponse.json({ error: "leaseId, contactId, moveOutDate required" }, { status: 400 });
-  }
-  try {
-    const metrics = await getLeaseMetrics(leaseId);
-    const deposit = await getSecurityDeposit(leaseId);
+const unavailable = () =>
+  NextResponse.json({ error: "Online rental is not available yet — please reserve by phone." }, { status: 503 });
 
-    await addMoveOutNote(contactId, leaseId, spaceNumber ?? "", note ?? `Move-out requested online for ${moveOutDate} via journey.storage`);
-    await closeLease(leaseId, moveOutDate);
+export const POST = unavailable;
 
-    return NextResponse.json({
-      closed: true,
-      paidThrough: metrics.paid_through_date,
-      prepaidBalance: metrics.prepaid_balance,
-      hadAutopay: metrics.has_autopay,
-      securityDeposit: deposit, // refunds are handled by the office; must be < deposit
-    });
-  } catch (e) {
-    if (e instanceof NectarError) {
-      return NextResponse.json({ error: "Move-out could not be completed online — please call the office", requestId: e.requestId }, { status: 502 });
-    }
-    throw e;
-  }
-}

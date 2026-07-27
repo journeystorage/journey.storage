@@ -129,3 +129,65 @@ export async function hummingbirdFetch<T>(path: string, opts: NectarRequestOptio
   if (wrapped && wrapped.data !== undefined) return wrapped.data as T;
   return data;
 }
+
+// ---------------------------------------------------------------------------
+// v2 app-scoped API (the live Tenant Inc production API).
+//
+// NECTAR_BASE_URL already bakes in the application + version:
+//   https://prod.edge.tenant.dev/api/v3/applications/{appId}/v2
+// so a request path is just the resource, e.g. `companies/{co}/properties/{p}/space-mix`.
+//
+// The envelope is ALWAYS HTTP 200 with { message:"success", applicationData:{ [appId]: [ {status, data|msg} ] } }.
+// The REAL status/error lives on the inner item — a wrong company id comes back as
+// inner status 401 under an outer HTTP 200, so we must inspect the inner status, not res.ok.
+// ---------------------------------------------------------------------------
+const APP_ID = process.env.NECTAR_APP_ID ?? "";
+
+interface V2Inner<T> {
+  status?: number;
+  data?: T;
+  msg?: string;
+}
+interface V2Envelope<T> {
+  message?: string;
+  applicationData?: Record<string, Array<V2Inner<T>>>;
+  meta?: { requestId?: string };
+}
+
+export async function nectarV2<T>(path: string, opts: NectarRequestOptions = {}): Promise<{ data: T; requestId?: string }> {
+  if (!API_KEY) throw new NectarError("NECTAR_API_KEY is not configured", 500, "ConfigMissing");
+  if (!APP_ID) throw new NectarError("NECTAR_APP_ID is not configured", 500, "ConfigMissing");
+
+  const url = new URL(BASE_URL + (path.startsWith("/") ? path : `/${path}`));
+  for (const [k, v] of Object.entries(opts.query ?? {})) {
+    if (v !== undefined) url.searchParams.set(k, String(v));
+  }
+
+  const res = await fetch(url, {
+    method: opts.method ?? "GET",
+    headers: {
+      "X-storageapi-key": API_KEY,
+      "X-storageapi-date": String(Math.floor(Date.now() / 1000)),
+      ...(opts.body !== undefined ? { "Content-Type": "application/json" } : {}),
+    },
+    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    ...(opts.next ? { next: opts.next } : { cache: "no-store" as const }),
+  });
+
+  let env: V2Envelope<T> | undefined;
+  try {
+    env = (await res.json()) as V2Envelope<T>;
+  } catch {
+    /* non-JSON */
+  }
+  const requestId = env?.meta?.requestId;
+  const inner = env?.applicationData?.[APP_ID]?.[0];
+
+  if (!res.ok || !inner || (inner.status !== undefined && inner.status >= 400)) {
+    const status = inner?.status ?? res.status;
+    console.error("[nectar] v2 request failed", { path, httpStatus: res.status, innerStatus: inner?.status, msg: inner?.msg, requestId });
+    throw new NectarError(inner?.msg ?? env?.message ?? `Nectar request failed (${status})`, status, undefined, requestId);
+  }
+
+  return { data: (inner.data ?? ({} as T)), requestId };
+}

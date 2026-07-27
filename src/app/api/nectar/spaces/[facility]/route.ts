@@ -1,32 +1,25 @@
 // GET /api/nectar/spaces/:facility
-// Cached availability + pricing feed for a facility page.
-// Returns browser-safe pricing cards derived from GET /facilities/{fid}/space-types.
+// Cached live availability + pricing feed for a facility page.
+// Derives browser-safe cards from the v2 space-mix endpoint.
 
 import { NextRequest, NextResponse } from "next/server";
 import { facilityBySlug } from "@/lib/nectar/facilities";
-import { getSpaceTypes } from "@/lib/nectar/spaces";
-import { NectarError } from "@/lib/nectar/client";
-import { costArrayTotal, type SpaceType } from "@/lib/nectar/types";
+import { getSpaceMix, type SpaceOption } from "@/lib/nectar/spaces";
 
 export const revalidate = 120;
 
-function toCard(t: SpaceType) {
-  const street = t.costs.find((c) => c.costType === "rent");
-  const web = t.costs.find((c) => c.costType === "discountedRent");
+function toCard(o: SpaceOption) {
   return {
-    spaceTypeId: t.id,
-    name: t.name,
-    category: t.category,
-    description: t.description,
-    width: t.dimension?.width?.value ?? null,
-    length: t.dimension?.length?.value ?? null,
-    streetRate: street?.amount ?? costArrayTotal(t.costs),
-    webRate: web?.amount ?? null, // promotional online rate when present
-    available: t.spaceCount.available,
-    total: t.spaceCount.total,
-    features: (t.features ?? []).map((f) => f.name),
-    discounts: t.discounts.filter((d) => d.visible).map((d) => ({ id: d.id, name: d.name, value: d.value, valueType: d.valueType })),
-    insurance: t.insurance.map((i) => ({ id: i.id, coverage: i.coverage, premium: i.premium, description: i.description })),
+    id: o.id,
+    size: o.sizeLabel,
+    width: o.width,
+    length: o.length,
+    category: o.category,
+    description: o.description,
+    available: o.available,
+    inStock: o.available > 0,
+    onlinePrice: o.onlinePrice, // dollars/mo — the bookable rate
+    fromPrice: o.fromPrice,
   };
 }
 
@@ -35,14 +28,13 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ fac
   const cfg = facilityBySlug(facility);
   if (!cfg) return NextResponse.json({ error: "Unknown facility" }, { status: 404 });
   try {
-    const spaceTypes = await getSpaceTypes(cfg.gdsFacilityId);
-    return NextResponse.json({
-      facility: cfg.slug,
-      updatedAt: Date.now(),
-      spaceTypes: spaceTypes.map(toCard).sort((a, b) => (a.streetRate ?? 0) - (b.streetRate ?? 0)),
-    });
-  } catch (e) {
-    const status = e instanceof NectarError && e.isAuthError ? 502 : 502;
-    return NextResponse.json({ error: "Live pricing temporarily unavailable" }, { status });
+    const options = await getSpaceMix(cfg.propertyId);
+    const spaces = options
+      .map(toCard)
+      // vacant first, then cheapest bookable rate
+      .sort((a, b) => Number(b.inStock) - Number(a.inStock) || (a.onlinePrice ?? Infinity) - (b.onlinePrice ?? Infinity));
+    return NextResponse.json({ facility: cfg.slug, updatedAt: Date.now(), spaces });
+  } catch {
+    return NextResponse.json({ error: "Live pricing temporarily unavailable" }, { status: 502 });
   }
 }
