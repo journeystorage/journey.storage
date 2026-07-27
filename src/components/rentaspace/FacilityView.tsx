@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, type FormEvent } from 'react'
 import { MapPin, Phone, Menu, Star, Check, ChevronRight, ChevronLeft, ChevronDown, X, Ruler, Sparkles } from 'lucide-react'
 import { SIZE_ART, SizeArt, getSizeArt } from '@/lib/sizeArt'
 import RentFooter from '@/components/rentaspace/RentFooter'
+import RentalFlow from '@/components/rentaspace/RentalFlow'
 
 export type Unit = {
   size: string
@@ -115,6 +116,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
   const [reserveStatus, setReserveStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const [preview, setPreview] = useState(false)
   const [live, setLive] = useState<{ status: 'off' | 'loading' | 'ok' | 'error'; spaces: LiveSpace[]; error?: string }>({ status: 'off', spaces: [] })
+  const [rentalSpace, setRentalSpace] = useState<{ size: string; price: number; category?: string | null } | null>(null)
   const n = f.slides.length
   const gLen = f.gallery.length
   const reviewsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Journey Storage ${f.short} Granbury TX`)}`
@@ -313,19 +315,30 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                     <>
                       <p className="mt-4 text-[0.75rem] font-bold uppercase tracking-wide text-orange">{inStock.length} sizes available now · {live.spaces.length} total returned</p>
                       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                        {shown.map((s) => (
-                          <div key={s.id} className="rounded-xl border border-black/[0.06] bg-warm-white p-3 shadow-card">
-                            <p className="text-[1.125rem] font-black tracking-[-0.02em] text-black">{s.size ?? '—'}</p>
-                            <p className="mt-0.5 text-[0.75rem] font-bold text-[#5c8a52]">{s.available} available</p>
-                            <p className="mt-2 leading-none">
-                              {s.onlinePrice != null
-                                ? <><span className="text-[1.25rem] font-black text-orange">${s.onlinePrice}</span><span className="text-[0.75rem] font-bold text-stone">/mo</span></>
-                                : <span className="text-[0.8125rem] font-bold text-stone">Call for price</span>}
-                            </p>
-                          </div>
-                        ))}
+                        {shown.map((s) => {
+                          const rentable = s.onlinePrice != null && s.size
+                          return (
+                            <button
+                              key={s.id}
+                              type="button"
+                              disabled={!rentable}
+                              onClick={() => rentable && setRentalSpace({ size: s.size!, price: s.onlinePrice!, category: s.category })}
+                              className="unit group/live rounded-xl border border-black/[0.06] bg-warm-white p-3 text-left disabled:cursor-default disabled:opacity-70"
+                            >
+                              <p className="text-[1.125rem] font-black tracking-[-0.02em] text-black">{s.size ?? '—'}</p>
+                              <p className="mt-0.5 text-[0.75rem] font-bold text-[#5c8a52]">{s.available} available</p>
+                              <p className="mt-2 leading-none">
+                                {s.onlinePrice != null
+                                  ? <><span className="text-[1.25rem] font-black text-orange">${s.onlinePrice}</span><span className="text-[0.75rem] font-bold text-stone">/mo</span></>
+                                  : <span className="text-[0.8125rem] font-bold text-stone">Call for price</span>}
+                              </p>
+                              {rentable && <span className="mt-2 inline-flex items-center gap-1 text-[0.75rem] font-bold text-orange opacity-0 transition-opacity group-hover/live:opacity-100">Rent online<ChevronRight className="h-3 w-3" aria-hidden /></span>}
+                            </button>
+                          )
+                        })}
                       </div>
                       {inStock.length > shown.length && <p className="mt-3 text-[0.8125rem] text-stone">+{inStock.length - shown.length} more available sizes returned by the API…</p>}
+                      <p className="mt-3 text-[0.75rem] font-bold text-orange">↑ Click any space to walk the full online rental — move-in, lease signing, payment, gate code.</p>
                     </>
                   )
                 })()}
@@ -362,7 +375,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                             </div>
                           </div>
                         </div>
-                        <button onClick={() => openReserve(u.size)} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>
+                        <button onClick={() => preview ? setRentalSpace({ size: u.size, price: u.online, category: u.tags[0] ?? null }) : openReserve(u.size)} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>
                       </div>
                     )
                   })}
@@ -439,6 +452,15 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       </section>
 
       <RentFooter />
+
+      {/* ── RENTAL FLOW (preview-only demo checkout) ── */}
+      {rentalSpace && (
+        <RentalFlow
+          facility={{ short: f.short, address: f.address, city: f.city, phone: f.phone, tel: f.tel }}
+          space={rentalSpace}
+          onClose={() => setRentalSpace(null)}
+        />
+      )}
 
       {/* ── STICKY MOBILE CTA ── */}
       <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-black/10 bg-warm-white/95 p-3 backdrop-blur lg:hidden">
