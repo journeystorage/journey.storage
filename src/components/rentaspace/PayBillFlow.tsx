@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { X, Check, ChevronLeft, ChevronRight, Search, Wallet, CreditCard, CalendarClock } from 'lucide-react'
+import { X, Check, ChevronLeft, ChevronRight, Search, Wallet, CreditCard } from 'lucide-react'
 
 /**
  * PREVIEW-ONLY Pay Bill flow. Mirrors the real Nectar tenant-payment sequence:
@@ -34,7 +34,6 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
   const [step, setStep] = useState(0)
   const [contact, setContact] = useState('')
   const [looking, setLooking] = useState(false)
-  const [prepayMonths, setPrepayMonths] = useState(0)
   const [card, setCard] = useState({ number: '', exp: '', cvc: '' })
   const [billing, setBilling] = useState({ name: '', address1: '', city: '', state: '', zip: '' })
   const [processing, setProcessing] = useState(false)
@@ -56,8 +55,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
   }, [onClose])
 
-  const prepayTotal = +(prepayMonths * (account.monthly + account.monthly * TAX_RATE)).toFixed(2)
-  const amountDue = +(account.balanceDue + prepayTotal).toFixed(2)
+  const amountDue = account.balanceDue
 
   const canNext = () => {
     if (stepName === 'Account') return /.+@.+\..+/.test(contact) || contact.replace(/\D/g, '').length >= 7
@@ -122,27 +120,6 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
                   <div className="flex justify-between"><dt className="text-warm-white/55">Tax</dt><dd className="text-warm-white/80">{money(+(account.monthly * TAX_RATE).toFixed(2))}</dd></div>
                 </dl>
               </div>
-
-              <div className={`mt-4 ${glassCard} p-5`}>
-                <div className="flex items-center gap-2.5">
-                  <CalendarClock className="h-4 w-4 text-orange" aria-hidden />
-                  <span className="text-[0.9375rem] font-bold text-warm-white">Pay ahead</span>
-                  <span className="text-[0.8125rem] text-warm-white/45">optional</span>
-                </div>
-                <div className="mt-3 flex gap-2">
-                  {[0, 1, 3, 6].map((m) => (
-                    <button key={m} onClick={() => setPrepayMonths(m)} className={`flex-1 rounded-sm border py-2.5 text-[0.875rem] font-bold transition-colors ${prepayMonths === m ? 'border-orange bg-orange/[0.1] text-warm-white' : 'border-warm-white/12 bg-warm-white/[0.03] text-warm-white/60 hover:border-orange/50'}`}>
-                      {m === 0 ? 'None' : `${m} mo`}
-                    </button>
-                  ))}
-                </div>
-                {prepayMonths > 0 && <p className="mt-2.5 text-[0.75rem] text-warm-white/45">+{money(prepayTotal)} for {prepayMonths} month{prepayMonths > 1 ? 's' : ''} prepaid</p>}
-              </div>
-
-              <div className="mt-5 flex items-baseline justify-between border-t border-warm-white/10 pt-4">
-                <span className="text-[1rem] font-black text-warm-white">Total to pay</span>
-                <span className="text-[1.5rem] font-black text-orange">{money(amountDue)}</span>
-              </div>
             </div>
           )}
 
@@ -181,7 +158,6 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
                   <div className="flex justify-between"><dt className="text-warm-white/55">Confirmation</dt><dd className="font-black tracking-[0.05em] text-warm-white">{confirmation}</dd></div>
                   <div className="flex justify-between"><dt className="text-warm-white/55">Amount paid</dt><dd className="font-bold text-warm-white">{money(amountDue)}</dd></div>
                   <div className="flex justify-between"><dt className="text-warm-white/55">New balance</dt><dd className="font-bold text-sage-green">$0.00</dd></div>
-                  {prepayMonths > 0 && <div className="flex justify-between"><dt className="text-warm-white/55">Paid ahead</dt><dd className="font-bold text-warm-white">{prepayMonths} month{prepayMonths > 1 ? 's' : ''}</dd></div>}
                 </dl>
               </div>
               <p className="mt-7 text-[0.75rem] text-warm-white/40">Preview — no real payment was made. Questions? Call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a>.</p>

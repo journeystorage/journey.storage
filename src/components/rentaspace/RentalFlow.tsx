@@ -199,7 +199,7 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
               </div>
               <p className="mt-4 flex items-start gap-2.5 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-4 py-3 text-[0.8125rem] leading-relaxed text-warm-white/60">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-sage-green" aria-hidden />
-                <span>Already insured? Send us proof of your homeowner&rsquo;s or renter&rsquo;s coverage and this protection is dropped from your bill.</span>
+                <span>Already insured? Just send us proof of your homeowner&rsquo;s or renter&rsquo;s coverage and we&rsquo;ll happily drop this protection from your bill.</span>
               </p>
             </div>
           )}
