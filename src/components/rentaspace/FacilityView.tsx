@@ -5,6 +5,7 @@ import { MapPin, Phone, Menu, Star, Check, ChevronRight, ChevronLeft, ChevronDow
 import { SIZE_ART, SizeArt, getSizeArt } from '@/lib/sizeArt'
 import RentFooter from '@/components/rentaspace/RentFooter'
 import RentalFlow from '@/components/rentaspace/RentalFlow'
+import PayBillFlow from '@/components/rentaspace/PayBillFlow'
 
 export type Unit = {
   size: string
@@ -53,7 +54,7 @@ const SCOPED_CSS = `
 #facility .unit:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(24,24,24,.05),0 22px 44px -18px rgba(232,98,42,.24)}
 `
 
-function Nav({ onSizeGuide }: { onSizeGuide: () => void }) {
+function Nav({ onSizeGuide, onPayBill }: { onSizeGuide: () => void; onPayBill?: () => void }) {
   return (
     <header className="absolute left-0 right-0 top-0 z-50">
       <nav className="mx-auto flex h-[72px] max-w-content items-center justify-between px-5 lg:px-16">
@@ -68,7 +69,11 @@ function Nav({ onSizeGuide }: { onSizeGuide: () => void }) {
           <a href={PHONE_TEL} className="flex items-center gap-2 text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">
             <Phone className="h-4 w-4" strokeWidth={2} aria-hidden />(817) 579-0607
           </a>
-          <a href={PHONE_TEL} className="btn-spring rounded-full border-2 border-warm-white/80 px-5 py-2 text-[0.9375rem] font-bold text-warm-white hover:bg-warm-white hover:text-black">Pay Bill</a>
+          {onPayBill ? (
+            <button onClick={onPayBill} className="btn-spring rounded-full border-2 border-warm-white/80 px-5 py-2 text-[0.9375rem] font-bold text-warm-white hover:bg-warm-white hover:text-black">Pay Bill</button>
+          ) : (
+            <a href={PHONE_TEL} className="btn-spring rounded-full border-2 border-warm-white/80 px-5 py-2 text-[0.9375rem] font-bold text-warm-white hover:bg-warm-white hover:text-black">Pay Bill</a>
+          )}
         </div>
         <button className="text-warm-white lg:hidden" aria-label="Menu"><Menu className="h-7 w-7" strokeWidth={2} aria-hidden /></button>
       </nav>
@@ -117,6 +122,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
   const [preview, setPreview] = useState(false)
   const [live, setLive] = useState<{ status: 'off' | 'loading' | 'ok' | 'error'; spaces: LiveSpace[]; error?: string }>({ status: 'off', spaces: [] })
   const [rentalSpace, setRentalSpace] = useState<{ size: string; price: number; category?: string | null } | null>(null)
+  const [payBill, setPayBill] = useState(false)
   const n = f.slides.length
   const gLen = f.gallery.length
   const reviewsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Journey Storage ${f.short} Granbury TX`)}`
@@ -222,7 +228,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
     <div id="facility" className="bg-warm-white pb-16 text-black antialiased lg:pb-0">
       <style dangerouslySetInnerHTML={{ __html: SCOPED_CSS }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <Nav onSizeGuide={() => setGuideOpen(true)} />
+      <Nav onSizeGuide={() => setGuideOpen(true)} onPayBill={preview ? () => setPayBill(true) : undefined} />
 
       {/* ── HERO CAROUSEL ── */}
       <section className="relative h-[460px] overflow-hidden bg-black lg:h-[540px]">
@@ -460,6 +466,11 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
           space={rentalSpace}
           onClose={() => setRentalSpace(null)}
         />
+      )}
+
+      {/* ── PAY BILL (preview-only demo) ── */}
+      {payBill && (
+        <PayBillFlow facility={{ short: f.short, phone: f.phone, tel: f.tel }} onClose={() => setPayBill(false)} />
       )}
 
       {/* ── STICKY MOBILE CTA ── */}
