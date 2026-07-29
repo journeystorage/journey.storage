@@ -113,14 +113,16 @@
   }
 
     /* ---------- Desktop deck navigation ----------
-     * The side pager and per-slide page badges this file used to build
-     * do not exist in this export — the selectors matched nothing, and
-     * the badge loop was overwriting real content (it renumbered the
-     * "01" step marker on the Frictionless slide to "06").  Both were
-     * removed.  What remains is keyboard navigation, which the deck
-     * genuinely lacked: <main class="deck"> is the scroll container,
-     * not the document, so arrow keys did nothing until the visitor
-     * happened to click inside the deck first.
+     * This export ships no navigation UI: the side pager and per-slide
+     * page badges the old code targeted are not in the markup, so its
+     * selectors matched nothing and its badge loop overwrote real
+     * content (it renumbered the "01" step marker on the Frictionless
+     * slide to "06").  That code is gone; the pager below is built from
+     * scratch against the sections that actually exist.
+     *
+     * Keyboard handling matters here too: <main class="deck"> is the
+     * scroll container rather than the document, so arrow keys did
+     * nothing until the visitor happened to click inside the deck.
      */
     const deck = document.querySelector('main.deck');
     const sections = Array.from(document.querySelectorAll('section'));
@@ -159,6 +161,106 @@
           e.preventDefault(); goTo(sections.length - 1); break;
       }
     });
+
+    /* ---------- Side pager ----------
+     * One dot per slide, labelled on hover.  With 31 slides the rail is
+     * the only way to move around without scrolling the whole deck.
+     */
+
+    // Slide name for the hover label: prefer the heading, minus any
+    // nested body copy, and drop the boilerplate before the en dash
+    // ("Property Details – N. State Hwy H" reads better as the address).
+    function labelFor(sec, i) {
+      const h = sec.querySelector('h2') || sec.querySelector('h1');
+      let t = '';
+      if (h) {
+        const clone = h.cloneNode(true);
+        clone.querySelectorAll('p, div').forEach(function (n) { n.remove(); });
+        t = clone.textContent.replace(/\s+/g, ' ').trim();
+      }
+      const dash = t.indexOf('–');
+      if (dash > -1 && t.length - dash > 3) t = t.slice(dash + 1).trim();
+      if (!t) {
+        const eyebrow = sec.querySelector('span');
+        t = eyebrow ? eyebrow.textContent.replace(/\s+/g, ' ').trim() : '';
+      }
+      if (!t) t = 'Slide ' + (i + 1);
+      return t.length > 34 ? t.slice(0, 33).trim() + '…' : t;
+    }
+
+    // Group key = the section's eyebrow, so the eleven asset slides and
+    // the four competition slides read as blocks rather than one long run.
+    function groupKey(sec) {
+      const s = sec.querySelector('span');
+      return s ? s.textContent.replace(/\s+/g, ' ').trim() : '';
+    }
+    const keys = sections.map(groupKey);
+    const runLength = {};
+    keys.forEach(function (k) { runLength[k] = (runLength[k] || 0) + 1; });
+
+    const pager = document.createElement('nav');
+    pager.className = 'deck-pager';
+    pager.setAttribute('aria-label', 'Slide navigation');
+
+    function mkNav(label, points, onClick) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'deck-nav';
+      b.setAttribute('aria-label', label);
+      b.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+        'stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="' + points + '"></polyline></svg>';
+      b.addEventListener('click', onClick);
+      return b;
+    }
+    const prevBtn = mkNav('Previous slide', '18 15 12 9 6 15', function () { goTo(currentIdx() - 1); });
+    const nextBtn = mkNav('Next slide', '6 9 12 15 18 9', function () { goTo(currentIdx() + 1); });
+
+    const dotsCol = document.createElement('div');
+    dotsCol.className = 'deck-pager-dots';
+    const dots = sections.map(function (sec, i) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'deck-dot';
+      const name = labelFor(sec, i);
+      b.setAttribute('aria-label', (i + 1) + ' of ' + sections.length + ': ' + name);
+      // Separate one block of slides from the next, but only where a
+      // repeated eyebrow actually forms a block.
+      if (i > 0 && keys[i] !== keys[i - 1] && (runLength[keys[i]] > 1 || runLength[keys[i - 1]] > 1)) {
+        b.classList.add('deck-dot--group');
+      }
+      const tip = document.createElement('span');
+      tip.className = 'deck-tip';
+      tip.textContent = name;
+      b.appendChild(tip);
+      b.addEventListener('click', function () { goTo(i); });
+      dotsCol.appendChild(b);
+      return b;
+    });
+
+    pager.appendChild(prevBtn);
+    pager.appendChild(dotsCol);
+    pager.appendChild(nextBtn);
+    document.body.appendChild(pager);
+
+    let active = -1;
+    function paint() {
+      const i = Math.max(0, Math.min(sections.length - 1, currentIdx()));
+      if (i !== active) {
+        if (dots[active]) dots[active].removeAttribute('aria-current');
+        dots[i].setAttribute('aria-current', 'true');
+        active = i;
+      }
+      prevBtn.disabled = i === 0;
+      nextBtn.disabled = i === sections.length - 1;
+    }
+    let ticking = false;
+    deck.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () { paint(); ticking = false; });
+    }, { passive: true });
+    window.addEventListener('resize', paint);
+    paint();
 
   });
 })();
