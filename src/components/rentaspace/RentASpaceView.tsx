@@ -14,6 +14,10 @@ const SCOPED_CSS = `
 #rentaspace .btn-spring:active{transform:translateY(0)}
 #rentaspace .card-spring{box-shadow:0 1px 2px rgba(24,24,24,.04),0 12px 32px -12px rgba(24,24,24,.14);transition:transform .28s cubic-bezier(.22,1,.36,1),box-shadow .28s cubic-bezier(.22,1,.36,1)}
 #rentaspace .card-spring:hover{transform:translateY(-4px);box-shadow:0 2px 4px rgba(24,24,24,.06),0 24px 48px -16px rgba(232,98,42,.22)}
+#rentaspace .r-jr{border-radius:20px 4px 4px 4px}
+#rentaspace .eyebrow{display:flex;align-items:center;gap:.75rem}
+#rentaspace .eyebrow.center{justify-content:center}
+#rentaspace .eyebrow::before{content:'';height:1px;width:2rem;background:var(--color-orange);flex:none}
 `
 
 const phoneIcon = (cls: string) => <Phone className={cls} strokeWidth={2} aria-hidden />
@@ -57,7 +61,12 @@ export default function RentASpaceView() {
           <div className="absolute inset-0" style={{ background: 'radial-gradient(120% 90% at 50% 8%, rgba(232,98,42,0.22) 0%, transparent 55%)' }} />
         </div>
 
-        <div className="relative mx-auto max-w-content px-5 pb-24 pt-[150px] lg:px-16 lg:pb-28 lg:pt-[188px]">
+        {/* Ghost watermark */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-[1] flex select-none items-center justify-center overflow-hidden">
+          <span className="whitespace-nowrap text-[7rem] font-black uppercase leading-none tracking-tighter text-warm-white/[0.04] lg:text-[16rem]">Space</span>
+        </div>
+
+        <div className="relative z-[2] mx-auto max-w-content px-5 pb-24 pt-[150px] lg:px-16 lg:pb-28 lg:pt-[188px]">
           <div className="mx-auto max-w-3xl text-center">
             <span className="mb-5 inline-block text-[0.8125rem] font-bold uppercase tracking-[0.22em] text-terracotta">Clean · Secure · Month-to-month</span>
             <h1 className="track-tighter text-[2.75rem] font-black leading-[0.98] text-warm-white sm:text-[3.75rem] lg:text-[4.25rem]">
@@ -115,14 +124,14 @@ export default function RentASpaceView() {
       {/* ── LOCATIONS ── */}
       <section id="locations" className="mx-auto max-w-content px-5 py-20 lg:px-16 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="text-[0.8125rem] font-bold uppercase tracking-[0.2em] text-orange">Storage without the friction</span>
+          <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Storage without the friction</span></div>
           <h2 className="track-tight mt-3 text-[2rem] font-black leading-tight text-black lg:text-[2.5rem]">Our Granbury locations</h2>
           <p className="mt-3 text-[1.0625rem] leading-relaxed text-stone">Three facilities across Granbury. Pick the one nearest you and reserve online — someone who understands your moment is close by.</p>
         </div>
 
         <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {/* #1 Temple Hall */}
-          <article className="card-spring group relative flex flex-col overflow-hidden rounded-2xl border border-black/[0.05] bg-white">
+          <article className="card-spring group r-jr relative flex flex-col overflow-hidden border border-black/[0.05] bg-white">
             <div className="relative h-44 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/images/granbury/rs-card-th-aerial.webp" alt="Temple Hall facility aerial" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -152,7 +161,7 @@ export default function RentASpaceView() {
           </article>
 
           {/* #2 Western Hills */}
-          <article className="card-spring group relative flex flex-col overflow-hidden rounded-2xl border border-black/[0.05] bg-white">
+          <article className="card-spring group r-jr relative flex flex-col overflow-hidden border border-black/[0.05] bg-white">
             <div className="relative h-44 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/images/granbury/rs-card-wh-aerial.webp" alt="Western Hills facility aerial" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -182,7 +191,7 @@ export default function RentASpaceView() {
           </article>
 
           {/* #3 Cleveland Rd */}
-          <article className="card-spring group relative flex flex-col overflow-hidden rounded-2xl border border-black/[0.05] bg-white">
+          <article className="card-spring group r-jr relative flex flex-col overflow-hidden border border-black/[0.05] bg-white">
             <div className="relative h-44 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/images/granbury/rs-card-cl-aerial.webp" alt="Cleveland Rd facility aerial" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -218,7 +227,7 @@ export default function RentASpaceView() {
         <div className="mx-auto max-w-content px-5 py-20 lg:px-16 lg:py-24">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
             <div>
-              <span className="text-[0.8125rem] font-bold uppercase tracking-[0.2em] text-orange">Featured facility</span>
+              <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Featured facility</span></div>
               <h2 className="track-tight mt-3 text-[2rem] font-black leading-[1.05] text-black lg:text-[2.5rem]">More than a space.<br />Our flagship on Temple Hall.</h2>
               <p className="mt-4 text-[1.0625rem] leading-relaxed text-stone">Our flagship Granbury facility: 350+ clean, secure spaces set on landscaped grounds — from breezy drive-up spaces to fully climate-controlled interior storage. Wide, well-lit aisles, a friendly front office, and a gated perimeter watched around the clock.</p>
               <ul className="mt-6 space-y-3">
@@ -235,15 +244,15 @@ export default function RentASpaceView() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="shadow-card relative col-span-2 aspect-[16/9] overflow-hidden rounded-2xl">
+              <div className="shadow-card r-jr relative col-span-2 aspect-[16/9] overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/images/granbury/rs-gallery-aerial.webp" alt="Aerial of Temple Hall facility" className="h-full w-full object-cover" />
               </div>
-              <div className="shadow-card relative aspect-[4/3] overflow-hidden rounded-2xl">
+              <div className="shadow-card r-jr relative aspect-[4/3] overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/images/granbury/rs-gallery-climate.webp" alt="Climate-controlled units" className="h-full w-full object-cover" />
               </div>
-              <div className="shadow-card relative aspect-[4/3] overflow-hidden rounded-2xl">
+              <div className="shadow-card r-jr relative aspect-[4/3] overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/images/granbury/rs-gallery-office.webp" alt="Rental office" className="h-full w-full object-cover" />
               </div>
@@ -254,7 +263,7 @@ export default function RentASpaceView() {
 
       {/* ── HOURS / INFO ── */}
       <section className="mx-auto max-w-content px-5 py-16 lg:px-16 lg:py-20">
-        <div className="shadow-card grid grid-cols-1 gap-6 rounded-2xl border border-black/[0.05] bg-white p-6 text-center sm:grid-cols-3 lg:p-8">
+        <div className="shadow-card r-jr grid grid-cols-1 gap-6 border border-black/[0.05] bg-white p-6 text-center sm:grid-cols-3 lg:p-8">
           <div>
             <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Open 24/7</p>
             <p className="mt-1 text-[0.9375rem] leading-relaxed text-charcoal">Gate access any hour<br />Every day of the year</p>
@@ -272,14 +281,19 @@ export default function RentASpaceView() {
       </section>
 
       {/* ── CTA BAND ── */}
-      <section className="relative overflow-hidden bg-black">
+      <section className="grain relative overflow-hidden bg-black">
         <div className="absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 50% 0%, rgba(232,98,42,0.22) 0%, transparent 60%)' }} />
-        <div className="relative mx-auto max-w-content px-5 py-16 text-center lg:px-16 lg:py-20">
-          <h2 className="track-tighter text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3rem]">Space to move on.</h2>
+        {/* Ghost watermark */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-[1] flex select-none items-center justify-center overflow-hidden">
+          <span className="whitespace-nowrap text-[5rem] font-black uppercase leading-none tracking-tighter text-warm-white/[0.03] lg:text-[11rem]">Journey</span>
+        </div>
+        <div className="relative z-[2] mx-auto max-w-content px-5 py-16 text-center lg:px-16 lg:py-20">
+          <div className="eyebrow center"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Space to move on</span></div>
+          <h2 className="track-tighter mt-4 text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3rem]">Find your space today.</h2>
           <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] font-light text-warm-white/70 lg:text-[1.25rem]">Find your space in Granbury today. Clear pricing, no lock-in, and a team that gets your moment.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <a href="#locations" className="btn-spring shadow-cta rounded-xl bg-orange px-8 py-3.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Find a space</a>
-            <a href="tel:+18175790607" className="btn-spring rounded-xl border-2 border-warm-white/70 px-8 py-3.5 font-bold text-warm-white hover:bg-warm-white hover:text-black">Call us</a>
+            <a href="#locations" className="btn-spring shadow-cta rounded-sm bg-orange px-8 py-3.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Find a space</a>
+            <a href="tel:+18175790607" className="btn-spring rounded-sm border-2 border-warm-white/70 px-8 py-3.5 font-bold text-warm-white hover:bg-warm-white hover:text-black">Call us</a>
           </div>
         </div>
       </section>
