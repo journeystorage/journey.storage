@@ -112,118 +112,53 @@
     return;
   }
 
+    /* ---------- Desktop deck navigation ----------
+     * The side pager and per-slide page badges this file used to build
+     * do not exist in this export — the selectors matched nothing, and
+     * the badge loop was overwriting real content (it renumbered the
+     * "01" step marker on the Frictionless slide to "06").  Both were
+     * removed.  What remains is keyboard navigation, which the deck
+     * genuinely lacked: <main class="deck"> is the scroll container,
+     * not the document, so arrow keys did nothing until the visitor
+     * happened to click inside the deck first.
+     */
+    const deck = document.querySelector('main.deck');
     const sections = Array.from(document.querySelectorAll('section'));
-    const total = sections.length;
-    if (!total) return;
+    if (!deck || !sections.length) return;
 
-    /* ---------- 1. Rebuild side pager ---------- */
-    const pagerWrap = document.querySelector('.hidden.lg\\:flex.fixed.right-4.top-1\\/2, [class*="right-4"][class*="top-1/2"]');
-    if (pagerWrap) {
-      // Find the existing prev / next buttons
-      const prevBtn = pagerWrap.querySelector('button[aria-label="Previous page"]');
-      const nextBtn = pagerWrap.querySelector('button[aria-label="Next page"]');
-
-      // Remove all existing "Go to page N" buttons
-      pagerWrap.querySelectorAll('button[aria-label^="Go to page"]').forEach(b => b.remove());
-
-      // Build a wrapper for the dots between prev and next
-      const dotsCol = document.createElement('div');
-      dotsCol.className = 'flex flex-col gap-2 items-center my-2';
-      dotsCol.style.maxHeight = '70vh';
-      dotsCol.style.overflowY = 'auto';
-      dotsCol.style.overflowX = 'hidden';
-      dotsCol.style.padding = '4px 2px';
-      dotsCol.style.scrollbarWidth = 'thin';
-
-      sections.forEach((sec, i) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.setAttribute('aria-label', 'Go to page ' + (i+1));
-        btn.dataset.idx = String(i);
-        btn.className = 'deck-dot block rounded-full transition-all duration-200 cursor-pointer h-1.5 w-1.5 bg-deck-text/20 hover:bg-deck-text/40';
-        btn.style.flexShrink = '0';
-        btn.addEventListener('click', function(){
-          sec.scrollIntoView({behavior:'smooth', block:'start'});
-        });
-        dotsCol.appendChild(btn);
-      });
-
-      if (prevBtn && nextBtn) {
-        prevBtn.parentNode.insertBefore(dotsCol, nextBtn);
-      } else {
-        pagerWrap.appendChild(dotsCol);
-      }
-
-      // Wire prev/next
-      function currentIdx(){
-        const mid = window.scrollY + window.innerHeight/2;
-        let best = 0, bestDist = Infinity;
-        sections.forEach((s, i) => {
-          const c = s.offsetTop + s.offsetHeight/2;
-          const d = Math.abs(c - mid);
-          if (d < bestDist){ best = i; bestDist = d; }
-        });
-        return best;
-      }
-      if (prevBtn) prevBtn.addEventListener('click', () => {
-        const i = Math.max(0, currentIdx() - 1);
-        sections[i].scrollIntoView({behavior:'smooth', block:'start'});
-      });
-      if (nextBtn) nextBtn.addEventListener('click', () => {
-        const i = Math.min(sections.length - 1, currentIdx() + 1);
-        sections[i].scrollIntoView({behavior:'smooth', block:'start'});
-      });
-
-      /* Active dot tracking via IntersectionObserver */
-      const dots = Array.from(dotsCol.querySelectorAll('button.deck-dot'));
-      function setActive(i){
-        dots.forEach((d, j) => {
-          if (j === i){
-            d.className = 'deck-dot block rounded-full transition-all duration-200 cursor-pointer h-2.5 w-2.5 bg-orange';
-          } else {
-            d.className = 'deck-dot block rounded-full transition-all duration-200 cursor-pointer h-1.5 w-1.5 bg-deck-text/20 hover:bg-deck-text/40';
-          }
-        });
-        // Scroll active dot into view within the dots column
-        if (dots[i]) dots[i].scrollIntoView({block:'nearest', inline:'nearest'});
-      }
-
-      /* Update active dot on scroll (debounced via rAF) */
-      let scrollTick = false;
-      window.addEventListener('scroll', () => {
-        if (scrollTick) return;
-        scrollTick = true;
-        requestAnimationFrame(() => {
-          setActive(currentIdx());
-          scrollTick = false;
-        });
-      }, {passive:true});
-      setActive(0);
+    function currentIdx() {
+      const h = deck.clientHeight || 1;
+      return Math.round(deck.scrollTop / h);
+    }
+    function goTo(i) {
+      const target = Math.max(0, Math.min(sections.length - 1, i));
+      // Smooth for a step or two; jumping the length of the deck with a
+      // smooth animation takes seconds and fights the mandatory snap.
+      const far = Math.abs(target - currentIdx()) > 2;
+      deck.scrollTo({ top: target * deck.clientHeight, behavior: far ? 'auto' : 'smooth' });
     }
 
-    /* ---------- 2. Per-section page-number indicators ---------- */
-    /* Each section's bottom-right shows a 2-digit page index.
-     * Find the existing span and update it to "01 / N" format
-     * so the user can see total pages.                            */
-    sections.forEach((sec, i) => {
-      // The page number indicator is typically a small <span> with classes like
-      // "uppercase tracking-[0.12em] text-deck-text/25" sitting in a flex row footer
-      const candidates = sec.querySelectorAll('span');
-      for (const sp of candidates) {
-        const t = (sp.textContent || '').trim();
-        if (/^\d{2}$/.test(t)) {
-          // Existing page indicator (e.g., "01") — replace with "<idx>/<total>"
-          const override = sec.getAttribute('data-page-label');
-          const idx = override || String(i + 1).padStart(2, '0');
-          sp.textContent = idx;
-          break;
-        }
+    document.addEventListener('keydown', function (e) {
+      // Never fight the lightbox, a modifier chord, or a focused field.
+      const lb = document.getElementById('deck-lightbox');
+      if (lb && lb.classList.contains('open')) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+
+      switch (e.key) {
+        case 'ArrowDown': case 'PageDown': case 'ArrowRight':
+          e.preventDefault(); goTo(currentIdx() + 1); break;
+        case 'ArrowUp': case 'PageUp': case 'ArrowLeft':
+          e.preventDefault(); goTo(currentIdx() - 1); break;
+        case ' ': case 'Spacebar':
+          e.preventDefault(); goTo(currentIdx() + (e.shiftKey ? -1 : 1)); break;
+        case 'Home':
+          e.preventDefault(); goTo(0); break;
+        case 'End':
+          e.preventDefault(); goTo(sections.length - 1); break;
       }
     });
 
-    /* Theme toggle + download were already bound by the MOBILE PATCH
-       block at the top of ready(); rebinding them here would cause the
-       handler to fire twice per click and toggle right back to the
-       previous state, so the click appears to do nothing. */
   });
 })();
