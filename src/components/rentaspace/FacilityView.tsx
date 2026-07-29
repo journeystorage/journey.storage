@@ -50,6 +50,9 @@ const SCOPED_CSS = `
 #facility .btn-spring{transition:transform .2s cubic-bezier(.22,1,.36,1),box-shadow .2s cubic-bezier(.22,1,.36,1),filter .2s ease}
 #facility .btn-spring:hover{transform:translateY(-1px);filter:brightness(1.06)}
 #facility .btn-spring:active{transform:translateY(0)}
+#facility .r-jr{border-radius:20px 4px 4px 4px}
+#facility .eyebrow{display:flex;align-items:center;gap:.75rem}
+#facility .eyebrow::before{content:'';height:1px;width:2rem;background:var(--color-orange)}
 #facility .unit{box-shadow:0 1px 2px rgba(24,24,24,.04),0 10px 26px -14px rgba(24,24,24,.14);transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s cubic-bezier(.22,1,.36,1)}
 #facility .unit:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(24,24,24,.05),0 22px 44px -18px rgba(232,98,42,.24)}
 `
@@ -231,13 +234,17 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       <Nav onSizeGuide={() => setGuideOpen(true)} onPayBill={preview ? () => setPayBill(true) : undefined} />
 
       {/* ── HERO CAROUSEL ── */}
-      <section className="relative h-[460px] overflow-hidden bg-black lg:h-[540px]">
+      <section className="grain relative h-[460px] overflow-hidden bg-black lg:h-[540px]">
         {f.slides.map((sl, i) => (
           // eslint-disable-next-line @next/next/no-img-element
           <img key={sl.src} src={sl.src} alt={i === slide ? sl.alt : ''} className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${i === slide ? 'opacity-100' : 'opacity-0'}`} />
         ))}
         <div className="absolute inset-0 bg-charcoal/30 mix-blend-multiply" />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(24,24,24,0.60) 0%, rgba(24,24,24,0.25) 45%, rgba(24,24,24,0.88) 100%)' }} />
+        {/* Ghost watermark */}
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-[-2.5rem] z-[1] flex select-none justify-end overflow-hidden pr-4 lg:pr-16">
+          <span className="whitespace-nowrap text-[7rem] font-black uppercase leading-none tracking-tighter text-warm-white/[0.04] lg:text-[14rem]">Storage</span>
+        </div>
 
         <div className="relative mx-auto flex h-full max-w-content flex-col px-5 pt-[104px] lg:px-16 lg:pt-[120px]">
           <nav className="flex items-center gap-1.5 text-[0.8125rem] font-bold text-warm-white/70">
@@ -299,7 +306,8 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       <section className="mx-auto max-w-content px-5 py-12 lg:px-16 lg:py-16">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:gap-12">
           <div>
-            <h2 className="track-tight text-[1.75rem] font-black text-black lg:text-[2.25rem]">Choose your space</h2>
+            <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Rent a space</span></div>
+            <h2 className="track-tight mt-3 text-[1.75rem] font-black text-black lg:text-[2.25rem]">Choose your space</h2>
             <p className="mt-2 text-[1.0625rem] leading-relaxed text-stone">Reserve online in minutes — lock in the online rate, move in when you like. Month-to-month, no deposit, no long-term commitment.</p>
 
             {preview && (
@@ -361,7 +369,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                   {group.units.map((u) => {
                     const art = getSizeArt(u.art)
                     return (
-                      <div key={u.size} className="unit flex h-full flex-col rounded-2xl border border-black/[0.06] bg-warm-white p-5">
+                      <div key={u.size} className="unit r-jr flex h-full flex-col border border-black/[0.06] bg-warm-white p-5">
                         <div className="mb-5 flex items-start gap-4">
                           <SizeVideo art={u.art} tint={art?.tint ?? 'rgba(232,98,42,0.1)'} />
                           <div className="min-w-0 flex-1">
@@ -394,7 +402,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
 
           {/* sidebar */}
           <aside className="flex flex-col gap-6 lg:sticky lg:top-6 lg:self-start">
-            <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-warm-white shadow-card">
+            <div className="r-jr overflow-hidden border border-black/[0.06] bg-warm-white shadow-card">
               <iframe title={`Map of Journey.Storage ${f.short}, ${f.address}`} src={`https://www.google.com/maps?q=${encodeURIComponent(f.mapQuery)}&output=embed`} className="h-44 w-full border-0" loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
               <div className="p-5">
                 <p className="flex items-start gap-2 text-[0.9375rem] font-bold text-black"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange" strokeWidth={2} aria-hidden /><span>{f.address}<br /><span className="font-normal text-stone">{f.city}</span></span></p>
@@ -403,7 +411,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
               </div>
             </div>
 
-            <button onClick={() => setGuideOpen(true)} className="btn-spring flex w-full items-center justify-between gap-3 rounded-2xl border border-black/[0.06] bg-warm-white p-5 text-left shadow-card hover:border-orange/40">
+            <button onClick={() => setGuideOpen(true)} className="btn-spring r-jr flex w-full items-center justify-between gap-3 border border-black/[0.06] bg-warm-white p-5 text-left shadow-card hover:border-orange/40">
               <span className="flex items-center gap-3">
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-orange/[0.12] text-orange"><Ruler className="h-5 w-5" strokeWidth={2} aria-hidden /></span>
                 <span><span className="block text-[0.9375rem] font-black text-black">Not sure what fits?</span><span className="block text-[0.8125rem] text-stone">Open the storage size guide</span></span>
@@ -411,14 +419,14 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
               <ChevronRight className="h-5 w-5 shrink-0 text-orange" aria-hidden />
             </button>
 
-            <div className="rounded-2xl border border-black/[0.06] bg-warm-white p-5 shadow-card">
+            <div className="r-jr border border-black/[0.06] bg-warm-white p-5 shadow-card">
               <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Amenities</p>
               <ul className="mt-3 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
                 {f.amenities.map((a) => (<li key={a} className="flex items-center gap-2 text-[0.875rem] text-charcoal"><Check className="h-4 w-4 shrink-0 text-sage-green" strokeWidth={2.5} aria-hidden />{a}</li>))}
               </ul>
             </div>
 
-            <div className="rounded-2xl border border-black/[0.06] bg-warm-white p-5 shadow-card">
+            <div className="r-jr border border-black/[0.06] bg-warm-white p-5 shadow-card">
               <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Common questions</p>
               <div className="mt-2 divide-y divide-black/[0.07]">
                 {f.faqs.map((faq) => (
@@ -437,7 +445,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       <section className="border-y border-black/[0.06] bg-warm-white">
         <div className="mx-auto max-w-content px-5 py-14 lg:px-16 lg:py-20">
           <div className="max-w-3xl">
-            <span className="text-[0.8125rem] font-bold uppercase tracking-[0.2em] text-orange">About this location</span>
+            <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">About this location</span></div>
             <h2 className="track-tight mt-3 text-[1.75rem] font-black leading-tight text-black lg:text-[2.25rem]">Self storage on {f.short}, Granbury.</h2>
             <div className="mt-5 space-y-4 text-[1.0625rem] leading-relaxed text-stone">{f.about.map((p, i) => (<p key={i}>{p}</p>))}</div>
           </div>
@@ -445,14 +453,19 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       </section>
 
       {/* ── CTA ── */}
-      <section className="relative overflow-hidden bg-black">
+      <section className="grain relative overflow-hidden bg-black">
         <div className="absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 50% 0%, rgba(232,98,42,0.22) 0%, transparent 60%)' }} />
-        <div className="relative mx-auto max-w-content px-5 py-16 text-center lg:px-16 lg:py-20">
-          <h2 className="track-tighter text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3rem]">Space to move on.</h2>
+        {/* Ghost watermark */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-[1] flex select-none items-center justify-center overflow-hidden">
+          <span className="whitespace-nowrap text-[5rem] font-black uppercase leading-none tracking-tighter text-warm-white/[0.03] lg:text-[11rem]">Journey</span>
+        </div>
+        <div className="relative z-[2] mx-auto max-w-content px-5 py-16 text-center lg:px-16 lg:py-20">
+          <div className="eyebrow justify-center"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Space to move on</span></div>
+          <h2 className="track-tighter mt-4 text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3rem]">Your space is waiting.</h2>
           <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] font-light text-warm-white/70 lg:text-[1.25rem]">Reserve your space at {f.short} today — clear pricing, month-to-month, rented online in minutes.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <button onClick={() => openReserve('')} className="btn-spring shadow-cta rounded-xl bg-orange px-8 py-3.5 font-bold text-warm-white">Reserve a space</button>
-            <a href={f.tel} className="btn-spring rounded-xl border-2 border-warm-white/70 px-8 py-3.5 font-bold text-warm-white hover:bg-warm-white hover:text-black">Call us</a>
+            <button onClick={() => openReserve('')} className="btn-spring shadow-cta rounded-sm bg-orange px-8 py-3.5 font-bold text-warm-white">Reserve a space</button>
+            <a href={f.tel} className="btn-spring rounded-sm border-2 border-warm-white/70 px-8 py-3.5 font-bold text-warm-white hover:bg-warm-white hover:text-black">Call us</a>
           </div>
         </div>
       </section>
