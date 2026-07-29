@@ -70,7 +70,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={lato.variable}>
+      {/* journey_property is mapped to GA4 content_group in GTM, so sibling
+          sites sharing this container (managed.journey.storage) stay separable
+          in standard reports — page paths alone collide on "/". */}
       <Script id="gtm" strategy="afterInteractive">{`
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ journey_property: 'Main Site' });
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
         j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=

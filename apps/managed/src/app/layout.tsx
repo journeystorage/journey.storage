@@ -70,7 +70,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={lato.variable}>
+      {/* journey_property is mapped to GA4 content_group in GTM, so this
+          subdomain stays separable from journey.storage in standard reports —
+          both share GTM-NL5KP8QJ and their page paths collide on "/". */}
       <Script id="gtm" strategy="afterInteractive">{`
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ journey_property: 'Managed' });
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
         j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
