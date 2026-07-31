@@ -203,6 +203,7 @@ export default function Navbar() {
                 <a
                   key={link.label}
                   href={link.href}
+                  onClick={() => setMobileOpen(false)}
                   className="group flex items-baseline gap-3 py-2.5 text-left"
                 >
                   <span className="text-[0.6rem] font-bold tabular-nums tracking-[0.2em] text-orange/60 group-hover:text-orange transition-colors duration-150">

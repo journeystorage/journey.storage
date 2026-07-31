@@ -359,7 +359,7 @@ export default function ManagedView() {
       </section>
 
       {/* ══════════ MODEL ══════════ */}
-      <section id="managed-model" className="bg-warm-white">
+      <section id="managed-model" className="scroll-mt-20 bg-warm-white">
         <div className="mx-auto max-w-content px-5 py-20 md:px-8 lg:px-16 lg:py-28">
           <SectionHead
             eyebrow="Our model"
@@ -606,7 +606,7 @@ export default function ManagedView() {
       </section>
 
       {/* ══════════ FOUNDER ══════════ */}
-      <section className="relative overflow-hidden border-t border-black/[0.06] bg-warm-white">
+      <section id="managed-leadership" className="scroll-mt-20 relative overflow-hidden border-t border-black/[0.06] bg-warm-white">
         <div className="pointer-events-none absolute left-0 top-8 z-0 hidden select-none lg:block" aria-hidden>
           <span className="ml-[4%] text-[10rem] font-black uppercase leading-none text-black/[0.03] xl:text-[14rem]">JONAH</span>
         </div>
@@ -661,7 +661,7 @@ export default function ManagedView() {
       </section>
 
       {/* ══════════ TRANSPARENT TERMS ══════════ */}
-      <section className="relative overflow-hidden bg-black">
+      <section id="managed-pricing" className="scroll-mt-20 relative overflow-hidden bg-black">
         <div className="grain pointer-events-none absolute inset-0" aria-hidden />
         <div className="pointer-events-none absolute inset-0" aria-hidden style={{ background: 'radial-gradient(60% 70% at 50% 0%, rgba(232,98,42,0.16) 0%, transparent 55%)' }} />
         <div className="relative z-10 mx-auto max-w-content px-5 py-20 md:px-8 lg:px-16 lg:py-28">

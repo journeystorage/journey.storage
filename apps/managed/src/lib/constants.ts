@@ -31,10 +31,12 @@ export const socialUrls = {
 
 // ─── Nav Configuration ───
 // All absolute — these leave the subdomain.
+// In-page anchors — this page sells management to facility owners, so the nav
+// answers an owner's three questions: what you do, what it costs, who runs it.
 export const navLinks = [
-  { label: 'Storage', href: 'https://journey.storage' },
-  { label: 'Locations', href: 'https://journey.storage/#locations' },
-  { label: 'Size Guide', href: 'https://journey.storage/?sizeguide' },
+  { label: 'How it works', href: '#managed-model' },
+  { label: 'Pricing', href: '#managed-pricing' },
+  { label: 'Leadership', href: '#managed-leadership' },
 ] as const
 
 export const ecosystemDropdownLinks = [
