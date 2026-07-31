@@ -38,6 +38,18 @@ const ecosystemLinks = [
   { label: 'Storage', href: externalUrls.mainSite },
   { label: 'Investing', href: externalUrls.investors },
 ]
+// Keyword anchors → the "what's included" model section.
+const serviceLinks = [
+  { label: 'Revenue management', href: '#managed-model' },
+  { label: 'Marketing & occupancy', href: '#managed-model' },
+  { label: 'Smart access & tech', href: '#managed-model' },
+  { label: 'Reporting & reconciliation', href: '#managed-model' },
+  { label: 'Facility operations', href: '#managed-model' },
+]
+const legalLinks = [
+  { label: 'Privacy', href: 'https://journey.storage/legal/privacy' },
+  { label: 'Terms', href: 'https://journey.storage/legal/terms' },
+]
 const socialLinks = [
   { label: 'Instagram', href: socialUrls.instagram, Icon: IconInstagram },
   { label: 'LinkedIn', href: socialUrls.linkedin, Icon: IconLinkedin },
@@ -66,12 +78,15 @@ export default function Footer() {
     <footer className="relative border-t border-warm-white/[0.04] bg-black pt-20 pb-10">
       <div className="mx-auto max-w-content px-5 md:px-8 lg:px-16">
         {/* Top grid */}
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {/* Column 1 */}
           <div>
             <Image src="/images/brand/logo-white-TM.svg" alt="Journey.Storage™ logo" width={140} height={32} className="w-[140px]" style={{ height: 'auto' }} />
             <p className="mt-3 text-body-sm font-light italic text-warm-white/30">
               We run storage for a living.
+            </p>
+            <p className="mt-4 max-w-[280px] text-body-sm leading-relaxed text-warm-white/40">
+              Third-party self-storage management for facility owners — one flat fee, everything included. Managing facilities across Texas.
             </p>
             <a
               href="mailto:hello@journey.storage"
@@ -104,7 +119,22 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 3 — Business */}
+          {/* Column 3 — What we do */}
+          <div>
+            <h3 className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50 mb-4">What we do</h3>
+            <ul>
+              {serviceLinks.map((link) => (
+                <li key={link.label}>
+                  <a href={link.href}
+                    className="block py-1.5 text-body-sm text-warm-white/30 transition-colors duration-200 hover:text-warm-white">
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 4 — Ecosystem */}
           <div>
             <h3 className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50 mb-4">Ecosystem</h3>
             <ul>
@@ -147,10 +177,20 @@ export default function Footer() {
           )}
         </div>
 
-        {/* Copyright */}
-        <p className="mt-10 text-center text-caption text-warm-white/20">
-          &copy; {new Date().getFullYear()} Journey.Storage&trade;. All rights reserved.
-        </p>
+        {/* Bottom bar */}
+        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-warm-white/[0.04] pt-6 sm:flex-row">
+          <p className="text-caption text-warm-white/20 order-2 sm:order-1">
+            &copy; {new Date().getFullYear()} Journey.Storage&trade;. All rights reserved.
+          </p>
+          <nav aria-label="Legal" className="order-1 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 sm:order-2">
+            {legalLinks.map((link) => (
+              <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer"
+                className="text-caption text-warm-white/30 transition-colors duration-200 hover:text-warm-white">
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        </div>
       </div>
     </footer>
   )

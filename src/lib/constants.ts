@@ -54,6 +54,15 @@ export const navLinks = [
   { label: 'About Us', href: `#${sectionIds.about}` },
 ] as const
 
+// ─── Facilities (single source: footer links + SelfStorage JSON-LD) ───
+export const facilities = [
+  { name: 'Temple Hall Hwy', slug: 'templehallhwy', street: '212 Temple Hall Hwy', city: 'Granbury', region: 'TX', zip: '76049' },
+  { name: 'Western Hills Trl', slug: 'westernhillstrl', street: '409 Western Hills Trail', city: 'Granbury', region: 'TX', zip: '76049' },
+  { name: 'McCreary Rd', slug: 'mccrearyrd', street: '3501 McCreary Rd', city: 'Granbury', region: 'TX', zip: '76049' },
+] as const
+
+export const PHONE = { display: '(817) 579-0607', tel: '+18175790607' } as const
+
 export const ecosystemDropdownLinks = [
   { label: 'Storage', description: 'Self-storage built for life in motion', href: externalUrls.mainSite, current: true },
   { label: 'Managed', description: 'Third-party management', href: externalUrls.managed },

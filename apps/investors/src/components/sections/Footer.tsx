@@ -1,5 +1,17 @@
 import Image from 'next/image'
-import { externalUrls } from '@/lib/constants'
+import { externalUrls, CALENDAR_URL } from '@/lib/constants'
+
+// Crawlable in-page anchors → the investors page sections.
+const investLinks = [
+  { label: 'How it works', href: '#process' },
+  { label: 'Opportunities', href: '#opportunities' },
+  { label: 'Strategy', href: '#strategy' },
+  { label: 'Market', href: '#market' },
+  { label: 'Team', href: '#team' },
+  { label: 'FAQ', href: '#faq' },
+]
+
+const linkClass = 'text-body-sm text-stone hover:text-warm-white transition-colors duration-150'
 
 export default function Footer() {
   return (
@@ -7,7 +19,7 @@ export default function Footer() {
       <div className="mx-auto w-full max-w-[var(--container-content)] px-5 md:px-8 lg:px-16">
 
         {/* Top section */}
-        <div className="py-10 lg:py-14 grid gap-8 lg:grid-cols-[1fr_auto_auto] lg:gap-16">
+        <div className="py-10 lg:py-14 grid gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
 
           {/* Logo + tagline */}
           <div>
@@ -21,6 +33,21 @@ export default function Footer() {
             <p className="mt-3 text-body-sm text-stone/60">
               Direct investment in self-storage.
             </p>
+            <p className="mt-4 max-w-[280px] text-body-sm leading-relaxed text-warm-white/40">
+              Institutional-grade self-storage real estate investment and syndication, offered directly to accredited investors.
+            </p>
+          </div>
+
+          {/* Invest */}
+          <div>
+            <h4 className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50 mb-3">
+              Invest
+            </h4>
+            <ul className="flex flex-col gap-2">
+              {investLinks.map((link) => (
+                <li key={link.label}><a href={link.href} className={linkClass}>{link.label}</a></li>
+              ))}
+            </ul>
           </div>
 
           {/* Ecosystem */}
@@ -29,22 +56,8 @@ export default function Footer() {
               Ecosystem
             </h4>
             <div className="flex flex-col gap-2">
-              <a
-                href={externalUrls.mainSite}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-body-sm text-stone hover:text-warm-white transition-colors duration-150"
-              >
-                Storage
-              </a>
-              <a
-                href={externalUrls.managed}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-body-sm text-stone hover:text-warm-white transition-colors duration-150"
-              >
-                Managed
-              </a>
+              <a href={externalUrls.mainSite} target="_blank" rel="noopener noreferrer" className={linkClass}>Storage</a>
+              <a href={externalUrls.managed} target="_blank" rel="noopener noreferrer" className={linkClass}>Managed</a>
               <span className="text-body-sm text-orange font-bold">Direct</span>
             </div>
           </div>
@@ -55,9 +68,10 @@ export default function Footer() {
               Contact
             </h4>
             <div className="flex flex-col gap-2">
-              <span className="text-body-sm text-stone">
-                Dallas, TX
-              </span>
+              <span className="text-body-sm text-stone">Dallas, TX</span>
+              <a href={CALENDAR_URL} target="_blank" rel="noopener noreferrer" className={`${linkClass} font-bold`}>
+                Request access &rarr;
+              </a>
             </div>
           </div>
         </div>

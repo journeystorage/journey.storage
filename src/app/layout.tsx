@@ -1,7 +1,7 @@
 import Script from 'next/script'
 import type { Metadata } from 'next'
 import { Lato } from 'next/font/google'
-import { socialUrls } from '@/lib/constants'
+import { socialUrls, facilities, PHONE } from '@/lib/constants'
 import '@/styles/globals.css'
 import SizeGuideModal from '@/components/SizeGuideModal'
 
@@ -17,6 +17,37 @@ const organizationJsonLd = {
   description:
     'A new kind of self-storage company — 100% digital, 24/7 access, month-to-month with no hidden fees. Built for people in motion.',
   sameAs: [socialUrls.instagram, socialUrls.linkedin, socialUrls.facebook],
+}
+
+// SelfStorage (LocalBusiness) structured data — one entity per facility with
+// address, 24/7 hours, and phone, so each location is eligible for local /
+// map rich results. Data comes from the shared `facilities` constant.
+const facilitiesJsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': facilities.map((f) => ({
+    '@type': 'SelfStorage',
+    '@id': `https://journey.storage/rentaspace/${f.slug}`,
+    name: `Journey.Storage — ${f.name}`,
+    url: `https://journey.storage/rentaspace/${f.slug}`,
+    image: 'https://journey.storage/images/brand/og-image-default.png',
+    telephone: PHONE.tel,
+    priceRange: '$$',
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: f.street,
+      addressLocality: f.city,
+      addressRegion: f.region,
+      postalCode: f.zip,
+      addressCountry: 'US',
+    },
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      opens: '00:00',
+      closes: '23:59',
+    },
+    parentOrganization: { '@type': 'Organization', name: 'Journey.Storage', url: 'https://journey.storage' },
+  })),
 }
 
 const GTM_ID = 'GTM-NL5KP8QJ'
@@ -87,6 +118,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(facilitiesJsonLd) }}
         />
         <noscript>
           <iframe
