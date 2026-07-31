@@ -36,7 +36,7 @@ const companyLinks = [
 ]
 const businessLinks = [
   { label: 'Investing', href: externalUrls.investors },
-  { label: 'Consulting', href: externalUrls.consulting },
+  { label: 'Managed', href: externalUrls.managed },
 ]
 const socialLinks = [
   { label: 'Instagram', href: socialUrls.instagram, Icon: IconInstagram },

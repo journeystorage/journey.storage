@@ -38,12 +38,12 @@ export default function Footer() {
                 Storage
               </a>
               <a
-                href={externalUrls.advisory}
+                href={externalUrls.managed}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-body-sm text-stone hover:text-warm-white transition-colors duration-150"
               >
-                Advisory
+                Managed
               </a>
               <span className="text-body-sm text-orange font-bold">Direct</span>
             </div>

@@ -15,7 +15,7 @@ export default function DisclaimerPage() {
         <p>
           The information provided on this website and any affiliated
           properties (including direct.journey.storage and
-          advisory.journey.storage) is for informational purposes only and
+          managed.journey.storage) is for informational purposes only and
           does not constitute an offer to sell, a solicitation of an offer to
           buy, or a recommendation for any security, investment product, or
           investment strategy.

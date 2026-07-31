@@ -31,11 +31,10 @@ const companyLinks = [
   { label: 'Storage', href: externalUrls.mainSite },
   { label: 'About', href: `${externalUrls.mainSite}/#about` },
   { label: 'Locations', href: `${externalUrls.mainSite}/#locations` },
-  { label: 'Size Guide', href: `${externalUrls.mainSite}/size-guide` },
+  { label: 'Size Guide', href: `${externalUrls.mainSite}/?sizeguide` },
 ]
 const businessLinks = [
   { label: 'Investing', href: externalUrls.investors },
-  { label: 'Consulting', href: externalUrls.consulting },
 ]
 const socialLinks = [
   { label: 'Instagram', href: socialUrls.instagram, Icon: IconInstagram },

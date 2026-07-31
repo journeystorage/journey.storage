@@ -74,9 +74,9 @@ export default function FoundedBy() {
                 Investment platform
                 <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
               </a>
-              <a href={externalUrls.consulting} target="_blank" rel="noopener noreferrer"
+              <a href={externalUrls.managed} target="_blank" rel="noopener noreferrer"
                 className="group inline-flex items-center gap-1.5 text-caption uppercase tracking-[0.15em] text-warm-white/30 transition-colors duration-200 hover:text-orange">
-                Consulting division
+                Managed platform
                 <span className="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
               </a>
             </div>

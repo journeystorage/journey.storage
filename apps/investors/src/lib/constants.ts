@@ -8,7 +8,7 @@ export const LAUNCH_DATE_ISO = '2026-04-13T05:00:00.000Z'
 // ─── Ecosystem dropdown (mirrors main site) ───
 export const externalUrls = {
   mainSite: 'https://journey.storage',
-  advisory: 'https://advisory.journey.storage',
+  managed: 'https://managed.journey.storage',
   direct: 'https://direct.journey.storage',
 } as const
 
@@ -19,9 +19,9 @@ export const ecosystemDropdownLinks = [
     href: externalUrls.mainSite,
   },
   {
-    label: 'Advisory',
-    description: 'Consulting & operations',
-    href: externalUrls.advisory,
+    label: 'Managed',
+    description: 'Third-party management',
+    href: externalUrls.managed,
   },
   {
     label: 'Direct',

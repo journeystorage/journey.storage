@@ -41,6 +41,15 @@ export default function SizeGuideModal() {
     return () => window.removeEventListener(OPEN_EVENT, onOpen)
   }, [])
 
+  // Deep-link: journey.storage/?sizeguide (or #sizeguide) opens the guide on
+  // load — used by cross-site "Size Guide" links from other Journey subdomains.
+  useEffect(() => {
+    const { search, hash } = window.location
+    if (new URLSearchParams(search).has('sizeguide') || hash === '#sizeguide') {
+      setOpen(true)
+    }
+  }, [])
+
   useEffect(() => {
     if (!open) return
     document.body.style.overflow = 'hidden'

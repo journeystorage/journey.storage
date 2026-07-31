@@ -19,7 +19,6 @@ export const colors = {
 export const externalUrls = {
   mainSite: 'https://journey.storage',
   managed: 'https://managed.journey.storage',
-  consulting: 'https://advisory.journey.storage',
   investors: 'https://direct.journey.storage',
 } as const
 
@@ -35,13 +34,12 @@ export const socialUrls = {
 export const navLinks = [
   { label: 'Storage', href: 'https://journey.storage' },
   { label: 'Locations', href: 'https://journey.storage/#locations' },
-  { label: 'Size Guide', href: 'https://journey.storage/size-guide' },
+  { label: 'Size Guide', href: 'https://journey.storage/?sizeguide' },
 ] as const
 
 export const ecosystemDropdownLinks = [
   { label: 'Storage', description: 'Self-storage built for life in motion', href: externalUrls.mainSite },
   { label: 'Managed', description: 'Third-party management', href: externalUrls.managed, current: true },
-  { label: 'Advisory', description: 'Consulting & operations', href: externalUrls.consulting },
   { label: 'Direct', description: 'Investment platform', href: externalUrls.investors },
 ] as const
 

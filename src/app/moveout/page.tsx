@@ -55,7 +55,7 @@ const FAQS = [
 
 const ECO_LINKS = [
   { name: 'Storage', desc: 'Self-storage built for life in motion', href: 'https://journey.storage', current: true },
-  { name: 'Advisory', desc: 'Consulting & operations', href: 'https://advisory.journey.storage', current: false },
+  { name: 'Managed', desc: 'Third-party management', href: 'https://managed.journey.storage', current: false },
   { name: 'Direct', desc: 'Investment platform', href: 'https://direct.journey.storage', current: false },
 ]
 
