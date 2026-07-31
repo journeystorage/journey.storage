@@ -11,74 +11,71 @@ const investLinks = [
   { label: 'FAQ', href: '#faq' },
 ]
 
-const linkClass = 'text-body-sm text-stone hover:text-warm-white transition-colors duration-150'
+const headingClass = 'mb-4 text-[0.7rem] font-bold uppercase tracking-[0.22em] text-warm-white/45'
+const linkClass = 'block py-1.5 text-body-sm text-warm-white/55 transition-colors duration-200 hover:text-warm-white'
 
 export default function Footer() {
   return (
-    <footer className="relative bg-black border-t border-warm-white/[0.04]">
+    <footer className="border-t border-warm-white/[0.06] bg-black">
       <div className="mx-auto w-full max-w-[var(--container-content)] px-5 md:px-8 lg:px-16">
 
-        {/* Top section */}
-        <div className="py-10 lg:py-14 grid gap-10 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
-
-          {/* Logo + tagline */}
-          <div>
-            <Image
-              src="/images/brand/logo-white-TM.svg"
-              alt="Journey.Storage™"
-              width={160}
-              height={36}
-              style={{ height: 'auto' }}
-            />
-            <p className="mt-3 text-body-sm text-stone/60">
-              Direct investment in self-storage.
-            </p>
-            <p className="mt-4 max-w-[280px] text-body-sm leading-relaxed text-warm-white/40">
-              Institutional-grade self-storage real estate investment and syndication, offered directly to accredited investors.
+        {/* ── Brand moment + CTA ── */}
+        <div className="flex flex-col gap-10 border-b border-warm-white/[0.06] py-16 lg:flex-row lg:items-end lg:justify-between lg:py-20">
+          <div className="max-w-md">
+            <Image src="/images/brand/logo-white-TM.svg" alt="Journey.Storage™" width={150} height={34} className="w-[150px]" style={{ height: 'auto' }} />
+            <h2 className="mt-7 text-[1.75rem] font-black leading-[1.05] tracking-tight text-warm-white md:text-[2.1rem]">
+              Direct investment in self storage.
+            </h2>
+            <p className="mt-3 text-body-sm leading-relaxed text-warm-white/50">
+              Institutional-grade self-storage real estate, offered directly to accredited investors.
             </p>
           </div>
 
-          {/* Invest */}
+          <div className="w-full lg:max-w-xs">
+            <p className="mb-3 text-body-sm font-bold text-warm-white/80">Interested in investing with us?</p>
+            <a href={CALENDAR_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-orange px-6 py-3.5 text-body-sm font-bold text-warm-white transition-all duration-200 hover:brightness-110 active:translate-y-px">
+              Request access <span aria-hidden>&rarr;</span>
+            </a>
+          </div>
+        </div>
+
+        {/* ── Link columns ── */}
+        <div className="grid grid-cols-2 gap-x-8 gap-y-10 py-14 lg:grid-cols-3">
           <div>
-            <h4 className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50 mb-3">
-              Invest
-            </h4>
-            <ul className="flex flex-col gap-2">
+            <h3 className={headingClass}>Invest</h3>
+            <ul>
               {investLinks.map((link) => (
                 <li key={link.label}><a href={link.href} className={linkClass}>{link.label}</a></li>
               ))}
             </ul>
           </div>
 
-          {/* Ecosystem */}
           <div>
-            <h4 className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50 mb-3">
-              Ecosystem
-            </h4>
-            <div className="flex flex-col gap-2">
-              <a href={externalUrls.mainSite} target="_blank" rel="noopener noreferrer" className={linkClass}>Storage</a>
-              <a href={externalUrls.managed} target="_blank" rel="noopener noreferrer" className={linkClass}>Managed</a>
-              <span className="text-body-sm text-orange font-bold">Direct</span>
-            </div>
+            <h3 className={headingClass}>Ecosystem</h3>
+            <ul className="space-y-3">
+              <li className="text-body-sm leading-snug">
+                <a href={externalUrls.mainSite} target="_blank" rel="noopener noreferrer" className="font-bold text-warm-white/85 transition-colors duration-200 hover:text-orange">Journey.Storage</a>
+                <span className="mt-0.5 block text-warm-white/40">Self storage for renters</span>
+              </li>
+              <li className="text-body-sm leading-snug">
+                <a href={externalUrls.managed} target="_blank" rel="noopener noreferrer" className="font-bold text-warm-white/85 transition-colors duration-200 hover:text-orange">Journey.Managed</a>
+                <span className="mt-0.5 block text-warm-white/40">Facility management for owners</span>
+              </li>
+            </ul>
           </div>
 
-          {/* Contact */}
           <div>
-            <h4 className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50 mb-3">
-              Contact
-            </h4>
-            <div className="flex flex-col gap-2">
-              <span className="text-body-sm text-stone">Dallas, TX</span>
-              <a href={CALENDAR_URL} target="_blank" rel="noopener noreferrer" className={`${linkClass} font-bold`}>
-                Request access &rarr;
-              </a>
-            </div>
+            <h3 className={headingClass}>Contact</h3>
+            <p className="text-body-sm text-warm-white/55">Dallas, TX</p>
+            <a href={CALENDAR_URL} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-body-sm font-bold text-warm-white/80 transition-colors duration-200 hover:text-orange">
+              Request access &rarr;
+            </a>
           </div>
         </div>
 
-        {/* Disclaimer */}
-        <div className="py-6 border-t border-warm-white/[0.04]">
-          <p className="text-[0.72rem] leading-[1.7] text-warm-white/55 max-w-[900px]">
+        {/* ── Disclaimer ── */}
+        <div className="border-t border-warm-white/[0.06] py-6">
+          <p className="max-w-[900px] text-[0.72rem] leading-[1.7] text-warm-white/45">
             This website contains information that is privileged and confidential.
             It is for informational purposes only and is not intended as a general
             solicitation or a securities offering of any kind. The information
@@ -98,10 +95,10 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* Copyright */}
-        <div className="py-5 border-t border-warm-white/[0.04] flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+        {/* ── Bottom bar ── */}
+        <div className="flex flex-col gap-3 border-t border-warm-white/[0.06] py-7 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-caption text-warm-white/30">
-            &copy; 2026 Journey.Storage&trade;. All rights reserved.
+            &copy; {new Date().getFullYear()}{' '}Journey.Storage&trade;. All rights reserved.
           </span>
           <span className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-warm-white/45">
             Privileged &amp; Confidential
