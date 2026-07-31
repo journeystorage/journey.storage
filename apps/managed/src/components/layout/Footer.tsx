@@ -26,14 +26,16 @@ function IconFacebook({ size = 18 }: { size?: number }) {
   )
 }
 
-/* All footer links are absolute — they leave the subdomain. */
-const companyLinks = [
-  { label: 'Storage', href: externalUrls.mainSite },
-  { label: 'About', href: `${externalUrls.mainSite}/#about` },
-  { label: 'Locations', href: `${externalUrls.mainSite}/#locations` },
-  { label: 'Size Guide', href: `${externalUrls.mainSite}/?sizeguide` },
+/* Explore links are in-page anchors (owner-focused); ecosystem links are
+   absolute and leave the subdomain. */
+const exploreLinks = [
+  { label: 'How it works', href: '#managed-model' },
+  { label: 'Pricing', href: '#managed-pricing' },
+  { label: 'Leadership', href: '#managed-leadership' },
+  { label: 'Free facility review', href: '#managed-contact' },
 ]
-const businessLinks = [
+const ecosystemLinks = [
+  { label: 'Storage', href: externalUrls.mainSite },
   { label: 'Investing', href: externalUrls.investors },
 ]
 const socialLinks = [
@@ -89,9 +91,9 @@ export default function Footer() {
 
           {/* Column 2 — Company */}
           <div>
-            <h3 className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50 mb-4">Company</h3>
+            <h3 className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50 mb-4">Explore</h3>
             <ul>
-              {companyLinks.map((link) => (
+              {exploreLinks.map((link) => (
                 <li key={link.label}>
                   <a href={link.href}
                     className="block py-1.5 text-body-sm text-warm-white/30 transition-colors duration-200 hover:text-warm-white">
@@ -104,9 +106,9 @@ export default function Footer() {
 
           {/* Column 3 — Business */}
           <div>
-            <h3 className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50 mb-4">Business</h3>
+            <h3 className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50 mb-4">Ecosystem</h3>
             <ul>
-              {businessLinks.map((link) => (
+              {ecosystemLinks.map((link) => (
                 <li key={link.label}>
                   <a href={link.href} target="_blank" rel="noopener noreferrer"
                     className="block py-1.5 text-body-sm text-warm-white/30 transition-colors duration-200 hover:text-warm-white">
