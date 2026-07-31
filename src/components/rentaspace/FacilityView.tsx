@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef, type FormEvent } from 'react'
 import { MapPin, Phone, Menu, Star, Check, ChevronRight, ChevronLeft, ChevronDown, X, Ruler, Sparkles } from 'lucide-react'
-import { SIZE_ART, SizeArt, getSizeArt } from '@/lib/sizeArt'
+import { SizeArt, getSizeArt } from '@/lib/sizeArt'
+import { openSizeGuide } from '@/components/SizeGuideModal'
 import RentFooter from '@/components/rentaspace/RentFooter'
 import RentalFlow from '@/components/rentaspace/RentalFlow'
 import PayBillFlow from '@/components/rentaspace/PayBillFlow'
@@ -118,7 +119,6 @@ function SizeVideo({ art, tint }: { art: string; tint: string }) {
 
 export default function FacilityView({ facility: f }: { facility: Facility }) {
   const [slide, setSlide] = useState(0)
-  const [guideOpen, setGuideOpen] = useState(false)
   const [lightbox, setLightbox] = useState<number | null>(null)
   const [reserveSize, setReserveSize] = useState<string | null>(null)
   const [reserveStatus, setReserveStatus] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
@@ -154,14 +154,6 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       .then((j) => setLive({ status: 'ok', spaces: (j.spaces ?? []) as LiveSpace[] }))
       .catch((e: unknown) => setLive({ status: 'error', spaces: [], error: e instanceof Error ? e.message : String(e) }))
   }, [f.slug])
-
-  useEffect(() => {
-    if (!guideOpen) return
-    document.body.style.overflow = 'hidden'
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setGuideOpen(false) }
-    window.addEventListener('keydown', onKey)
-    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
-  }, [guideOpen])
 
   useEffect(() => {
     if (lightbox === null) return
@@ -231,7 +223,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
     <div id="facility" className="bg-warm-white pb-16 text-black antialiased lg:pb-0">
       <style dangerouslySetInnerHTML={{ __html: SCOPED_CSS }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <Nav onSizeGuide={() => setGuideOpen(true)} onPayBill={preview ? () => setPayBill(true) : undefined} />
+      <Nav onSizeGuide={openSizeGuide} onPayBill={preview ? () => setPayBill(true) : undefined} />
 
       {/* ── HERO CAROUSEL ── */}
       <section className="grain relative h-[460px] overflow-hidden bg-black lg:h-[540px]">
@@ -411,7 +403,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
               </div>
             </div>
 
-            <button onClick={() => setGuideOpen(true)} className="btn-spring r-jr flex w-full items-center justify-between gap-3 border border-black/[0.06] bg-warm-white p-5 text-left shadow-card hover:border-orange/40">
+            <button onClick={openSizeGuide} className="btn-spring r-jr flex w-full items-center justify-between gap-3 border border-black/[0.06] bg-warm-white p-5 text-left shadow-card hover:border-orange/40">
               <span className="flex items-center gap-3">
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-orange/[0.12] text-orange"><Ruler className="h-5 w-5" strokeWidth={2} aria-hidden /></span>
                 <span><span className="block text-[0.9375rem] font-black text-black">Not sure what fits?</span><span className="block text-[0.8125rem] text-stone">Open the storage size guide</span></span>
@@ -492,39 +484,6 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
         <button onClick={() => openReserve('')} className="shadow-cta flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-orange py-3 font-bold text-warm-white">Reserve a space</button>
       </div>
 
-      {/* ── SIZE GUIDE BOARD (modal) ── */}
-      {guideOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setGuideOpen(false)} aria-hidden />
-          <div role="dialog" aria-modal="true" aria-label="Storage size guide" className="relative flex max-h-[86vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-black/[0.06] bg-warm-white shadow-[0_40px_80px_-20px_rgba(0,0,0,0.6)]">
-            <div className="flex items-start justify-between gap-4 border-b border-black/[0.06] px-6 py-5">
-              <div>
-                <h3 className="track-tight text-[1.375rem] font-black text-black">Storage size guide</h3>
-                <p className="mt-0.5 text-[0.875rem] text-stone">Find the space that fits — every size at {f.short}.</p>
-              </div>
-              <button onClick={() => setGuideOpen(false)} aria-label="Close size guide" className="btn-spring grid h-9 w-9 shrink-0 place-items-center rounded-full bg-black/[0.06] text-black hover:bg-black/[0.12]"><X className="h-5 w-5" aria-hidden /></button>
-            </div>
-            <div className="overflow-y-auto p-6">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {SIZE_ART.map((s) => (
-                  <div key={s.key} className="group/card rounded-xl border border-black/[0.06] bg-warm-white p-4 text-center shadow-card">
-                    <div className="mx-auto aspect-[3/4] w-full max-w-[150px] overflow-hidden rounded-lg shadow-[0_3px_12px_-4px_rgba(24,24,24,0.3)] transition-transform duration-300 ease-out will-change-transform group-hover/card:scale-[1.28] group-hover/card:shadow-[0_16px_40px_-10px_rgba(24,24,24,0.4)]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${s.tint} 100%)` }}>
-                      <video src={`/videos/storage-${s.key}-sm.webm`} autoPlay muted loop playsInline preload="metadata" aria-hidden className="h-full w-full object-cover" />
-                    </div>
-                    <p className="mt-3 text-[1.25rem] font-black tracking-[-0.02em] text-black">{s.size.replace(/'/g, '')}</p>
-                    <p className="text-[0.6875rem] font-bold uppercase tracking-wide text-stone">{s.label}</p>
-                    <p className="mt-0.5 text-[0.8125rem] text-stone">{s.sqft} sq ft</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-black/[0.06] px-6 py-4">
-              <p className="text-[0.8125rem] text-stone">Still unsure? Our team can help you pick the right fit.</p>
-              <button onClick={() => setGuideOpen(false)} className="btn-spring shadow-cta rounded-xl bg-orange px-5 py-2.5 font-bold text-warm-white">Got it</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── PHOTO LIGHTBOX ── */}
       {lightbox !== null && (

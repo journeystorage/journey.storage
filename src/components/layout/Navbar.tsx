@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { navLinks, ecosystemDropdownLinks, sectionIds } from '@/lib/constants'
 import { scrollToSection } from '@/lib/utils'
+import { openSizeGuide } from '@/components/SizeGuideModal'
 import Button from '@/components/ui/Button'
 
 export default function Navbar() {
@@ -50,7 +51,11 @@ export default function Navbar() {
 
   const handleNavClick = useCallback(
     (href: string) => {
-      if (href.startsWith('#')) {
+      if (href === '/size-guide') {
+        setMobileOpen(false)
+        setDropdownOpen(false)
+        openSizeGuide()
+      } else if (href.startsWith('#')) {
         handleAnchor(href.slice(1))
       } else {
         setMobileOpen(false)

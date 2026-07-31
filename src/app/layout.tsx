@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Lato } from 'next/font/google'
 import { socialUrls } from '@/lib/constants'
 import '@/styles/globals.css'
+import SizeGuideModal from '@/components/SizeGuideModal'
 
 // Organization structured data — tells Google the official company name, logo,
 // and social profiles (helps logo/brand display and knowledge-panel eligibility).
@@ -96,6 +97,7 @@ export default function RootLayout({
           />
         </noscript>
         {children}
+        <SizeGuideModal />
       </body>
     </html>
   )

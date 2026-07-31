@@ -1,4 +1,5 @@
 import { socialUrls } from '@/lib/constants'
+import { SizeGuideLink } from '@/components/SizeGuideModal'
 
 const FACILITIES = [
   { name: 'Temple Hall Hwy', href: '/rentaspace/templehallhwy', address: '212 Temple Hall Hwy, Granbury, TX 76049' },
@@ -77,7 +78,7 @@ export default function RentFooter() {
             <p className="text-[0.75rem] font-bold uppercase tracking-wide text-warm-white/50">Explore</p>
             <ul className="mt-3 space-y-2 text-[0.875rem]">
               <li><a href="/rentaspace" className="transition-colors hover:text-warm-white">Rent a Space</a></li>
-              <li><a href="/size-guide" className="transition-colors hover:text-warm-white">Size Guide</a></li>
+              <li><SizeGuideLink className="cursor-pointer transition-colors hover:text-warm-white" /></li>
               <li><a href="/moveout" className="transition-colors hover:text-warm-white">Move Out</a></li>
               <li><a href="https://journey.storage" className="transition-colors hover:text-warm-white">About Journey</a></li>
               <li><a href="/legal/privacy" className="transition-colors hover:text-warm-white">Privacy Policy</a></li>

@@ -2,6 +2,7 @@
 
 import { Search, MapPin, Phone, CheckCircle2, CalendarDays, Zap, Check, Menu } from 'lucide-react'
 import RentFooter from '@/components/rentaspace/RentFooter'
+import { openSizeGuide } from '@/components/SizeGuideModal'
 
 const SCOPED_CSS = `
 #rentaspace .track-tight{letter-spacing:-.03em}
@@ -36,7 +37,7 @@ export default function RentASpaceView() {
           </a>
           <div className="hidden items-center gap-8 lg:flex">
             <a href="#locations" className="text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">Locations</a>
-            <a href="/size-guide" className="text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">Size Guide</a>
+            <button type="button" onClick={openSizeGuide} className="cursor-pointer text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">Size Guide</button>
             <a href="/#about" className="text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">About Us</a>
             <a href="tel:+18175790607" className="flex items-center gap-2 text-[0.9375rem] font-bold text-warm-white transition-opacity hover:opacity-70">
               {phoneIcon('h-4 w-4')}

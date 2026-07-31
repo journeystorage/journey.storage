@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { useForm } from 'react-hook-form'
+import { openSizeGuide } from '@/components/SizeGuideModal'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import {
@@ -191,7 +192,7 @@ export default function MoveOutPage() {
 
           <div className="hidden lg:flex items-center gap-8">
             <a href="/#locations" className="text-body-sm font-bold transition-opacity duration-150 hover:opacity-70 text-warm-white">Locations</a>
-            <a href="/size-guide" className="text-body-sm font-bold transition-opacity duration-150 hover:opacity-70 text-warm-white">Size Guide</a>
+            <button type="button" onClick={openSizeGuide} className="cursor-pointer text-body-sm font-bold transition-opacity duration-150 hover:opacity-70 text-warm-white">Size Guide</button>
             <a href="/#about" className="text-body-sm font-bold transition-opacity duration-150 hover:opacity-70 text-warm-white">About Us</a>
 
             <div ref={ecoRef} className={`eco-menu ${ecoOpen ? 'open' : ''}`} style={{ marginLeft: 96 }}>
