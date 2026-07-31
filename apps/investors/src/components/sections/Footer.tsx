@@ -1,81 +1,70 @@
 import Image from 'next/image'
-import { externalUrls, CALENDAR_URL } from '@/lib/constants'
-
-// Crawlable in-page anchors → the investors page sections.
-const investLinks = [
-  { label: 'How it works', href: '#process' },
-  { label: 'Opportunities', href: '#opportunities' },
-  { label: 'Strategy', href: '#strategy' },
-  { label: 'Market', href: '#market' },
-  { label: 'Team', href: '#team' },
-  { label: 'FAQ', href: '#faq' },
-]
-
-const headingClass = 'mb-4 text-[0.7rem] font-bold uppercase tracking-[0.22em] text-warm-white/45'
-const linkClass = 'block py-1.5 text-body-sm text-warm-white/55 transition-colors duration-200 hover:text-warm-white'
+import { externalUrls } from '@/lib/constants'
 
 export default function Footer() {
   return (
-    <footer className="border-t border-warm-white/[0.06] bg-black">
+    <footer className="relative bg-black border-t border-warm-white/[0.04]">
       <div className="mx-auto w-full max-w-[var(--container-content)] px-5 md:px-8 lg:px-16">
 
-        {/* ── Brand moment + CTA ── */}
-        <div className="flex flex-col gap-10 border-b border-warm-white/[0.06] py-16 lg:flex-row lg:items-end lg:justify-between lg:py-20">
-          <div className="max-w-md">
-            <Image src="/images/brand/logo-white-TM.svg" alt="Journey.Storage™" width={150} height={34} className="w-[150px]" style={{ height: 'auto' }} />
-            <h2 className="mt-7 text-[1.75rem] font-black leading-[1.05] tracking-tight text-warm-white md:text-[2.1rem]">
-              Direct investment in self storage.
-            </h2>
-            <p className="mt-3 text-body-sm leading-relaxed text-warm-white/50">
-              Institutional-grade self-storage real estate, offered directly to accredited investors.
+        {/* Top section */}
+        <div className="py-10 lg:py-14 grid gap-8 lg:grid-cols-[1fr_auto_auto] lg:gap-16">
+
+          {/* Logo + tagline */}
+          <div>
+            <Image
+              src="/images/brand/logo-white-TM.svg"
+              alt="Journey.Storage™"
+              width={160}
+              height={36}
+              style={{ height: 'auto' }}
+            />
+            <p className="mt-3 text-body-sm text-stone/60">
+              Direct investment in self-storage.
             </p>
           </div>
 
-          <div className="w-full lg:max-w-xs">
-            <p className="mb-3 text-body-sm font-bold text-warm-white/80">Interested in investing with us?</p>
-            <a href={CALENDAR_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-lg bg-orange px-6 py-3.5 text-body-sm font-bold text-warm-white transition-all duration-200 hover:brightness-110 active:translate-y-px">
-              Request access <span aria-hidden>&rarr;</span>
-            </a>
+          {/* Ecosystem */}
+          <div>
+            <h4 className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50 mb-3">
+              Ecosystem
+            </h4>
+            <div className="flex flex-col gap-2">
+              <a
+                href={externalUrls.mainSite}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-body-sm text-stone hover:text-warm-white transition-colors duration-150"
+              >
+                Storage
+              </a>
+              <a
+                href={externalUrls.managed}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-body-sm text-stone hover:text-warm-white transition-colors duration-150"
+              >
+                Managed
+              </a>
+              <span className="text-body-sm text-orange font-bold">Direct</span>
+            </div>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="text-[0.7rem] font-bold uppercase tracking-[0.2em] text-warm-white/50 mb-3">
+              Contact
+            </h4>
+            <div className="flex flex-col gap-2">
+              <span className="text-body-sm text-stone">
+                Dallas, TX
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* ── Link columns ── */}
-        <div className="grid grid-cols-2 gap-x-8 gap-y-10 py-14 lg:grid-cols-3">
-          <div>
-            <h3 className={headingClass}>Invest</h3>
-            <ul>
-              {investLinks.map((link) => (
-                <li key={link.label}><a href={link.href} className={linkClass}>{link.label}</a></li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className={headingClass}>Ecosystem</h3>
-            <ul className="space-y-3">
-              <li className="text-body-sm leading-snug">
-                <a href={externalUrls.mainSite} target="_blank" rel="noopener noreferrer" className="font-bold text-warm-white/85 transition-colors duration-200 hover:text-orange">Journey.Storage</a>
-                <span className="mt-0.5 block text-warm-white/40">Self storage for renters</span>
-              </li>
-              <li className="text-body-sm leading-snug">
-                <a href={externalUrls.managed} target="_blank" rel="noopener noreferrer" className="font-bold text-warm-white/85 transition-colors duration-200 hover:text-orange">Journey.Managed</a>
-                <span className="mt-0.5 block text-warm-white/40">Facility management for owners</span>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className={headingClass}>Contact</h3>
-            <p className="text-body-sm text-warm-white/55">Dallas, TX</p>
-            <a href={CALENDAR_URL} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-body-sm font-bold text-warm-white/80 transition-colors duration-200 hover:text-orange">
-              Request access &rarr;
-            </a>
-          </div>
-        </div>
-
-        {/* ── Disclaimer ── */}
-        <div className="border-t border-warm-white/[0.06] py-6">
-          <p className="max-w-[900px] text-[0.72rem] leading-[1.7] text-warm-white/45">
+        {/* Disclaimer */}
+        <div className="py-6 border-t border-warm-white/[0.04]">
+          <p className="text-[0.72rem] leading-[1.7] text-warm-white/55 max-w-[900px]">
             This website contains information that is privileged and confidential.
             It is for informational purposes only and is not intended as a general
             solicitation or a securities offering of any kind. The information
@@ -95,10 +84,10 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* ── Bottom bar ── */}
-        <div className="flex flex-col gap-3 border-t border-warm-white/[0.06] py-7 sm:flex-row sm:items-center sm:justify-between">
+        {/* Copyright */}
+        <div className="py-5 border-t border-warm-white/[0.04] flex flex-col md:flex-row md:justify-between md:items-center gap-2">
           <span className="text-caption text-warm-white/30">
-            &copy; {new Date().getFullYear()}{' '}Journey.Storage&trade;. All rights reserved.
+            &copy; 2026 Journey.Storage&trade;. All rights reserved.
           </span>
           <span className="text-[0.6rem] font-bold uppercase tracking-[0.2em] text-warm-white/45">
             Privileged &amp; Confidential
