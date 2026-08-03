@@ -105,7 +105,14 @@ The server is single-process and zero-dependency, so it stays well under Hosting
 
 ---
 
-### Hub (internal, hub.journey.storage — Vercel, NOT Hostinger)
+### Hub (internal — currently LOCAL ONLY, not deployed anywhere)
+
+> **Status as of 2026-08-03: not deployed.** Lyvia and Jonah run it locally
+> via `npm run dev:hub` (`http://localhost:3006`) — no Vercel project exists
+> yet. All data lives in Supabase, not on disk, so running it locally on two
+> different machines works fine and stays in sync. The Vercel plan below is
+> documented in case remote/always-on access is wanted later — nothing in it
+> has been executed.
 
 | Field              | Value                          |
 |--------------------|--------------------------------|
