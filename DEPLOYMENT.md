@@ -112,7 +112,7 @@ The server is single-process and zero-dependency, so it stays well under Hosting
 | Platform           | Vercel (separate from Hostinger) |
 | Root Directory     | `apps/hub`                     |
 | Framework preset   | Next.js (auto-detected)        |
-| Branch             | main                           |
+| Branch             | `locations-redesign` (as of 2026-08-03 — that branch carries 26 commits never merged to main; switch this to `main` once it's merged) |
 
 **Why not Hostinger:** the Hub is a 2-person internal tool (Journey employees only, not customer-facing). Every push to `main` already redeploys all 5 Hostinger instances simultaneously against a shared 120-process limit that has already caused a multi-site 503 outage once (see 2026-04-03 in the changelog). Adding a 6th Hostinger instance for an internal tool would tighten that margin for no customer-facing benefit, so the Hub deploys to Vercel instead — fully decoupled from the Hostinger plan and its process limit.
 
