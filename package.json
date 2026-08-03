@@ -13,10 +13,12 @@
     "dev:tenant-lab": "next dev apps/tenant-lab --port 3003 --hostname 0.0.0.0",
     "dev:springfield": "node apps/springfield/server.mjs",
     "dev:managed": "next dev apps/managed --port 3005 --webpack",
+    "dev:hub": "next dev apps/hub --port 3006 --webpack",
     "build": "next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "build:investors": "rm -rf src public .next && cp -r apps/investors/src src && cp -r apps/investors/public public && cp apps/investors/next.config.ts next.config.ts && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "build:springfield": "echo Springfield is a pre-built static export, no build step required.",
     "build:managed": "rm -rf src public .next && cp -r apps/managed/src src && cp -r apps/managed/public public && cp apps/managed/next.config.ts next.config.ts && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
+    "build:hub": "rm -rf src public .next && cp -r apps/hub/src src && cp -r apps/hub/public public && cp apps/hub/next.config.ts next.config.ts && next build && cp -r public .next/standalone/public && cp -r .next/static .next/standalone/.next/static",
     "start": "HOSTNAME=0.0.0.0 node .next/standalone/server.js",
     "start:springfield": "node apps/springfield/server.mjs",
     "lint": "next lint"
