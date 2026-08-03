@@ -105,6 +105,33 @@ The server is single-process and zero-dependency, so it stays well under Hosting
 
 ---
 
+### Hub (internal, hub.journey.storage — Vercel, NOT Hostinger)
+
+| Field              | Value                          |
+|--------------------|--------------------------------|
+| Platform           | Vercel (separate from Hostinger) |
+| Root Directory     | `apps/hub`                     |
+| Framework preset   | Next.js (auto-detected)        |
+| Branch             | main                           |
+
+**Why not Hostinger:** the Hub is a 2-person internal tool (Journey employees only, not customer-facing). Every push to `main` already redeploys all 5 Hostinger instances simultaneously against a shared 120-process limit that has already caused a multi-site 503 outage once (see 2026-04-03 in the changelog). Adding a 6th Hostinger instance for an internal tool would tighten that margin for no customer-facing benefit, so the Hub deploys to Vercel instead — fully decoupled from the Hostinger plan and its process limit.
+
+**Setup (one-time, via Vercel dashboard — not automatable from here):**
+1. Import this GitHub repo as a new Vercel project.
+2. Set **Root Directory** to `apps/hub`. Vercel auto-detects the npm/Turborepo workspace from the root `package-lock.json` + `turbo.json` and installs correctly.
+3. Framework preset: Next.js (auto-detected — no build command override needed, just `next build`).
+4. Env vars (Project Settings → Environment Variables):
+   - `NEXT_PUBLIC_SUPABASE_URL` — `https://uwncchrmdotateyditjc.supabase.co` (also has a safe hardcoded fallback in code, but set it explicitly)
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — the publishable anon key (see `apps/hub/.env.example`; also has a safe hardcoded fallback)
+   - `ANTHROPIC_API_KEY` — **required, no fallback**. Copy the value from `apps/hub/.env.local` (gitignored, not in this doc).
+5. Deploy.
+6. Add custom domain `hub.journey.storage` in Project Settings → Domains, then add the CNAME record Vercel gives you at the DNS provider.
+7. No Supabase Auth redirect-URL changes needed — the Hub uses password sign-in (`supabase.auth.signInWithPassword`), not magic links/OAuth, so there's no callback URL tied to the domain.
+
+`apps/hub/package.json` has its own `build`/`start` scripts (`next build` / `next start`) — Vercel uses these directly; there is no `build:hub` file-replacement script (that pattern is Hostinger-only). Root `package.json` keeps `dev:hub` (port 3006) for local dev.
+
+---
+
 ## Post-Deploy Checklist
 
 After every deploy (automatic or manual), do this for **each site**:
