@@ -6,11 +6,10 @@ import { PageHeader } from '@/components/PageHeader'
 import { OrbitalOverview, type DepartmentStat } from '@/components/OrbitalOverview'
 
 const QUICK_LINKS = [
-  { label: 'Investors CRM', href: 'https://portal.journey.storage/investors.html' },
-  { label: 'Portal', href: 'https://portal.journey.storage' },
+  { label: 'Investors CRM', href: '/departments/acquisitions/investors' },
   { label: 'Supabase', href: 'https://supabase.com/dashboard/project/uwncchrmdotateyditjc' },
   { label: 'Hostinger', href: 'https://hpanel.hostinger.com' },
-  { label: 'GitHub repo', href: 'https://github.com' },
+  { label: 'GitHub repo', href: 'https://github.com/journeystorage/journey.storage' },
 ]
 
 export default async function DashboardPage() {
@@ -95,18 +94,26 @@ export default async function DashboardPage() {
               Quick links
             </h2>
             <ul className="space-y-2">
-              {QUICK_LINKS.map((link) => (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-sans text-body-sm text-stone hover:text-cyan"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
+              {QUICK_LINKS.map((link) =>
+                link.href.startsWith('/') ? (
+                  <li key={link.href}>
+                    <Link href={link.href} className="font-sans text-body-sm text-stone hover:text-cyan">
+                      {link.label}
+                    </Link>
+                  </li>
+                ) : (
+                  <li key={link.href}>
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-sans text-body-sm text-stone hover:text-cyan"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ),
+              )}
             </ul>
           </section>
 

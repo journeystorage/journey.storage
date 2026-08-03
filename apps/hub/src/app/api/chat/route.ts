@@ -28,8 +28,6 @@ export async function POST(req: Request) {
     }
   }
 
-  await supabase.from('hub_chat_messages').insert({ role: 'user', content: message, employee_id: employeeId })
-
   const tasksQuery = supabase.from('hub_tasks').select('title,status,priority,due_date').neq('status', 'done')
   const notesQuery = supabase.from('hub_notes').select('title,content').order('updated_at', { ascending: false }).limit(10)
   const historyQuery = supabase
@@ -61,10 +59,13 @@ export async function POST(req: Request) {
           .gte('created_at', new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString()),
       ]
 
-  const [{ data: tasks }, { data: notes }, { data: historyRows }, ...extraResults] = await Promise.all([
+  const userInsert = supabase.from('hub_chat_messages').insert({ role: 'user', content: message, employee_id: employeeId })
+
+  const [{ data: tasks }, { data: notes }, { data: historyRows }, , ...extraResults] = await Promise.all([
     tasksQuery,
     notesQuery,
     historyQuery,
+    userInsert,
     ...extraQueries,
   ])
 
@@ -79,10 +80,18 @@ export async function POST(req: Request) {
     spend: employee ? undefined : summarizeSpend((usageResult?.data as { created_at: string; cost_usd: number }[]) ?? []),
   })
 
-  const messages = (historyRows ?? []).map((row) => ({
-    role: row.role as 'user' | 'assistant',
-    content: row.content as string,
-  }))
+  // Built locally rather than re-read back from the DB after the insert
+  // above — a read-after-write round trip that was racing (or the insert
+  // silently failing with no error surfaced), which is why Claude was
+  // sometimes called with an empty `messages` array ("at least one message
+  // is required"). historyQuery only ever contains turns before this one.
+  const messages = [
+    ...(historyRows ?? []).map((row) => ({
+      role: row.role as 'user' | 'assistant',
+      content: row.content as string,
+    })),
+    { role: 'user' as const, content: message },
+  ]
 
   const client = getAnthropicClient()
   const stream = client.messages.stream({
