@@ -31,6 +31,13 @@ export async function proxy(request: NextRequest) {
   const isLoginRoute = pathname === '/login'
   const isApiRoute = pathname.startsWith('/api/')
 
+  // Agent heartbeats are triggered by pg_cron without a session. The routes
+  // themselves self-limit (one run per interval, no force for anonymous
+  // callers), so an outside trigger can never do more than the schedule.
+  const isHeartbeat =
+    request.method === 'POST' && (pathname === '/api/agents/standup' || pathname === '/api/agents/work')
+  if (isHeartbeat) return response
+
   if (user && !HUB_ALLOWED_EMAILS.includes(user.email ?? '')) {
     await supabase.auth.signOut()
     if (!isLoginRoute) {

@@ -1,4 +1,5 @@
 import { getSupabaseServer } from '@/lib/supabase-server'
+import { getServiceClient } from '@/lib/service-client'
 import { buildSystemPrompt, getAnthropicClient, JARVIS_MODEL } from '@/lib/anthropic'
 import { computeCostUsd } from '@/lib/cost'
 import type { HubAiEmployee, HubNote, HubTask } from '@/lib/types'
@@ -44,21 +45,32 @@ function extractJsonArray(text: string): Proposal[] {
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}))
-  const force = body?.force === true
 
-  const supabase = await getSupabaseServer()
+  // Authed users may force a fresh standup; unattended cron calls run via the
+  // service client and can never force — the staleness guard bounds them.
+  const sessionClient = await getSupabaseServer()
+  const { data: userData } = await sessionClient.auth.getUser()
+  const isAuthed = Boolean(userData.user)
+  const supabase = isAuthed ? sessionClient : getServiceClient()
+  const force = isAuthed && body?.force === true
+
+  if (!supabase) {
+    return Response.json({ ran: false, reason: 'service client not configured' }, { status: 503 })
+  }
 
   if (!force) {
     const staleCutoff = new Date(Date.now() - STALE_HOURS * 60 * 60 * 1000).toISOString()
-    const { data: recent } = await supabase
-      .from('hub_proposals')
-      .select('id')
-      .gte('created_at', staleCutoff)
-      .limit(1)
-    if (recent?.length) {
+    const [{ data: recentRun }, { data: recentProposal }] = await Promise.all([
+      supabase.from('hub_agent_runs').select('id').eq('kind', 'standup').gte('created_at', staleCutoff).limit(1),
+      supabase.from('hub_proposals').select('id').gte('created_at', staleCutoff).limit(1),
+    ])
+    if (recentRun?.length || recentProposal?.length) {
       return Response.json({ ran: false, reason: 'standup already ran recently' })
     }
   }
+
+  // Claim the slot immediately so overlapping triggers no-op.
+  await supabase.from('hub_agent_runs').insert({ kind: 'standup', summary: { status: 'started' } })
 
   const { data: employeesData } = await supabase.from('hub_ai_employees').select('*')
   const employees = (employeesData as HubAiEmployee[]) ?? []
@@ -175,5 +187,6 @@ If nothing is genuinely worth proposing, respond with [].`
   const summary = results.map((r) =>
     r.status === 'fulfilled' ? r.value : { error: r.reason instanceof Error ? r.reason.message : 'failed' },
   )
+  await supabase.from('hub_agent_runs').insert({ kind: 'standup', summary: { status: 'finished', summary } })
   return Response.json({ ran: true, summary })
 }
