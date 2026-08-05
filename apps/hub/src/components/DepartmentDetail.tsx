@@ -6,6 +6,7 @@ import { getSupabaseBrowser } from '@/lib/supabase-browser'
 import type { DepartmentSlug } from '@/lib/departments'
 import type { HubAiEmployee, HubNote, HubTask } from '@/lib/types'
 import { PageHeader } from '@/components/PageHeader'
+import { extractFileText, EXTRACTABLE_ACCEPT, EXTRACTABLE_LABEL } from '@/lib/extract-text'
 
 export function DepartmentDetail({
   slug,
@@ -62,17 +63,13 @@ export function DepartmentDetail({
     setUploading(true)
     const supabase = getSupabaseBrowser()
     for (const file of files) {
-      try {
-        const text = await file.text()
-        if (!text.trim()) continue
-        await supabase.from('hub_department_docs').insert({
-          department: slug,
-          filename: file.name,
-          content: text.slice(0, MAX_DOC_CHARS),
-        })
-      } catch {
-        // unreadable file — skip
-      }
+      const text = await extractFileText(file)
+      if (!text) continue
+      await supabase.from('hub_department_docs').insert({
+        department: slug,
+        filename: file.name,
+        content: text.slice(0, MAX_DOC_CHARS),
+      })
     }
     setUploading(false)
     refetch()
@@ -185,7 +182,7 @@ export function DepartmentDetail({
               ref={fileInputRef}
               type="file"
               multiple
-              accept=".txt,.md,.csv,.json,.html"
+              accept={EXTRACTABLE_ACCEPT}
               onChange={(e) => {
                 void ingestFiles(Array.from(e.target.files ?? []))
                 e.target.value = ''
@@ -203,7 +200,7 @@ export function DepartmentDetail({
             >
               {uploading
                 ? 'Absorbing…'
-                : 'Drop files here or click to add — every employee in this department absorbs them (.txt, .md, .csv, .json, .html)'}
+                : `Drop files here or click to add — every employee in this department absorbs them (${EXTRACTABLE_LABEL})`}
             </button>
 
             {docs.length > 0 && (

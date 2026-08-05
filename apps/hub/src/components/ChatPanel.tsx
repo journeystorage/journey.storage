@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 import { Linkified } from '@/components/Linkified'
+import { extractFileText, EXTRACTABLE_ACCEPT, EXTRACTABLE_LABEL } from '@/lib/extract-text'
 import type { HubChatMessage } from '@/lib/types'
 
 interface ChatTurn {
@@ -106,9 +107,6 @@ export function ChatPanel({ employeeId, name, subtitle, accent, placeholder, emp
     }
   }, [employeeId])
 
-  // Text-readable formats only for now — PDFs and Word docs need a parsing
-  // step we haven't built; paste their content or export as text meanwhile.
-  const ACCEPTED_FILES = '.txt,.md,.csv,.json,.html'
   const MAX_DOC_CHARS = 120_000
 
   async function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
@@ -120,18 +118,14 @@ export function ChatPanel({ employeeId, name, subtitle, accent, placeholder, emp
     const supabase = getSupabaseBrowser()
     let added = 0
     for (const file of files) {
-      try {
-        const text = await file.text()
-        if (!text.trim()) continue
-        const { error } = await supabase.from('hub_employee_docs').insert({
-          employee_id: employeeId,
-          filename: file.name,
-          content: text.slice(0, MAX_DOC_CHARS),
-        })
-        if (!error) added++
-      } catch {
-        // unreadable file — skip
-      }
+      const text = await extractFileText(file)
+      if (!text) continue
+      const { error } = await supabase.from('hub_employee_docs').insert({
+        employee_id: employeeId,
+        filename: file.name,
+        content: text.slice(0, MAX_DOC_CHARS),
+      })
+      if (!error) added++
     }
     setDocCount((prev) => (prev ?? 0) + added)
     setUploading(false)
@@ -284,14 +278,14 @@ export function ChatPanel({ employeeId, name, subtitle, accent, placeholder, emp
               ref={fileInputRef}
               type="file"
               multiple
-              accept={ACCEPTED_FILES}
+              accept={EXTRACTABLE_ACCEPT}
               onChange={handleFiles}
               className="hidden"
             />
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
-              title="Drop files into this employee's library (.txt, .md, .csv, .json, .html)"
+              title={`Drop files into this employee's library (${EXTRACTABLE_LABEL})`}
               className="rounded-full bg-surface-elevated px-3 py-1 font-sans text-body-sm text-stone transition-colors duration-150 hover:text-warm-white disabled:opacity-60"
             >
               {uploading ? 'Uploading…' : `+ Files${docCount ? ` (${docCount})` : ''}`}
