@@ -1,14 +1,34 @@
 import { PageHeader } from '@/components/PageHeader'
+import { getSupabaseServer } from '@/lib/supabase-server'
+import { getGoogleOAuthConfig, hasGoogleConnection } from '@/lib/google'
 
-const NOT_CONNECTED = ['Gmail', 'Google Calendar', 'Slack', 'Stripe']
+const NOT_CONNECTED = ['Slack', 'Stripe']
 
-export default function ConnectionsPage() {
+export default async function ConnectionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ google?: string }>
+}) {
+  const supabase = await getSupabaseServer()
+  const googleConfigured = Boolean(getGoogleOAuthConfig())
+  const googleConnected = await hasGoogleConnection(supabase)
+  const { google: googleParam } = await searchParams
+
   const connections = [
     { label: 'Supabase', detail: 'Tasks, notes, employees, chat history, usage — all data lives here.', connected: true },
     {
       label: 'Anthropic',
       detail: 'Powers Jarvis and every AI employee.',
       connected: Boolean(process.env.ANTHROPIC_API_KEY),
+    },
+    {
+      label: 'Google (Gmail + Calendar)',
+      detail: googleConnected
+        ? 'Inbox + calendar read-only; team output filed to Drive under Journey Hub/.'
+        : googleConfigured
+          ? 'Credentials set — click Connect to grant read-only access.'
+          : 'Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env.local first.',
+      connected: googleConnected,
     },
   ]
 
@@ -18,6 +38,17 @@ export default function ConnectionsPage() {
         title="Connections"
         subtitle="What's actually wired up right now — not a wishlist dressed up as green checkmarks."
       />
+
+      {googleParam === 'error' && (
+        <p className="mb-4 rounded-md border border-danger/40 bg-danger/10 px-4 py-3 font-sans text-body-sm text-danger">
+          Google connection failed — check the OAuth credentials in .env.local and try again.
+        </p>
+      )}
+      {googleParam === 'connected' && (
+        <p className="mb-4 rounded-md border border-status-good/40 bg-status-good/10 px-4 py-3 font-sans text-body-sm text-status-good">
+          Google connected. Ask Jarvis about your email or calendar.
+        </p>
+      )}
 
       <section className="hud-panel mb-8 p-6">
         <ul className="space-y-4">
@@ -31,9 +62,20 @@ export default function ConnectionsPage() {
                 <p className="font-sans text-body font-medium text-warm-white">{conn.label}</p>
                 <p className="font-sans text-body-sm text-stone">{conn.detail}</p>
               </div>
-              <span className={`font-sans text-body-sm font-medium ${conn.connected ? 'text-status-good' : 'text-danger'}`}>
-                {conn.connected ? 'Connected' : 'Not connected'}
-              </span>
+              {conn.label.startsWith('Google') && !conn.connected && googleConfigured ? (
+                <a
+                  href="/api/google/auth"
+                  className="rounded-md bg-cyan px-3 py-1.5 font-sans text-body-sm font-semibold text-black transition-colors hover:bg-cyan-400"
+                >
+                  Connect
+                </a>
+              ) : (
+                <span
+                  className={`font-sans text-body-sm font-medium ${conn.connected ? 'text-status-good' : 'text-danger'}`}
+                >
+                  {conn.connected ? 'Connected' : 'Not connected'}
+                </span>
+              )}
             </li>
           ))}
         </ul>

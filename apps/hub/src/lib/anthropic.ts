@@ -31,7 +31,9 @@ const JARVIS_PERSONA = `You are Jarvis — Lyvia's own AI extension inside Journ
 
 ${BUSINESS_CONTEXT}
 
-Below you have the current open tasks and notes across every department, the full AI employee roster, the most recent generated insights, and a real spend summary — all real, all current. Use it as working context, not just background: connect things across departments when it's relevant, notice when something in one area affects another, and don't wait to be asked the obvious follow-up. Be direct and concise; this is a working tool, not a chat demo. When something isn't in your context, say so rather than guessing — never invent data you weren't given.`
+Below you have the current open tasks and notes across every department, the full AI employee roster, the most recent generated insights, and a real spend summary — all real, all current. Use it as working context, not just background: connect things across departments when it's relevant, notice when something in one area affects another, and don't wait to be asked the obvious follow-up. Be direct and concise; this is a working tool, not a chat demo. When something isn't in your context, say so rather than guessing — never invent data you weren't given.
+
+You can act, not just talk. You have tools to create and update tasks, save notes, search the investor CRM, update investor deal records (stage, follow-up dates, outreach, amounts, notes), and hire new AI employees into departments (write their mandate in the same style as the existing team: mandate, north stars, operating behavior, initiative clause). When Google is connected you also have read-only tools for Lyvia's Gmail inbox and Calendar — use them for anything about her email, schedule, or day. When Lyvia asks you to do one of these things, do it with the tool — don't describe what she should do herself. After acting, confirm briefly what changed. If a request is ambiguous (which task, which investor, which deal), ask one short clarifying question instead of guessing.`
 
 function employeePersona(employee: HubAiEmployee): string {
   const department = getDepartment(employee.department)
@@ -43,23 +45,32 @@ ${BUSINESS_CONTEXT}
 
 ${employee.system_prompt}
 
-You have access to ${departmentLabel}'s current open tasks and recent notes below — use them as real working context, not just background. Be direct and concise; this is a working tool, not a chat demo. When you don't know something that isn't in your context, say so rather than guessing.`
+You have access to ${departmentLabel}'s current open tasks and recent notes below — use them as real working context, not just background. Be direct and concise; this is a working tool, not a chat demo. When you don't know something that isn't in your context, say so rather than guessing.
+
+You can act, not just talk. You have tools to create and update tasks and save notes in your department${employee.department === 'acquisitions' ? ', plus search the investor CRM and update investor deal records' : ''}. When Lyvia asks you to do one of these things, do it with the tool, then confirm briefly what changed.`
 }
 
 interface HubContext {
   employee?: HubAiEmployee | null
-  tasks: Pick<HubTask, 'title' | 'status' | 'priority' | 'due_date'>[]
+  tasks: Pick<HubTask, 'id' | 'title' | 'status' | 'priority' | 'due_date'>[]
   notes: Pick<HubNote, 'title' | 'content'>[]
+  // Employee-only: documents Lyvia dropped into this employee's chat.
+  docs?: { filename: string; content: string }[]
   // Jarvis-only — full-company context no department employee gets.
   allEmployees?: Pick<HubAiEmployee, 'name' | 'role' | 'department'>[]
   recentInsights?: Pick<HubInsight, 'content' | 'category' | 'created_at'>[]
   spend?: { todayUsd: number; monthToDateUsd: number }
 }
 
+// Keeps each doc readable while bounding total context cost.
+const DOC_CHAR_LIMIT = 6000
+const DOCS_TOTAL_CHAR_LIMIT = 40000
+
 export function buildSystemPrompt({
   employee,
   tasks,
   notes,
+  docs,
   allEmployees,
   recentInsights,
   spend,
@@ -69,7 +80,7 @@ export function buildSystemPrompt({
   const openTasks = tasks.filter((t) => t.status !== 'done')
   const taskLines = openTasks.length
     ? openTasks
-        .map((t) => `- [${t.priority ?? 'normal'}] ${t.title}${t.due_date ? ` (due ${t.due_date})` : ''}`)
+        .map((t) => `- [${t.priority ?? 'normal'}] ${t.title}${t.due_date ? ` (due ${t.due_date})` : ''} (id: ${t.id})`)
         .join('\n')
     : '(no open tasks)'
 
@@ -77,7 +88,18 @@ export function buildSystemPrompt({
     ? notes.map((n) => `- ${n.title}: ${n.content.slice(0, 200)}`).join('\n')
     : '(no recent notes)'
 
-  let dynamicText = `Current open tasks:\n${taskLines}\n\nRecent notes:\n${noteLines}`
+  // Date lives in the dynamic (uncached) block on purpose — the persona
+  // block above it stays byte-identical so its prompt cache keeps hitting.
+  const today = new Intl.DateTimeFormat('en-CA', {
+    dateStyle: 'short',
+    timeZone: 'America/Chicago',
+  }).format(new Date())
+  const weekday = new Intl.DateTimeFormat('en-US', {
+    weekday: 'long',
+    timeZone: 'America/Chicago',
+  }).format(new Date())
+
+  let dynamicText = `Today is ${weekday}, ${today} (Central Time).\n\nCurrent open tasks:\n${taskLines}\n\nRecent notes:\n${noteLines}`
 
   if (allEmployees) {
     const employeeLines = allEmployees.length
@@ -97,6 +119,22 @@ export function buildSystemPrompt({
 
   if (spend) {
     dynamicText += `\n\nAnthropic spend — today: $${spend.todayUsd.toFixed(2)}, month-to-date: $${spend.monthToDateUsd.toFixed(2)}`
+  }
+
+  if (docs?.length) {
+    let budget = DOCS_TOTAL_CHAR_LIMIT
+    const docBlocks: string[] = []
+    for (const doc of docs) {
+      if (budget <= 0) {
+        docBlocks.push(`--- ${doc.filename} (not shown — context budget reached; ask Lyvia if you need it) ---`)
+        continue
+      }
+      const slice = doc.content.slice(0, Math.min(DOC_CHAR_LIMIT, budget))
+      budget -= slice.length
+      const truncated = slice.length < doc.content.length ? '\n[…truncated]' : ''
+      docBlocks.push(`--- ${doc.filename} ---\n${slice}${truncated}`)
+    }
+    dynamicText += `\n\nYour document library (files Lyvia has given you — cite by filename):\n${docBlocks.join('\n\n')}`
   }
 
   return [

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 import type { DepartmentSlug } from '@/lib/departments'
@@ -19,15 +19,15 @@ export function DepartmentDetail({
   const [employees, setEmployees] = useState<HubAiEmployee[]>([])
   const [tasks, setTasks] = useState<HubTask[]>([])
   const [notes, setNotes] = useState<HubNote[]>([])
+  const [docs, setDocs] = useState<{ id: string; filename: string; created_at: string }[]>([])
   const [loading, setLoading] = useState(true)
-  const [name, setName] = useState('')
-  const [role, setRole] = useState('')
-  const [systemPrompt, setSystemPrompt] = useState('')
-  const [adding, setAdding] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [dragOver, setDragOver] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function refetch() {
     const supabase = getSupabaseBrowser()
-    const [{ data: employeeRows }, { data: taskRows }, { data: noteRows }] = await Promise.all([
+    const [{ data: employeeRows }, { data: taskRows }, { data: noteRows }, { data: docRows }] = await Promise.all([
       supabase.from('hub_ai_employees').select('*').eq('department', slug).order('created_at', { ascending: true }),
       supabase
         .from('hub_tasks')
@@ -37,10 +37,16 @@ export function DepartmentDetail({
         .order('due_date', { ascending: true, nullsFirst: false })
         .limit(6),
       supabase.from('hub_notes').select('*').eq('department', slug).order('updated_at', { ascending: false }).limit(4),
+      supabase
+        .from('hub_department_docs')
+        .select('id,filename,created_at')
+        .eq('department', slug)
+        .order('created_at', { ascending: false }),
     ])
     setEmployees((employeeRows as HubAiEmployee[]) ?? [])
     setTasks((taskRows as HubTask[]) ?? [])
     setNotes((noteRows as HubNote[]) ?? [])
+    setDocs((docRows as { id: string; filename: string; created_at: string }[]) ?? [])
     setLoading(false)
   }
 
@@ -49,22 +55,33 @@ export function DepartmentDetail({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug])
 
-  async function addEmployee(e: React.FormEvent) {
-    e.preventDefault()
-    if (!name.trim() || !role.trim()) return
-    setAdding(true)
+  const MAX_DOC_CHARS = 120_000
+
+  async function ingestFiles(files: File[]) {
+    if (!files.length) return
+    setUploading(true)
     const supabase = getSupabaseBrowser()
-    await supabase.from('hub_ai_employees').insert({
-      department: slug,
-      name: name.trim(),
-      role: role.trim(),
-      system_prompt: systemPrompt.trim(),
-    })
-    setName('')
-    setRole('')
-    setSystemPrompt('')
-    setAdding(false)
+    for (const file of files) {
+      try {
+        const text = await file.text()
+        if (!text.trim()) continue
+        await supabase.from('hub_department_docs').insert({
+          department: slug,
+          filename: file.name,
+          content: text.slice(0, MAX_DOC_CHARS),
+        })
+      } catch {
+        // unreadable file — skip
+      }
+    }
+    setUploading(false)
     refetch()
+  }
+
+  async function removeDoc(id: string) {
+    const supabase = getSupabaseBrowser()
+    await supabase.from('hub_department_docs').delete().eq('id', id)
+    setDocs((prev) => prev.filter((d) => d.id !== id))
   }
 
   async function deleteEmployee(id: string) {
@@ -135,46 +152,79 @@ export function DepartmentDetail({
                 </li>
               ))}
               {employees.length === 0 && (
-                <p className="font-sans text-body-sm text-stone">No employees yet — hire one below.</p>
+                <p className="font-sans text-body-sm text-stone">
+                  No employees yet — ask Jarvis to hire one for this department.
+                </p>
               )}
             </ul>
           )}
 
-          <form onSubmit={addEmployee} className="hud-panel space-y-2 p-4">
-            <div className="flex gap-2">
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Name (e.g. Ledger)"
-                suppressHydrationWarning
-                className="flex-1 rounded-md bg-transparent px-2 py-1.5 font-sans text-body text-warm-white placeholder:text-stone/60 focus:outline-none"
-              />
-              <input
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                placeholder="Role (e.g. Bookkeeper)"
-                suppressHydrationWarning
-                className="flex-1 rounded-md bg-transparent px-2 py-1.5 font-sans text-body text-warm-white placeholder:text-stone/60 focus:outline-none"
-              />
+          {/* Department context library — every employee in this department
+              absorbs these files automatically. */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault()
+              setDragOver(true)
+            }}
+            onDragLeave={() => setDragOver(false)}
+            onDrop={(e) => {
+              e.preventDefault()
+              setDragOver(false)
+              void ingestFiles(Array.from(e.dataTransfer.files))
+            }}
+            className={`hud-panel p-4 transition-colors duration-150 ${dragOver ? 'border-cyan/60' : ''}`}
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <p className="hud-label" style={{ color: accent }}>
+                {label} context
+              </p>
+              <p className="hud-label">{docs.length} file{docs.length === 1 ? '' : 's'}</p>
             </div>
-            <textarea
-              value={systemPrompt}
-              onChange={(e) => setSystemPrompt(e.target.value)}
-              placeholder="What should they focus on, and how should they act? (optional)"
-              rows={3}
-              suppressHydrationWarning
-              className="w-full resize-none rounded-md bg-transparent px-2 py-1.5 font-sans text-body-sm text-warm-white placeholder:text-stone/60 focus:outline-none"
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept=".txt,.md,.csv,.json,.html"
+              onChange={(e) => {
+                void ingestFiles(Array.from(e.target.files ?? []))
+                e.target.value = ''
+              }}
+              className="hidden"
             />
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={adding}
-                className="rounded-md bg-cyan px-4 py-2 font-sans text-body-sm font-semibold text-black transition-transform duration-150 hover:bg-cyan-400 active:scale-[0.98] disabled:opacity-50"
-              >
-                {adding ? 'Hiring…' : 'Hire employee'}
-              </button>
-            </div>
-          </form>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className={`w-full rounded-md border border-dashed px-4 py-6 text-center font-sans text-body-sm transition-colors duration-150 disabled:opacity-60 ${
+                dragOver
+                  ? 'border-cyan text-cyan'
+                  : 'border-surface-border text-stone hover:border-stone/60 hover:text-warm-white'
+              }`}
+            >
+              {uploading
+                ? 'Absorbing…'
+                : 'Drop files here or click to add — every employee in this department absorbs them (.txt, .md, .csv, .json, .html)'}
+            </button>
+
+            {docs.length > 0 && (
+              <ul className="mt-3 space-y-1.5">
+                {docs.map((doc) => (
+                  <li key={doc.id} className="group flex items-center gap-2">
+                    <span className="h-1 w-1 shrink-0 rounded-full bg-stone" aria-hidden />
+                    <span className="flex-1 truncate font-sans text-body-sm text-warm-white">{doc.filename}</span>
+                    <span className="hud-label">{doc.created_at.slice(0, 10)}</span>
+                    <button
+                      onClick={() => removeDoc(doc.id)}
+                      aria-label={`Remove ${doc.filename}`}
+                      className="font-sans text-body-sm text-stone opacity-0 transition-opacity duration-150 hover:text-danger group-hover:opacity-100"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </section>
 
         <div className="space-y-6">

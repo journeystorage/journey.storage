@@ -38,17 +38,36 @@ export function OrbitalOverview({
 }) {
   return (
     <div className="relative mx-auto aspect-square w-full max-w-[480px]">
+      {/* Radar sweep — slow rotating wedge behind everything */}
+      <div
+        className="hub-radar-sweep absolute rounded-full"
+        style={{ inset: `${50 - ORBIT_RADIUS_PCT - 6}%` }}
+        aria-hidden
+      />
+
       {/* Orbit ring + spokes — decorative structure only, no data encoded here */}
       <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full" aria-hidden>
-        <circle
-          cx="50"
-          cy="50"
-          r={ORBIT_RADIUS_PCT}
-          fill="none"
-          stroke="var(--color-surface-border)"
-          strokeWidth="0.4"
-          strokeDasharray="1.5 2"
-        />
+        <g className="hub-orbit-spin">
+          <circle
+            cx="50"
+            cy="50"
+            r={ORBIT_RADIUS_PCT}
+            fill="none"
+            stroke="var(--color-surface-border)"
+            strokeWidth="0.4"
+            strokeDasharray="1.5 2"
+          />
+          <circle
+            cx="50"
+            cy="50"
+            r={ORBIT_RADIUS_PCT + 6}
+            fill="none"
+            stroke="var(--color-surface-border)"
+            strokeWidth="0.2"
+            strokeDasharray="0.5 4"
+            opacity="0.6"
+          />
+        </g>
         {departments.map((dept, i) => {
           const pos = nodePosition(i, departments.length)
           return (
@@ -70,6 +89,7 @@ export function OrbitalOverview({
         className="absolute left-1/2 top-1/2 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-cyan/30 bg-surface-elevated"
         style={{ boxShadow: 'var(--shadow-glow-cyan)' }}
       >
+        <span className="hub-core-breathe absolute -inset-1 rounded-full border border-cyan/20" aria-hidden />
         <span className="font-mono text-h1 font-medium leading-none text-warm-white">{totalOpen}</span>
         <span className="hud-label mt-1">Open</span>
       </div>
@@ -110,10 +130,10 @@ export function OrbitalOverview({
                 </span>
               )}
             </span>
-            <p className="mt-2 font-sans text-body-sm font-medium text-warm-white group-hover:text-cyan">
+            <p className="mt-2 whitespace-nowrap font-sans text-body-sm font-medium text-warm-white group-hover:text-cyan">
               {dept.label}
             </p>
-            <p className="hud-label">
+            <p className="hud-label whitespace-nowrap">
               {dept.employeeCount} employee{dept.employeeCount === 1 ? '' : 's'}
             </p>
           </Link>
