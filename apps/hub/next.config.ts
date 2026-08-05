@@ -13,10 +13,11 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  output: 'standalone',
-  outputFileTracingRoot: __dirname,
-  // Monorepo: Turbopack can't infer the workspace root on Vercel (next is
-  // hoisted to the repo root) — pin it explicitly or the build fails.
+  // No `output: 'standalone'` here on purpose: the hub deploys on Vercel,
+  // which manages its own output. Standalone + outputFileTracingRoot are the
+  // Hostinger pattern (see DEPLOYMENT.md) and break Vercel's monorepo
+  // output collection (ENOENT on /vercel/path0/.next).
+  outputFileTracingRoot: path.join(__dirname, '..', '..'),
   turbopack: {
     root: path.join(__dirname, '..', '..'),
   },
