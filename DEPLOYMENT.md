@@ -154,6 +154,21 @@ None of the above is automatable from here — GitHub App creation, PAT minting,
 
 `apps/hub/package.json` has its own `build`/`start` scripts (`next build` / `next start`) — Vercel uses these directly; there is no `build:hub` file-replacement script (that pattern is Hostinger-only). Root `package.json` keeps `dev:hub` (port 3006) for local dev.
 
+#### ElevenLabs voice (natural back-and-forth with Jarvis)
+
+Jarvis's actual brain (`apps/hub/src/lib/jarvis-loop.ts` — system prompt, context, tools) is shared between the text chat and voice; ElevenLabs Conversational AI is only the audio layer on top, via a "Custom LLM" pointed at `apps/hub/src/app/api/voice/completions/route.ts` (OpenAI-chat-completions-compatible SSE). Jarvis-only for now, not available to department employees.
+
+**Manual setup (ElevenLabs dashboard + env vars — not automatable from here):**
+1. Create an ElevenLabs account, create a **Conversational AI Agent**. Make it **private** (not a public `agentId`) — this agent has real tool access (tasks, notes, Drive, calendar) via the Hub.
+2. Under the agent's LLM settings, choose **Custom LLM**, URL: `https://hub.journey.storage/api/voice/completions`.
+3. Add a custom header on that Custom LLM config carrying a shared secret, e.g. `X-Hub-Voice-Secret: <random value>` — this must match `VOICE_LLM_SECRET` below. (Verify this is really where ElevenLabs exposes an inbound-auth header — confirm in the dashboard; this wasn't fully spelled out in their docs at the time this was built.)
+4. Env vars — Vercel (Hub):
+   - `ELEVENLABS_API_KEY` — from the ElevenLabs dashboard
+   - `ELEVENLABS_AGENT_ID` — the agent created in step 1
+   - `VOICE_LLM_SECRET` — same random value as the custom header in step 3
+5. Browser side: `@elevenlabs/client` (already added to `apps/hub/package.json`) opens the session directly from `ChatPanel.tsx`'s "Talk to Jarvis" button, via a signed URL minted by `/api/voice/session` (session-gated, unlike the completions route above).
+6. Check current pricing at elevenlabs.io/pricing before relying on this daily — it's minutes-based (STT+TTS+orchestration), separate from ElevenLabs' character-credit system, and billed on top of Anthropic's own per-token cost (already tracked in `hub_api_usage` same as text chat).
+
 ---
 
 ## Post-Deploy Checklist

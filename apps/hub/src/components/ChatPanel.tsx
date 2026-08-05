@@ -5,6 +5,7 @@ import { getSupabaseBrowser } from '@/lib/supabase-browser'
 import { Linkified } from '@/components/Linkified'
 import { extractFileText, EXTRACTABLE_ACCEPT, EXTRACTABLE_LABEL } from '@/lib/extract-text'
 import type { HubChatMessage } from '@/lib/types'
+import type { Conversation as ElevenLabsConversation } from '@elevenlabs/client'
 
 interface ChatTurn {
   id: string
@@ -70,9 +71,11 @@ export function ChatPanel({ employeeId, name, subtitle, accent, placeholder, emp
   const [listening, setListening] = useState(false)
   const [docCount, setDocCount] = useState<number | null>(null)
   const [uploading, setUploading] = useState(false)
+  const [callStatus, setCallStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle')
   const scrollRef = useRef<HTMLDivElement>(null)
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const callRef = useRef<ElevenLabsConversation | null>(null)
 
   useEffect(() => {
     setVoiceSupported(typeof window !== 'undefined' && 'speechSynthesis' in window)
@@ -144,6 +147,57 @@ export function ChatPanel({ employeeId, name, subtitle, accent, placeholder, emp
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [turns])
+
+  useEffect(() => {
+    return () => {
+      callRef.current?.endSession()
+    }
+  }, [])
+
+  // Real back-and-forth voice via ElevenLabs — Jarvis only (employeeId is
+  // undefined here). The Hub's own logic (context, tools, RLS-equivalent
+  // scoping) stays the source of truth: this just opens a live audio
+  // session against api/voice/completions, the same Jarvis brain the text
+  // chat uses, over a different transport.
+  async function startVoiceCall() {
+    if (callRef.current) return
+    setCallStatus('connecting')
+    try {
+      const res = await fetch('/api/voice/session', { method: 'POST' })
+      if (!res.ok) throw new Error('could not start voice session')
+      const { signedUrl, userEmail } = await res.json()
+
+      const { Conversation } = await import('@elevenlabs/client')
+      const conversation = await Conversation.startSession({
+        signedUrl,
+        dynamicVariables: { user_email: userEmail },
+        onConnect: () => setCallStatus('connected'),
+        onDisconnect: () => {
+          callRef.current = null
+          setCallStatus('idle')
+        },
+        onError: () => {
+          callRef.current = null
+          setCallStatus('error')
+        },
+        onMessage: ({ message, role }) => {
+          setTurns((prev) => [
+            ...prev,
+            { id: `voice-${Date.now()}-${role}`, role: role === 'agent' ? 'assistant' : 'user', content: message },
+          ])
+        },
+      })
+      callRef.current = conversation
+    } catch {
+      setCallStatus('error')
+    }
+  }
+
+  function endVoiceCall() {
+    callRef.current?.endSession()
+    callRef.current = null
+    setCallStatus('idle')
+  }
 
   function toggleVoice() {
     const next = !voiceEnabled
@@ -301,6 +355,20 @@ export function ChatPanel({ employeeId, name, subtitle, accent, placeholder, emp
             }`}
           >
             {voiceEnabled ? 'Voice: On' : 'Voice: Off'}
+          </button>
+        )}
+        {!employeeId && (
+          <button
+            onClick={callStatus === 'connected' || callStatus === 'connecting' ? endVoiceCall : startVoiceCall}
+            disabled={callStatus === 'connecting'}
+            aria-pressed={callStatus === 'connected'}
+            className={`rounded-full px-3 py-1 font-sans text-body-sm transition-colors duration-150 disabled:opacity-60 ${
+              callStatus === 'connected'
+                ? 'hub-pulse-dot bg-danger text-warm-white'
+                : 'bg-surface-elevated text-stone hover:text-warm-white'
+            }`}
+          >
+            {callStatus === 'connected' ? '● On a call — end' : callStatus === 'connecting' ? 'Connecting…' : 'Talk to Jarvis'}
           </button>
         )}
         </div>

@@ -46,6 +46,13 @@ export async function proxy(request: NextRequest) {
   // here — it stays fully session-gated, same as every other Hub route.
   if (request.method === 'POST' && pathname === '/api/proposals/code/callback') return response
 
+  // ElevenLabs' Custom LLM webhook has no Supabase session either — gated
+  // by its own shared secret + an explicit allowlisted email header instead
+  // (checked in the route). /api/voice/session, which mints the signed URL
+  // in the first place, is NOT exempted here — that one stays fully
+  // session-gated like everything else.
+  if (request.method === 'POST' && pathname === '/api/voice/completions') return response
+
   if (user && !HUB_ALLOWED_EMAILS.includes(user.email ?? '')) {
     await supabase.auth.signOut()
     if (!isLoginRoute) {
