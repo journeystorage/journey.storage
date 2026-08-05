@@ -1,9 +1,14 @@
 import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { HUB_ALLOWED_EMAILS } from '@/lib/constants'
 
 // Gmail + Google Calendar, read-only, via raw REST (no googleapis dep).
-// Tokens live in hub_google_tokens, one row per hub user, RLS-scoped to
-// that user's own session. Jarvis only ever reads — no send, no delete.
+// Tokens live in hub_google_tokens, one row per hub user. Every function
+// below takes an explicit userEmail and filters on it directly — RLS also
+// scopes this for interactive (session-client) callers, but the autonomous
+// agent routes call in with a service-role client that bypasses RLS
+// entirely, so the explicit filter is load-bearing there, not just defense
+// in depth.
 
 export const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/gmail.readonly',
@@ -41,12 +46,26 @@ export async function hasGoogleConnection(supabase: SupabaseClient): Promise<boo
   return Boolean(data?.length)
 }
 
+// For unattended (service-role) callers with no signed-in user to attribute
+// work to — deterministic rather than "whichever row Postgres returns
+// first": prefers whichever HUB_ALLOWED_EMAILS entry has actually connected,
+// in allowlist order, falling back to any other connected account.
+export async function resolvePrimaryGoogleEmail(supabase: SupabaseClient): Promise<string | null> {
+  const { data } = await supabase.from('hub_google_tokens').select('user_email')
+  const rows = (data ?? []) as { user_email: string }[]
+  if (!rows.length) return null
+  for (const email of HUB_ALLOWED_EMAILS) {
+    if (rows.some((r) => r.user_email === email)) return email
+  }
+  return rows[0].user_email
+}
+
 // Returns a live access token, refreshing (and persisting) if expired.
-async function getAccessToken(supabase: SupabaseClient): Promise<string | null> {
+async function getAccessToken(supabase: SupabaseClient, userEmail: string): Promise<string | null> {
   const config = getGoogleOAuthConfig()
   if (!config) return null
 
-  const { data } = await supabase.from('hub_google_tokens').select('*').limit(1).single()
+  const { data } = await supabase.from('hub_google_tokens').select('*').eq('user_email', userEmail).single()
   const row = data as TokenRow | null
   if (!row) return null
 
@@ -92,8 +111,8 @@ export interface EmailSummary {
   snippet: string
 }
 
-export async function listRecentEmails(supabase: SupabaseClient, query?: string, max = 15): Promise<EmailSummary[]> {
-  const token = await getAccessToken(supabase)
+export async function listRecentEmails(supabase: SupabaseClient, userEmail: string, query?: string, max = 15): Promise<EmailSummary[]> {
+  const token = await getAccessToken(supabase, userEmail)
   if (!token) throw new Error('Google is not connected')
 
   const q = encodeURIComponent(query?.trim() || 'newer_than:2d in:inbox')
@@ -129,8 +148,8 @@ export interface DriveFileSummary {
   modified: string
 }
 
-export async function searchDriveFiles(supabase: SupabaseClient, query: string): Promise<DriveFileSummary[]> {
-  const token = await getAccessToken(supabase)
+export async function searchDriveFiles(supabase: SupabaseClient, userEmail: string, query: string): Promise<DriveFileSummary[]> {
+  const token = await getAccessToken(supabase, userEmail)
   if (!token) throw new Error('Google is not connected')
 
   const q = `name contains '${query.replace(/['\\]/g, '')}' and trashed = false`
@@ -192,11 +211,12 @@ export interface DriveSaveResult {
 
 export async function saveToDrive(
   supabase: SupabaseClient,
+  userEmail: string,
   ownerName: string,
   title: string,
   content: string,
 ): Promise<DriveSaveResult> {
-  const token = await getAccessToken(supabase)
+  const token = await getAccessToken(supabase, userEmail)
   if (!token) throw new Error('Google is not connected')
 
   const rootId = await ensureFolder(token, HUB_FOLDER_NAME)
@@ -239,9 +259,10 @@ export interface CalendarEventSummary {
 
 export async function listCalendarEvents(
   supabase: SupabaseClient,
+  userEmail: string,
   daysAhead = 7,
 ): Promise<CalendarEventSummary[]> {
-  const token = await getAccessToken(supabase)
+  const token = await getAccessToken(supabase, userEmail)
   if (!token) throw new Error('Google is not connected')
 
   const timeMin = new Date().toISOString()

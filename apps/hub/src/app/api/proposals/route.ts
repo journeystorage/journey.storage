@@ -1,5 +1,5 @@
 import { getSupabaseServer } from '@/lib/supabase-server'
-import { saveToDrive } from '@/lib/google'
+import { getUserEmail, saveToDrive } from '@/lib/google'
 
 export const runtime = 'nodejs'
 
@@ -42,11 +42,16 @@ export async function POST(req: Request) {
       const content = payload.content ?? payload.notes ?? proposal.rationale ?? ''
       const { error } = await supabase.from('hub_notes').insert({ title, content, department })
       if (error) return Response.json({ error: error.message }, { status: 500 })
-      // Best-effort Drive mirror under the author's folder.
-      try {
-        await saveToDrive(supabase, employeeInfo?.name ?? 'Team', title, content)
-      } catch {
-        // Google not connected — note still created in the hub.
+      // Best-effort Drive mirror under the author's folder — this route is
+      // always hit by a signed-in user (proxy.ts doesn't exempt it), so
+      // there's always a real user to attribute the save to.
+      const userEmail = await getUserEmail(supabase)
+      if (userEmail) {
+        try {
+          await saveToDrive(supabase, userEmail, employeeInfo?.name ?? 'Team', title, content)
+        } catch {
+          // Google not connected — note still created in the hub.
+        }
       }
     } else {
       const { error } = await supabase.from('hub_tasks').insert({

@@ -2,7 +2,7 @@ import { getSupabaseServer } from '@/lib/supabase-server'
 import { getServiceClient } from '@/lib/service-client'
 import { buildSystemPrompt, getAnthropicClient, JARVIS_MODEL } from '@/lib/anthropic'
 import { computeCostUsd } from '@/lib/cost'
-import { saveToDrive } from '@/lib/google'
+import { resolvePrimaryGoogleEmail, saveToDrive } from '@/lib/google'
 import type { HubAiEmployee, HubNote, HubTask } from '@/lib/types'
 
 export const runtime = 'nodejs'
@@ -29,6 +29,12 @@ export async function POST() {
   if (!supabase) {
     return Response.json({ ran: false, reason: 'service client not configured' }, { status: 503 })
   }
+
+  // Interactive trigger: attribute Drive saves to whoever's signed in.
+  // Unattended (pg_cron) trigger: no signed-in user to attribute to, so pick
+  // deterministically rather than letting an unfiltered query silently grab
+  // whichever token row Postgres happens to return first.
+  const driveUserEmail = userData.user?.email ?? (await resolvePrimaryGoogleEmail(supabase))
 
   const cutoff = new Date(Date.now() - WORK_INTERVAL_MIN * 60 * 1000).toISOString()
   const { data: recent } = await supabase
@@ -167,10 +173,12 @@ Respond with ONLY a JSON object, no prose:
       })
       await supabase.from('hub_tasks').update({ status: 'doing', updated_at: new Date().toISOString() }).eq('id', task.id)
 
-      try {
-        await saveToDrive(supabase, employee.name, title, content)
-      } catch {
-        // Google not connected — note still saved in the hub.
+      if (driveUserEmail) {
+        try {
+          await saveToDrive(supabase, driveUserEmail, employee.name, title, content)
+        } catch {
+          // Google not connected — note still saved in the hub.
+        }
       }
 
       return { employee: employee.name, task: task.title, produced: title, progress: parsed.progress_summary }

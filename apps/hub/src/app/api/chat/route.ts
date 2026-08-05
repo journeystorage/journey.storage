@@ -3,7 +3,7 @@ import { getSupabaseServer } from '@/lib/supabase-server'
 import { buildSystemPrompt, getAnthropicClient, JARVIS_MODEL } from '@/lib/anthropic'
 import { computeCostUsd, summarizeSpend } from '@/lib/cost'
 import { executeTool, getToolsFor } from '@/lib/tools'
-import { hasGoogleConnection } from '@/lib/google'
+import { getUserEmail, hasGoogleConnection } from '@/lib/google'
 import type { HubAiEmployee, HubInsight, HubNote, HubTask } from '@/lib/types'
 
 export const runtime = 'nodejs'
@@ -123,6 +123,7 @@ export async function POST(req: Request) {
   // Everyone gets Drive filing once Google is connected; Gmail/Calendar stay Jarvis-only.
   const hasGoogle = await hasGoogleConnection(supabase)
   const tools = getToolsFor(employee, hasGoogle)
+  const userEmail = await getUserEmail(supabase)
   const encoder = new TextEncoder()
   let fullText = ''
 
@@ -178,6 +179,7 @@ export async function POST(req: Request) {
               employee,
               block.name,
               (block.input ?? {}) as Record<string, unknown>,
+              userEmail,
             )
             toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: result })
           }

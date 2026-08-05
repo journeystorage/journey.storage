@@ -222,6 +222,7 @@ export async function executeTool(
   employee: HubAiEmployee | null,
   name: string,
   input: Record<string, unknown>,
+  userEmail: string | null,
 ): Promise<string> {
   try {
     switch (name) {
@@ -256,13 +257,13 @@ export async function executeTool(
         if (typeof input.title === 'string' && input.title.trim()) patch.title = input.title.trim()
         if (typeof input.notes === 'string') patch.notes = input.notes
         if (Object.keys(patch).length === 1) return fail('nothing to update — pass at least one field')
-        const { data, error } = await supabase
-          .from('hub_tasks')
-          .update(patch)
-          .eq('id', input.task_id)
-          .select('id,title,status')
-          .single()
-        if (error) return fail(error.message)
+        // Department employees are forced into their own department on
+        // create; matching that here so they can't edit another
+        // department's task by ID. Jarvis (no employee) is unrestricted.
+        let updateQuery = supabase.from('hub_tasks').update(patch).eq('id', input.task_id)
+        if (employee) updateQuery = updateQuery.eq('department', employee.department)
+        const { data, error } = await updateQuery.select('id,title,status').single()
+        if (error) return fail(employee ? 'no matching task in your department' : error.message)
         return ok({ updated: data })
       }
 
@@ -286,11 +287,13 @@ export async function executeTool(
         // Best-effort Drive mirror — the note is the source of truth; the
         // Doc in Journey Hub/<name>/ is the filing-cabinet copy.
         let driveLink: string | undefined
-        try {
-          const saved = await saveToDrive(supabase, employee?.name ?? 'Jarvis', input.title, input.content)
-          driveLink = saved.link
-        } catch {
-          // Google not connected or upload failed — note still created.
+        if (userEmail) {
+          try {
+            const saved = await saveToDrive(supabase, userEmail, employee?.name ?? 'Jarvis', input.title, input.content)
+            driveLink = saved.link
+          } catch {
+            // Google not connected or upload failed — note still created.
+          }
         }
         return ok({ created: data, ...(driveLink ? { drive_link: driveLink } : {}) })
       }
@@ -299,7 +302,8 @@ export async function executeTool(
         if (typeof input.title !== 'string' || typeof input.content !== 'string' || !input.title.trim()) {
           return fail('title and content are required')
         }
-        const saved = await saveToDrive(supabase, employee?.name ?? 'Jarvis', input.title.trim(), input.content)
+        if (!userEmail) return fail('not signed in')
+        const saved = await saveToDrive(supabase, userEmail, employee?.name ?? 'Jarvis', input.title.trim(), input.content)
         return ok({ saved_to: saved.folder, link: saved.link })
       }
 
@@ -353,8 +357,10 @@ export async function executeTool(
       }
 
       case 'read_recent_emails': {
+        if (!userEmail) return fail('not signed in')
         const emails = await listRecentEmails(
           supabase,
+          userEmail,
           typeof input.query === 'string' ? input.query : undefined,
           typeof input.max === 'number' ? input.max : 15,
         )
@@ -389,13 +395,16 @@ export async function executeTool(
 
       case 'find_drive_files': {
         if (typeof input.query !== 'string' || !input.query.trim()) return fail('query is required')
-        const files = await searchDriveFiles(supabase, input.query.trim())
+        if (!userEmail) return fail('not signed in')
+        const files = await searchDriveFiles(supabase, userEmail, input.query.trim())
         return ok({ files })
       }
 
       case 'read_calendar': {
+        if (!userEmail) return fail('not signed in')
         const events = await listCalendarEvents(
           supabase,
+          userEmail,
           typeof input.days_ahead === 'number' ? input.days_ahead : 7,
         )
         return ok({ events })
