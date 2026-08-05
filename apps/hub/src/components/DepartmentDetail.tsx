@@ -98,9 +98,9 @@ export function DepartmentDetail({
         actions={<span className="h-3 w-3 rounded-full" style={{ backgroundColor: accent }} aria-hidden />}
       />
 
-      {slug === 'acquisitions' && (
+      {slug === 'investor-relations' && (
         <Link
-          href="/departments/acquisitions/investors"
+          href="/departments/investor-relations/investors"
           className="hud-panel mb-6 flex items-center justify-between px-5 py-4 transition-colors duration-150 hover:border-stone/40"
         >
           <div>

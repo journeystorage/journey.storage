@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import { getSupabaseBrowser } from '@/lib/supabase-browser'
 import type { HubDeal } from '@/lib/investors/types'
 
-const BASE = '/departments/acquisitions/investors'
+const BASE = '/departments/investor-relations/investors'
 
 export default function InvestorsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()

@@ -193,7 +193,11 @@ export function getToolsFor(employee: HubAiEmployee | null, hasGoogle = false): 
       ? [...TASK_NOTE_TOOLS, ...INVESTOR_TOOLS, ...JARVIS_TOOLS, ...GOOGLE_TOOLS, ...driveTools]
       : [...TASK_NOTE_TOOLS, ...INVESTOR_TOOLS, ...JARVIS_TOOLS]
   }
-  if (employee.department === 'acquisitions') return [...TASK_NOTE_TOOLS, ...INVESTOR_TOOLS, ...driveTools]
+  // The investor CRM lives in Investor Relations (Meridian's lane);
+  // Acquisitions keeps access too since Compass matches investors to deals.
+  if (employee.department === 'investor-relations' || employee.department === 'acquisitions') {
+    return [...TASK_NOTE_TOOLS, ...INVESTOR_TOOLS, ...driveTools]
+  }
   return [...TASK_NOTE_TOOLS, ...driveTools]
 }
 

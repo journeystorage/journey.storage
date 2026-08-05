@@ -36,7 +36,7 @@ export default function InvestorsDashboardPage() {
             {deals.map((deal) => {
               const stats = dealStats(deal.id, entries, investorsById)
               return (
-                <Link key={deal.id} href={`/departments/acquisitions/investors/deals/${deal.id}`} className="hud-panel block p-5 transition-colors duration-150 hover:border-stone/40">
+                <Link key={deal.id} href={`/departments/investor-relations/investors/deals/${deal.id}`} className="hud-panel block p-5 transition-colors duration-150 hover:border-stone/40">
                   <p className="hud-label mb-3">{deal.name}</p>
                   <div className="grid grid-cols-3 gap-3">
                     <div>
@@ -63,7 +63,7 @@ export default function InvestorsDashboardPage() {
           <div className="hud-panel p-5">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="font-display text-h3 font-bold uppercase tracking-wide text-warm-white">Up next</h2>
-              <Link href="/departments/acquisitions/investors/follow-ups" className="font-sans text-body-sm text-cyan hover:text-cyan-400">
+              <Link href="/departments/investor-relations/investors/follow-ups" className="font-sans text-body-sm text-cyan hover:text-cyan-400">
                 All follow-ups →
               </Link>
             </div>

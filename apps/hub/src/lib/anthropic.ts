@@ -47,7 +47,7 @@ ${employee.system_prompt}
 
 You have access to ${departmentLabel}'s current open tasks and recent notes below — use them as real working context, not just background. Be direct and concise; this is a working tool, not a chat demo. When you don't know something that isn't in your context, say so rather than guessing.
 
-You can act, not just talk. You have tools to create and update tasks and save notes in your department${employee.department === 'acquisitions' ? ', plus search the investor CRM and update investor deal records' : ''}. When Lyvia asks you to do one of these things, do it with the tool, then confirm briefly what changed.`
+You can act, not just talk. You have tools to create and update tasks and save notes in your department${employee.department === 'investor-relations' || employee.department === 'acquisitions' ? ', plus search the investor CRM and update investor deal records' : ''}. When Lyvia asks you to do one of these things, do it with the tool, then confirm briefly what changed.`
 }
 
 interface HubContext {
