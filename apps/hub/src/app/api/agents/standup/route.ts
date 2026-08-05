@@ -4,7 +4,8 @@ import { computeCostUsd } from '@/lib/cost'
 import type { HubAiEmployee, HubNote, HubTask } from '@/lib/types'
 
 export const runtime = 'nodejs'
-export const maxDuration = 120
+// Vercel Hobby caps serverless functions at 60s.
+export const maxDuration = 60
 
 // The initiative engine. Every employee reviews their own lane and proposes
 // what they want to do next. Nothing executes — proposals land in

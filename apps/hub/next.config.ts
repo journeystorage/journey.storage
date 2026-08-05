@@ -1,3 +1,4 @@
+import path from 'path'
 import type { NextConfig } from 'next'
 
 const securityHeaders = [
@@ -14,6 +15,11 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   output: 'standalone',
   outputFileTracingRoot: __dirname,
+  // Monorepo: Turbopack can't infer the workspace root on Vercel (next is
+  // hoisted to the repo root) — pin it explicitly or the build fails.
+  turbopack: {
+    root: path.join(__dirname, '..', '..'),
+  },
   images: {
     unoptimized: true,
   },
