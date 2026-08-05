@@ -1,0 +1,114 @@
+# Dispatched by Jarvis's `propose_code_change` tool (apps/hub/src/lib/github.ts)
+# — never by a human directly. Runs in an isolated, ephemeral runner with its
+# own credentials, completely separate from anything the Hub's own Vercel
+# process holds. This workflow can open a pull request; it can never merge
+# one — merging only happens via the session-gated
+# apps/hub/src/app/api/proposals/code/merge/route.ts, hit by a human clicking
+# Approve in the Hub's Code Changes panel.
+#
+# NOTE: verify `anthropics/claude-code-action@v1`'s exact input keys
+# (`prompt`, `claude_args`, `anthropic_api_key`, `github_token`) against
+# https://code.claude.com/docs/en/github-actions before the first real run —
+# written from documented behavior, not copy-pasted from a working example.
+
+name: Jarvis code change
+
+on:
+  workflow_dispatch:
+    inputs:
+      instruction:
+        description: 'What Jarvis was asked to change'
+        required: true
+      proposal_id:
+        description: 'hub_code_proposals row id to report the result against'
+        required: true
+
+concurrency:
+  group: jarvis-code-${{ github.event.inputs.proposal_id }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  code:
+    name: Jarvis writes code
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      # Short-lived, auto-rotating, scoped to this repo only — NOT the
+      # default GITHUB_TOKEN. Pushes/PRs authored with GITHUB_TOKEN don't
+      # trigger downstream workflows, which would silently disable
+      # build.yml's own check on this bot's PR. See JARVIS_APP_ID /
+      # JARVIS_APP_PRIVATE_KEY setup in DEPLOYMENT.md.
+      - name: Mint GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.JARVIS_APP_ID }}
+          private-key: ${{ secrets.JARVIS_APP_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          fetch-depth: 0
+          ref: locations-redesign
+
+      - name: Run Jarvis
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        with:
+          anthropic_api_key: ${{ secrets.JARVIS_CODE_ANTHROPIC_API_KEY }}
+          github_token: ${{ steps.app-token.outputs.token }}
+          claude_args: '--max-turns 15'
+          prompt: |
+            You are making a real code change to the journey.storage monorepo
+            on behalf of Jarvis, an AI assistant a founder was talking to in
+            the Journey Hub app. The founder's instruction, verbatim:
+
+            ---
+            ${{ github.event.inputs.instruction }}
+            ---
+
+            Do the work for real — read the relevant files first, make the
+            actual change, and verify it (typecheck/build the affected app
+            if one exists) before finishing.
+
+            When the change is complete:
+            1. Create a new branch named exactly `jarvis/${{ github.event.inputs.proposal_id }}`.
+            2. Commit your changes with a clear message.
+            3. Push that branch: `git push origin jarvis/${{ github.event.inputs.proposal_id }}`
+            4. Open a pull request against the `locations-redesign` branch:
+               `gh pr create --base locations-redesign --head jarvis/${{ github.event.inputs.proposal_id }} --title "..." --body "Dispatched by Jarvis. Proposal: ${{ github.event.inputs.proposal_id }}"`
+            5. Write the exact PR URL that `gh pr create` printed, and nothing
+               else, to a file at `/tmp/jarvis-pr-url.txt`.
+
+            Do not merge the pull request. Do not push to `main` or
+            `locations-redesign` directly. If you cannot complete the change,
+            explain why in a comment on a draft PR if one exists, or just stop
+            — do not guess or invent an unrelated change to "succeed" anyway.
+
+      - name: Report result back to Journey Hub
+        if: always()
+        run: |
+          PR_URL=""
+          STATUS="failed"
+          if [ -f /tmp/jarvis-pr-url.txt ]; then
+            PR_URL=$(cat /tmp/jarvis-pr-url.txt)
+            if [ -n "$PR_URL" ]; then STATUS="ready"; fi
+          fi
+
+          curl -sS -X POST "https://hub.journey.storage/api/proposals/code/callback" \
+            -H "Content-Type: application/json" \
+            -H "X-Code-Callback-Secret: ${{ secrets.CODE_CALLBACK_SECRET }}" \
+            -d "$(jq -n \
+                --arg proposal_id "${{ github.event.inputs.proposal_id }}" \
+                --arg status "$STATUS" \
+                --arg pr_url "$PR_URL" \
+                --arg branch "jarvis/${{ github.event.inputs.proposal_id }}" \
+                --arg workflow_run_id "${{ github.run_id }}" \
+                '{proposal_id:$proposal_id, status:$status, pr_url:$pr_url, branch:$branch, workflow_run_id:$workflow_run_id}')"

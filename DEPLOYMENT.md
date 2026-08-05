@@ -105,14 +105,12 @@ The server is single-process and zero-dependency, so it stays well under Hosting
 
 ---
 
-### Hub (internal — currently LOCAL ONLY, not deployed anywhere)
+### Hub (internal — live at hub.journey.storage, Vercel)
 
-> **Status as of 2026-08-03: not deployed.** Lyvia and Jonah run it locally
-> via `npm run dev:hub` (`http://localhost:3006`) — no Vercel project exists
-> yet. All data lives in Supabase, not on disk, so running it locally on two
-> different machines works fine and stays in sync. The Vercel plan below is
-> documented in case remote/always-on access is wanted later — nothing in it
-> has been executed.
+> **Status as of 2026-08-05: deployed.** Live at `https://hub.journey.storage`,
+> Vercel project tracking the `locations-redesign` branch (see note below on
+> why not `main` yet). `npm run dev:hub` (`http://localhost:3006`) still works
+> for local dev against the same Supabase project.
 
 | Field              | Value                          |
 |--------------------|--------------------------------|
@@ -134,6 +132,25 @@ The server is single-process and zero-dependency, so it stays well under Hosting
 5. Deploy.
 6. Add custom domain `hub.journey.storage` in Project Settings → Domains, then add the CNAME record Vercel gives you at the DNS provider.
 7. No Supabase Auth redirect-URL changes needed — the Hub uses password sign-in (`supabase.auth.signInWithPassword`), not magic links/OAuth, so there's no callback URL tied to the domain.
+
+#### Jarvis code-change pipeline (Jarvis writes code, a human merges)
+
+Jarvis's `propose_code_change` tool (`apps/hub/src/lib/tools.ts`) dispatches `.github/workflows/jarvis-code.yml`, which runs the actual coding work in an isolated GitHub Actions runner — never inside the Hub's own Vercel process — and opens a PR. Merging only happens via a human clicking Approve in the Hub's Code Changes panel, which hits a separately-credentialed, session-gated route. See the full design rationale in the plan this was built from if you need it — this section is just the setup checklist.
+
+**Three separate credentials, on purpose — do not consolidate them:**
+
+| Credential | Scope | Where it lives | Used by |
+|---|---|---|---|
+| `GITHUB_DISPATCH_TOKEN` | Fine-grained PAT, **`Actions: write` only** on this repo — no Contents access at all | Vercel env var (Hub) | `dispatchCodeWorkflow()` in `apps/hub/src/lib/github.ts` — can only ever trigger a run, never push code, even if leaked |
+| `JARVIS_APP_ID` / `JARVIS_APP_PRIVATE_KEY` | A GitHub App installed on this repo only, Contents (RW) + Pull requests (RW) | GitHub Actions repo secrets | `jarvis-code.yml`'s own git push + `gh pr create` — deliberately NOT the default `GITHUB_TOKEN`, which would silently stop `build.yml` from running on the bot's PR (GitHub suppresses downstream triggers for `GITHUB_TOKEN`-authored pushes) |
+| `GITHUB_MERGE_TOKEN` | Fine-grained PAT, Contents (RW) + Pull requests (RW) on this repo — separate from the App above | Vercel env var (Hub) | `apps/hub/src/app/api/proposals/code/merge/route.ts` only. No Jarvis tool ever holds or can reach this credential — there is no merge tool in `tools.ts` |
+
+Plus:
+- `CODE_CALLBACK_SECRET` — any random string, set as **both** a Vercel env var and a GitHub Actions repo secret (must match). Gates `POST /api/proposals/code/callback`, the one route `proxy.ts` exempts from the normal session check, since GitHub Actions has no Supabase session to present.
+- `JARVIS_CODE_ANTHROPIC_API_KEY` — a **separate** Anthropic API key from the Hub's own `ANTHROPIC_API_KEY`, used only inside `jarvis-code.yml`. Set a spend limit on it in the Anthropic Console — `claude-code-action` has no dollar-cap parameter, so this key's Console limit is the actual cost backstop.
+- **Branch protection** on `locations-redesign` (the branch this currently ships from — see the note above about eventually switching to `main`): require the `build.yml` status check, no bypass actors. This is what actually prevents any credential above — App token or otherwise — from pushing straight to the deploy branch; the credential scoping is defense in depth on top of it, not a substitute for it.
+
+None of the above is automatable from here — GitHub App creation, PAT minting, and Anthropic Console spend limits all need your own account access.
 
 `apps/hub/package.json` has its own `build`/`start` scripts (`next build` / `next start`) — Vercel uses these directly; there is no `build:hub` file-replacement script (that pattern is Hostinger-only). Root `package.json` keeps `dev:hub` (port 3006) for local dev.
 

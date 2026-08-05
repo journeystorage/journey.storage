@@ -6,6 +6,7 @@ import { DEPARTMENTS, getDepartment } from '@/lib/departments'
 import { CommandHeader } from '@/components/CommandHeader'
 import { OrbitalOverview, type DepartmentStat } from '@/components/OrbitalOverview'
 import { ProposalsPanel } from '@/components/ProposalsPanel'
+import { CodeProposalsPanel } from '@/components/CodeProposalsPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -140,6 +141,9 @@ export default async function DashboardPage() {
 
         {/* ── Team proposals — the approval desk ── */}
         <ProposalsPanel />
+
+        {/* ── Code changes Jarvis has dispatched, awaiting merge decision ── */}
+        <CodeProposalsPanel />
 
         {/* ── Priority queue — full width below ── */}
         <section className="hud-panel col-span-2 p-6">

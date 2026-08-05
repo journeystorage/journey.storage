@@ -65,3 +65,31 @@ create index if not exists hub_department_docs_department_idx on public.hub_depa
 create index if not exists hub_employee_docs_employee_idx on public.hub_employee_docs (employee_id);
 create index if not exists hub_proposals_status_idx on public.hub_proposals (status, created_at);
 create index if not exists hub_proposals_employee_idx on public.hub_proposals (employee_id);
+
+-- ── Jarvis code proposals ───────────────────────────────────────────
+-- Jarvis dispatches a GitHub Actions run (a completely separate,
+-- minimally-scoped credential from the Hub's own) that does the actual
+-- coding in an isolated runner and opens a PR. Nothing here ever merges
+-- anything — that only happens via the session-gated Approve button
+-- hitting /api/proposals/code/merge, never from a chat/voice-callable tool.
+create table if not exists public.hub_code_proposals (
+  id               uuid primary key default gen_random_uuid(),
+  instruction      text not null,
+  branch           text,
+  pr_url           text,
+  workflow_run_id  text,
+  summary          text,
+  status           text not null default 'pending' check (status in ('pending', 'ready', 'merged', 'dismissed', 'failed')),
+  created_at       timestamptz not null default now(),
+  decided_at       timestamptz
+);
+
+alter table public.hub_code_proposals enable row level security;
+
+drop policy if exists hub_code_proposals_all on public.hub_code_proposals;
+create policy hub_code_proposals_all on public.hub_code_proposals
+  for all to authenticated
+  using ((auth.jwt() ->> 'email') in ('lyvia@journey.storage','jonah@journey.storage'))
+  with check ((auth.jwt() ->> 'email') in ('lyvia@journey.storage','jonah@journey.storage'));
+
+create index if not exists hub_code_proposals_status_idx on public.hub_code_proposals (status, created_at desc);

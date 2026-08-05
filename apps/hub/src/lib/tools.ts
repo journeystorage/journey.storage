@@ -3,6 +3,7 @@ import type Anthropic from '@anthropic-ai/sdk'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { isDepartmentSlug } from '@/lib/departments'
 import { listCalendarEvents, listRecentEmails, saveToDrive, searchDriveFiles } from '@/lib/google'
+import { dispatchCodeWorkflow } from '@/lib/github'
 import type { HubAiEmployee } from '@/lib/types'
 
 // Jarvis's hands. Every tool writes through the caller's own Supabase
@@ -124,7 +125,27 @@ const JARVIS_TOOLS: Anthropic.Tool[] = [
       required: ['department', 'name', 'role', 'system_prompt'],
     },
   },
+  {
+    name: 'propose_code_change',
+    description:
+      "Dispatch a real code change to journey.storage's own codebase. This does NOT execute anything directly and does NOT merge or deploy anything — it kicks off an isolated GitHub Actions run that writes the change on its own branch and opens a pull request. It always lands in the Hub's Code Changes panel for Lyvia or Jonah to review and approve there (never from a chat reply) before anything reaches production. Use only when explicitly asked to change how the Hub or the wider site behaves or looks. Be precise and complete in the instruction — it is the only context the coding run gets, so name the file/behavior/page involved and what \"done\" looks like.",
+    input_schema: {
+      type: 'object',
+      properties: {
+        instruction: {
+          type: 'string',
+          description: 'Precise, complete instruction for the change — what to target and what "done" looks like.',
+        },
+      },
+      required: ['instruction'],
+    },
+  },
 ]
+
+// Independent of any GitHub-side limit — cheap insurance against a runaway
+// loop or a voice misfire dispatching many parallel coding runs.
+const CODE_DISPATCH_WINDOW_MIN = 60
+const MAX_CODE_DISPATCHES_PER_WINDOW = 4
 
 // Available to everyone once Google is connected — deliverables get filed
 // in Drive under Journey Hub/<employee name>/.
@@ -391,6 +412,48 @@ export async function executeTool(
           .single()
         if (error) return fail(error.message)
         return ok({ hired: data })
+      }
+
+      case 'propose_code_change': {
+        // No merge/deploy path exists in this function, or anywhere in this
+        // file, on purpose — see the module comment on saveToDrive/dispatch.
+        if (employee) return fail('only Jarvis can propose code changes')
+        if (typeof input.instruction !== 'string' || !input.instruction.trim()) {
+          return fail('instruction is required')
+        }
+
+        const cutoff = new Date(Date.now() - CODE_DISPATCH_WINDOW_MIN * 60 * 1000).toISOString()
+        const { count } = await supabase
+          .from('hub_code_proposals')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', cutoff)
+        if ((count ?? 0) >= MAX_CODE_DISPATCHES_PER_WINDOW) {
+          return fail(
+            `already dispatched ${MAX_CODE_DISPATCHES_PER_WINDOW} code changes in the last ${CODE_DISPATCH_WINDOW_MIN} minutes — wait before dispatching another, or combine into one instruction`,
+          )
+        }
+
+        const instruction = input.instruction.trim()
+        const { data: proposal, error: insertError } = await supabase
+          .from('hub_code_proposals')
+          .insert({ instruction, status: 'pending' })
+          .select('id')
+          .single()
+        if (insertError) return fail(insertError.message)
+
+        const dispatched = await dispatchCodeWorkflow(instruction, proposal.id)
+        if (!dispatched.ok) {
+          await supabase
+            .from('hub_code_proposals')
+            .update({ status: 'failed', summary: dispatched.error })
+            .eq('id', proposal.id)
+          return fail(dispatched.error)
+        }
+
+        return ok({
+          proposal_id: proposal.id,
+          note: "Dispatched. It'll show up in the Code Changes panel once the run opens a pull request — nothing merges or deploys until Lyvia or Jonah approves it there.",
+        })
       }
 
       case 'find_drive_files': {

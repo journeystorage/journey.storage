@@ -38,6 +38,14 @@ export async function proxy(request: NextRequest) {
     request.method === 'POST' && (pathname === '/api/agents/standup' || pathname === '/api/agents/work')
   if (isHeartbeat) return response
 
+  // The code-change callback is called by GitHub Actions once a coding run
+  // finishes — it has no Supabase session to present, so it's gated by its
+  // own shared-secret header instead (checked in the route itself). This is
+  // report-only: it can update a hub_code_proposals row's status, never
+  // merge or deploy anything. The merge route is deliberately NOT exempted
+  // here — it stays fully session-gated, same as every other Hub route.
+  if (request.method === 'POST' && pathname === '/api/proposals/code/callback') return response
+
   if (user && !HUB_ALLOWED_EMAILS.includes(user.email ?? '')) {
     await supabase.auth.signOut()
     if (!isLoginRoute) {
