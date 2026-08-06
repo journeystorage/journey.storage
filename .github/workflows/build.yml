@@ -1,0 +1,38 @@
+name: Build check
+
+# Runs the real production build (the same `npm run build` Hostinger runs for
+# the main site) on every push and PR, so a build that would 503 production is
+# caught here first. There is no local Node in the authoring env, so this is the
+# primary pre-deploy gate.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# Cancel an in-progress run when new commits land on the same ref.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build main site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # `next build` also type-checks (tsc) and lints, so a TS/ESLint error
+      # here fails the job before it can reach production.
+      - name: Build (next build + standalone copy)
+        run: npm run build
