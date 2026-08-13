@@ -129,6 +129,7 @@ The server is single-process and zero-dependency, so it stays well under Hosting
    - `NEXT_PUBLIC_SUPABASE_URL` — `https://uwncchrmdotateyditjc.supabase.co` (also has a safe hardcoded fallback in code, but set it explicitly)
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — the publishable anon key (see `apps/hub/.env.example`; also has a safe hardcoded fallback)
    - `ANTHROPIC_API_KEY` — **required, no fallback**. Copy the value from `apps/hub/.env.local` (gitignored, not in this doc).
+   - `SUPABASE_SERVICE_ROLE_KEY` — **required for every unattended/service-role path**: the standup/work cron routes (`api/agents/standup`, `api/agents/work`), and the code-proposal callback (`api/proposals/code/callback`). `getServiceClient()` (`apps/hub/src/lib/service-client.ts`) returns `null` without it, which fails silently in most of these routes (they just 503 or skip the write). This was missing from this checklist even though it was needed since the autonomous-agent work — if the standup/work cycles have never actually produced anything, check this first.
 5. Deploy.
 6. Add custom domain `hub.journey.storage` in Project Settings → Domains, then add the CNAME record Vercel gives you at the DNS provider.
 7. No Supabase Auth redirect-URL changes needed — the Hub uses password sign-in (`supabase.auth.signInWithPassword`), not magic links/OAuth, so there's no callback URL tied to the domain.
