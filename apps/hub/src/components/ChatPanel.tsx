@@ -199,6 +199,15 @@ export function ChatPanel({ employeeId, name, subtitle, accent, placeholder, emp
     setCallStatus('idle')
   }
 
+  // Auto-starts the call the moment this page opens — by explicit request,
+  // with the tradeoff spelled out first: the mic goes live immediately,
+  // every time this page is open, not just when you mean to talk. Jarvis
+  // only; department employees still use the click-to-talk browser mic.
+  useEffect(() => {
+    if (!employeeId) startVoiceCall()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   function toggleVoice() {
     const next = !voiceEnabled
     setVoiceEnabled(next)
