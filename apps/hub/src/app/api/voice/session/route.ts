@@ -10,6 +10,13 @@ export const runtime = 'nodejs'
 // ElevenLabs client SDK as dynamicVariables, which ElevenLabs then forwards
 // to /api/voice/completions on every turn of that conversation, since that
 // route has no session cookie to read it from itself.
+// journey.storage email local-parts are first names — good enough for a
+// spoken greeting without a real name field to draw from.
+function firstNameFromEmail(email: string): string {
+  const local = email.split('@')[0]
+  return local.charAt(0).toUpperCase() + local.slice(1)
+}
+
 export async function POST() {
   const supabase = await getSupabaseServer()
   const userEmail = await getUserEmail(supabase)
@@ -18,5 +25,5 @@ export async function POST() {
   const minted = await mintSignedConversationUrl()
   if ('error' in minted) return Response.json({ error: minted.error }, { status: 502 })
 
-  return Response.json({ signedUrl: minted.signedUrl, userEmail })
+  return Response.json({ signedUrl: minted.signedUrl, userEmail, userName: firstNameFromEmail(userEmail) })
 }

@@ -165,12 +165,12 @@ export function ChatPanel({ employeeId, name, subtitle, accent, placeholder, emp
     try {
       const res = await fetch('/api/voice/session', { method: 'POST' })
       if (!res.ok) throw new Error('could not start voice session')
-      const { signedUrl, userEmail } = await res.json()
+      const { signedUrl, userEmail, userName } = await res.json()
 
       const { Conversation } = await import('@elevenlabs/client')
       const conversation = await Conversation.startSession({
         signedUrl,
-        dynamicVariables: { user_email: userEmail },
+        dynamicVariables: { user_email: userEmail, user_name: userName },
         onConnect: () => setCallStatus('connected'),
         onDisconnect: () => {
           callRef.current = null
@@ -346,7 +346,11 @@ export function ChatPanel({ employeeId, name, subtitle, accent, placeholder, emp
             </button>
           </>
         )}
-        {voiceSupported && (
+        {/* Browser TTS/STT is a fallback for department employees only —
+            Jarvis has real two-way voice via ElevenLabs below instead, and
+            showing both was confusing (this one just reads text aloud
+            robotically; that one is an actual live conversation). */}
+        {voiceSupported && employeeId && (
           <button
             onClick={toggleVoice}
             aria-pressed={voiceEnabled}
@@ -396,7 +400,7 @@ export function ChatPanel({ employeeId, name, subtitle, accent, placeholder, emp
 
       <form onSubmit={handleSubmit} className="border-t border-surface-border px-8 py-5">
         <div className="mx-auto flex max-w-2xl items-center gap-2">
-          {micSupported && (
+          {micSupported && employeeId && (
             <button
               type="button"
               onClick={listening ? stopListening : startListening}
