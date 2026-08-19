@@ -103,6 +103,17 @@ export interface RunJarvisLoopParams {
   context: JarvisContext
   messages: Anthropic.MessageParam[]
   onDelta: (text: string) => void
+  // False for the autonomous work engine — its synthetic "work session"
+  // instruction and output aren't a real chat turn, and inserting them
+  // into hub_chat_messages would pollute that employee's actual
+  // conversation history with a reply to a message that was never shown.
+  logChat?: boolean
+}
+
+export interface ExecutedToolCall {
+  name: string
+  input: Record<string, unknown>
+  result: string
 }
 
 // Agentic loop: stream text out as it arrives; when Claude stops to use
@@ -117,10 +128,12 @@ export async function runJarvisLoop({
   context,
   messages,
   onDelta,
-}: RunJarvisLoopParams): Promise<{ fullText: string }> {
+  logChat = true,
+}: RunJarvisLoopParams): Promise<{ fullText: string; toolCalls: ExecutedToolCall[] }> {
   const employeeId = employee?.id ?? null
   const client = getAnthropicClient()
   let fullText = ''
+  const toolCalls: ExecutedToolCall[] = []
 
   const totalUsage = {
     input_tokens: 0,
@@ -160,8 +173,10 @@ export async function runJarvisLoop({
     const toolResults: Anthropic.ToolResultBlockParam[] = []
     for (const block of finalMessage.content) {
       if (block.type !== 'tool_use') continue
-      const result = await executeTool(supabase, employee, block.name, (block.input ?? {}) as Record<string, unknown>, userEmail)
+      const input = (block.input ?? {}) as Record<string, unknown>
+      const result = await executeTool(supabase, employee, block.name, input, userEmail)
       toolResults.push({ type: 'tool_result', tool_use_id: block.id, content: result })
+      toolCalls.push({ name: block.name, input, result })
     }
 
     messages.push({ role: 'assistant', content: finalMessage.content })
@@ -175,7 +190,7 @@ export async function runJarvisLoop({
   }
 
   const inserts: PromiseLike<unknown>[] = []
-  if (fullText.trim()) {
+  if (logChat && fullText.trim()) {
     inserts.push(supabase.from('hub_chat_messages').insert({ role: 'assistant', content: fullText, employee_id: employeeId }))
   }
   inserts.push(
@@ -191,5 +206,5 @@ export async function runJarvisLoop({
   )
   await Promise.all(inserts)
 
-  return { fullText }
+  return { fullText, toolCalls }
 }

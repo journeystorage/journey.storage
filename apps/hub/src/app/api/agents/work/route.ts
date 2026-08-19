@@ -1,22 +1,28 @@
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { getServiceClient } from '@/lib/service-client'
-import { buildSystemPrompt, getAnthropicClient, JARVIS_MODEL } from '@/lib/anthropic'
-import { computeCostUsd } from '@/lib/cost'
 import { resolvePrimaryGoogleEmail, saveToDrive } from '@/lib/google'
-import type { HubAiEmployee, HubNote, HubTask } from '@/lib/types'
+import { gatherJarvisContext, runJarvisLoop, type ExecutedToolCall } from '@/lib/jarvis-loop'
+import type { HubAiEmployee, HubTask } from '@/lib/types'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
 // The work engine. Each cycle, a few employees pick up an open task in
-// their department and produce a real draft toward it, saved as a note
-// (and mirrored to Drive when connected). Tasks move to 'doing' — never to
-// 'done' on their own; finishing is Lyvia's call.
+// their department and actually work it — using the same tools they have
+// in chat (create_note, update_task, investor tools, save_to_drive) rather
+// than just drafting text for a human to act on. Two guarantees enforced
+// regardless of what the model does: a task assigned this cycle always
+// ends this cycle at status 'doing', never 'done' — finishing is Lyvia or
+// Jonah's call — and some record of the work always lands as a note, even
+// if the model never calls create_note itself.
 //
 // Called by pg_cron (unauthenticated, via service client) or by a signed-in
 // user. Self-limits to one cycle per WORK_INTERVAL_MIN so a stray or
 // malicious trigger can't burn money — an unauthenticated caller can never
-// make it do more than the schedule already does.
+// make it do more than the schedule already does. No department employee
+// ever gets the propose_code_change tool (Jarvis-only, see tools.ts) or
+// runs as Jarvis (employee is always set here) — this cycle's reach is
+// exactly what that employee could already do from their own chat.
 
 const WORK_INTERVAL_MIN = 100
 const EMPLOYEES_PER_CYCLE = 3
@@ -34,7 +40,7 @@ export async function POST() {
   // Unattended (pg_cron) trigger: no signed-in user to attribute to, so pick
   // deterministically rather than letting an unfiltered query silently grab
   // whichever token row Postgres happens to return first.
-  const driveUserEmail = userData.user?.email ?? (await resolvePrimaryGoogleEmail(supabase))
+  const userEmail = userData.user?.email ?? (await resolvePrimaryGoogleEmail(supabase))
 
   const cutoff = new Date(Date.now() - WORK_INTERVAL_MIN * 60 * 1000).toISOString()
   const { data: recent } = await supabase
@@ -83,7 +89,6 @@ export async function POST() {
     return Response.json({ ran: true, summary: [{ note: 'no departments with open tasks' }] })
   }
 
-  const client = getAnthropicClient()
   const claimed = new Set<string>()
 
   const results = await Promise.allSettled(
@@ -92,96 +97,64 @@ export async function POST() {
       if (!task) return { employee: employee.name, note: 'no task' }
       claimed.add(task.id)
 
-      const [{ data: notes }, { data: docs }, { data: deptDocs }] = await Promise.all([
-        supabase
-          .from('hub_notes')
-          .select('title,content')
-          .eq('department', employee.department)
-          .order('updated_at', { ascending: false })
-          .limit(5),
-        supabase
-          .from('hub_employee_docs')
-          .select('filename,content')
-          .eq('employee_id', employee.id)
-          .order('created_at', { ascending: false })
-          .limit(5),
-        supabase
-          .from('hub_department_docs')
-          .select('filename,content')
-          .eq('department', employee.department)
-          .order('created_at', { ascending: false })
-          .limit(5),
-      ])
-
-      const system = buildSystemPrompt({
-        employee,
-        tasks: [task],
-        notes: (notes as HubNote[]) ?? [],
-        docs: [
-          ...(((docs as { filename: string; content: string }[]) ?? [])),
-          ...(((deptDocs as { filename: string; content: string }[]) ?? []).map((d) => ({
-            filename: `${d.filename} (department library)`,
-            content: d.content,
-          }))),
-        ].map((d) => ({ filename: d.filename, content: d.content.slice(0, 3000) })),
-      })
+      const context = await gatherJarvisContext(supabase, employee)
 
       const instruction = `Work session. Your assigned task right now:
-"${task.title}"${task.notes ? `\nTask detail: ${task.notes}` : ''}
+"${task.title}"${task.notes ? `\nTask detail: ${task.notes}` : ''} (task_id: ${task.id})
 
-Produce the actual work product for this task — the real deliverable or the strongest possible draft of it, not a plan to make one. Ground it in your document library and recent notes where relevant.
+Actually do the work — use your tools for real, the same way you would if Lyvia asked you directly. Save the real deliverable (the work product itself, or the strongest possible draft of it — not a plan to make one) with create_note, titled "Draft: ..." if it needs review before use. If this task is about an investor relationship, use your investor tools to update the actual record. Call update_task on task_id ${task.id} to reflect real progress in its notes — but never set its status to "done"; only Lyvia or Jonah closes out a task. Ground your work in your document library and recent notes where relevant. End with one sentence on what you did and what remains.`
 
-Respond with ONLY a JSON object, no prose:
-{"note_title": "short deliverable title (start with 'Draft:' if it needs Lyvia's review before use)", "note_content": "the complete work product", "progress_summary": "1 sentence on what you did and what remains"}`
-
-      const response = await client.messages.create({
-        model: JARVIS_MODEL,
-        max_tokens: 3000,
-        output_config: { effort: 'low' },
-        system,
-        messages: [{ role: 'user', content: instruction }],
-      })
-
-      await supabase.from('hub_api_usage').insert({
-        employee_id: employee.id,
-        model: JARVIS_MODEL,
-        input_tokens: response.usage.input_tokens,
-        output_tokens: response.usage.output_tokens,
-        cache_creation_input_tokens: response.usage.cache_creation_input_tokens ?? 0,
-        cache_read_input_tokens: response.usage.cache_read_input_tokens ?? 0,
-        cost_usd: computeCostUsd(JARVIS_MODEL, response.usage),
-      })
-
-      const text = response.content.map((b) => (b.type === 'text' ? b.text : '')).join('')
-      let parsed: { note_title?: string; note_content?: string; progress_summary?: string } = {}
+      let fullText = ''
+      let toolCalls: ExecutedToolCall[] = []
       try {
-        const start = text.indexOf('{')
-        const end = text.lastIndexOf('}')
-        if (start !== -1 && end > start) parsed = JSON.parse(text.slice(start, end + 1))
-      } catch {
-        // fall through — treat whole text as content
+        const result = await runJarvisLoop({
+          supabase,
+          employee,
+          userEmail,
+          context,
+          messages: [{ role: 'user', content: instruction }],
+          onDelta: () => {},
+          logChat: false,
+        })
+        fullText = result.fullText
+        toolCalls = result.toolCalls
+      } catch (err) {
+        return { employee: employee.name, task: task.title, error: err instanceof Error ? err.message : 'failed' }
       }
 
-      const title = (parsed.note_title || `Draft: ${task.title}`).slice(0, 200)
-      const content = parsed.note_content || text
-      if (!content.trim()) return { employee: employee.name, task: task.title, note: 'empty output' }
-
-      await supabase.from('hub_notes').insert({
-        title: `${employee.name}: ${title}`,
-        content,
-        department: employee.department,
-      })
-      await supabase.from('hub_tasks').update({ status: 'doing', updated_at: new Date().toISOString() }).eq('id', task.id)
-
-      if (driveUserEmail) {
-        try {
-          await saveToDrive(supabase, driveUserEmail, employee.name, title, content)
-        } catch {
-          // Google not connected — note still saved in the hub.
+      // Safety net: if the model never actually saved a note, the fallback
+      // is the old behavior — the raw output becomes the note itself.
+      const savedNote = toolCalls.some((c) => c.name === 'create_note')
+      if (!savedNote && fullText.trim()) {
+        const title = `Draft: ${task.title}`.slice(0, 200)
+        await supabase.from('hub_notes').insert({
+          title: `${employee.name}: ${title}`,
+          content: fullText,
+          department: employee.department,
+        })
+        if (userEmail) {
+          try {
+            await saveToDrive(supabase, userEmail, employee.name, title, fullText)
+          } catch {
+            // Google not connected — note still saved in the hub.
+          }
         }
       }
 
-      return { employee: employee.name, task: task.title, produced: title, progress: parsed.progress_summary }
+      // Guarantee enforced regardless of what the model did: this task is
+      // "doing", never "done", at the end of this cycle.
+      await supabase
+        .from('hub_tasks')
+        .update({ status: 'doing', updated_at: new Date().toISOString() })
+        .eq('id', task.id)
+        .neq('status', 'doing')
+
+      return {
+        employee: employee.name,
+        task: task.title,
+        tools_used: toolCalls.map((c) => c.name),
+        saved_note: savedNote || Boolean(fullText.trim()),
+      }
     }),
   )
 
