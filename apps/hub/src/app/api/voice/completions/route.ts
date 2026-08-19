@@ -45,7 +45,7 @@ export async function POST(req: Request) {
   const latestUserMessage = turns[turns.length - 1].content
 
   const [context] = await Promise.all([
-    gatherJarvisContext(supabase, null),
+    gatherJarvisContext(supabase, null, 'voice'),
     supabase.from('hub_chat_messages').insert({ role: 'user', content: latestUserMessage, employee_id: null }),
   ])
 

@@ -50,8 +50,15 @@ You have access to ${departmentLabel}'s current open tasks and recent notes belo
 You can act, not just talk. You have tools to create and update tasks and save notes in your department${employee.department === 'investor-relations' || employee.department === 'acquisitions' ? ', plus search the investor CRM and update investor deal records' : ''}. When Lyvia asks you to do one of these things, do it with the tool, then confirm briefly what changed.`
 }
 
+// Voice has its own cache lineage (appended to the cached persona block,
+// same as the text-chat persona) — Claude otherwise writes for the eye
+// (markdown, bullet lists, "1. 2. 3.") which reads as robotic once spoken
+// aloud by TTS, regardless of how good the voice itself sounds.
+const VOICE_STYLE_ADDENDUM = `You're on a live voice call right now, not typing — write every reply exactly the way you'd actually say it out loud. Short sentences. Contractions ("it's", "you're", "I'll", "that's"). Never use markdown, bullet points, numbered lists, headers, or asterisks — if you'd normally list several things, just say them in one natural spoken sentence ("first X, then Y, and finally Z"). Keep replies brief and conversational, like an actual phone call, not a status report. Say numbers and dates the way you'd say them aloud (e.g. "August nineteenth", "twelve hundred dollars"), not shorthand notation.`
+
 interface HubContext {
   employee?: HubAiEmployee | null
+  mode?: 'text' | 'voice'
   tasks: Pick<HubTask, 'id' | 'title' | 'status' | 'priority' | 'due_date'>[]
   notes: Pick<HubNote, 'title' | 'content'>[]
   // Employee-only: documents Lyvia dropped into this employee's chat.
@@ -68,6 +75,7 @@ const DOCS_TOTAL_CHAR_LIMIT = 40000
 
 export function buildSystemPrompt({
   employee,
+  mode = 'text',
   tasks,
   notes,
   docs,
@@ -75,7 +83,8 @@ export function buildSystemPrompt({
   recentInsights,
   spend,
 }: HubContext): Anthropic.Messages.TextBlockParam[] {
-  const persona = employee ? employeePersona(employee) : JARVIS_PERSONA
+  const basePersona = employee ? employeePersona(employee) : JARVIS_PERSONA
+  const persona = mode === 'voice' ? `${basePersona}\n\n${VOICE_STYLE_ADDENDUM}` : basePersona
 
   const openTasks = tasks.filter((t) => t.status !== 'done')
   const taskLines = openTasks.length

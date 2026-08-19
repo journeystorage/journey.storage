@@ -20,6 +20,7 @@ export interface JarvisContext {
 export async function gatherJarvisContext(
   supabase: SupabaseClient,
   employee: HubAiEmployee | null,
+  mode: 'text' | 'voice' = 'text',
 ): Promise<JarvisContext> {
   const employeeId = employee?.id ?? null
 
@@ -72,6 +73,7 @@ export async function gatherJarvisContext(
 
   const system = buildSystemPrompt({
     employee,
+    mode,
     tasks: (tasks as HubTask[]) ?? [],
     notes: (notes as HubNote[]) ?? [],
     docs: employee
