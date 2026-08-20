@@ -281,6 +281,7 @@ export function ChatPanel({ employeeId, name, subtitle, accent, placeholder, emp
         body: JSON.stringify({ message: text, employeeId }),
       })
 
+      if (!res.ok) throw new Error(`Server error (${res.status})`)
       if (!res.body) throw new Error('No response stream')
 
       const reader = res.body.getReader()
