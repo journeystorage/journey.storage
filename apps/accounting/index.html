@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journey.storage — Accounting Intake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&display=swap">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<style>
+  :root{
+    --bg:#0b0e13; --panel:#141a22; --panel2:#1b232e; --line:#28323f;
+    --text:#eef3f9; --muted:#93a3b4; --gold:#d9b46a; --gold-press:#c39a4f;
+    --ok:#3fb950; --danger:#f7686b; --radius:14px;
+    --serif:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{background:#070b12;}
+  html,body{margin:0;}
+  body{background:var(--bg);color:var(--text);
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  .hidden{display:none !important;}
+  button{font-family:inherit;cursor:pointer;}
+
+  .wordmark{font-family:var(--serif);color:var(--gold);font-weight:600;letter-spacing:.42em;
+    text-transform:uppercase;display:inline-block;padding-left:.42em;}
+
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 60px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;
+    padding-bottom:16px;border-bottom:1px solid var(--line);}
+  .brand{display:flex;flex-direction:column;gap:2px;}
+  .brand .wordmark{font-size:20px;}
+  .brand .tag{color:var(--muted);font-size:12px;letter-spacing:.04em;padding-left:.42em;}
+  .who{font-size:13px;color:var(--muted);}
+
+  .card{background:linear-gradient(180deg,var(--panel),#11161d);border:1px solid var(--line);
+    border-radius:var(--radius);padding:18px 18px;margin-bottom:14px;}
+  .step{display:flex;align-items:center;gap:9px;margin-bottom:12px;}
+  .num{width:24px;height:24px;border-radius:50%;background:var(--gold);color:#1b1406;font-weight:800;
+    font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .step h2{font-family:var(--serif);font-size:19px;margin:0;font-weight:600;letter-spacing:.03em;}
+
+  label{display:block;font-weight:600;margin-bottom:5px;font-size:13.5px;}
+  .req{color:var(--danger);}
+  .help{color:var(--muted);font-size:12px;margin:-2px 0 9px;}
+  input[type=text],input[type=email],input[type=date],select,textarea{
+    width:100%;background:#0a0f15;color:var(--text);border:1px solid var(--line);
+    border-radius:10px;padding:11px 12px;font-size:14.5px;outline:none;transition:border-color .15s,box-shadow .15s;
+    font-family:inherit;}
+  input::placeholder{color:var(--muted);opacity:.7;}
+  input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,180,106,.18);}
+  textarea{min-height:74px;resize:vertical;}
+  select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2393a3b4' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;}
+  .field{margin-bottom:14px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:560px){ .row2{grid-template-columns:1fr;} }
+  .filled{border-color:#2f6f3e !important;box-shadow:0 0 0 3px rgba(63,185,80,.12) !important;}
+
+  .drop{border:2px dashed #3a4150;border-radius:12px;padding:30px 18px;text-align:center;color:var(--muted);
+    cursor:pointer;transition:.15s;background:var(--panel2);}
+  .drop.hover{border-color:var(--gold);color:var(--text);background:#1e2330;}
+  .drop .big{font-size:30px;line-height:1;}
+  .drop strong{color:var(--text);}
+  .file-pill{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;
+    background:#0a0f15;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;}
+  .file-pill .x{cursor:pointer;color:var(--muted);font-weight:700;padding:0 4px;}
+  .file-pill .x:hover{color:var(--danger);}
+
+  .bar{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap;}
+  button{border:none;border-radius:10px;padding:12px 18px;font-size:14.5px;font-weight:700;color:#1b1406;
+    background:linear-gradient(180deg,var(--gold),var(--gold-press));transition:filter .15s;}
+  button:hover{filter:brightness(1.05);}
+  button.secondary{background:#222c38;color:var(--text);border:1px solid var(--line);}
+  button.ghost{background:transparent;color:var(--gold);border:1px solid rgba(217,180,106,.4);}
+  button:disabled{opacity:.55;cursor:default;}
+  .note{font-size:12px;color:var(--muted);}
+  .err-text{color:var(--danger);font-size:12px;margin-top:6px;display:none;}
+  .field.invalid .err-text{display:block;}
+  .field.invalid input,.field.invalid select,.field.invalid textarea{border-color:var(--danger);}
+  .spinner{width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--gold);
+    border-radius:50%;display:inline-block;animation:spin .8s linear infinite;vertical-align:-2px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .submit-row{display:flex;gap:10px;align-items:center;margin-top:6px;}
+  .submit-row button{padding:14px 26px;font-size:15px;}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--ok);color:#06210d;font-weight:700;padding:12px 18px;border-radius:10px;
+    opacity:0;pointer-events:none;transition:.25s;max-width:90%;z-index:50;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast.err{background:var(--danger);color:#2a0606;}
+  .ok-screen{text-align:center;padding:34px 12px;}
+  .ok-screen .big{font-size:46px;}
+  .ok-screen h2{font-family:var(--serif);font-size:22px;font-weight:500;margin:10px 0 4px;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <span class="wordmark">Journey</span>
+      <span class="tag">Invoice &amp; Receipt Portal</span>
+    </div>
+    <span class="who">Building — no login yet</span>
+  </div>
+  <main id="view"></main>
+</div>
+
+<div class="toast" id="toast">Submitted</div>
+
+<!-- config.js is loaded with a cache-busting timestamp on purpose: a stale
+     cached copy silently reverts SHEETS_WEBAPP_URL and the page then claims
+     it is unconfigured. document.write keeps it synchronous so JOURNEY_CONFIG
+     is set before the main script below runs. -->
+<script>document.write('<script src="config.js?t=' + Date.now() + '"><\/script>');</script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script>
+(function(){
+  const cfg = window.JOURNEY_CONFIG || {};
+  const configured = cfg.SHEETS_WEBAPP_URL && cfg.SHEETS_WEBAPP_URL.indexOf("PASTE_") === -1;
+  const $ = s => document.querySelector(s);
+
+  const ENTITIES=['Journey Storage LLC','Journey Managed','Journey Direct'];
+  let wizState=null;
+  function resetWizState(){ wizState={file:null,wireFile:null,vendor:'',entity:'',doc_date:'',amount:'',descr:''}; }
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function prettySize(b){ if(b<1024) return b+' B'; if(b<1048576) return (b/1024).toFixed(0)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
+  function normalizeDate(s){ const d=new Date(s); return isNaN(d)? s : d.toISOString().slice(0,10); }
+  function fileToB64(file){ return new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(String(r.result).split(',')[1]||''); r.onerror=()=>res(''); r.readAsDataURL(file); }); }
+  let toastTimer;
+  function showToast(html,cls){ const t=$('#toast'); t.innerHTML=html; t.className='toast show'+(cls?' '+cls:''); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'), 2600); }
+
+  // ───── DOCUMENT READING (same heuristics as the old ledger) ─────
+  function parseDoc(text, fname, kind){
+    const out={vendor:'',doc_date:'',descr:'',amount:''};
+    const t=(text||'').replace(/ /g,' ');
+    const lines=t.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+    const flat=t.replace(/\s+/g,' ');
+    const moneyRe=/([$£€]\s?\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d{1,3}(?:,\d{3})*\.\d{2})/g;
+    const toNum=s=>{ const n=parseFloat(String(s).replace(/[^0-9.]/g,'')); return isNaN(n)?0:n; };
+    const tiers = kind==='receipt'
+      ? [/amount paid|total paid|paid in full/i, /grand total|total due|amount due|balance due/i, /\btotal\b/i]
+      : [/total due|amount due|balance due|total payable|amount payable|invoice total/i, /grand total/i, /\btotal\b/i];
+    let amount=0;
+    for(const re of tiers){ lines.forEach(l=>{ if(re.test(l)) (l.match(moneyRe)||[]).forEach(m=>{ const n=toNum(m); if(n>amount)amount=n; }); }); if(amount) break; }
+    if(!amount){ const m=flat.match(/(?:total due|amount due|balance due|total paid|amount paid|grand total|total)[^0-9$£€]{0,14}([$£€]?\s?\d[\d,]*\.\d{2})/i); if(m) amount=toNum(m[1]); }
+    if(!amount){ (t.match(moneyRe)||[]).forEach(m=>{ const n=toNum(m); if(n>amount)amount=n; }); }
+    out.amount = amount? amount.toFixed(2):'';
+    const dm=t.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4})\b/i);
+    if(dm) out.doc_date=normalizeDate(dm[1]);
+    const BAD=/invoice|receipt|^date|total|amount|bill to|ship to|sold to|\btax\b|qty|description|subtotal|balance|due|paid|\bpage\b|phone|tel\b|email|www\.|http|@|suite|p\.?o\.? box|\d{5}(?:-\d{4})?$/i;
+    const SUFFIX=/\b(inc|llc|l\.l\.c|ltd|co|corp|corporation|company|studio|studios|group|services|agency|partners|associates|consulting|media|design|labs?|enterprises|solutions|systems)\b\.?/i;
+    let vendor='';
+    const lv=flat.match(/(?:bill from|sold by|remit to|pay to|vendor|supplier|from)\s*[:\-]\s*([A-Z0-9][^\n,]{2,50})/i);
+    if(lv) vendor=lv[1].trim();
+    if(!vendor){ const sl=lines.find(l=>SUFFIX.test(l) && !/bill to|ship to|sold to/i.test(l) && l.length<60); if(sl) vendor=sl.replace(/\s*[|–—-]\s.*$/,'').trim(); }
+    if(!vendor){ const top=lines.slice(0,6).find(l=>/[A-Za-z]{3,}/.test(l) && !BAD.test(l)); if(top) vendor=top; }
+    if(!vendor && fname) vendor=fname.replace(/\.[a-z0-9]+$/i,'').replace(/[_\-]+/g,' ').replace(/\b(invoice|receipt|inv|rcpt)\b/ig,'').replace(/\d{4}-\d{2}-\d{2}/,'').replace(/\s+/g,' ').trim();
+    out.vendor=vendor.slice(0,60);
+    const STOP=/\b(subtotal|total|tax|amount|qty|quantity|unit price|bill to|ship to|date|invoice\s*#|due|balance)\b/i;
+    let descr='';
+    const ld=t.match(/(?:description|memo|notes?|service|item|for)\s*[:\-]\s*(.+)/i);
+    if(ld){ descr=ld[1]; const s=descr.search(STOP); if(s>0) descr=descr.slice(0,s); }
+    if(!descr){ const item=lines.find(l=>moneyRe.test(l) && !/total|subtotal|tax|balance|amount due|amount paid|paid/i.test(l)); if(item) descr=item.replace(moneyRe,'').replace(/\s{2,}/g,' ').trim(); }
+    if(!descr && out.vendor) descr=(kind==='receipt'?'Payment to ':'Invoice from ')+out.vendor;
+    out.descr=descr.replace(/[•|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,90);
+    return out;
+  }
+  async function aiExtract(text, file, kind){
+    if(!cfg.USE_AI) return null;
+    const url = cfg.AI_ENDPOINT || 'extract.php';
+    try{
+      const body={ filename:file.name, kind, text };
+      if((text||'').replace(/\s/g,'').length < 25){ body.imageBase64=await fileToB64(file); body.mime=file.type; }
+      const r=await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+      if(!r.ok) return null;
+      const data=await r.json();
+      if(!data || data.error) return null;
+      return { vendor:data.vendor||'', doc_date:normalizeDate(data.date||data.doc_date||''), descr:data.description||data.descr||'', amount:(data.amount!=null&&data.amount!==''?String(data.amount).replace(/[^0-9.]/g,''):'') };
+    }catch(e){ return null; }
+  }
+  async function extractFromFile(file, kind){
+    let text='';
+    const isPdf = /\.pdf$/i.test(file.name||'')||file.type==='application/pdf';
+    try{
+      if(isPdf && window.pdfjsLib){
+        if(!pdfjsLib.GlobalWorkerOptions.workerSrc) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+        const buf=await file.arrayBuffer(); const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+        const pages=Math.min(pdf.numPages,3);
+        for(let i=1;i<=pages;i++){
+          const pg=await pdf.getPage(i); const c=await pg.getTextContent();
+          const rows={};
+          c.items.forEach(it=>{ const y=Math.round(it.transform[5]); (rows[y]=rows[y]||[]).push([it.transform[4], it.str]); });
+          Object.keys(rows).map(Number).sort((a,b)=>b-a).forEach(y=>{ const line=rows[y].sort((a,b)=>a[0]-b[0]).map(p=>p[1]).join(' ').replace(/\s+/g,' ').trim(); if(line) text+=line+'\n'; });
+        }
+      }
+    }catch(e){}
+    const ai=await aiExtract(text, file, kind); if(ai) return ai;
+    return parseDoc(text, file.name, kind);
+  }
+
+  // ───── SUBMIT INVOICE/RECEIPT WIZARD ─────
+  function paintWizard(){
+    if(!configured){
+      $('#view').innerHTML='<div class="card"><div class="note">Paste your Apps Script Web App URL into config.js first — see GOOGLE-SHEETS-SETUP.md.</div></div>';
+      return;
+    }
+    const f=wizState.file;
+    let html='<div class="card">'+
+      '<div class="step"><div class="num">1</div><h2>Drop your invoice or receipt</h2></div>'+
+      '<div class="drop" id="wizDz"><div class="big">📄</div>'+
+      '<div style="margin-top:6px">Drag a file here or <strong>click to choose</strong></div>'+
+      '<div class="help" style="margin:6px 0 0">PDF, JPG or PNG &middot; reads automatically</div>'+
+      '<input type="file" id="wizFile" accept=".pdf,image/*" style="display:none"></div>'+
+      (f? '<div class="file-pill"><span>'+esc(f.name)+' <span class="note">('+prettySize(f.size)+')</span></span><span class="x" id="wizRemoveFile">✕</span></div>'+
+          '<div class="bar" style="margin-top:10px"><button type="button" class="ghost" id="wizReread">Re-read the document</button>'+
+          '<span class="note" id="wizReadStatus"></span></div>' : '')+
+      (!f? '<div class="err-text" style="display:none" id="wizFileErr">Please attach an invoice or receipt.</div>':'')+
+    '</div>';
+    if(f){
+      html+='<div class="card">'+
+        '<div class="step"><div class="num">2</div><h2>Confirm the details</h2></div>'+
+        '<div class="row2">'+
+          '<div class="field" id="fVendor"><label>Vendor name <span class="req">*</span></label><input id="wVendor" type="text" placeholder="Who is billing" value="'+esc(wizState.vendor)+'"><div class="err-text">Required.</div></div>'+
+          '<div class="field" id="fEntity"><label>Entity billed <span class="req">*</span></label><select id="wEntity"><option value="" disabled'+(!wizState.entity?' selected':'')+'>Select an entity…</option>'+
+            ENTITIES.map(e=>'<option'+(wizState.entity===e?' selected':'')+'>'+esc(e)+'</option>').join('')+
+          '</select><div class="err-text">Required.</div></div>'+
+        '</div>'+
+        '<div class="row2">'+
+          '<div class="field" id="fDate"><label>Document date <span class="req">*</span></label><input id="wDate" type="date" value="'+esc(wizState.doc_date)+'"><div class="err-text">Required.</div></div>'+
+          '<div class="field" id="fAmount"><label>Total <span class="req">*</span></label><input id="wAmount" type="text" inputmode="decimal" placeholder="$0.00" value="'+esc(wizState.amount)+'"><div class="err-text">Required.</div></div>'+
+        '</div>'+
+        '<div class="field" id="fStatus"><label>This expense <span class="req">*</span></label><select id="wStatus">'+
+          '<option value="" disabled'+(!wizState.status?' selected':'')+'>Select…</option>'+
+          '<option value="unpaid"'+(wizState.status==='unpaid'?' selected':'')+'>Needs to be paid</option>'+
+          '<option value="paid"'+(wizState.status==='paid'?' selected':'')+'>Has already been paid</option>'+
+          '<option value="receipt"'+(wizState.status==='receipt'?' selected':'')+'>Record a deposit or receipt</option>'+
+        '</select><div class="err-text">Please choose one.</div></div>'+
+        '<div class="field" id="fDescr"><label>Brief description <span class="req">*</span></label><div class="help">What was billed (auto-filled — please review).</div><textarea id="wDescr">'+esc(wizState.descr)+'</textarea><div class="err-text">Required.</div></div>'+
+      '</div>';
+      html+='<div class="card">'+
+        '<div class="step"><div class="num">3</div><h2>Wire instructions <span style="color:var(--muted);font-weight:400;font-size:14px">(optional)</span></h2></div>'+
+        '<div class="help" style="margin:-4px 0 10px">Attach a wire-instructions sheet if this is being paid by wire. PDF, JPG or PNG.</div>'+
+        '<div class="drop" id="wizWireDz"><div class="big">🏦</div><div style="margin-top:6px">Drag a file here or <strong>click to choose</strong></div><div class="help" style="margin:6px 0 0">Optional</div>'+
+        '<input type="file" id="wizWireFile" accept=".pdf,image/*" style="display:none"></div>'+
+        '<div id="wizWirePill"></div>'+
+      '</div>';
+      html+='<div class="card">'+
+        '<div class="step"><div class="num">4</div><h2>Your info &amp; comments</h2></div>'+
+        '<div class="field"><label>Your email <span style="color:var(--muted);font-weight:400">(optional — there\'s no login yet)</span></label><input id="wEmail" type="email" placeholder="you@journey.storage" value="'+esc(wizState.email||'')+'"></div>'+
+        '<div class="field"><label>Comments</label><div class="help">Anything Accounting should know (optional).</div><textarea id="wComments">'+esc(wizState.comments||'')+'</textarea></div>'+
+        '<div class="submit-row">'+
+          '<button id="wizSubmit">Submit</button>'+
+          '<button class="secondary" id="wizClear">Clear</button>'+
+        '</div>'+
+      '</div>';
+    }
+    $('#view').innerHTML=html;
+    wireWizardEvents();
+  }
+  function wireDrop(el, onFiles){
+    el.addEventListener('click', ()=>{ const inp=document.createElement('input'); inp.type='file'; inp.multiple=false; inp.onchange=()=>onFiles(inp.files); inp.click(); });
+    el.addEventListener('dragover', e=>{ e.preventDefault(); el.classList.add('hover'); });
+    el.addEventListener('dragleave', ()=> el.classList.remove('hover'));
+    el.addEventListener('drop', e=>{ e.preventDefault(); el.classList.remove('hover'); onFiles(e.dataTransfer.files); });
+  }
+  function wireWizardEvents(){
+    const dz=$('#wizDz'); if(dz) wireDrop(dz, fl=>{ if(fl.length) setWizFile(fl[0]); });
+    const fi=$('#wizFile'); if(fi) fi.addEventListener('change', ()=>{ if(fi.files.length) setWizFile(fi.files[0]); });
+    const rm=$('#wizRemoveFile'); if(rm) rm.addEventListener('click', ()=>{ syncWizFromDom(); wizState.file=null; wizState.vendor=''; wizState.doc_date=''; wizState.amount=''; wizState.descr=''; paintWizard(); });
+    const rr=$('#wizReread'); if(rr) rr.addEventListener('click', runWizExtraction);
+    const wdz=$('#wizWireDz'); if(wdz) wireDrop(wdz, fl=>{ if(fl.length){ wizState.wireFile=fl[0]; renderWirePill(); } });
+    const wfi=$('#wizWireFile'); if(wfi) wfi.addEventListener('change', ()=>{ if(wfi.files.length){ wizState.wireFile=wfi.files[0]; renderWirePill(); } });
+    renderWirePill();
+    const sb2=$('#wizSubmit'); if(sb2) sb2.addEventListener('click', wizSubmitHandler);
+    const cl=$('#wizClear'); if(cl) cl.addEventListener('click', ()=>{ resetWizState(); paintWizard(); });
+  }
+  function renderWirePill(){
+    const el=$('#wizWirePill'); if(!el) return;
+    const wf=wizState.wireFile;
+    el.innerHTML = wf ? ('<div class="file-pill" style="margin-top:10px"><span>'+esc(wf.name)+' <span class="note">('+prettySize(wf.size)+')</span></span><span class="x" id="wizRemoveWire">✕</span></div>') : '';
+    const rw=$('#wizRemoveWire'); if(rw) rw.addEventListener('click', ()=>{ wizState.wireFile=null; renderWirePill(); });
+  }
+  async function runWizExtraction(){
+    if(!wizState.file) return;
+    const statusSel=$('#wStatus'); const kind=(statusSel&&statusSel.value==='receipt')?'receipt':'invoice';
+    const rb=$('#wizReread'), rs=$('#wizReadStatus');
+    if(rb) rb.disabled=true;
+    if(rs) rs.innerHTML='<span class="spinner"></span> Reading the document…';
+    let ex; try{ ex=await extractFromFile(wizState.file, kind); }catch(e){ ex={vendor:'',doc_date:'',descr:'',amount:''}; }
+    if(rb) rb.disabled=false;
+    const got=[];
+    const fill=(sel,val)=>{ const el=$(sel); if(el && !el.value){ el.value=val; el.classList.add('filled'); return true; } return false; };
+    if(ex.vendor && fill('#wVendor', ex.vendor)) got.push('vendor');
+    if(ex.doc_date && fill('#wDate', ex.doc_date)) got.push('date');
+    if(ex.amount && fill('#wAmount', ex.amount)) got.push('total');
+    if(ex.descr && fill('#wDescr', ex.descr)) got.push('description');
+    if(rs) rs.innerHTML = got.length? ('Filled in '+got.join(', ')+' — please review.') : 'Couldn’t read it. Please enter the details manually.';
+  }
+  function syncWizFromDom(){
+    if($('#wVendor')) wizState.vendor=$('#wVendor').value;
+    if($('#wEntity')) wizState.entity=$('#wEntity').value;
+    if($('#wDate')) wizState.doc_date=$('#wDate').value;
+    if($('#wAmount')) wizState.amount=$('#wAmount').value;
+    if($('#wStatus')) wizState.status=$('#wStatus').value;
+    if($('#wDescr')) wizState.descr=$('#wDescr').value;
+    if($('#wEmail')) wizState.email=$('#wEmail').value;
+    if($('#wComments')) wizState.comments=$('#wComments').value;
+  }
+  function setWizFile(file){
+    syncWizFromDom();
+    wizState.file=file; wizState.vendor=''; wizState.doc_date=''; wizState.amount=''; wizState.descr='';
+    paintWizard();
+    runWizExtraction();
+  }
+  function markInvalid(sel, bad){ const el=$(sel); if(el) el.classList.toggle('invalid', bad); return !bad; }
+  function validateWizard(){
+    let ok=true;
+    if(!wizState.file){ const fe=$('#wizFileErr'); if(fe) fe.style.display='block'; ok=false; }
+    ok = markInvalid('#fVendor', !$('#wVendor').value.trim()) && ok;
+    ok = markInvalid('#fEntity', !$('#wEntity').value) && ok;
+    ok = markInvalid('#fDate', !$('#wDate').value) && ok;
+    ok = markInvalid('#fAmount', !$('#wAmount').value.trim()) && ok;
+    ok = markInvalid('#fStatus', !$('#wStatus').value) && ok;
+    ok = markInvalid('#fDescr', !$('#wDescr').value.trim()) && ok;
+    return ok;
+  }
+  // Posts `payload` as a urlencoded form field into a hidden iframe. The
+  // response lands cross-origin on script.googleusercontent.com, so it stays
+  // unreadable and this is still fire-and-forget: resolving means "the request
+  // left the browser", not "the row was written". Verify in the Sheet or in the
+  // Apps Script Executions log.
+  function postViaForm(url, payload){
+    return new Promise((resolve, reject) => {
+      let frame, form;
+      try {
+        frame = document.createElement('iframe');
+        frame.name = 'journey_submit_' + Date.now();
+        frame.style.display = 'none';
+        document.body.appendChild(frame);
+
+        form = document.createElement('form');
+        form.method = 'POST';
+        form.action = url;
+        form.target = frame.name;
+        form.style.display = 'none';
+
+        const field = document.createElement('input');
+        field.type = 'hidden';
+        field.name = 'payload';
+        field.value = JSON.stringify(payload);
+        form.appendChild(field);
+
+        document.body.appendChild(form);
+        form.submit();
+      } catch (err) {
+        reject(err);
+        return;
+      }
+      // Give the navigation a beat to leave, then clean up the DOM nodes.
+      setTimeout(() => {
+        if (form && form.parentNode) form.parentNode.removeChild(form);
+        if (frame && frame.parentNode) frame.parentNode.removeChild(frame);
+        resolve();
+      }, 2500);
+    });
+  }
+
+  async function wizSubmitHandler(){
+    if(!validateWizard()) return;
+    const btn=$('#wizSubmit'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Submitting…';
+    const vendor=$('#wVendor').value.trim(), entity=$('#wEntity').value, doc_date=$('#wDate').value,
+      amount=$('#wAmount').value.trim().replace(/[^0-9.]/g,''), statusVal=$('#wStatus').value,
+      descr=$('#wDescr').value.trim(), comments=$('#wComments').value.trim(), email=$('#wEmail').value.trim();
+    const kind = statusVal==='receipt' ? 'receipt' : 'invoice';
+    try{
+      const payload={ vendor, entity, doc_date, descr, amount, kind, status:statusVal, comments, submitted_by:email||'',
+        file:{ filename:wizState.file.name, mimeType:wizState.file.type, base64:await fileToB64(wizState.file) } };
+      if(wizState.wireFile){
+        payload.wireFile={ filename:wizState.wireFile.name, mimeType:wizState.wireFile.type, base64:await fileToB64(wizState.wireFile) };
+      }
+      // Submitted as a real form POST, not fetch(). This deployment is scoped to
+      // "Anyone within Journey Capital Holdings, LLC" (Workspace policy blocks
+      // public Apps Script web apps), so the request has to carry the user's
+      // Google session. fetch() defaults to credentials:'same-origin' and sends
+      // no cookies cross-origin, so every fetch attempt was bounced to
+      // accounts.google.com ServiceLogin and silently dropped. A form POST into
+      // a hidden iframe is a real navigation and does carry the session.
+      //
+      // Consequence: the submitter MUST be signed into a journey.storage Google
+      // account. See GOOGLE-SHEETS-SETUP.md.
+      await postViaForm(cfg.SHEETS_WEBAPP_URL, payload);
+      showWizardSuccess(vendor, amount);
+    }catch(e){
+      btn.disabled=false; btn.textContent='Submit';
+      showToast('Could not submit: '+e.message, 'err');
+    }
+  }
+  function showWizardSuccess(vendor, amount){
+    $('#view').innerHTML='<div class="card ok-screen"><div class="big">✅</div>'+
+      '<h2>Submitted</h2>'+
+      '<p class="note">'+esc(vendor)+' — $'+esc(amount)+' recorded.</p>'+
+      '<div class="bar" style="justify-content:center;margin-top:8px"><button id="wizAgain">Submit another</button></div></div>';
+    $('#wizAgain').addEventListener('click', ()=>{ resetWizState(); paintWizard(); });
+  }
+
+  resetWizState();
+  paintWizard();
+})();
+</script>
+</body>
+</html>

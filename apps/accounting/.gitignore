@@ -1,0 +1,14 @@
+# ── Never commit: server-side secrets & setup scripts ─────────
+extract.php
+supabase/
+*.sql
+
+# ── Never commit: live endpoint config ────────────────────────
+# config.js holds the deployed Apps Script /exec URL, which is a
+# write endpoint: anyone holding it can append rows to the Sheet
+# and drop files into the Drive folder. Copy config.example.js to
+# config.js locally and fill it in. See GOOGLE-SHEETS-SETUP.md.
+config.js
+
+# ── Local cruft ────────────────────────────────────────────────
+.DS_Store
