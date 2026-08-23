@@ -56,6 +56,24 @@ Deploy → Manage deployments → edit (pencil icon) → New version. Just savin
 the script isn't enough; the existing `/exec` URL keeps serving whatever
 version was live when it was deployed.
 
+## Reordering columns in the sheet
+
+Safe to do — the script writes each value by matching the column's header
+text (`doPost` reads row 1 and looks up each field by name), not by fixed
+position. Drag columns around freely; new submissions will keep landing
+under the right header.
+
+What's **not** safe: renaming a header to something the script doesn't
+recognize, or adding a new column with no matching field — those columns
+just stay blank on new rows. The recognized headers are exactly: Timestamp,
+Vendor, Entity, Date, Amount, Kind, Status, Description, Comments, Submitted
+By, Invoice File, Wire File (case- and spacing-sensitive).
+
+If you already reordered columns under the *old* version of the script,
+rows submitted in between will still be misaligned — this fix only
+prevents new rows from breaking, it doesn't repair ones already written.
+You'll need to fix those rows by hand.
+
 ## How the page submits, and why it isn't `fetch`
 
 The page posts a hidden HTML form into a hidden iframe (`postViaForm` in

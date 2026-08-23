@@ -3,6 +3,7 @@
 
 var SHEET_NAME = 'Submissions';
 var FOLDER_NAME = 'Accounting Intake Files';
+var HEADERS = ['Timestamp', 'Vendor', 'Entity', 'Date', 'Amount', 'Kind', 'Status', 'Description', 'Comments', 'Submitted By', 'Invoice File', 'Wire File'];
 
 function doPost(e) {
   try {
@@ -13,20 +14,29 @@ function doPost(e) {
     var invoiceLink = data.file ? saveFile(folder, data.file) : '';
     var wireLink = data.wireFile ? saveFile(folder, data.wireFile) : '';
 
-    sheet.appendRow([
-      new Date(),
-      data.vendor || '',
-      data.entity || '',
-      data.doc_date || '',
-      data.amount || '',
-      data.kind || '',
-      data.status || '',
-      data.descr || '',
-      data.comments || '',
-      data.submitted_by || '',
-      invoiceLink,
-      wireLink
-    ]);
+    // Values by header NAME, not position — so reordering (or even
+    // deleting) columns in the sheet doesn't misalign future rows.
+    // Only the header text has to match; case and spacing count.
+    var values = {
+      'Timestamp': new Date(),
+      'Vendor': data.vendor || '',
+      'Entity': data.entity || '',
+      'Date': data.doc_date || '',
+      'Amount': data.amount || '',
+      'Kind': data.kind || '',
+      'Status': data.status || '',
+      'Description': data.descr || '',
+      'Comments': data.comments || '',
+      'Submitted By': data.submitted_by || '',
+      'Invoice File': invoiceLink,
+      'Wire File': wireLink
+    };
+
+    var headerRow = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var row = headerRow.map(function (h) {
+      return Object.prototype.hasOwnProperty.call(values, h) ? values[h] : '';
+    });
+    sheet.appendRow(row);
 
     return ContentService.createTextOutput(JSON.stringify({ ok: true }))
       .setMimeType(ContentService.MimeType.JSON);
@@ -53,7 +63,7 @@ function getOrCreateSheet() {
   var sheet = ss.getSheetByName(SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_NAME);
-    sheet.appendRow(['Timestamp', 'Vendor', 'Entity', 'Date', 'Amount', 'Kind', 'Status', 'Description', 'Comments', 'Submitted By', 'Invoice File', 'Wire File']);
+    sheet.appendRow(HEADERS);
     sheet.setFrozenRows(1);
   }
   return sheet;
