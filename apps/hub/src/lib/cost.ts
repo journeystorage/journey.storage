@@ -55,3 +55,28 @@ export function summarizeSpend(rows: SpendRow[]) {
 
   return { todayUsd, monthToDateUsd }
 }
+
+export interface DailySpendPoint {
+  date: string // YYYY-MM-DD
+  amountUsd: number
+}
+
+// Fixed-length series (zero-filled for silent days) so the chart's x-axis
+// never shifts based on which days happened to have activity.
+export function dailySpendSeries(rows: SpendRow[], days: number): DailySpendPoint[] {
+  const byDay = new Map<string, number>()
+  for (const row of rows) {
+    const day = row.created_at.slice(0, 10)
+    byDay.set(day, (byDay.get(day) ?? 0) + row.cost_usd)
+  }
+
+  const series: DailySpendPoint[] = []
+  const today = new Date()
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today)
+    d.setDate(d.getDate() - i)
+    const key = d.toISOString().slice(0, 10)
+    series.push({ date: key, amountUsd: byDay.get(key) ?? 0 })
+  }
+  return series
+}

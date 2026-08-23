@@ -1,12 +1,17 @@
 import Link from 'next/link'
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { hasGoogleConnection } from '@/lib/google'
+import { dailySpendSeries } from '@/lib/cost'
 import type { HubInsight, HubNote, HubTask } from '@/lib/types'
 import { DEPARTMENTS, getDepartment } from '@/lib/departments'
 import { CommandHeader } from '@/components/CommandHeader'
 import { OrbitalOverview, type DepartmentStat } from '@/components/OrbitalOverview'
+import { SpendTrendChart } from '@/components/SpendTrendChart'
+import { DepartmentLoadChart } from '@/components/DepartmentLoadChart'
 import { ProposalsPanel } from '@/components/ProposalsPanel'
 import { CodeProposalsPanel } from '@/components/CodeProposalsPanel'
+
+const SPEND_TREND_DAYS = 14
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +19,7 @@ export default async function DashboardPage() {
   const supabase = await getSupabaseServer()
   const today = new Date().toISOString().slice(0, 10)
   const startOfToday = `${today}T00:00:00Z`
+  const trendStart = new Date(Date.now() - (SPEND_TREND_DAYS - 1) * 24 * 60 * 60 * 1000).toISOString()
 
   const [
     { data: tasks },
@@ -21,7 +27,7 @@ export default async function DashboardPage() {
     { data: allOpenTasks },
     { data: employees },
     { data: insights },
-    { data: usageToday },
+    { data: usageTrend },
     googleConnected,
   ] = await Promise.all([
     supabase
@@ -29,19 +35,23 @@ export default async function DashboardPage() {
       .select('*')
       .neq('status', 'done')
       .order('due_date', { ascending: true, nullsFirst: false })
-      .limit(7),
+      .limit(20),
     supabase.from('hub_notes').select('*').order('updated_at', { ascending: false }).limit(3),
     supabase.from('hub_tasks').select('department,priority,due_date').neq('status', 'done'),
     supabase.from('hub_ai_employees').select('department'),
     supabase.from('hub_insights').select('*').order('created_at', { ascending: false }).limit(4),
-    supabase.from('hub_api_usage').select('cost_usd').gte('created_at', startOfToday),
+    supabase.from('hub_api_usage').select('created_at,cost_usd').gte('created_at', trendStart),
     hasGoogleConnection(supabase),
   ])
 
   const openTasks = (tasks as HubTask[]) ?? []
   const recentNotes = (notes as HubNote[]) ?? []
   const recentInsights = (insights as HubInsight[]) ?? []
-  const spendTodayUsd = (usageToday ?? []).reduce((sum, r) => sum + Number(r.cost_usd ?? 0), 0)
+  const spendSeries = dailySpendSeries(
+    (usageTrend ?? []).map((r) => ({ created_at: r.created_at as string, cost_usd: Number(r.cost_usd ?? 0) })),
+    SPEND_TREND_DAYS,
+  )
+  const spendTodayUsd = spendSeries[spendSeries.length - 1]?.amountUsd ?? 0
 
   const employeeCountByDept = new Map<string, number>()
   for (const row of employees ?? []) {
@@ -63,6 +73,10 @@ export default async function DashboardPage() {
 
   const totalOpen = (allOpenTasks ?? []).length
   const overdueCount = (allOpenTasks ?? []).filter((t) => t.due_date && t.due_date < today).length
+
+  const overdueTasks = openTasks.filter((t) => t.due_date && t.due_date < today)
+  const dueTodayTasks = openTasks.filter((t) => t.due_date === today)
+  const upcomingTasks = openTasks.filter((t) => !t.due_date || t.due_date > today)
 
   const systems = [
     { label: 'Database', detail: 'Supabase', online: true },
@@ -88,8 +102,12 @@ export default async function DashboardPage() {
           <OrbitalOverview totalOpen={totalOpen} departments={departmentStats} />
         </section>
 
-        {/* ── Right rail: systems + signal feed ── */}
+        {/* ── Right rail: spend trend + systems + signal feed ── */}
         <div className="flex flex-col gap-6">
+          <section className="hud-panel p-5">
+            <SpendTrendChart points={spendSeries} />
+          </section>
+
           <section className="hud-panel p-5">
             <p className="hud-label mb-3">Systems</p>
             <ul className="space-y-2.5">
@@ -139,6 +157,12 @@ export default async function DashboardPage() {
           </section>
         </div>
 
+        {/* ── Department load — precise comparison, complements the orbit ── */}
+        <section className="hud-panel col-span-2 p-6">
+          <p className="hud-label mb-4">Department load</p>
+          <DepartmentLoadChart departments={departmentStats} />
+        </section>
+
         {/* ── Team proposals — the approval desk ── */}
         <ProposalsPanel />
 
@@ -156,33 +180,48 @@ export default async function DashboardPage() {
           {openTasks.length === 0 ? (
             <p className="font-sans text-body-sm text-stone">Nothing open. Good place to be.</p>
           ) : (
-            <ul className="grid grid-cols-2 gap-x-8 gap-y-2.5">
-              {openTasks.map((task) => {
-                const dept = task.department ? getDepartment(task.department) : null
-                const isOverdue = Boolean(task.due_date && task.due_date < today)
-                return (
-                  <li key={task.id} className="flex items-center gap-3">
-                    <span
-                      className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                        isOverdue ? 'bg-danger' : task.priority === 'high' ? 'bg-orange' : 'bg-stone'
-                      }`}
-                      aria-hidden
-                    />
-                    <span className="flex-1 truncate font-sans text-body text-warm-white">{task.title}</span>
-                    {dept && (
-                      <span className="hud-label hidden lg:block" style={{ color: dept.accent }}>
-                        {dept.label}
-                      </span>
-                    )}
-                    {task.due_date && (
-                      <span className={`font-mono text-body-sm ${isOverdue ? 'text-danger' : 'text-stone'}`}>
-                        {task.due_date.slice(5)}
-                      </span>
-                    )}
-                  </li>
-                )
-              })}
-            </ul>
+            <div className="space-y-5">
+              {[
+                { label: 'Overdue', tasks: overdueTasks, tone: 'text-danger' },
+                { label: 'Due today', tasks: dueTodayTasks, tone: 'text-orange' },
+                { label: 'Upcoming', tasks: upcomingTasks, tone: 'text-stone' },
+              ]
+                .filter((group) => group.tasks.length > 0)
+                .map((group) => (
+                  <div key={group.label}>
+                    <p className={`hud-label mb-2 ${group.tone}`}>
+                      {group.label} <span className="text-stone/60">({group.tasks.length})</span>
+                    </p>
+                    <ul className="grid grid-cols-2 gap-x-8 gap-y-2.5">
+                      {group.tasks.map((task) => {
+                        const dept = task.department ? getDepartment(task.department) : null
+                        const isOverdue = Boolean(task.due_date && task.due_date < today)
+                        return (
+                          <li key={task.id} className="flex items-center gap-3">
+                            <span
+                              className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                                isOverdue ? 'bg-danger' : task.priority === 'high' ? 'bg-orange' : 'bg-stone'
+                              }`}
+                              aria-hidden
+                            />
+                            <span className="flex-1 truncate font-sans text-body text-warm-white">{task.title}</span>
+                            {dept && (
+                              <span className="hud-label hidden lg:block" style={{ color: dept.accent }}>
+                                {dept.label}
+                              </span>
+                            )}
+                            {task.due_date && (
+                              <span className={`font-mono text-body-sm ${isOverdue ? 'text-danger' : 'text-stone'}`}>
+                                {task.due_date.slice(5)}
+                              </span>
+                            )}
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                ))}
+            </div>
           )}
         </section>
       </div>
