@@ -1,0 +1,47 @@
+name: Deploy Accounting Intake
+
+# Manual trigger only. This app is completely decoupled from the Hostinger
+# Next.js sites — it's a plain static FTP upload, not a git-push-triggered
+# Hostinger build — but a push to `main` still redeploys all 4 Hostinger
+# instances (see DEPLOYMENT.md) and that's not something this app should
+# ever cause as a side effect. Run this by hand: Actions tab → this
+# workflow → Run workflow (pick the branch that has the changes you want live).
+on:
+  workflow_dispatch: {}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # config.js is gitignored on purpose (it holds a live write endpoint —
+      # the Apps Script /exec URL). Generate it here from a repo secret so
+      # the real URL is never committed, not even to an ignored local file.
+      - name: Write config.js from secret
+        run: |
+          cat > apps/accounting/config.js <<EOF
+          window.JOURNEY_CONFIG = {
+            SHEETS_WEBAPP_URL: "${{ secrets.ACCOUNTING_SHEETS_WEBAPP_URL }}",
+            USE_AI: false,
+            AI_ENDPOINT: "extract.php"
+          };
+          EOF
+
+      - name: FTP deploy (mirror — removes anything not in this app)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          local-dir: apps/accounting/
+          protocol: ftps
+          state-name: .ftp-deploy-sync-state.json
+          dangerous-clean-slate: true
+          exclude: |
+            **/.gitignore
+            **/apps-script/**
+            **/GOOGLE-SHEETS-SETUP.md
+            **/config.example.js
+            **/serve.py
