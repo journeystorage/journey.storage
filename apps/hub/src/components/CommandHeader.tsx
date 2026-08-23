@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { HudNumber } from '@/components/HudNumber'
 
 interface CommandHeaderProps {
   totalOpen: number
@@ -28,10 +29,15 @@ export function CommandHeader({ totalOpen, overdueCount, spendTodayUsd, employee
     : ''
 
   const readouts = [
-    { label: 'Open', value: String(totalOpen), tone: 'text-warm-white' },
-    { label: 'Overdue', value: String(overdueCount), tone: overdueCount > 0 ? 'text-danger' : 'text-status-good' },
-    { label: 'AI spend today', value: `$${spendTodayUsd.toFixed(2)}`, tone: 'text-warm-white' },
-    { label: 'Agents', value: String(employeeCount), tone: 'text-warm-white' },
+    { label: 'Open', value: totalOpen, tone: 'text-warm-white' },
+    { label: 'Overdue', value: overdueCount, tone: overdueCount > 0 ? 'text-danger' : 'text-status-good' },
+    {
+      label: 'AI spend today',
+      value: spendTodayUsd,
+      format: (n: number) => `$${n.toFixed(2)}`,
+      tone: 'text-warm-white',
+    },
+    { label: 'Agents', value: employeeCount, tone: 'text-warm-white' },
   ]
 
   return (
@@ -50,10 +56,12 @@ export function CommandHeader({ totalOpen, overdueCount, spendTodayUsd, employee
       </div>
 
       <div className="flex items-center gap-6">
-        <div className="hidden gap-6 md:flex">
+        <div className="hud-corners hidden gap-6 rounded-md px-4 py-2 md:flex">
           {readouts.map((r) => (
             <div key={r.label} className="text-right">
-              <p className={`font-mono text-h2 font-medium leading-none ${r.tone}`}>{r.value}</p>
+              <p className={`font-mono text-h2 font-medium leading-none ${r.tone}`}>
+                <HudNumber value={r.value} format={r.format} />
+              </p>
               <p className="hud-label mt-1">{r.label}</p>
             </div>
           ))}

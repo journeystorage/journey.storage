@@ -97,7 +97,7 @@ export default async function DashboardPage() {
 
       <div className="hub-stagger grid grid-cols-[1fr_340px] gap-6">
         {/* ── Orbital core — the company at a glance ── */}
-        <section className="hud-panel relative overflow-hidden py-6">
+        <section className="hud-panel hud-corners relative overflow-hidden py-6">
           <p className="hud-label absolute left-5 top-4">Company orbit</p>
           <OrbitalOverview totalOpen={totalOpen} departments={departmentStats} />
         </section>

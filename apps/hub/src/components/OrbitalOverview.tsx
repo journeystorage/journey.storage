@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { DepartmentSlug } from '@/lib/departments'
+import { HudNumber } from '@/components/HudNumber'
 
 export interface DepartmentStat {
   slug: DepartmentSlug
@@ -90,7 +91,9 @@ export function OrbitalOverview({
         style={{ boxShadow: 'var(--shadow-glow-cyan)' }}
       >
         <span className="hub-core-breathe absolute -inset-1 rounded-full border border-cyan/20" aria-hidden />
-        <span className="font-mono text-h1 font-medium leading-none text-warm-white">{totalOpen}</span>
+        <span className="font-mono text-h1 font-medium leading-none text-warm-white">
+          <HudNumber value={totalOpen} />
+        </span>
         <span className="hud-label mt-1">Open</span>
       </div>
 

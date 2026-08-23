@@ -99,10 +99,47 @@ body {
    translucent surface. Replaces the plain rounded-lg/border/bg-surface-elevated
    string repeated across every page. */
 .hud-panel {
+  position: relative;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-surface-border);
   background-color: color-mix(in srgb, var(--color-surface-elevated) 92%, transparent);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 0 0 1px rgba(56,225,216,0.04), var(--shadow-elevated);
+}
+
+/* Glow intensifies on hover — a separate always-present layer that only
+   fades in (opacity-only transition), never a box-shadow transition. */
+.hud-panel::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: var(--shadow-glow-cyan);
+  opacity: 0;
+  transition: opacity 0.25s ease-out;
+  pointer-events: none;
+}
+.hud-panel:hover::before {
+  opacity: 0.55;
+}
+
+/* HUD targeting-frame corner accents — opt-in, for the one or two hero
+   elements per screen, not blanket-applied to every panel. Uses ::after
+   only (four background-image lines, not borders) so it never collides
+   with .hud-panel's own ::before glow layer on elements using both. */
+.hud-corners::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.75;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--color-cyan) 1.5px, transparent 1.5px),
+    linear-gradient(to bottom, var(--color-cyan) 1.5px, transparent 1.5px),
+    linear-gradient(to left, var(--color-cyan) 1.5px, transparent 1.5px),
+    linear-gradient(to top, var(--color-cyan) 1.5px, transparent 1.5px);
+  background-size: 18px 18px;
+  background-position: top left, top left, bottom right, bottom right;
+  background-repeat: no-repeat;
 }
 
 /* Small uppercase, letter-spaced metadata caption — the reference's
@@ -158,6 +195,32 @@ body {
   background-size: 256px 256px;
 }
 
+/* Ambient scan sweep — a faint band drifting down the whole viewport on a
+   loop, transform-only. The one purely decorative touch meant to be felt,
+   not consciously noticed. */
+.hub-atmosphere::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -160px;
+  height: 160px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(56, 225, 216, 0.05) 45%,
+    rgba(56, 225, 216, 0.1) 50%,
+    rgba(56, 225, 216, 0.05) 55%,
+    transparent
+  );
+  animation: hub-scan-sweep 12s linear infinite;
+}
+
+@keyframes hub-scan-sweep {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(100vh + 160px)); }
+}
+
 /* Slow radar sweep for the orbital core — conic wedge rotating behind the
    department nodes. transform-only animation. */
 @keyframes hub-radar-sweep {
@@ -188,9 +251,17 @@ body {
   animation: hub-core-breathe 4s ease-in-out infinite;
 }
 
-/* Staggered entrance for dashboard panels */
+/* Staggered entrance for dashboard panels — a quick power-on flicker
+   (opacity only) before settling, rather than a plain fade. */
+@keyframes hub-boot-in {
+  0% { opacity: 0; transform: translateY(8px); }
+  18% { opacity: 0.5; transform: translateY(8px); }
+  32% { opacity: 0.08; }
+  46% { opacity: 0.75; }
+  100% { opacity: 1; transform: translateY(0); }
+}
 .hub-stagger > * {
-  animation: hub-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: hub-boot-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .hub-stagger > *:nth-child(2) { animation-delay: 90ms; }
 .hub-stagger > *:nth-child(3) { animation-delay: 180ms; }
