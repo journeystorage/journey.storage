@@ -115,7 +115,11 @@ export function ProposalsPanel() {
                     disabled={deciding === p.id}
                     className="rounded-md bg-cyan px-3 py-1.5 font-sans text-body-sm font-semibold text-black transition-transform duration-150 hover:bg-cyan-400 active:scale-[0.98] disabled:opacity-50"
                   >
-                    Approve
+                    {deciding === p.id
+                      ? p.action_type === 'task'
+                        ? 'Working…'
+                        : 'Saving…'
+                      : 'Approve'}
                   </button>
                   <button
                     onClick={() => decide(p.id, 'dismiss')}

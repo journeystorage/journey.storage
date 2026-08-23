@@ -1,11 +1,19 @@
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { getUserEmail, saveToDrive } from '@/lib/google'
+import { executeTaskWork } from '@/lib/task-work'
+import type { HubAiEmployee } from '@/lib/types'
 
 export const runtime = 'nodejs'
+export const maxDuration = 60
 
-// Decide a proposal. Approve executes the stored action (creates the task or
-// note in the employee's department); dismiss just archives it. Either way
-// the proposal records when it was decided.
+// Decide a proposal. For a note, the proposal's own content already IS the
+// deliverable — approving just files it. For a task, approving is the
+// moment Lyvia or Jonah is actually present and engaged, so the employee
+// works it for real right then (via executeTaskWork, same tool loop as the
+// scheduled work engine) rather than leaving a bare row for some later
+// cron cycle to maybe pick up — and because a human explicitly triggered
+// this one, the employee may mark it fully done, not just "doing".
+// Dismiss just archives the proposal either way.
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null)
   const id = body?.id
@@ -19,12 +27,14 @@ export async function POST(req: Request) {
 
   const { data: proposal } = await supabase
     .from('hub_proposals')
-    .select('*, hub_ai_employees(name,department)')
+    .select('*, hub_ai_employees(*)')
     .eq('id', id)
     .eq('status', 'pending')
     .single()
 
   if (!proposal) return Response.json({ error: 'proposal not found or already decided' }, { status: 404 })
+
+  let workResult: { toolsUsed: string[]; savedNote: boolean } | null = null
 
   if (decision === 'approve') {
     const payload = (proposal.action_payload ?? {}) as {
@@ -34,34 +44,48 @@ export async function POST(req: Request) {
       priority?: string | null
       due_date?: string | null
     }
-    const employeeInfo = proposal.hub_ai_employees as { name?: string; department?: string } | null
-    const department = employeeInfo?.department ?? null
+    const employee = proposal.hub_ai_employees as HubAiEmployee | null
+    const department = employee?.department ?? null
+    const userEmail = await getUserEmail(supabase)
 
     if (proposal.action_type === 'note') {
       const title = payload.title ?? proposal.title
       const content = payload.content ?? payload.notes ?? proposal.rationale ?? ''
       const { error } = await supabase.from('hub_notes').insert({ title, content, department })
       if (error) return Response.json({ error: error.message }, { status: 500 })
-      // Best-effort Drive mirror under the author's folder — this route is
-      // always hit by a signed-in user (proxy.ts doesn't exempt it), so
-      // there's always a real user to attribute the save to.
-      const userEmail = await getUserEmail(supabase)
+      // Best-effort Drive mirror under the author's folder.
       if (userEmail) {
         try {
-          await saveToDrive(supabase, userEmail, employeeInfo?.name ?? 'Team', title, content)
+          await saveToDrive(supabase, userEmail, employee?.name ?? 'Team', title, content)
         } catch {
           // Google not connected — note still created in the hub.
         }
       }
     } else {
-      const { error } = await supabase.from('hub_tasks').insert({
-        title: payload.title ?? proposal.title,
-        notes: payload.notes ?? proposal.rationale ?? null,
-        priority: payload.priority ?? 'normal',
-        due_date: payload.due_date ?? null,
-        department,
-      })
+      const { data: task, error } = await supabase
+        .from('hub_tasks')
+        .insert({
+          title: payload.title ?? proposal.title,
+          notes: payload.notes ?? proposal.rationale ?? null,
+          priority: payload.priority ?? 'normal',
+          due_date: payload.due_date ?? null,
+          department,
+        })
+        .select('*')
+        .single()
       if (error) return Response.json({ error: error.message }, { status: 500 })
+
+      if (employee) {
+        try {
+          workResult = await executeTaskWork({ supabase, employee, task, userEmail, allowDone: true })
+        } catch (err) {
+          // The task row exists either way — surface the failure but don't
+          // fail the approval itself, since dismissing it now would just
+          // lose the task with no way to retry.
+          workResult = { toolsUsed: [], savedNote: false }
+          console.error('[proposals] executeTaskWork failed', err)
+        }
+      }
     }
   }
 
@@ -71,5 +95,5 @@ export async function POST(req: Request) {
     .eq('id', id)
 
   if (updateError) return Response.json({ error: updateError.message }, { status: 500 })
-  return Response.json({ ok: true })
+  return Response.json({ ok: true, work: workResult })
 }

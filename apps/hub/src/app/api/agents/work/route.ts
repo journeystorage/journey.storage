@@ -1,7 +1,7 @@
 import { getSupabaseServer } from '@/lib/supabase-server'
 import { getServiceClient } from '@/lib/service-client'
-import { resolvePrimaryGoogleEmail, saveToDrive } from '@/lib/google'
-import { gatherJarvisContext, runJarvisLoop, type ExecutedToolCall } from '@/lib/jarvis-loop'
+import { resolvePrimaryGoogleEmail } from '@/lib/google'
+import { executeTaskWork } from '@/lib/task-work'
 import type { HubAiEmployee, HubTask } from '@/lib/types'
 
 export const runtime = 'nodejs'
@@ -97,63 +97,11 @@ export async function POST() {
       if (!task) return { employee: employee.name, note: 'no task' }
       claimed.add(task.id)
 
-      const context = await gatherJarvisContext(supabase, employee)
-
-      const instruction = `Work session. Your assigned task right now:
-"${task.title}"${task.notes ? `\nTask detail: ${task.notes}` : ''} (task_id: ${task.id})
-
-Actually do the work — use your tools for real, the same way you would if Lyvia asked you directly. Save the real deliverable (the work product itself, or the strongest possible draft of it — not a plan to make one) with create_note, titled "Draft: ..." if it needs review before use. If this task is about an investor relationship, use your investor tools to update the actual record. Call update_task on task_id ${task.id} to reflect real progress in its notes — but never set its status to "done"; only Lyvia or Jonah closes out a task. Ground your work in your document library and recent notes where relevant. End with one sentence on what you did and what remains.`
-
-      let fullText = ''
-      let toolCalls: ExecutedToolCall[] = []
       try {
-        const result = await runJarvisLoop({
-          supabase,
-          employee,
-          userEmail,
-          context,
-          messages: [{ role: 'user', content: instruction }],
-          onDelta: () => {},
-          logChat: false,
-        })
-        fullText = result.fullText
-        toolCalls = result.toolCalls
+        const result = await executeTaskWork({ supabase, employee, task, userEmail, allowDone: false })
+        return { employee: employee.name, task: task.title, tools_used: result.toolsUsed, saved_note: result.savedNote }
       } catch (err) {
         return { employee: employee.name, task: task.title, error: err instanceof Error ? err.message : 'failed' }
-      }
-
-      // Safety net: if the model never actually saved a note, the fallback
-      // is the old behavior — the raw output becomes the note itself.
-      const savedNote = toolCalls.some((c) => c.name === 'create_note')
-      if (!savedNote && fullText.trim()) {
-        const title = `Draft: ${task.title}`.slice(0, 200)
-        await supabase.from('hub_notes').insert({
-          title: `${employee.name}: ${title}`,
-          content: fullText,
-          department: employee.department,
-        })
-        if (userEmail) {
-          try {
-            await saveToDrive(supabase, userEmail, employee.name, title, fullText)
-          } catch {
-            // Google not connected — note still saved in the hub.
-          }
-        }
-      }
-
-      // Guarantee enforced regardless of what the model did: this task is
-      // "doing", never "done", at the end of this cycle.
-      await supabase
-        .from('hub_tasks')
-        .update({ status: 'doing', updated_at: new Date().toISOString() })
-        .eq('id', task.id)
-        .neq('status', 'doing')
-
-      return {
-        employee: employee.name,
-        task: task.title,
-        tools_used: toolCalls.map((c) => c.name),
-        saved_note: savedNote || Boolean(fullText.trim()),
       }
     }),
   )
