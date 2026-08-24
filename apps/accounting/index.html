@@ -128,7 +128,7 @@
   const configured = cfg.SHEETS_WEBAPP_URL && cfg.SHEETS_WEBAPP_URL.indexOf("PASTE_") === -1;
   const $ = s => document.querySelector(s);
 
-  const ENTITIES=['Journey Storage LLC','Journey Managed','Journey Direct'];
+  const ENTITIES=['Journey Storage LLC','Journey Managed','Journey Direct','JCH','EMB','JS','JD','JSM01','JSV01','JS001'];
   let wizState=null;
   function resetWizState(){ wizState={file:null,wireFile:null,vendor:'',entity:'',doc_date:'',amount:'',descr:''}; }
   function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
