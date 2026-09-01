@@ -142,6 +142,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
         facility: facility.slug, unitId: hold.unitId, holdToken: hold.token, dossierToken: hold.dossierToken, spaceMixId: hold.spaceMixId, startDate: moveIn,
         billDay: realQuote.billDay, webRate: realQuote.monthlyRent, totalDue: realQuote.dueToday, lineItems: realQuote.lineItems,
         promotionIds: hold.promotionId ? [hold.promotionId] : undefined,
+        insuranceId: realPlans ? planId : undefined,
         tenant: { first, last, email: details.email, phone: details.phone, address: details.address, city: details.city, state: details.state, zip: details.zip },
         card: { card_number: card.number.replace(/\s/g, ''), cvv2: card.cvc, exp_mo: mm, exp_yr: yy, name_on_card: details.name, address: details.address, city: details.city, state: details.state, zip: card.zip || details.zip },
       }) })

@@ -236,6 +236,7 @@ export interface CompleteRentalInput {
   totalDue: number
   lineItems: Array<{ name: string; amount: number }> // from the single quote
   promotionIds?: string[]
+  insuranceId?: string // enrolls + charges the coverage on the lease
   tenant: Tenant
   card: Card
   metadata?: { ip?: string; user_agent?: string; location?: string }
@@ -265,6 +266,7 @@ export async function completeRental(i: CompleteRentalInput): Promise<RentalResu
       start_date: i.startDate, space_mix_id: i.spaceMixId, total_payment_amount: i.totalDue,
       bill_day: i.billDay, payment_cycle: 'Monthly', web_rate: i.webRate, costs,
       ...(i.promotionIds?.length ? { discount_id: i.promotionIds[0] } : {}),
+      ...(i.insuranceId ? { insurance_id: i.insuranceId } : {}),
       metadata: { ip: i.metadata?.ip ?? '', user_agent: i.metadata?.user_agent ?? 'Mozilla/5.0', location: i.metadata?.location ?? 'Granbury, TX, US' },
     } },
   )
@@ -279,6 +281,7 @@ export async function completeRental(i: CompleteRentalInput): Promise<RentalResu
       hold_token: i.holdToken, additional_months: 0, contacts, documents,
       deliveryMethod: { notice_delivery: 'email' }, payment_method: payment,
       ...(i.promotionIds?.length ? { promotions: i.promotionIds.map((promotion_id) => ({ promotion_id })) } : {}),
+      ...(i.insuranceId ? { insurance_id: i.insuranceId } : {}),
       pending: false, platform: 'website', start_date: i.startDate,
     } },
   )
