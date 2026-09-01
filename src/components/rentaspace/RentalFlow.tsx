@@ -57,13 +57,15 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   // ── Live API state (demo math is the graceful fallback) ──
   const [hold, setHold] = useState<{ token: string; unitId: string; dossierToken?: string; spaceMixId?: string } | null>(null)
   const [realQuote, setRealQuote] = useState<{ dueToday: number; monthlyRent: number; billDay: number; lineItems: { name: string; amount: number }[] } | null>(null)
+  const [realPlans, setRealPlans] = useState<{ id: string; coverage: number; premium: number }[] | null>(null)
   const [rentResult, setRentResult] = useState<{ gatePin?: string | null; leaseId?: string } | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
   const real = !!hold // live mode once a hold is placed
   const dims = useMemo(() => { const m = space.size.match(/(\d+)\s*×\s*(\d+)/); return m ? { width: Number(m[1]), length: Number(m[2]) } : {} as { width?: number; length?: number } }, [space.size])
 
   const stepName: StepName = STEPS[step]
-  const plan = PLANS.find((p) => p.id === planId)!
+  const plans = realPlans && realPlans.length ? realPlans : PLANS
+  const plan = plans.find((p) => p.id === planId) ?? plans[0]
   const gateCode = useMemo(() => String(1000 + Math.floor(Math.random() * 8999)), [])
   const unitNo = useMemo(() => `${'ABCD'[Math.floor(Math.random() * 4)]}-${100 + Math.floor(Math.random() * 240)}`, [])
 
@@ -86,24 +88,46 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const effDueToday = realQuote?.dueToday ?? dueToday
   const effMonthly = realQuote?.monthlyRent ?? space.price
 
-  // Place a 15-minute hold. Returns whether it succeeded.
-  async function placeHold(): Promise<boolean> {
-    if (hold) return true
+  type Held = { token: string; unitId: string; dossierToken?: string; spaceMixId?: string }
+  async function doHold(): Promise<Held | null> {
     try {
       const r = await fetch('/api/nectar/checkout/hold', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ facility: facility.slug, width: dims.width, length: dims.length }) })
       const j = await r.json()
-      if (r.ok && j.holdToken) { setHold({ token: j.holdToken, unitId: j.unitId, dossierToken: j.dossierToken, spaceMixId: j.spaceMixId }); return true }
+      if (r.ok && j.holdToken) return { token: j.holdToken, unitId: j.unitId, dossierToken: j.dossierToken, spaceMixId: j.spaceMixId }
+    } catch { /* fall through */ }
+    return null
+  }
+  // Place a 15-minute hold on entering the flow. Returns whether it succeeded.
+  async function placeHold(): Promise<boolean> {
+    if (hold) return true
+    const h = await doHold()
+    if (h) { setHold(h); return true }
+    return false
+  }
+  // ONE lease-setup per hold (a second one 500s the lease). We quote exactly once
+  // per hold, with the chosen insurance; changing protection re-holds first.
+  async function fetchQuote(h: Held, insuranceId?: string): Promise<boolean> {
+    try {
+      const r = await fetch('/api/nectar/checkout/quote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ facility: facility.slug, unitId: h.unitId, holdToken: h.token, startDate: moveIn, insuranceId }) })
+      const j = await r.json()
+      if (j?.dueToday != null) { setRealQuote({ dueToday: j.dueToday, monthlyRent: j.monthlyRent ?? space.price, billDay: j.billDay ?? 1, lineItems: j.lineItems ?? [] }); return true }
     } catch { /* fall through */ }
     return false
   }
-  // Real cost breakdown once a hold exists.
+
+  // Load the facility's real protection products when the Protection step opens.
   useEffect(() => {
-    if (stepName !== 'Review' || !hold || realQuote) return
-    fetch('/api/nectar/checkout/quote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ facility: facility.slug, unitId: hold.unitId, holdToken: hold.token, startDate: moveIn }) })
+    if (stepName !== 'Protection' || !real || realPlans) return
+    fetch(`/api/nectar/checkout/insurances?facility=${facility.slug}`)
       .then((r) => r.json())
-      .then((j) => { if (j?.dueToday != null) setRealQuote({ dueToday: j.dueToday, monthlyRent: j.monthlyRent ?? space.price, billDay: j.billDay ?? 1, lineItems: j.lineItems ?? [] }) })
+      .then((j) => {
+        const opts = ((j.options ?? []) as { id: string; coverage: number; premium: number }[])
+          .filter((o) => o.premium > 0 && o.coverage >= 1000)
+          .sort((a, b) => a.coverage - b.coverage)
+        if (opts.length) { setRealPlans(opts); setPlanId(opts[Math.min(1, opts.length - 1)].id) }
+      })
       .catch(() => {})
-  }, [stepName, hold, realQuote, facility.slug, moveIn, space.price])
+  }, [stepName, real, realPlans, facility.slug])
 
   // Commit the rental (real). Returns true on success; false → demo confirmation.
   async function submitRent(): Promise<boolean> {
@@ -142,6 +166,17 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
       // Live: a hold must succeed to continue. Preview: allow demo walkthrough.
       if (!ok && !preview) { setApiError('We couldn’t hold this space — it may have just been taken. Try another size, or call us.'); return }
       setStep(1); return
+    }
+    if (stepName === 'Protection') {
+      if (real) {
+        setProcessing(true); setApiError(null)
+        // One lease-setup per hold: if re-quoting after a change, re-hold first.
+        let h = hold!
+        if (realQuote) { setRealQuote(null); const nh = await doHold(); if (nh) { setHold(nh); h = nh } }
+        await fetchQuote(h, realPlans ? planId : undefined)
+        setProcessing(false)
+      }
+      setStep((s) => s + 1); return
     }
     if (stepName === 'Payment') {
       setProcessing(true); setApiError(null)
@@ -255,7 +290,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><ShieldCheck className="h-6 w-6 text-orange" aria-hidden />Protect your belongings</h2>
               <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Coverage is required. Choose a protection plan below.</p>
               <div className="mt-7 space-y-3">
-                {PLANS.map((p) => {
+                {plans.map((p) => {
                   const active = planId === p.id
                   return (
                     <button key={p.id} onClick={() => setPlanId(p.id)} className={`${optionBase} ${active ? 'border-orange bg-orange/[0.08]' : 'border-warm-white/12 bg-warm-white/[0.03] hover:border-orange/50'}`}>
