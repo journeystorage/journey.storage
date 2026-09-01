@@ -211,12 +211,15 @@ const paymentFrom = (c: Card, t: Tenant) => ({
   exp_mo: c.exp_mo, exp_yr: c.exp_yr, first: t.first, last: t.last,
   name_on_card: c.name_on_card, save_to_account: false, state: c.state, type: 'card', zip: c.zip, auto_charge: true,
 })
-// Map lease-setup charge lines → the costs array documents/finalize + lease expect.
-const costsFrom = (setup: LeaseSetup, startDate: string) =>
-  (setup.Charges?.Detail ?? []).map((l) => ({
-    amount: l.total_cost, description: l.name,
+// Quote line items → the costs array documents/finalize + lease expect.
+// NOTE: the caller must NOT run a second lease-setup before this — a repeated
+// lease-setup on the same hold makes the lease step 500 (verified). We reuse
+// the single quote the client already fetched.
+const costsFrom = (lineItems: Array<{ name: string; amount: number }>, startDate: string) =>
+  lineItems.map((l) => ({
+    amount: l.amount, description: l.name,
     costType: l.name === 'Rent' ? 'rent' : 'other',
-    end: startDate, start: startDate, tax: 0, total: l.total_cost, pmsRaw: null,
+    end: startDate, start: startDate, tax: 0, total: l.amount, pmsRaw: null,
   }))
 
 export interface CompleteRentalInput {
@@ -228,7 +231,7 @@ export interface CompleteRentalInput {
   billDay: number
   webRate: number // monthly non-prorated rent
   totalDue: number
-  setup: LeaseSetup // lease-setup details, for the cost breakdown
+  lineItems: Array<{ name: string; amount: number }> // from the single quote
   tenant: Tenant
   card: Card
   metadata?: { ip?: string; user_agent?: string; location?: string }
@@ -248,7 +251,7 @@ export interface RentalResult {
 export async function completeRental(i: CompleteRentalInput): Promise<RentalResult> {
   const contacts = contactsFrom(i.tenant)
   const payment = paymentFrom(i.card, i.tenant)
-  const costs = costsFrom(i.setup, i.startDate)
+  const costs = costsFrom(i.lineItems, i.startDate)
 
   // 1. Finalize & sign documents (Super Lease / ClickWrap auto-sign → signed:true)
   const { data: docData } = await nectarV2<{ documents?: Array<{ document_type?: string; filename?: string; src?: string; version?: string }>; signed?: boolean }>(

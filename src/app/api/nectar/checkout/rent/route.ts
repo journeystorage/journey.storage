@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { facilityBySlug } from '@/lib/nectar/facilities'
-import { leaseSetup, completeRental, type Tenant, type Card } from '@/lib/nectar/rental'
+import { completeRental, type Tenant, type Card } from '@/lib/nectar/rental'
 
 interface RentBody {
   facility?: string
@@ -16,8 +16,12 @@ interface RentBody {
   dossierToken?: string
   spaceMixId?: string
   startDate?: string
-  insuranceId?: string
-  promotionIds?: string[]
+  // From the single quote the client already fetched (do NOT re-run lease-setup:
+  // a second lease-setup on the same hold makes the lease step 500).
+  billDay?: number
+  webRate?: number
+  totalDue?: number
+  lineItems?: Array<{ name: string; amount: number }>
   tenant?: Tenant
   card?: Card
 }
@@ -30,29 +34,21 @@ export async function POST(req: NextRequest) {
   try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid request' }, { status: 400 }) }
   const cfg = body.facility ? facilityBySlug(body.facility) : undefined
   if (!cfg) return NextResponse.json({ error: 'Unknown facility' }, { status: 404 })
-  const { unitId, holdToken, startDate, tenant, card } = body
-  if (!unitId || !holdToken || !startDate || !tenant?.email || !card?.card_number) {
+  const { unitId, holdToken, startDate, tenant, card, lineItems, billDay, webRate, totalDue } = body
+  if (!unitId || !holdToken || !startDate || !tenant?.email || !card?.card_number || !lineItems?.length || billDay == null) {
     return NextResponse.json({ error: 'Missing rental details.' }, { status: 400 })
   }
   try {
-    // Re-quote server-side so the charged amounts are authoritative (not client-supplied).
-    const setup = await leaseSetup(unitId, {
-      hold_token: holdToken,
-      start_date: startDate,
-      insurance_id: body.insuranceId,
-      promotions: body.promotionIds?.map((promotion_id) => ({ promotion_id })),
-      token: body.dossierToken,
-    })
     const result = await completeRental({
       unitId,
       holdToken,
       dossierToken: body.dossierToken,
       spaceMixId: body.spaceMixId,
       startDate,
-      billDay: setup.bill_day ?? 1,
-      webRate: setup.rent ?? setup.monthly ?? 0,
-      totalDue: setup.Charges?.total_due ?? 0,
-      setup,
+      billDay,
+      webRate: webRate ?? 0,
+      totalDue: totalDue ?? 0,
+      lineItems,
       tenant,
       card,
       metadata: {

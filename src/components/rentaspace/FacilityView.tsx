@@ -502,7 +502,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       {/* ── RENTAL FLOW (preview-only demo checkout) ── */}
       {rentalSpace && (
         <RentalFlow
-          facility={{ short: f.short, address: f.address, city: f.city, phone: f.phone, tel: f.tel }}
+          facility={{ slug: f.slug, short: f.short, address: f.address, city: f.city, phone: f.phone, tel: f.tel }}
           space={rentalSpace}
           onClose={() => setRentalSpace(null)}
         />

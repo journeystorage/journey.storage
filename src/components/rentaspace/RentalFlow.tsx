@@ -42,10 +42,10 @@ function Eyebrow({ label }: { label: string }) {
   )
 }
 
-export default function RentalFlow({ facility, space, onClose }: { facility: { short: string; address: string; city: string; phone: string; tel: string }; space: Space; onClose: () => void }) {
+export default function RentalFlow({ facility, space, onClose }: { facility: { slug: string; short: string; address: string; city: string; phone: string; tel: string }; space: Space; onClose: () => void }) {
   const [step, setStep] = useState(0)
   const [moveIn, setMoveIn] = useState(todayISO())
-  const [details, setDetails] = useState({ name: '', email: '', phone: '', address: '', dob: '' })
+  const [details, setDetails] = useState({ name: '', email: '', phone: '', address: '', city: (facility.city.split(',')[0] || 'Granbury').trim(), state: 'TX', zip: (facility.city.match(/\b(\d{5})\b/)?.[1]) || '' })
   const [planId, setPlanId] = useState<string>('p2')
   const [signature, setSignature] = useState('')
   const [agree, setAgree] = useState(false)
@@ -53,6 +53,14 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
   const [card, setCard] = useState({ number: '', exp: '', cvc: '', zip: '' })
   const [processing, setProcessing] = useState(false)
   const autopay = true // required — enrollment is not optional
+
+  // ── Live API state (demo math is the graceful fallback) ──
+  const [hold, setHold] = useState<{ token: string; unitId: string; dossierToken?: string; spaceMixId?: string } | null>(null)
+  const [realQuote, setRealQuote] = useState<{ dueToday: number; monthlyRent: number; billDay: number; lineItems: { name: string; amount: number }[] } | null>(null)
+  const [rentResult, setRentResult] = useState<{ gatePin?: string | null; leaseId?: string } | null>(null)
+  const [apiError, setApiError] = useState<string | null>(null)
+  const real = !!hold // live mode once a hold is placed
+  const dims = useMemo(() => { const m = space.size.match(/(\d+)\s*×\s*(\d+)/); return m ? { width: Number(m[1]), length: Number(m[2]) } : {} as { width?: number; length?: number } }, [space.size])
 
   const stepName: StepName = STEPS[step]
   const plan = PLANS.find((p) => p.id === planId)!
@@ -74,17 +82,72 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
   const tax = +(taxable * TAX_RATE).toFixed(2)
   const dueToday = +(firstMonth + ADMIN_FEE + protection + tax).toFixed(2)
   const monthlyGoing = +(space.price + protection).toFixed(2)
+  // Effective (real quote when live, else demo)
+  const effDueToday = realQuote?.dueToday ?? dueToday
+  const effMonthly = realQuote?.monthlyRent ?? space.price
+
+  // Place a hold when leaving the Move-in step; on failure the flow stays in demo mode.
+  async function placeHold() {
+    if (hold) return
+    try {
+      const r = await fetch('/api/nectar/checkout/hold', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ facility: facility.slug, width: dims.width, length: dims.length }) })
+      const j = await r.json()
+      if (r.ok && j.holdToken) setHold({ token: j.holdToken, unitId: j.unitId, dossierToken: j.dossierToken, spaceMixId: j.spaceMixId })
+    } catch { /* demo fallback */ }
+  }
+  // Real cost breakdown once a hold exists.
+  useEffect(() => {
+    if (stepName !== 'Review' || !hold || realQuote) return
+    fetch('/api/nectar/checkout/quote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ facility: facility.slug, unitId: hold.unitId, holdToken: hold.token, startDate: moveIn }) })
+      .then((r) => r.json())
+      .then((j) => { if (j?.dueToday != null) setRealQuote({ dueToday: j.dueToday, monthlyRent: j.monthlyRent ?? space.price, billDay: j.billDay ?? 1, lineItems: j.lineItems ?? [] }) })
+      .catch(() => {})
+  }, [stepName, hold, realQuote, facility.slug, moveIn, space.price])
+
+  // Commit the rental (real). Returns true on success; false → demo confirmation.
+  async function submitRent(): Promise<boolean> {
+    if (!hold || !realQuote) return false // needs the single quote already fetched
+    const parts = details.name.trim().split(/\s+/)
+    const last = parts.length > 1 ? parts.pop()! : parts[0]
+    const first = parts.join(' ') || details.name
+    const [mm = '', yyRaw = ''] = card.exp.split('/').map((s) => s.trim())
+    const yy = yyRaw.length === 2 ? `20${yyRaw}` : yyRaw
+    try {
+      const r = await fetch('/api/nectar/checkout/rent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        facility: facility.slug, unitId: hold.unitId, holdToken: hold.token, dossierToken: hold.dossierToken, spaceMixId: hold.spaceMixId, startDate: moveIn,
+        billDay: realQuote.billDay, webRate: realQuote.monthlyRent, totalDue: realQuote.dueToday, lineItems: realQuote.lineItems,
+        tenant: { first, last, email: details.email, phone: details.phone, address: details.address, city: details.city, state: details.state, zip: details.zip },
+        card: { card_number: card.number.replace(/\s/g, ''), cvv2: card.cvc, exp_mo: mm, exp_yr: yy, name_on_card: details.name, address: details.address, city: details.city, state: details.state, zip: card.zip || details.zip },
+      }) })
+      const j = await r.json()
+      if (r.ok && j.ok) { setRentResult({ gatePin: j.gatePin, leaseId: j.leaseId }); return true }
+    } catch { /* fall through to demo */ }
+    return false
+  }
 
   const canNext = () => {
     if (stepName === 'Move-in') return !!moveIn
-    if (stepName === 'Your details') return details.name && /.+@.+\..+/.test(details.email) && details.phone.length >= 7 && details.address
+    if (stepName === 'Your details') return !!details.name && /.+@.+\..+/.test(details.email) && details.phone.length >= 7 && !!details.address && !!details.zip
     if (stepName === 'Protection') return !!planId
     if (stepName === 'Sign lease') return agree && signature.trim().length >= 3
     if (stepName === 'Payment') return card.number.replace(/\s/g, '').length >= 12 && card.exp.length >= 4 && card.cvc.length >= 3
     return true
   }
-  const next = () => {
-    if (stepName === 'Payment') { setProcessing(true); setTimeout(() => { setProcessing(false); setStep((s) => s + 1) }, 1400); return }
+  const next = async () => {
+    if (stepName === 'Move-in') { setProcessing(true); await placeHold(); setProcessing(false); setStep(1); return }
+    if (stepName === 'Payment') {
+      setProcessing(true); setApiError(null)
+      if (real && realQuote) {
+        // Live: only advance on a real, confirmed lease — never fake success.
+        const ok = await submitRent()
+        setProcessing(false)
+        if (!ok) { setApiError('We couldn’t complete your rental just now. Please try again, or call us to finish.'); return }
+        setStep((s) => s + 1); return
+      }
+      // Demo/preview: no hold or no live quote → simulated confirmation.
+      await new Promise((r) => setTimeout(r, 1200))
+      setProcessing(false); setStep((s) => s + 1); return
+    }
     setStep((s) => Math.min(s + 1, STEPS.length - 1))
   }
   const back = () => setStep((s) => Math.max(s - 1, 0))
@@ -168,9 +231,11 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
                   <input type="tel" placeholder="Phone" value={details.phone} onChange={(e) => setDetails({ ...details, phone: e.target.value })} className={FIELD} />
                 </div>
                 <input placeholder="Street address" value={details.address} onChange={(e) => setDetails({ ...details, address: e.target.value })} className={FIELD} />
-                <label className="block text-[0.75rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">Date of birth
-                  <input type="date" value={details.dob} onChange={(e) => setDetails({ ...details, dob: e.target.value })} className={`mt-2 ${FIELD} [color-scheme:dark]`} />
-                </label>
+                <div className="grid grid-cols-[1fr_80px_110px] gap-3">
+                  <input placeholder="City" value={details.city} onChange={(e) => setDetails({ ...details, city: e.target.value })} className={FIELD} />
+                  <input placeholder="State" maxLength={2} value={details.state} onChange={(e) => setDetails({ ...details, state: e.target.value.toUpperCase() })} className={FIELD} />
+                  <input placeholder="ZIP" inputMode="numeric" value={details.zip} onChange={(e) => setDetails({ ...details, zip: e.target.value })} className={FIELD} />
+                </div>
               </div>
             </div>
           )}
@@ -210,15 +275,24 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
               <h2 className="mt-4 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white">Review your move-in</h2>
               <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">{space.size} at {facility.short} · move-in {dateLong(moveIn)}</p>
               <div className={`mt-7 ${glassCard} p-5`}>
-                <dl className="space-y-2.5 text-[0.9375rem]">
-                  <div className="flex justify-between"><dt className="text-warm-white/70">First month rent</dt><dd className="font-bold text-warm-white">{money(firstMonthFull)}</dd></div>
-                  <div className="flex justify-between text-sage-green"><dt>50% off first month</dt><dd className="font-bold">−{money(promoDiscount)}</dd></div>
-                  <div className="flex justify-between"><dt className="text-warm-white/70">One-time admin fee</dt><dd className="font-bold text-warm-white">{money(ADMIN_FEE)}</dd></div>
-                  <div className="flex justify-between"><dt className="text-warm-white/70">Protection ({money(plan.coverage).replace('.00', '')})</dt><dd className="font-bold text-warm-white">{money(protection)}</dd></div>
-                  <div className="flex justify-between"><dt className="text-warm-white/70">Estimated tax</dt><dd className="font-bold text-warm-white">{money(tax)}</dd></div>
-                  <div className="mt-2 flex items-baseline justify-between border-t border-warm-white/12 pt-3"><dt className="text-[1.125rem] font-black text-warm-white">Due today</dt><dd className="text-[1.375rem] font-black text-orange">{money(dueToday)}</dd></div>
-                </dl>
-                <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Then {money(monthlyGoing)}/mo starting next cycle. Month-to-month — cancel anytime. Amounts are an estimate; the facility confirms final totals.</p>
+                {realQuote ? (
+                  <dl className="space-y-2.5 text-[0.9375rem]">
+                    {realQuote.lineItems.map((l, i) => (
+                      <div key={i} className="flex justify-between"><dt className="text-warm-white/70">{l.name}</dt><dd className="font-bold text-warm-white">{money(l.amount)}</dd></div>
+                    ))}
+                    <div className="mt-2 flex items-baseline justify-between border-t border-warm-white/12 pt-3"><dt className="text-[1.125rem] font-black text-warm-white">Due today</dt><dd className="text-[1.375rem] font-black text-orange">{money(effDueToday)}</dd></div>
+                  </dl>
+                ) : (
+                  <dl className="space-y-2.5 text-[0.9375rem]">
+                    <div className="flex justify-between"><dt className="text-warm-white/70">First month rent</dt><dd className="font-bold text-warm-white">{money(firstMonthFull)}</dd></div>
+                    <div className="flex justify-between text-sage-green"><dt>50% off first month</dt><dd className="font-bold">−{money(promoDiscount)}</dd></div>
+                    <div className="flex justify-between"><dt className="text-warm-white/70">One-time admin fee</dt><dd className="font-bold text-warm-white">{money(ADMIN_FEE)}</dd></div>
+                    <div className="flex justify-between"><dt className="text-warm-white/70">Protection ({money(plan.coverage).replace('.00', '')})</dt><dd className="font-bold text-warm-white">{money(protection)}</dd></div>
+                    <div className="flex justify-between"><dt className="text-warm-white/70">Estimated tax</dt><dd className="font-bold text-warm-white">{money(tax)}</dd></div>
+                    <div className="mt-2 flex items-baseline justify-between border-t border-warm-white/12 pt-3"><dt className="text-[1.125rem] font-black text-warm-white">Due today</dt><dd className="text-[1.375rem] font-black text-orange">{money(dueToday)}</dd></div>
+                  </dl>
+                )}
+                <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Then {money(effMonthly)}/mo starting next cycle. Month-to-month — cancel anytime.{realQuote ? '' : ' Amounts are an estimate; the facility confirms final totals.'}</p>
               </div>
             </div>
           )}
@@ -258,7 +332,7 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
             <div className="mx-auto max-w-lg">
               <Eyebrow label="Payment" />
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><CreditCard className="h-6 w-6 text-orange" aria-hidden />Payment</h2>
-              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Pay {money(dueToday)} today to complete your rental.</p>
+              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Pay {money(effDueToday)} today to complete your rental.</p>
               <div className="mt-7 space-y-3">
                 <input inputMode="numeric" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })} className={FIELD} />
                 <div className="grid grid-cols-3 gap-3">
@@ -274,7 +348,12 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
                   <input type="checkbox" checked readOnly disabled aria-label="Autopay enrollment (required)" className="h-4 w-4 accent-orange opacity-80" />
                 </span>
               </div>
-              <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55"><b className="text-warm-white/80">Demo only.</b> This is a preview — no card is charged and no rental is created. In production this is processed securely by Tenant Payments.</p>
+              {apiError && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-3 py-2.5 text-[0.8125rem] font-bold text-[#E8A87C]">{apiError} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
+              {real ? (
+                <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Secured by Tenant Payments. Your card is charged {money(effDueToday)} today; autopay continues each cycle.</p>
+              ) : (
+                <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55"><b className="text-warm-white/80">Demo only.</b> This is a preview — no card is charged and no rental is created. In production this is processed securely by Tenant Payments.</p>
+              )}
             </div>
           )}
 
@@ -282,12 +361,12 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
             <div className="mx-auto max-w-lg py-4 text-center">
               <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-sage-green/20 text-sage-green ring-1 ring-sage-green/30"><Check className="h-9 w-9" strokeWidth={3} aria-hidden /></div>
               <h2 className="mt-5 text-[2rem] font-black leading-[1.02] tracking-[-0.02em] text-warm-white">You&rsquo;re all moved in{details.name ? `, ${details.name.split(' ')[0]}` : ''}!</h2>
-              <p className="mt-3 text-[1rem] leading-[1.6] text-warm-white/50">Your {space.size} space at {facility.short} is reserved. A confirmation and lease PDF are on the way to {details.email || 'your email'}.</p>
+              <p className="mt-3 text-[1rem] leading-[1.6] text-warm-white/50">Your {space.size} space at {facility.short} is {rentResult ? 'rented' : 'reserved'}. A confirmation and lease PDF are on the way to {details.email || 'your email'}.</p>
               <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className={`relative overflow-hidden ${R} border border-warm-white/10 bg-warm-white/[0.05] p-5 text-left`}>
                   <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(232,98,42,0.18) 0%, transparent 60%)' }} />
                   <p className="relative flex items-center gap-2 text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45"><KeyRound className="h-3.5 w-3.5 text-orange" aria-hidden />Gate code</p>
-                  <p className="relative mt-1.5 text-[1.875rem] font-black tracking-[0.12em] text-warm-white">{gateCode}#</p>
+                  <p className="relative mt-1.5 text-[1.875rem] font-black tracking-[0.12em] text-warm-white">{rentResult?.gatePin ? rentResult.gatePin : `${gateCode}#`}</p>
                   <p className="relative text-[0.75rem] text-warm-white/45">24/7 access · non-transferable</p>
                 </div>
                 <div className={`relative overflow-hidden ${R} border border-warm-white/10 bg-warm-white/[0.05] p-5 text-left`}>
@@ -299,10 +378,10 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
               </div>
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[0.8125rem]">
                 <span className="inline-flex items-center gap-1.5 rounded-sm border border-sage-green/25 bg-sage-green/10 px-3 py-1.5 font-bold text-sage-green"><FileText className="h-3.5 w-3.5" aria-hidden />Lease signed</span>
-                <span className="inline-flex items-center gap-1.5 rounded-sm border border-sage-green/25 bg-sage-green/10 px-3 py-1.5 font-bold text-sage-green"><Check className="h-3.5 w-3.5" aria-hidden />Paid {money(dueToday)}</span>
+                <span className="inline-flex items-center gap-1.5 rounded-sm border border-sage-green/25 bg-sage-green/10 px-3 py-1.5 font-bold text-sage-green"><Check className="h-3.5 w-3.5" aria-hidden />Paid {money(effDueToday)}</span>
                 {autopay && <span className="inline-flex items-center gap-1.5 rounded-sm border border-sage-green/25 bg-sage-green/10 px-3 py-1.5 font-bold text-sage-green"><Check className="h-3.5 w-3.5" aria-hidden />Autopay on</span>}
               </div>
-              <p className="mt-7 text-[0.75rem] text-warm-white/40">Preview — no real rental was created. Questions? Call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a>.</p>
+              <p className="mt-7 text-[0.75rem] text-warm-white/40">{rentResult ? 'Rental complete.' : 'Preview — no real rental was created.'} Questions? Call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a>.</p>
               <button onClick={onClose} className={`mt-6 ${primaryBtn}`}>Close preview</button>
             </div>
           )}
@@ -356,9 +435,9 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
               <ChevronLeft className="h-4 w-4" aria-hidden />{step === 0 ? 'Cancel' : 'Back'}
             </button>
             <div className="flex items-center gap-3">
-              {stepName === 'Review' && <span className="hidden text-[0.9375rem] font-black text-warm-white sm:inline">{money(dueToday)} due today</span>}
+              {stepName === 'Review' && <span className="hidden text-[0.9375rem] font-black text-warm-white sm:inline">{money(effDueToday)} due today</span>}
               <button onClick={next} disabled={!canNext() || processing} className={primaryBtn}>
-                {processing ? 'Processing…' : stepName === 'Payment' ? `Pay ${money(dueToday)}` : stepName === 'Sign lease' ? 'Sign & continue' : stepName === 'Review' ? 'Looks good' : 'Continue'}
+                {processing ? 'Processing…' : stepName === 'Payment' ? `Pay ${money(effDueToday)}` : stepName === 'Sign lease' ? 'Sign & continue' : stepName === 'Review' ? 'Looks good' : 'Continue'}
                 {!processing && <ChevronRight className="h-4 w-4" aria-hidden />}
               </button>
             </div>
