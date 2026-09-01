@@ -174,36 +174,112 @@ export async function leaseSetup(unitId: string, p: LeaseSetupParams): Promise<L
   return data.details
 }
 
-// ── Commit steps (from docs — smoke-test at go-live) ────────────────────────
-// Payment card data flows through these bodies; nectarV2 redaction is on the
-// legacy client, so keep these server-only and never log the body.
+// ── Commit: documents/finalize → lease (Direct Rental) ──────────────────────
+// VERIFIED end-to-end against the sandbox: the direct flow (hold_token, no
+// reserve) with pending:true + a deliveryMethod creates a real lease and
+// returns a gate PIN. Card data is server-side only and never logged.
 
-export interface ReserveParams {
-  hold_token: string
-  move_in_cost?: unknown
-  bill_day?: number
-  start_date?: string
-  tenant?: unknown // { firstName, lastName, email, phone, Address:{...} }
+export interface Tenant {
+  first: string
+  last: string
+  email: string
+  phone: string
+  address: string
+  city: string
+  state: string
+  zip: string
 }
-export async function reserveUnit(unitId: string, body: ReserveParams) {
-  const { data } = await nectarV2(`companies/${co()}/units/${unitId}/reserve`, { method: 'POST', body })
-  return data as { reservation_id?: string; lease_id?: string; tenants?: unknown }
+export interface Card {
+  card_number: string
+  cvv2: string
+  exp_mo: string
+  exp_yr: string
+  name_on_card: string
+  address: string
+  city: string
+  state: string
+  zip: string
 }
 
-export async function finalizeDocuments(unitId: string, body: unknown) {
-  const { data } = await nectarV2(`companies/${co()}/units/${unitId}/documents/finalize`, { method: 'POST', body })
-  return data as { documents?: Array<{ document_type?: string; filename?: string; src?: string; url?: string; display_name?: unknown }>; signed?: boolean }
+const contactsFrom = (t: Tenant) => [{
+  Addresses: [{ Address: { address: t.address, city: t.city, state: t.state, zip: t.zip }, type: 'primary' }],
+  Phones: [{ phone: t.phone, sms: true, type: 'cell' }],
+  email: t.email, first: t.first, last: t.last,
+}]
+const paymentFrom = (c: Card, t: Tenant) => ({
+  address: c.address, card_number: c.card_number, city: c.city, cvv2: c.cvv2,
+  exp_mo: c.exp_mo, exp_yr: c.exp_yr, first: t.first, last: t.last,
+  name_on_card: c.name_on_card, save_to_account: false, state: c.state, type: 'card', zip: c.zip, auto_charge: true,
+})
+// Map lease-setup charge lines → the costs array documents/finalize + lease expect.
+const costsFrom = (setup: LeaseSetup, startDate: string) =>
+  (setup.Charges?.Detail ?? []).map((l) => ({
+    amount: l.total_cost, description: l.name,
+    costType: l.name === 'Rent' ? 'rent' : 'other',
+    end: startDate, start: startDate, tax: 0, total: l.total_cost, pmsRaw: null,
+  }))
+
+export interface CompleteRentalInput {
+  unitId: string
+  holdToken: string
+  dossierToken?: string
+  spaceMixId?: string
+  startDate: string // YYYY-MM-DD
+  billDay: number
+  webRate: number // monthly non-prorated rent
+  totalDue: number
+  setup: LeaseSetup // lease-setup details, for the cost breakdown
+  tenant: Tenant
+  card: Card
+  metadata?: { ip?: string; user_agent?: string; location?: string }
 }
 
-export async function createLease(unitId: string, body: unknown) {
-  const { data } = await nectarV2(`companies/${co()}/units/${unitId}/lease`, { method: 'POST', body })
-  return data as { lease_id?: string; payment_method_id?: string }
+export interface RentalResult {
+  leaseId: string
+  paymentId?: string
+  paymentMethodId?: string
+  gatePin?: string
+  status?: string
+  documentUrl?: string
+  signed: boolean
 }
 
-export async function setAutopay(leaseId: string, paymentMethodId: string, enable = true) {
-  const { data } = await nectarV2(
-    `companies/${co()}/leases/${leaseId}/payment-methods/${paymentMethodId}/autopay`,
-    { method: enable ? 'PUT' : 'DELETE' },
+/** Direct online move-in: documents/finalize (auto-signs) → lease (pending). */
+export async function completeRental(i: CompleteRentalInput): Promise<RentalResult> {
+  const contacts = contactsFrom(i.tenant)
+  const payment = paymentFrom(i.card, i.tenant)
+  const costs = costsFrom(i.setup, i.startDate)
+
+  // 1. Finalize & sign documents (Super Lease / ClickWrap auto-sign → signed:true)
+  const { data: docData } = await nectarV2<{ documents?: Array<{ document_type?: string; filename?: string; src?: string; version?: string }>; signed?: boolean }>(
+    `companies/${co()}/units/${i.unitId}/documents/finalize`,
+    { method: 'POST', body: {
+      contacts, payment_method: payment, platform: 'website', source: i.dossierToken,
+      start_date: i.startDate, space_mix_id: i.spaceMixId, total_payment_amount: i.totalDue,
+      bill_day: i.billDay, payment_cycle: 'Monthly', web_rate: i.webRate, costs,
+      metadata: { ip: i.metadata?.ip ?? '', user_agent: i.metadata?.user_agent ?? 'Mozilla/5.0', location: i.metadata?.location ?? 'Granbury, TX, US' },
+    } },
   )
-  return data
+  const documents = (docData.documents ?? []).map((d) => ({ document_type: d.document_type, filename: d.filename ?? 'Lease', src: d.src, version: d.version }))
+
+  // 2. Create the lease — direct flow: hold_token, pending:true, deliveryMethod.
+  const { data: leaseData } = await nectarV2<{ lease?: { lease_id?: string; payment_id?: string; payment_method_id?: string; status?: string; tenants?: Array<{ pin?: string }> } }>(
+    `companies/${co()}/units/${i.unitId}/lease`,
+    { method: 'POST', body: {
+      hold_token: i.holdToken, additional_months: 0, contacts, documents,
+      deliveryMethod: { notice_delivery: 'email' }, payment_method: payment,
+      pending: true, platform: 'website', start_date: i.startDate,
+    } },
+  )
+  const lease = leaseData.lease ?? {}
+  if (!lease.lease_id) throw new Error('Lease could not be created')
+  return {
+    leaseId: lease.lease_id,
+    paymentId: lease.payment_id,
+    paymentMethodId: lease.payment_method_id,
+    gatePin: lease.tenants?.[0]?.pin,
+    status: lease.status,
+    documentUrl: documents[0]?.src,
+    signed: docData.signed ?? false,
+  }
 }
