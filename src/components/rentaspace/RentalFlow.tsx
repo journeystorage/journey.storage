@@ -381,8 +381,8 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 <div className={`relative overflow-hidden ${R} border border-warm-white/10 bg-warm-white/[0.05] p-5 text-left`}>
                   <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(232,98,42,0.18) 0%, transparent 60%)' }} />
                   <p className="relative text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Your space</p>
-                  <p className="relative mt-1.5 text-[1.875rem] font-black text-warm-white">{unitNo}</p>
-                  <p className="relative text-[0.75rem] text-warm-white/45">{space.size} · {facility.address}</p>
+                  <p className="relative mt-1.5 text-[1.875rem] font-black text-warm-white">{space.size}</p>
+                  <p className="relative text-[0.75rem] text-warm-white/45">{rentResult ? 'Unit number in your confirmation email' : `${unitNo} · ${facility.address}`}</p>
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[0.8125rem]">

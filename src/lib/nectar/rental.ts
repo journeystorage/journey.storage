@@ -265,13 +265,15 @@ export async function completeRental(i: CompleteRentalInput): Promise<RentalResu
   )
   const documents = (docData.documents ?? []).map((d) => ({ document_type: d.document_type, filename: d.filename ?? 'Lease', src: d.src, version: d.version }))
 
-  // 2. Create the lease — direct flow: hold_token, pending:true, deliveryMethod.
+  // 2. Create the lease — direct flow: hold_token, deliveryMethod.
+  // pending:false fully ACTIVATES the tenant (pending:true left it as a lead).
+  // The earlier 500 on pending:false was the double-lease-setup bug, now fixed.
   const { data: leaseData } = await nectarV2<{ lease?: { lease_id?: string; payment_id?: string; payment_method_id?: string; status?: string; tenants?: Array<{ pin?: string }> } }>(
     `companies/${co()}/units/${i.unitId}/lease`,
     { method: 'POST', body: {
       hold_token: i.holdToken, additional_months: 0, contacts, documents,
       deliveryMethod: { notice_delivery: 'email' }, payment_method: payment,
-      pending: true, platform: 'website', start_date: i.startDate,
+      pending: false, platform: 'website', start_date: i.startDate,
     } },
   )
   const lease = leaseData.lease ?? {}
