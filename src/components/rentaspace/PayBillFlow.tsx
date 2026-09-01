@@ -1,21 +1,19 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Check, ChevronLeft, ChevronRight, Search, Wallet, CreditCard } from 'lucide-react'
 
 /**
- * PREVIEW-ONLY Pay Bill flow. Mirrors the real Nectar tenant-payment sequence:
- *   1. Get tenant details (Customer & Tenant Information) → read `balance`
- *   2. If balance due → POST facilities/{fid}/tenants/{tid}/payments?liveData=true (periods=0)
- *   3. If no balance → GET prepay quote (periods=N) → POST payment
- * Billing address is mandatory in the paymentInstrument. Runs client-side in
- * demo mode — no lookup, no charge — until the GDS pay API is wired.
+ * Pay Bill — real tenant payment.
+ *   1. Look up the account by email/phone (/api/nectar/account/lookup)
+ *   2. Show the live balance
+ *   3. Pay by card (/api/nectar/account/pay → leases/{id}/payment)
+ * Card data is sent to our server route only; never stored client-side.
  */
 
 const STEPS = ['Account', 'Balance', 'Payment', 'Done'] as const
 type StepName = (typeof STEPS)[number]
 const WATERMARK: Record<StepName, string> = { Account: 'BILL', Balance: 'BALANCE', Payment: 'PAY', Done: 'PAID' }
-const TAX_RATE = 0.0825
 
 const money = (n: number) => `$${n.toFixed(2)}`
 const R = 'rounded-tl-[20px] rounded-tr-[4px] rounded-br-[4px] rounded-bl-[4px]'
@@ -30,23 +28,21 @@ function Eyebrow({ label }: { label: string }) {
   )
 }
 
+type Account = { leaseId: string; name: string; code: string | null; balance: number }
+
 export default function PayBillFlow({ facility, onClose }: { facility: { short: string; phone: string; tel: string }; onClose: () => void }) {
   const [step, setStep] = useState(0)
   const [contact, setContact] = useState('')
   const [looking, setLooking] = useState(false)
+  const [account, setAccount] = useState<Account | null>(null)
+  const [lookupMsg, setLookupMsg] = useState<string | null>(null)
   const [card, setCard] = useState({ number: '', exp: '', cvc: '' })
   const [billing, setBilling] = useState({ name: '', address1: '', city: '', state: '', zip: '' })
   const [processing, setProcessing] = useState(false)
+  const [payError, setPayError] = useState<string | null>(null)
 
   const stepName: StepName = STEPS[step]
-
-  // Demo account — in production this is the tenant record from the lookup.
-  const account = useMemo(() => {
-    const monthly = 95
-    const balanceDue = +(monthly + monthly * TAX_RATE).toFixed(2)
-    return { name: 'Your account', space: '10 × 10', monthly, balanceDue, nextDue: 'the 1st' }
-  }, [])
-  const confirmation = useMemo(() => `JS-${100000 + Math.floor(Math.random() * 899999)}`, [])
+  const amountDue = account?.balance ?? 0
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -55,16 +51,51 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
   }, [onClose])
 
-  const amountDue = account.balanceDue
-
   const canNext = () => {
     if (stepName === 'Account') return /.+@.+\..+/.test(contact) || contact.replace(/\D/g, '').length >= 7
-    if (stepName === 'Payment') return card.number.replace(/\s/g, '').length >= 12 && card.exp.length >= 4 && card.cvc.length >= 3 && billing.name && billing.address1 && billing.city && billing.state && billing.zip
+    if (stepName === 'Balance') return amountDue > 0
+    if (stepName === 'Payment') return card.number.replace(/\s/g, '').length >= 12 && card.exp.length >= 4 && card.cvc.length >= 3 && !!billing.name && !!billing.address1 && !!billing.city && !!billing.state && !!billing.zip
     return true
   }
-  const next = () => {
-    if (stepName === 'Account') { setLooking(true); setTimeout(() => { setLooking(false); setStep(1) }, 1100); return }
-    if (stepName === 'Payment') { setProcessing(true); setTimeout(() => { setProcessing(false); setStep(3) }, 1400); return }
+
+  async function lookup() {
+    setLooking(true); setLookupMsg(null)
+    try {
+      const r = await fetch('/api/nectar/account/lookup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contact }) })
+      const j = await r.json()
+      if (!r.ok) { setLookupMsg(j.error ?? 'Lookup failed.'); return false }
+      if (!j.found || !j.accounts?.length) { setLookupMsg('We couldn’t find an account for that email or phone. Double-check it, or call us.'); return false }
+      setAccount(j.accounts[0] as Account) // first active lease
+      return true
+    } catch { setLookupMsg('Something went wrong — please try again or call us.'); return false }
+    finally { setLooking(false) }
+  }
+
+  async function pay(): Promise<boolean> {
+    if (!account) return false
+    const [mm = '', yyRaw = ''] = card.exp.split('/').map((s) => s.trim())
+    const yy = yyRaw.length === 2 ? `20${yyRaw}` : yyRaw
+    try {
+      const r = await fetch('/api/nectar/account/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+        leaseId: account.leaseId, amount: amountDue,
+        card: { card_number: card.number.replace(/\s/g, ''), cvv2: card.cvc, exp_mo: mm, exp_yr: yy, name_on_card: billing.name, address: billing.address1, city: billing.city, state: billing.state, zip: billing.zip },
+      }) })
+      const j = await r.json()
+      if (r.ok && j.ok) return true
+      setPayError(j.error ?? 'Payment could not be processed.')
+    } catch { setPayError('Something went wrong — please try again or call us.') }
+    return false
+  }
+
+  const next = async () => {
+    if (stepName === 'Account') { if (await lookup()) setStep(1); return }
+    if (stepName === 'Payment') {
+      setProcessing(true); setPayError(null)
+      const ok = await pay()
+      setProcessing(false)
+      if (ok) setStep(3)
+      return
+    }
     setStep((s) => Math.min(s + 1, STEPS.length - 1))
   }
   const back = () => setStep((s) => Math.max(s - 1, 0))
@@ -83,12 +114,9 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
 
         {/* Header */}
         <div className="sticky top-0 z-[5] flex items-center justify-between gap-4 border-b border-warm-white/[0.07] bg-black/70 px-5 py-4 backdrop-blur-md lg:px-10">
-          <div className="flex items-center gap-3">
-            <span className="rounded-sm bg-orange px-2.5 py-1 text-[0.625rem] font-black uppercase tracking-[0.15em] text-warm-white">Preview</span>
-            <div>
-              <p className="text-[0.9375rem] font-black leading-tight tracking-[-0.02em] text-warm-white">Pay your bill</p>
-              <p className="text-[0.75rem] text-warm-white/50">Journey.Storage™ — {facility.short}, Granbury TX</p>
-            </div>
+          <div>
+            <p className="text-[0.9375rem] font-black leading-tight tracking-[-0.02em] text-warm-white">Pay your bill</p>
+            <p className="text-[0.75rem] text-warm-white/50">Journey.Storage™ — {facility.short}, Granbury TX</p>
           </div>
           <button onClick={onClose} aria-label="Close" className="grid h-9 w-9 shrink-0 place-items-center rounded-sm bg-warm-white/[0.08] text-warm-white transition-colors hover:bg-warm-white/[0.16]"><X className="h-5 w-5" aria-hidden /></button>
         </div>
@@ -101,25 +129,22 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
               <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Enter the email or phone on your rental at {facility.short}.</p>
               <input value={contact} onChange={(e) => setContact(e.target.value)} placeholder="Email or phone" className={`mt-7 ${FIELD}`} />
               <p className="mt-3 text-[0.75rem] leading-relaxed text-warm-white/40">We&rsquo;ll find your balance and let you pay securely. No login required.</p>
+              {lookupMsg && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{lookupMsg} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
             </div>
           )}
 
-          {stepName === 'Balance' && (
+          {stepName === 'Balance' && account && (
             <div className="mx-auto max-w-md">
               <Eyebrow label="Balance" />
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><Wallet className="h-6 w-6 text-orange" aria-hidden />Your balance</h2>
-              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">{account.space} space at {facility.short}</p>
-
+              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">{account.name}{account.code ? ` · ${account.code}` : ''}</p>
               <div className={`mt-7 ${glassCard} p-5`}>
                 <div className="flex items-baseline justify-between">
                   <span className="text-[0.9375rem] text-warm-white/70">Amount due now</span>
-                  <span className="text-[1.75rem] font-black text-orange">{money(account.balanceDue)}</span>
+                  <span className={`text-[1.75rem] font-black ${amountDue > 0 ? 'text-orange' : 'text-sage-green'}`}>{money(amountDue)}</span>
                 </div>
-                <dl className="mt-3 space-y-1.5 border-t border-warm-white/10 pt-3 text-[0.8125rem]">
-                  <div className="flex justify-between"><dt className="text-warm-white/55">Monthly rent</dt><dd className="text-warm-white/80">{money(account.monthly)}</dd></div>
-                  <div className="flex justify-between"><dt className="text-warm-white/55">Tax</dt><dd className="text-warm-white/80">{money(+(account.monthly * TAX_RATE).toFixed(2))}</dd></div>
-                </dl>
               </div>
+              {amountDue <= 0 && <p className="mt-4 flex items-center gap-2 text-[0.9375rem] font-bold text-sage-green"><Check className="h-4 w-4" aria-hidden />You&rsquo;re all paid up — nothing due right now.</p>}
             </div>
           )}
 
@@ -143,7 +168,8 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
                   <input placeholder="ZIP" value={billing.zip} onChange={(e) => setBilling({ ...billing, zip: e.target.value })} className={FIELD} />
                 </div>
               </div>
-              <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55"><b className="text-warm-white/80">Demo only.</b> This is a preview — no card is charged. In production, payments post to your Tenant Inc account securely.</p>
+              {payError && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{payError} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
+              <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Secured by Tenant Payments. Your card is charged {money(amountDue)} and applied to your account.</p>
             </div>
           )}
 
@@ -151,17 +177,16 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
             <div className="mx-auto max-w-md py-4 text-center">
               <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-sage-green/20 text-sage-green ring-1 ring-sage-green/30"><Check className="h-9 w-9" strokeWidth={3} aria-hidden /></div>
               <h2 className="mt-5 text-[2rem] font-black leading-[1.02] tracking-[-0.02em] text-warm-white">Payment received</h2>
-              <p className="mt-3 text-[1rem] leading-[1.6] text-warm-white/50">Thanks! We&rsquo;ve applied {money(amountDue)} to your {facility.short} account. A receipt is on its way.</p>
+              <p className="mt-3 text-[1rem] leading-[1.6] text-warm-white/50">Thanks{account?.name ? `, ${account.name.split(' ')[0]}` : ''}! We&rsquo;ve applied {money(amountDue)} to your {facility.short} account. A receipt is on its way.</p>
               <div className={`mt-7 ${R} relative overflow-hidden border border-warm-white/10 bg-warm-white/[0.05] p-6 text-left`}>
                 <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(232,98,42,0.18) 0%, transparent 60%)' }} />
                 <dl className="relative space-y-2 text-[0.9375rem]">
-                  <div className="flex justify-between"><dt className="text-warm-white/55">Confirmation</dt><dd className="font-black tracking-[0.05em] text-warm-white">{confirmation}</dd></div>
+                  {account?.code && <div className="flex justify-between"><dt className="text-warm-white/55">Account</dt><dd className="font-bold text-warm-white">{account.code}</dd></div>}
                   <div className="flex justify-between"><dt className="text-warm-white/55">Amount paid</dt><dd className="font-bold text-warm-white">{money(amountDue)}</dd></div>
-                  <div className="flex justify-between"><dt className="text-warm-white/55">New balance</dt><dd className="font-bold text-sage-green">$0.00</dd></div>
                 </dl>
               </div>
-              <p className="mt-7 text-[0.75rem] text-warm-white/40">Preview — no real payment was made. Questions? Call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a>.</p>
-              <button onClick={onClose} className={`mt-6 ${primaryBtn}`}>Close preview</button>
+              <p className="mt-7 text-[0.75rem] text-warm-white/40">Questions? Call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a>.</p>
+              <button onClick={onClose} className={`mt-6 ${primaryBtn}`}>Done</button>
             </div>
           )}
         </div>
@@ -172,7 +197,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
               <ChevronLeft className="h-4 w-4" aria-hidden />{step === 0 ? 'Cancel' : 'Back'}
             </button>
             <div className="flex items-center gap-3">
-              {stepName === 'Balance' && <span className="hidden text-[0.9375rem] font-black text-warm-white sm:inline">{money(amountDue)} total</span>}
+              {stepName === 'Balance' && amountDue > 0 && <span className="hidden text-[0.9375rem] font-black text-warm-white sm:inline">{money(amountDue)} due</span>}
               <button onClick={next} disabled={!canNext() || looking || processing} className={primaryBtn}>
                 {looking ? 'Finding…' : processing ? 'Processing…' : stepName === 'Account' ? 'Find my balance' : stepName === 'Balance' ? 'Continue to payment' : `Pay ${money(amountDue)}`}
                 {!looking && !processing && <ChevronRight className="h-4 w-4" aria-hidden />}

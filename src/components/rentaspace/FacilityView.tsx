@@ -31,10 +31,12 @@ const liveSqft = (size: string | null): number | null => {
   const m = size?.match(/(\d+)\s*×\s*(\d+)/)
   return m ? Number(m[1]) * Number(m[2]) : null
 }
-// Tidy raw back-office category names: drop the "Granbury/Ganbury" locale word
-// (incl. the back-office typo) and any trailing "#1" group suffix.
+// Tidy raw back-office category names: drop a leading "Facility - " prefix
+// (e.g. "Temple Hall Hwy - Standard Storage" → "Standard Storage"), the
+// "Granbury/Ganbury" locale word (incl. the back-office typo), and any
+// trailing "#1" group suffix.
 const cleanCat = (cat: string | null): string =>
-  (cat ? cat.replace(/\bGr?anbury\b/gi, '').replace(/#\s*\d+/g, '').replace(/\s+/g, ' ').trim() : '') || 'Storage'
+  (cat ? cat.replace(/^.*?\s[-–]\s/, '').replace(/\bGr?anbury\b/gi, '').replace(/#\s*\d+/g, '').replace(/\s+/g, ' ').trim() : '') || 'Storage'
 export type Facility = {
   slug: string
   name: string
@@ -257,7 +259,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
     <div id="facility" className="bg-warm-white pb-16 text-black antialiased lg:pb-0">
       <style dangerouslySetInnerHTML={{ __html: SCOPED_CSS }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <Nav onSizeGuide={openSizeGuide} onPayBill={preview ? () => setPayBill(true) : undefined} />
+      <Nav onSizeGuide={openSizeGuide} onPayBill={() => setPayBill(true)} />
 
       {/* ── HERO CAROUSEL ── */}
       <section className="grain relative h-[460px] overflow-hidden bg-black lg:h-[540px]">

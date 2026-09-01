@@ -348,7 +348,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
               <Eyebrow label="Sign lease" />
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><FileText className="h-6 w-6 text-orange" aria-hidden />Lease agreement</h2>
               <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Review and sign your month-to-month rental agreement.</p>
-              <p className="mt-4 rounded-sm border border-orange/25 bg-orange/[0.06] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/70"><b className="text-orange">Preview lease.</b> Sample terms shown for the demo — your final, binding agreement is served and signed through Tenant Inc at checkout.</p>
+              <p className="mt-4 rounded-sm border border-orange/25 bg-orange/[0.06] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/70"><b className="text-orange">Summary of terms.</b> Your full, binding rental agreement is generated and signed when you complete checkout.</p>
               <div className="mt-4 h-52 overflow-y-auto rounded-sm border border-warm-white/10 bg-warm-white/[0.04] p-4 text-[0.8125rem] leading-relaxed text-warm-white/70">
                 <p className="font-black tracking-[0.05em] text-warm-white">SELF-STORAGE RENTAL AGREEMENT</p>
                 <p className="mt-2">This Agreement is between Journey Storage 001, LLC (&ldquo;Operator&rdquo;), {facility.address}, {facility.city}, and {details.name || 'the Occupant'} (&ldquo;Occupant&rdquo;) for one {space.size} storage space, on a month-to-month basis beginning {dateLong(moveIn)}.</p>
@@ -428,7 +428,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 {autopay && <span className="inline-flex items-center gap-1.5 rounded-sm border border-sage-green/25 bg-sage-green/10 px-3 py-1.5 font-bold text-sage-green"><Check className="h-3.5 w-3.5" aria-hidden />Autopay on</span>}
               </div>
               <p className="mt-7 text-[0.75rem] text-warm-white/40">{rentResult ? 'Rental complete.' : 'Preview — no real rental was created.'} Questions? Call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a>.</p>
-              <button onClick={onClose} className={`mt-6 ${primaryBtn}`}>Close preview</button>
+              <button onClick={onClose} className={`mt-6 ${primaryBtn}`}>{rentResult ? 'Done' : 'Close'}</button>
             </div>
           )}
         </div>
@@ -445,7 +445,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 <button onClick={() => setFullLease(false)} aria-label="Close full agreement" className="grid h-9 w-9 shrink-0 place-items-center rounded-sm bg-warm-white/[0.08] text-warm-white transition-colors hover:bg-warm-white/[0.16]"><X className="h-5 w-5" aria-hidden /></button>
               </div>
               <div className="flex-1 overflow-y-auto px-5 py-6 text-[0.8125rem] leading-[1.7] text-warm-white/70 lg:px-7">
-                <p className="mb-4 rounded-sm border border-orange/25 bg-orange/[0.06] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/70"><b className="text-orange">Preview lease.</b> These are sample terms for the demo. The final, binding rental agreement is generated and signed through Tenant Inc at checkout, using the lease Journey configures in its back office.</p>
+                <p className="mb-4 rounded-sm border border-orange/25 bg-orange/[0.06] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/70"><b className="text-orange">Summary of terms.</b> Your full, binding rental agreement is generated and signed when you complete checkout, using Journey&rsquo;s official lease.</p>
                 <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/40">Journey Storage 001, LLC · {facility.address}, {facility.city}</p>
                 <p className="mt-3">This Self-Storage Rental Agreement (the &ldquo;Agreement&rdquo;) is entered into between Journey Storage 001, LLC (&ldquo;Operator&rdquo;) and {details.name || 'the Occupant'} (&ldquo;Occupant&rdquo;) for the rental of one {space.size} storage space (the &ldquo;Space&rdquo;) at the facility above, on a month-to-month basis commencing {dateLong(moveIn)}.</p>
                 {[
