@@ -15,8 +15,11 @@ export async function GET(req: NextRequest) {
     const types = await getSpaceTypes()
     const unitTypeIds = types.map((t) => t.unit_type_id).filter(Boolean)
     const plans = await getInsurances(cfg.propertyId, unitTypeIds)
+    // Use only the branded "Protection Plan" products (the current offering);
+    // exclude legacy SafeLease variants. Dedupe by coverage.
     const seen = new Set<string>()
     const options = plans
+      .filter((p) => /protection plan/i.test(p.name))
       .filter((p) => (seen.has(p.coverage) ? false : (seen.add(p.coverage), true)))
       .map((p) => ({
         id: p.id,

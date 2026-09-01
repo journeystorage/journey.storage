@@ -45,7 +45,7 @@ function Eyebrow({ label }: { label: string }) {
 export default function RentalFlow({ facility, space, preview = false, onClose }: { facility: { slug: string; short: string; address: string; city: string; phone: string; tel: string }; space: Space; preview?: boolean; onClose: () => void }) {
   const [step, setStep] = useState(0)
   const [moveIn, setMoveIn] = useState(todayISO())
-  const [details, setDetails] = useState({ name: '', email: '', phone: '', address: '', city: (facility.city.split(',')[0] || 'Granbury').trim(), state: 'TX', zip: (facility.city.match(/\b(\d{5})\b/)?.[1]) || '' })
+  const [details, setDetails] = useState({ name: '', email: '', phone: '', address: '', city: '', state: '', zip: '' })
   const [planId, setPlanId] = useState<string>('p2')
   const [signature, setSignature] = useState('')
   const [agree, setAgree] = useState(false)
@@ -153,7 +153,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
 
   const canNext = () => {
     if (stepName === 'Move-in') return !!moveIn
-    if (stepName === 'Your details') return !!details.name && /.+@.+\..+/.test(details.email) && details.phone.length >= 7 && !!details.address && !!details.zip
+    if (stepName === 'Your details') return !!details.name && /.+@.+\..+/.test(details.email) && details.phone.length >= 7 && !!details.address && !!details.city && !!details.state && !!details.zip
     if (stepName === 'Protection') return !!planId
     if (stepName === 'Sign lease') return agree && signature.trim().length >= 3
     if (stepName === 'Payment') return card.number.replace(/\s/g, '').length >= 12 && card.exp.length >= 4 && card.cvc.length >= 3
