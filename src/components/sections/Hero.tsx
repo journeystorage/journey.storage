@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { ChevronDown } from 'lucide-react'
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { sectionIds } from '@/lib/constants'
-import { scrollToSection } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 
 export default function Hero() {
+  const router = useRouter()
   const prefersReducedMotion = useReducedMotion()
   const [showIndicator, setShowIndicator] = useState(true)
 
@@ -117,9 +118,9 @@ export default function Hero() {
             <motion.div className="mt-12" {...fadeUp(0.65)}>
               <Button
                 variant="primary"
-                onClick={() => scrollToSection(sectionIds.waitlist)}
+                onClick={() => router.push('/rentaspace')}
               >
-                Contact Us
+                Rent a Space
               </Button>
             </motion.div>
           </div>
