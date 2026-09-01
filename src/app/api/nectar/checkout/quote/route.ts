@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       monthlyRent: details.rent ?? details.monthly ?? null,
       billDay: details.bill_day ?? null,
       startDate: details.start_date ?? body.startDate,
-      dueToday: c.total_due ?? null,
+      dueToday: c.balance ?? c.total_due ?? null, // balance = net of discounts; total_due is the gross subtotal
       discounts: c.discounts ?? 0,
       tax: c.total_tax ?? 0,
       lineItems: (c.Detail ?? []).map((l) => ({ name: l.name, amount: l.total_cost })),

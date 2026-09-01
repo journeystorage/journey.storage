@@ -22,6 +22,7 @@ interface RentBody {
   webRate?: number
   totalDue?: number
   lineItems?: Array<{ name: string; amount: number }>
+  promotionIds?: string[]
   tenant?: Tenant
   card?: Card
 }
@@ -49,6 +50,7 @@ export async function POST(req: NextRequest) {
       webRate: webRate ?? 0,
       totalDue: totalDue ?? 0,
       lineItems,
+      promotionIds: body.promotionIds,
       tenant,
       card,
       metadata: {

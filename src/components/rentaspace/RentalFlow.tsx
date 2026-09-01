@@ -55,7 +55,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const autopay = true // required — enrollment is not optional
 
   // ── Live API state (demo math is the graceful fallback) ──
-  const [hold, setHold] = useState<{ token: string; unitId: string; dossierToken?: string; spaceMixId?: string } | null>(null)
+  const [hold, setHold] = useState<{ token: string; unitId: string; dossierToken?: string; spaceMixId?: string; promotionId?: string } | null>(null)
   const [realQuote, setRealQuote] = useState<{ dueToday: number; monthlyRent: number; billDay: number; lineItems: { name: string; amount: number }[] } | null>(null)
   const [realPlans, setRealPlans] = useState<{ id: string; coverage: number; premium: number }[] | null>(null)
   const [rentResult, setRentResult] = useState<{ gatePin?: string | null; leaseId?: string } | null>(null)
@@ -88,12 +88,12 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const effDueToday = realQuote?.dueToday ?? dueToday
   const effMonthly = realQuote?.monthlyRent ?? space.price
 
-  type Held = { token: string; unitId: string; dossierToken?: string; spaceMixId?: string }
+  type Held = { token: string; unitId: string; dossierToken?: string; spaceMixId?: string; promotionId?: string }
   async function doHold(): Promise<Held | null> {
     try {
       const r = await fetch('/api/nectar/checkout/hold', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ facility: facility.slug, width: dims.width, length: dims.length }) })
       const j = await r.json()
-      if (r.ok && j.holdToken) return { token: j.holdToken, unitId: j.unitId, dossierToken: j.dossierToken, spaceMixId: j.spaceMixId }
+      if (r.ok && j.holdToken) return { token: j.holdToken, unitId: j.unitId, dossierToken: j.dossierToken, spaceMixId: j.spaceMixId, promotionId: j.promotionId }
     } catch { /* fall through */ }
     return null
   }
@@ -108,7 +108,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   // per hold, with the chosen insurance; changing protection re-holds first.
   async function fetchQuote(h: Held, insuranceId?: string): Promise<boolean> {
     try {
-      const r = await fetch('/api/nectar/checkout/quote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ facility: facility.slug, unitId: h.unitId, holdToken: h.token, startDate: moveIn, insuranceId }) })
+      const r = await fetch('/api/nectar/checkout/quote', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ facility: facility.slug, unitId: h.unitId, holdToken: h.token, startDate: moveIn, insuranceId, promotionIds: h.promotionId ? [h.promotionId] : undefined }) })
       const j = await r.json()
       if (j?.dueToday != null) { setRealQuote({ dueToday: j.dueToday, monthlyRent: j.monthlyRent ?? space.price, billDay: j.billDay ?? 1, lineItems: j.lineItems ?? [] }); return true }
     } catch { /* fall through */ }
@@ -141,6 +141,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
       const r = await fetch('/api/nectar/checkout/rent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         facility: facility.slug, unitId: hold.unitId, holdToken: hold.token, dossierToken: hold.dossierToken, spaceMixId: hold.spaceMixId, startDate: moveIn,
         billDay: realQuote.billDay, webRate: realQuote.monthlyRent, totalDue: realQuote.dueToday, lineItems: realQuote.lineItems,
+        promotionIds: hold.promotionId ? [hold.promotionId] : undefined,
         tenant: { first, last, email: details.email, phone: details.phone, address: details.address, city: details.city, state: details.state, zip: details.zip },
         card: { card_number: card.number.replace(/\s/g, ''), cvv2: card.cvc, exp_mo: mm, exp_yr: yy, name_on_card: details.name, address: details.address, city: details.city, state: details.state, zip: card.zip || details.zip },
       }) })

@@ -141,7 +141,7 @@ export async function getInsurances(propertyId: string, unitTypeIds: string[]): 
 export async function resolveBookableUnit(
   propertyId: string,
   want: { width?: number | null; length?: number | null },
-): Promise<{ unitId: string; tierId: string; spaceMixId?: string; dossierToken?: string; spaceTypeId?: string } | null> {
+): Promise<{ unitId: string; tierId: string; spaceMixId?: string; dossierToken?: string; spaceTypeId?: string; promotionId?: string } | null> {
   const groups = await getSpaceGroups(propertyId)
   const group = groups.find((g) => g.is_default === 1 && g.active === 1) ?? groups.find((g) => g.active === 1) ?? groups[0]
   if (!group) return null
@@ -152,7 +152,10 @@ export async function resolveBookableUnit(
   const offers = await getOffers(propertyId, tier.tier_id)
   const offer = offers.find((o) => o.unit_id)
   if (!offer?.unit_id) return null
-  return { unitId: offer.unit_id, tierId: tier.tier_id, spaceMixId: offer.space_mix_id, dossierToken: offer.dossier?.token, spaceTypeId: tier.space_type_id }
+  // Online-channel promotion for this tier (Tenant lists it but won't auto-apply
+  // it — the id must be passed to quote/lease for the discount to take effect).
+  const promotionId = tier.allocated_promo?.id ?? tier.promo?.[0]?.id
+  return { unitId: offer.unit_id, tierId: tier.tier_id, spaceMixId: offer.space_mix_id, dossierToken: offer.dossier?.token, spaceTypeId: tier.space_type_id, promotionId }
 }
 
 // ── Hold + quote (verified) ─────────────────────────────────────────────────
@@ -232,6 +235,7 @@ export interface CompleteRentalInput {
   webRate: number // monthly non-prorated rent
   totalDue: number
   lineItems: Array<{ name: string; amount: number }> // from the single quote
+  promotionIds?: string[]
   tenant: Tenant
   card: Card
   metadata?: { ip?: string; user_agent?: string; location?: string }
@@ -260,6 +264,7 @@ export async function completeRental(i: CompleteRentalInput): Promise<RentalResu
       contacts, payment_method: payment, platform: 'website', source: i.dossierToken,
       start_date: i.startDate, space_mix_id: i.spaceMixId, total_payment_amount: i.totalDue,
       bill_day: i.billDay, payment_cycle: 'Monthly', web_rate: i.webRate, costs,
+      ...(i.promotionIds?.length ? { discount_id: i.promotionIds[0] } : {}),
       metadata: { ip: i.metadata?.ip ?? '', user_agent: i.metadata?.user_agent ?? 'Mozilla/5.0', location: i.metadata?.location ?? 'Granbury, TX, US' },
     } },
   )
@@ -273,6 +278,7 @@ export async function completeRental(i: CompleteRentalInput): Promise<RentalResu
     { method: 'POST', body: {
       hold_token: i.holdToken, additional_months: 0, contacts, documents,
       deliveryMethod: { notice_delivery: 'email' }, payment_method: payment,
+      ...(i.promotionIds?.length ? { promotions: i.promotionIds.map((promotion_id) => ({ promotion_id })) } : {}),
       pending: false, platform: 'website', start_date: i.startDate,
     } },
   )

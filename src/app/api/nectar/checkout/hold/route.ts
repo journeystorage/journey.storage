@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
       spaceTypeId: unit.spaceTypeId,
       spaceMixId: unit.spaceMixId,
       dossierToken: unit.dossierToken,
+      promotionId: unit.promotionId,
       expiresInSeconds: 900,
     })
   } catch (e) {
