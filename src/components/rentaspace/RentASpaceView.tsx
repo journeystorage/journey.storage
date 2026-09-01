@@ -1,7 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { Search, MapPin, Phone, CheckCircle2, CalendarDays, Zap, Check, Menu } from 'lucide-react'
 import RentFooter from '@/components/rentaspace/RentFooter'
+import PayBillFlow from '@/components/rentaspace/PayBillFlow'
 import { openSizeGuide } from '@/components/SizeGuideModal'
 
 const SCOPED_CSS = `
@@ -24,6 +26,7 @@ const SCOPED_CSS = `
 const phoneIcon = (cls: string) => <Phone className={cls} strokeWidth={2} aria-hidden />
 
 export default function RentASpaceView() {
+  const [payBill, setPayBill] = useState(false)
   return (
     <div id="rentaspace" className="bg-warm-white text-black antialiased">
       <style dangerouslySetInnerHTML={{ __html: SCOPED_CSS }} />
@@ -43,7 +46,7 @@ export default function RentASpaceView() {
               {phoneIcon('h-4 w-4')}
               (817) 579-0607
             </a>
-            <a href="tel:+18175790607" className="btn-spring rounded-full border-2 border-warm-white/80 px-5 py-2 text-[0.9375rem] font-bold text-warm-white hover:bg-warm-white hover:text-black">Pay Bill</a>
+            <button onClick={() => setPayBill(true)} className="btn-spring rounded-full border-2 border-warm-white/80 px-5 py-2 text-[0.9375rem] font-bold text-warm-white hover:bg-warm-white hover:text-black">Pay Bill</button>
           </div>
           <button className="text-warm-white lg:hidden" aria-label="Menu">
             <Menu className="h-7 w-7" strokeWidth={2} aria-hidden />
@@ -300,6 +303,8 @@ export default function RentASpaceView() {
       </section>
 
       <RentFooter />
+
+      {payBill && <PayBillFlow facility={{ short: 'Granbury', phone: '(817) 579-0607', tel: 'tel:+18175790607' }} onClose={() => setPayBill(false)} />}
     </div>
   )
 }
