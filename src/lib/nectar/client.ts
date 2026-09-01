@@ -6,7 +6,10 @@
 import "server-only";
 import { randomUUID } from "crypto";
 
-const BASE_URL = (process.env.NECTAR_BASE_URL ?? "https://edge.tenant.dev/api/v3").replace(/\/$/, "");
+// App id + base url are not secret — default to the live Hummingbird app so
+// production only needs NECTAR_API_KEY set. Env overrides for local/sandbox.
+const LIVE_APP_ID = "appc02fcbc01b5e41818669077c87c01e7f";
+const BASE_URL = (process.env.NECTAR_BASE_URL ?? `https://prod.edge.tenant.dev/api/v3/applications/${LIVE_APP_ID}/v2`).replace(/\/$/, "");
 const API_KEY = process.env.NECTAR_API_KEY ?? "";
 
 export class NectarError extends Error {
@@ -141,7 +144,7 @@ export async function hummingbirdFetch<T>(path: string, opts: NectarRequestOptio
 // The REAL status/error lives on the inner item — a wrong company id comes back as
 // inner status 401 under an outer HTTP 200, so we must inspect the inner status, not res.ok.
 // ---------------------------------------------------------------------------
-const APP_ID = process.env.NECTAR_APP_ID ?? "";
+const APP_ID = process.env.NECTAR_APP_ID ?? LIVE_APP_ID;
 
 interface V2Inner<T> {
   status?: number;

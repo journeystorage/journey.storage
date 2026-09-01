@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef, type FormEvent } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef, type FormEvent } from 'react'
 import { MapPin, Phone, Menu, Star, Check, ChevronRight, ChevronLeft, ChevronDown, X, Ruler, Sparkles } from 'lucide-react'
 import { SizeArt, getSizeArt } from '@/lib/sizeArt'
 import { openSizeGuide } from '@/components/SizeGuideModal'
@@ -20,6 +20,21 @@ export type Unit = {
 export type UnitGroup = { category: string; blurb: string; units: Unit[] }
 // Live availability card from GET /api/nectar/spaces/[facility] (preview-only).
 type LiveSpace = { id: string; size: string | null; available: number; inStock: boolean; onlinePrice: number | null; fromPrice: number | null; category: string | null }
+
+const SIZE_ART_KEYS = new Set(['5x5', '5x10', '10x10', '10x15', '10x20', '10x30'])
+const liveArtKey = (size: string | null): string | null => {
+  if (!size) return null
+  const k = size.replace(/\s*×\s*/, 'x').toLowerCase()
+  return SIZE_ART_KEYS.has(k) ? k : null
+}
+const liveSqft = (size: string | null): number | null => {
+  const m = size?.match(/(\d+)\s*×\s*(\d+)/)
+  return m ? Number(m[1]) * Number(m[2]) : null
+}
+// Tidy raw back-office category names: drop the "Granbury/Ganbury" locale word
+// (incl. the back-office typo) and any trailing "#1" group suffix.
+const cleanCat = (cat: string | null): string =>
+  (cat ? cat.replace(/\bGr?anbury\b/gi, '').replace(/#\s*\d+/g, '').replace(/\s+/g, ' ').trim() : '') || 'Storage'
 export type Facility = {
   slug: string
   name: string
@@ -142,8 +157,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
   // from the Nectar API into the page, so you can see the integration render without
   // touching the public page. No-op unless the flag is present.
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('preview') !== 'live') return
-    setPreview(true)
+    if (new URLSearchParams(window.location.search).get('preview') === 'live') setPreview(true)
     setLive({ status: 'loading', spaces: [] })
     fetch(`/api/nectar/spaces/${f.slug}`)
       .then(async (r) => {
@@ -154,6 +168,26 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       .then((j) => setLive({ status: 'ok', spaces: (j.spaces ?? []) as LiveSpace[] }))
       .catch((e: unknown) => setLive({ status: 'error', spaces: [], error: e instanceof Error ? e.message : String(e) }))
   }, [f.slug])
+
+  // Live availability grouped by category (in-stock, priced), cheapest group first.
+  const liveGroups = useMemo(() => {
+    if (live.status !== 'ok') return []
+    const inStock = live.spaces.filter((s) => s.inStock && s.size && (s.onlinePrice ?? 0) > 0)
+    const byCat = new Map<string, LiveSpace[]>()
+    for (const s of inStock) {
+      const c = cleanCat(s.category)
+      const arr = byCat.get(c) ?? []
+      arr.push(s)
+      byCat.set(c, arr)
+    }
+    return [...byCat.entries()]
+      .map(([category, spaces]) => ({
+        category,
+        spaces: spaces.sort((a, b) => (a.onlinePrice ?? 0) - (b.onlinePrice ?? 0)),
+        min: Math.min(...spaces.map((s) => s.onlinePrice ?? Infinity)),
+      }))
+      .sort((a, b) => a.min - b.min)
+  }, [live])
 
   useEffect(() => {
     if (lightbox === null) return
@@ -302,92 +336,93 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
             <h2 className="track-tight mt-3 text-[1.75rem] font-black text-black lg:text-[2.25rem]">Choose your space</h2>
             <p className="mt-2 text-[1.0625rem] leading-relaxed text-stone">Reserve online in minutes — lock in the online rate, move in when you like. Month-to-month, no deposit, no long-term commitment.</p>
 
-            {preview && (
-              <div className="mt-8 rounded-2xl border-2 border-dashed border-orange/50 bg-orange/[0.04] p-5 lg:p-6">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-orange px-3 py-1 text-[0.6875rem] font-black uppercase tracking-wide text-warm-white"><Sparkles className="h-3.5 w-3.5" aria-hidden />Live preview</span>
-                  <span className="text-[0.875rem] font-bold text-charcoal">Real-time availability &amp; pricing from the Tenant Inc API</span>
-                </div>
-                <p className="mt-2 text-[0.8125rem] leading-relaxed text-stone">Sandbox data — the sizes look odd because it&rsquo;s a shared test facility. On go-live this becomes your real Granbury spaces. This panel is only visible with <span className="font-bold">?preview=live</span>; the public page is untouched.</p>
-
-                {live.status === 'loading' && <p className="mt-4 text-[0.9375rem] font-bold text-stone">Loading live availability…</p>}
-                {live.status === 'error' && (
-                  <p className="mt-4 text-[0.9375rem] font-bold text-[#D94A4A]">Live feed unavailable: {live.error}. <span className="font-normal text-stone">(Expected on the production URL until API keys are set in Hostinger — works locally where the sandbox key is set.)</span></p>
-                )}
-                {live.status === 'ok' && (() => {
-                  const inStock = live.spaces.filter((s) => s.inStock)
-                  const shown = inStock.slice(0, 12)
-                  return (
-                    <>
-                      <p className="mt-4 text-[0.75rem] font-bold uppercase tracking-wide text-orange">{inStock.length} sizes available now · {live.spaces.length} total returned</p>
-                      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                        {shown.map((s) => {
-                          const rentable = s.onlinePrice != null && s.size
-                          return (
-                            <button
-                              key={s.id}
-                              type="button"
-                              disabled={!rentable}
-                              onClick={() => rentable && setRentalSpace({ size: s.size!, price: s.onlinePrice!, category: s.category })}
-                              className="unit group/live rounded-xl border border-black/[0.06] bg-warm-white p-3 text-left disabled:cursor-default disabled:opacity-70"
-                            >
-                              <p className="text-[1.125rem] font-black tracking-[-0.02em] text-black">{s.size ?? '—'}</p>
-                              <p className="mt-0.5 text-[0.75rem] font-bold text-[#5c8a52]">{s.available} available</p>
-                              <p className="mt-2 leading-none">
-                                {s.onlinePrice != null
-                                  ? <><span className="text-[1.25rem] font-black text-orange">${s.onlinePrice}</span><span className="text-[0.75rem] font-bold text-stone">/mo</span></>
-                                  : <span className="text-[0.8125rem] font-bold text-stone">Call for price</span>}
-                              </p>
-                              {rentable && <span className="mt-2 inline-flex items-center gap-1 text-[0.75rem] font-bold text-orange opacity-0 transition-opacity group-hover/live:opacity-100">Rent online<ChevronRight className="h-3 w-3" aria-hidden /></span>}
-                            </button>
-                          )
-                        })}
-                      </div>
-                      {inStock.length > shown.length && <p className="mt-3 text-[0.8125rem] text-stone">+{inStock.length - shown.length} more available sizes returned by the API…</p>}
-                      <p className="mt-3 text-[0.75rem] font-bold text-orange">↑ Click any space to walk the full online rental — move-in, lease signing, payment, gate code.</p>
-                    </>
-                  )
-                })()}
-              </div>
-            )}
-
-            {f.groups.map((group) => (
-              <div key={group.category} className="mt-10">
-                <div className="flex items-baseline justify-between border-b border-black/[0.08] pb-2">
-                  <h3 className="text-[1.25rem] font-black text-black">{group.category}</h3>
-                  <span className="text-[0.875rem] text-stone">{group.blurb}</span>
-                </div>
-                <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {group.units.map((u) => {
-                    const art = getSizeArt(u.art)
-                    return (
-                      <div key={u.size} className="unit r-jr flex h-full flex-col border border-black/[0.06] bg-warm-white p-5">
-                        <div className="mb-5 flex items-start gap-4">
-                          <SizeVideo art={u.art} tint={art?.tint ?? 'rgba(232,98,42,0.1)'} />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <h4 className="text-[1.375rem] font-black tracking-[-0.02em] text-black">{u.size}</h4>
-                                <p className="mt-0.5 text-[0.8125rem] text-stone">{u.sqft} sq ft · {u.fits}</p>
+            {live.status === 'ok' && liveGroups.length > 0 ? (
+              // ── LIVE availability + pricing (real Tenant Inc data) ──
+              liveGroups.map((group) => (
+                <div key={group.category} className="mt-10">
+                  <div className="flex items-baseline justify-between border-b border-black/[0.08] pb-2">
+                    <h3 className="text-[1.25rem] font-black text-black">{group.category}</h3>
+                    <span className="text-[0.875rem] text-stone">{group.spaces.length} size{group.spaces.length > 1 ? 's' : ''} available</span>
+                  </div>
+                  <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {group.spaces.map((s) => {
+                      const artKey = liveArtKey(s.size)
+                      const art = artKey ? getSizeArt(artKey) : null
+                      const sqft = liveSqft(s.size)
+                      const price = s.onlinePrice!
+                      return (
+                        <div key={s.id} className="unit r-jr flex h-full flex-col border border-black/[0.06] bg-warm-white p-5">
+                          <div className="mb-5 flex items-start gap-4">
+                            {artKey ? (
+                              <SizeVideo art={artKey} tint={art?.tint ?? 'rgba(232,98,42,0.1)'} />
+                            ) : (
+                              <div className="grid aspect-[3/4] w-[86px] shrink-0 place-items-center rounded-xl text-center shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)]" style={{ background: 'linear-gradient(165deg, #F5F0E8 0%, rgba(232,98,42,0.12) 100%)' }}>
+                                <span className="px-1 text-[0.95rem] font-black leading-tight text-charcoal">{s.size}</span>
                               </div>
-                              <div className="shrink-0 text-right">
-                                <p className="text-[0.6875rem] font-bold uppercase tracking-wide text-stone">In store <span className="line-through">${u.walkIn}</span></p>
-                                <p className="leading-none"><span className="text-[1.625rem] font-black text-orange">${u.online}</span><span className="text-[0.8125rem] font-bold text-stone">/mo online</span></p>
-                                <p className="mt-1 text-[0.6875rem] font-bold text-[#5c8a52]">1st month ${Math.round(u.online / 2)}</p>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <h4 className="whitespace-nowrap text-[1.375rem] font-black tracking-[-0.02em] text-black">{s.size}</h4>
+                                  <p className="mt-0.5 text-[0.8125rem] text-stone">{sqft ? `${sqft} sq ft · ` : ''}{group.category}</p>
+                                </div>
+                                <div className="shrink-0 text-right">
+                                  <p className="leading-none"><span className="text-[1.625rem] font-black text-orange">${price}</span><span className="text-[0.8125rem] font-bold text-stone">/mo online</span></p>
+                                  <p className="mt-1 text-[0.6875rem] font-bold text-[#5c8a52]">1st month ${Math.round(price / 2)}</p>
+                                </div>
                               </div>
-                            </div>
-                            <div className="mt-3 flex min-h-[3.25rem] flex-wrap content-start gap-1.5">
-                              {u.tags.map((t) => (<span key={t} className={`h-fit rounded-full px-2.5 py-1 text-[0.75rem] font-bold ${t === 'Climate-controlled' ? 'bg-sage-green/15 text-[#5c8a52]' : 'bg-sand/25 text-charcoal'}`}>{t}</span>))}
+                              <div className="mt-3">
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-sage-green/15 px-2.5 py-1 text-[0.75rem] font-bold text-[#5c8a52]"><span className="h-1.5 w-1.5 rounded-full bg-sage-green" aria-hidden />{s.available} available now</span>
+                              </div>
                             </div>
                           </div>
+                          <button onClick={() => preview ? setRentalSpace({ size: s.size!, price, category: group.category }) : openReserve(s.size!)} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>
                         </div>
-                        <button onClick={() => preview ? setRentalSpace({ size: u.size, price: u.online, category: u.tags[0] ?? null }) : openReserve(u.size)} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>
-                      </div>
-                    )
-                  })}
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              // ── Fallback: curated sizes (while live loads, or if the feed is down) ──
+              f.groups.map((group) => (
+                <div key={group.category} className="mt-10">
+                  <div className="flex items-baseline justify-between border-b border-black/[0.08] pb-2">
+                    <h3 className="text-[1.25rem] font-black text-black">{group.category}</h3>
+                    <span className="text-[0.875rem] text-stone">{group.blurb}</span>
+                  </div>
+                  <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {group.units.map((u) => {
+                      const art = getSizeArt(u.art)
+                      return (
+                        <div key={u.size} className="unit r-jr flex h-full flex-col border border-black/[0.06] bg-warm-white p-5">
+                          <div className="mb-5 flex items-start gap-4">
+                            <SizeVideo art={u.art} tint={art?.tint ?? 'rgba(232,98,42,0.1)'} />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <h4 className="text-[1.375rem] font-black tracking-[-0.02em] text-black">{u.size}</h4>
+                                  <p className="mt-0.5 text-[0.8125rem] text-stone">{u.sqft} sq ft · {u.fits}</p>
+                                </div>
+                                <div className="shrink-0 text-right">
+                                  <p className="text-[0.6875rem] font-bold uppercase tracking-wide text-stone">In store <span className="line-through">${u.walkIn}</span></p>
+                                  <p className="leading-none"><span className="text-[1.625rem] font-black text-orange">${u.online}</span><span className="text-[0.8125rem] font-bold text-stone">/mo online</span></p>
+                                  <p className="mt-1 text-[0.6875rem] font-bold text-[#5c8a52]">1st month ${Math.round(u.online / 2)}</p>
+                                </div>
+                              </div>
+                              <div className="mt-3 flex min-h-[3.25rem] flex-wrap content-start gap-1.5">
+                                {u.tags.map((t) => (<span key={t} className={`h-fit rounded-full px-2.5 py-1 text-[0.75rem] font-bold ${t === 'Climate-controlled' ? 'bg-sage-green/15 text-[#5c8a52]' : 'bg-sand/25 text-charcoal'}`}>{t}</span>))}
+                              </div>
+                            </div>
+                          </div>
+                          <button onClick={() => preview ? setRentalSpace({ size: u.size, price: u.online, category: u.tags[0] ?? null }) : openReserve(u.size)} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))
+            )}
 
             <p className="mt-8 text-[0.8125rem] italic text-stone/70">Online rates shown — final price is confirmed at checkout. First-month offer applies to new rentals on select sizes.</p>
           </div>
