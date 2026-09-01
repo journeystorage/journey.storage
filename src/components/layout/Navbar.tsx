@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X, ChevronDown } from 'lucide-react'
-import { navLinks, ecosystemDropdownLinks, sectionIds } from '@/lib/constants'
+import { navLinks, ecosystemDropdownLinks } from '@/lib/constants'
 import { scrollToSection } from '@/lib/utils'
 import { openSizeGuide } from '@/components/SizeGuideModal'
 import Button from '@/components/ui/Button'
@@ -51,7 +51,7 @@ export default function Navbar() {
 
   const handleNavClick = useCallback(
     (href: string) => {
-      if (href === '/size-guide') {
+      if (href === '/?sizeguide') {
         setMobileOpen(false)
         setDropdownOpen(false)
         openSizeGuide()
@@ -208,10 +208,10 @@ export default function Navbar() {
           <div className="hidden lg:block">
             <Button
               variant="primary"
-              onClick={() => handleAnchor(sectionIds.waitlist)}
+              onClick={() => handleNavClick('/rentaspace')}
               className="!py-3 !px-6"
             >
-              Contact Us
+              Rent a Space
             </Button>
           </div>
 
@@ -366,10 +366,10 @@ export default function Navbar() {
           <div className="relative z-10 px-8 pb-8">
             <Button
               variant="primary"
-              onClick={() => handleAnchor(sectionIds.waitlist)}
+              onClick={() => handleNavClick('/rentaspace')}
               className="w-full"
             >
-              Contact Us
+              Rent a Space
             </Button>
           </div>
         </div>
