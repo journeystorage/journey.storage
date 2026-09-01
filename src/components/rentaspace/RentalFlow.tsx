@@ -42,7 +42,7 @@ function Eyebrow({ label }: { label: string }) {
   )
 }
 
-export default function RentalFlow({ facility, space, onClose }: { facility: { slug: string; short: string; address: string; city: string; phone: string; tel: string }; space: Space; onClose: () => void }) {
+export default function RentalFlow({ facility, space, preview = false, onClose }: { facility: { slug: string; short: string; address: string; city: string; phone: string; tel: string }; space: Space; preview?: boolean; onClose: () => void }) {
   const [step, setStep] = useState(0)
   const [moveIn, setMoveIn] = useState(todayISO())
   const [details, setDetails] = useState({ name: '', email: '', phone: '', address: '', city: (facility.city.split(',')[0] || 'Granbury').trim(), state: 'TX', zip: (facility.city.match(/\b(\d{5})\b/)?.[1]) || '' })
@@ -86,14 +86,15 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
   const effDueToday = realQuote?.dueToday ?? dueToday
   const effMonthly = realQuote?.monthlyRent ?? space.price
 
-  // Place a hold when leaving the Move-in step; on failure the flow stays in demo mode.
-  async function placeHold() {
-    if (hold) return
+  // Place a 15-minute hold. Returns whether it succeeded.
+  async function placeHold(): Promise<boolean> {
+    if (hold) return true
     try {
       const r = await fetch('/api/nectar/checkout/hold', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ facility: facility.slug, width: dims.width, length: dims.length }) })
       const j = await r.json()
-      if (r.ok && j.holdToken) setHold({ token: j.holdToken, unitId: j.unitId, dossierToken: j.dossierToken, spaceMixId: j.spaceMixId })
-    } catch { /* demo fallback */ }
+      if (r.ok && j.holdToken) { setHold({ token: j.holdToken, unitId: j.unitId, dossierToken: j.dossierToken, spaceMixId: j.spaceMixId }); return true }
+    } catch { /* fall through */ }
+    return false
   }
   // Real cost breakdown once a hold exists.
   useEffect(() => {
@@ -134,7 +135,14 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
     return true
   }
   const next = async () => {
-    if (stepName === 'Move-in') { setProcessing(true); await placeHold(); setProcessing(false); setStep(1); return }
+    if (stepName === 'Move-in') {
+      setProcessing(true); setApiError(null)
+      const ok = await placeHold()
+      setProcessing(false)
+      // Live: a hold must succeed to continue. Preview: allow demo walkthrough.
+      if (!ok && !preview) { setApiError('We couldn’t hold this space — it may have just been taken. Try another size, or call us.'); return }
+      setStep(1); return
+    }
     if (stepName === 'Payment') {
       setProcessing(true); setApiError(null)
       if (real && realQuote) {
@@ -172,7 +180,7 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
         {/* Header */}
         <div className="sticky top-0 z-[5] flex items-center justify-between gap-4 border-b border-warm-white/[0.07] bg-black/70 px-5 py-4 backdrop-blur-md lg:px-10">
           <div className="flex items-center gap-3">
-            <span className="rounded-sm bg-orange px-2.5 py-1 text-[0.625rem] font-black uppercase tracking-[0.15em] text-warm-white">Preview</span>
+            {preview && <span className="rounded-sm bg-orange px-2.5 py-1 text-[0.625rem] font-black uppercase tracking-[0.15em] text-warm-white">Preview</span>}
             <div>
               <p className="text-[0.9375rem] font-black leading-tight tracking-[-0.02em] text-warm-white">Rent a {space.size} space</p>
               <p className="text-[0.75rem] text-warm-white/50">Journey.Storage™ — {facility.short}, Granbury TX</p>
@@ -216,6 +224,7 @@ export default function RentalFlow({ facility, space, onClose }: { facility: { s
                   <input type="date" min={todayISO()} value={moveIn} onChange={(e) => setMoveIn(e.target.value)} className={`mt-2 ${FIELD} [color-scheme:dark]`} />
                 </label>
               </div>
+              {apiError && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{apiError} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
             </div>
           )}
 

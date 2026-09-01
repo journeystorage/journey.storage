@@ -376,7 +376,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                               </div>
                             </div>
                           </div>
-                          <button onClick={() => preview ? setRentalSpace({ size: s.size!, price, category: group.category }) : openReserve(s.size!)} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>
+                          <button onClick={() => setRentalSpace({ size: s.size!, price, category: group.category })} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>
                         </div>
                       )
                     })}
@@ -415,7 +415,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                               </div>
                             </div>
                           </div>
-                          <button onClick={() => preview ? setRentalSpace({ size: u.size, price: u.online, category: u.tags[0] ?? null }) : openReserve(u.size)} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>
+                          <button onClick={() => setRentalSpace({ size: u.size, price: u.online, category: u.tags[0] ?? null })} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>
                         </div>
                       )
                     })}
@@ -499,11 +499,12 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
 
       <RentFooter />
 
-      {/* ── RENTAL FLOW (preview-only demo checkout) ── */}
+      {/* ── RENTAL FLOW (real online move-in) ── */}
       {rentalSpace && (
         <RentalFlow
           facility={{ slug: f.slug, short: f.short, address: f.address, city: f.city, phone: f.phone, tel: f.tel }}
           space={rentalSpace}
+          preview={preview}
           onClose={() => setRentalSpace(null)}
         />
       )}
