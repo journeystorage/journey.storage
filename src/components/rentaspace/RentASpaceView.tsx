@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Search, MapPin, Phone, CheckCircle2, CalendarDays, Zap, Check, Menu } from 'lucide-react'
 import RentFooter from '@/components/rentaspace/RentFooter'
 import PayBillFlow from '@/components/rentaspace/PayBillFlow'
@@ -23,10 +24,63 @@ const SCOPED_CSS = `
 #rentaspace .eyebrow::before{content:'';height:1px;width:2rem;background:var(--color-orange);flex:none}
 `
 
+// ── Space finder ───────────────────────────────────────────────────────────
+// All three facilities sit in Granbury, TX 76049, so there is no meaningful
+// "nearest" to compute from a ZIP. A ZIP or city we serve therefore shows the
+// locations grid and lets the renter pick; only naming a facility outright
+// (its name, street, or street number) jumps straight to that rental page.
+const FACILITY_ALIASES: ReadonlyArray<readonly [RegExp, string]> = [
+  [/temple\s*hall|(^|\D)212(\D|$)/, '/rentaspace/templehallhwy'],
+  [/western\s*hills|(^|\D)409(\D|$)/, '/rentaspace/westernhillstrl'],
+  [/mc\s*creary|(^|\D)3501(\D|$)/, '/rentaspace/mccrearyrd'],
+]
+
+// Granbury proper plus the Hood County / Somervell towns people drive in from.
+const SERVED_ZIPS = new Set(['76048', '76049', '76035', '76043', '76462', '76476', '76077'])
+const SERVED_CITIES = ['granbury', 'acton', 'cresson', 'glen rose', 'lipan', 'tolar', 'rainbow', 'pecan plantation', 'hood county']
+
+type SearchResult =
+  | { kind: 'facility'; path: string } // named a specific facility
+  | { kind: 'served' }                 // somewhere we cover — show all three
+  | { kind: 'unserved' }               // say where we actually are
+
+function resolveSearch(raw: string): SearchResult {
+  const q = raw.trim().toLowerCase().replace(/[.,]/g, ' ').replace(/\s+/g, ' ')
+  if (!q) return { kind: 'served' }
+
+  for (const [pattern, path] of FACILITY_ALIASES) {
+    if (pattern.test(q)) return { kind: 'facility', path }
+  }
+
+  const zip = q.match(/\b\d{5}\b/)?.[0]
+  if (zip) return SERVED_ZIPS.has(zip) ? { kind: 'served' } : { kind: 'unserved' }
+
+  return SERVED_CITIES.some((city) => q.includes(city)) ? { kind: 'served' } : { kind: 'unserved' }
+}
+
 const phoneIcon = (cls: string) => <Phone className={cls} strokeWidth={2} aria-hidden />
 
 export default function RentASpaceView() {
+  const router = useRouter()
   const [payBill, setPayBill] = useState(false)
+  const [query, setQuery] = useState('')
+  const [notFound, setNotFound] = useState('')
+
+  const scrollToLocations = () => document.getElementById('locations')?.scrollIntoView({ behavior: 'smooth' })
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    const result = resolveSearch(query)
+    if (result.kind === 'facility') {
+      router.push(result.path)
+      return
+    }
+    // Served or not, the renter stays here and picks from the three locations —
+    // the notice only changes what we tell them on the way down.
+    setNotFound(result.kind === 'unserved' ? query.trim() : '')
+    scrollToLocations()
+  }
+
   return (
     <div id="rentaspace" className="bg-warm-white text-black antialiased">
       <style dangerouslySetInnerHTML={{ __html: SCOPED_CSS }} />
@@ -80,17 +134,34 @@ export default function RentASpaceView() {
               Storage built for people in motion — not for boxes sitting still. Find a clean, secure space near you and reserve online in minutes.
             </p>
 
-            <form className="mx-auto mt-9 max-w-xl" onSubmit={(e) => { e.preventDefault(); document.getElementById('locations')?.scrollIntoView({ behavior: 'smooth' }) }}>
+            <form className="mx-auto mt-9 max-w-xl" onSubmit={handleSearch}>
               <div className="flex items-stretch gap-2 rounded-2xl bg-warm-white p-2 shadow-[0_20px_60px_-20px_rgba(24,24,24,0.6)]">
                 <div className="flex flex-1 items-center gap-3 pl-4">
                   <MapPin className="h-5 w-5 shrink-0 text-orange" strokeWidth={2} aria-hidden />
-                  <input type="text" placeholder="Enter your ZIP or city" aria-label="Search by ZIP or city" className="w-full bg-transparent py-3 text-[1.0625rem] text-black placeholder:text-stone focus:outline-none" />
+                  <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => { setQuery(e.target.value); setNotFound('') }}
+                    placeholder="Enter your ZIP or city"
+                    aria-label="Search by ZIP or city"
+                    autoComplete="postal-code"
+                    className="w-full bg-transparent py-3 text-[1.0625rem] text-black placeholder:text-stone focus:outline-none"
+                  />
                 </div>
                 <button type="submit" className="btn-spring shadow-cta flex shrink-0 items-center gap-2 rounded-xl bg-orange px-6 py-3 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">
                   <Search className="h-5 w-5" strokeWidth={2.2} aria-hidden />
                   <span className="hidden sm:inline">Find spaces</span>
                 </button>
               </div>
+              <p aria-live="polite" className="sr-only">
+                {notFound ? `No spaces in ${notFound} yet. All three of our facilities are in Granbury, Texas. Showing our Granbury locations.` : ''}
+              </p>
+              {notFound && (
+                <div className="mx-auto mt-4 max-w-lg rounded-xl border border-terracotta/40 bg-black/40 px-5 py-3 text-[0.9375rem] leading-relaxed text-warm-white/90 backdrop-blur-sm">
+                  No spaces in <span className="font-bold">{notFound}</span> yet — all three of our
+                  facilities are in <span className="font-bold">Granbury, TX</span>.
+                </div>
+              )}
               <div className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[0.875rem] text-warm-white/70">
                 <span>Popular sizes:</span>
                 <button type="button" onClick={() => document.getElementById('locations')?.scrollIntoView({ behavior: 'smooth' })} className="font-bold text-warm-white transition-colors hover:text-terracotta">5×10</button><span className="opacity-40">·</span>
