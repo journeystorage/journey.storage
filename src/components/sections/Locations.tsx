@@ -1,9 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { motion, useReducedMotion } from 'framer-motion'
 import { Search, MapPin, ArrowDown } from 'lucide-react'
 import { sectionIds } from '@/lib/constants'
+import { resolveSearch } from '@/lib/space-search'
+import { openSizeGuide } from '@/components/SizeGuideModal'
 
 /** Granbury facilities acquired by Journey — live inventory/pricing will come from the Tenant Inc API. */
 const locations = [
@@ -11,16 +15,19 @@ const locations = [
     name: 'Temple Hall Hwy',
     address: '212 Temple Hall Hwy · Granbury, TX 76049',
     img: '/images/granbury/temple-hall-aerial-sm.webp',
+    href: '/rentaspace/templehallhwy',
   },
   {
     name: 'Western Hills Trl',
     address: '409 Western Hills Trl · Granbury, TX 76049',
     img: '/images/granbury/western-hills-aerial-2-sm.webp',
+    href: '/rentaspace/westernhillstrl',
   },
   {
     name: 'McCreary Rd',
     address: '3501 McCreary Rd · Granbury, TX 76049',
     img: '/images/granbury/cleveland-aerial-sm.webp',
+    href: '/rentaspace/mccrearyrd',
   },
 ] as const
 
@@ -28,8 +35,27 @@ const popularSizes = ['5×10', '10×10', '10×20', 'Climate-controlled'] as cons
 const springEase = [0.22, 1, 0.36, 1] as const
 
 export default function Locations({ seeAllHref }: { seeAllHref?: string } = {}) {
+  const router = useRouter()
   const prefersReducedMotion = useReducedMotion()
   const seeAll = seeAllHref ?? `#${sectionIds.locations}`
+  const [query, setQuery] = useState('')
+  const [notFound, setNotFound] = useState('')
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    const q = query.trim()
+    if (!q) return
+    const result = resolveSearch(q)
+    if (result.kind === 'facility') {
+      router.push(result.path)
+    } else if (result.kind === 'served') {
+      // The main rental page shows the "Good news" banner for ?near= and
+      // lands on its locations grid.
+      router.push(`/rentaspace?near=${encodeURIComponent(q.slice(0, 40))}`)
+    } else {
+      setNotFound(q) // nowhere to send them — say where we actually are
+    }
+  }
 
   const fadeUp = (delay: number) =>
     prefersReducedMotion
@@ -86,14 +112,17 @@ export default function Locations({ seeAllHref }: { seeAllHref?: string } = {}) 
           Rent online in minutes.
         </p>
 
-        <form className="mx-auto mt-8 w-full max-w-[560px]" onSubmit={(e) => e.preventDefault()}>
+        <form className="mx-auto mt-8 w-full max-w-[560px]" onSubmit={handleSearch}>
           <div className="flex items-stretch gap-2 rounded-2xl bg-warm-white p-2 shadow-[0_20px_60px_-20px_rgba(24,24,24,0.7)]">
             <div className="flex flex-1 items-center gap-3 pl-4">
               <MapPin className="h-5 w-5 shrink-0 text-orange" strokeWidth={2} aria-hidden />
               <input
                 type="text"
+                value={query}
+                onChange={(e) => { setQuery(e.target.value); setNotFound('') }}
                 placeholder="Enter your ZIP or city"
                 aria-label="Search by ZIP code or city"
+                autoComplete="postal-code"
                 className="w-full bg-transparent py-3 text-[1.0625rem] text-black placeholder:text-stone focus:outline-none"
               />
             </div>
@@ -105,11 +134,20 @@ export default function Locations({ seeAllHref }: { seeAllHref?: string } = {}) 
               <span>Find units</span>
             </button>
           </div>
+          <p aria-live="polite" className="sr-only">
+            {notFound ? `No spaces in ${notFound} yet. All three of our facilities are in Granbury, Texas.` : ''}
+          </p>
+          {notFound && (
+            <div className="mx-auto mt-4 max-w-[480px] rounded-xl border border-terracotta/40 bg-black/40 px-5 py-3 text-[0.9375rem] leading-relaxed text-warm-white/90 backdrop-blur-sm">
+              No spaces in <span className="font-bold">{notFound}</span> yet — all three of our
+              facilities are in <span className="font-bold">Granbury, TX</span>, just below.
+            </div>
+          )}
           <div className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-body-sm text-warm-white/70">
             <span>Popular sizes:</span>
             {popularSizes.map((size, i) => (
               <span key={size} className="contents">
-                <button type="button" className="font-bold text-warm-white transition-colors duration-150 hover:text-terracotta">
+                <button type="button" onClick={openSizeGuide} className="cursor-pointer font-bold text-warm-white transition-colors duration-150 hover:text-terracotta">
                   {size}
                 </button>
                 {i < popularSizes.length - 1 && <span className="opacity-40">·</span>}
@@ -140,7 +178,7 @@ export default function Locations({ seeAllHref }: { seeAllHref?: string } = {}) 
         {locations.map((loc) => (
           <a
             key={loc.name}
-            href="#"
+            href={loc.href}
             className="group flex items-center gap-2 rounded-2xl border border-white/35 bg-warm-white p-3.5 shadow-[0_22px_48px_-24px_rgba(0,0,0,0.85)] transition duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:shadow-[0_30px_60px_-22px_rgba(232,98,42,0.55)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
           >
             <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full shadow-[0_6px_16px_-6px_rgba(24,24,24,0.6)]">

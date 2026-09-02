@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, MapPin, Phone, CheckCircle2, CalendarDays, Zap, Check, Menu } from 'lucide-react'
 import RentFooter from '@/components/rentaspace/RentFooter'
 import PayBillFlow from '@/components/rentaspace/PayBillFlow'
 import { openSizeGuide } from '@/components/SizeGuideModal'
+import { resolveSearch } from '@/lib/space-search'
 
 const SCOPED_CSS = `
 #rentaspace .track-tight{letter-spacing:-.03em}
@@ -24,40 +25,6 @@ const SCOPED_CSS = `
 #rentaspace .eyebrow::before{content:'';height:1px;width:2rem;background:var(--color-orange);flex:none}
 `
 
-// ── Space finder ───────────────────────────────────────────────────────────
-// All three facilities sit in Granbury, TX 76049, so there is no meaningful
-// "nearest" to compute from a ZIP. A ZIP or city we serve therefore shows the
-// locations grid and lets the renter pick; only naming a facility outright
-// (its name, street, or street number) jumps straight to that rental page.
-const FACILITY_ALIASES: ReadonlyArray<readonly [RegExp, string]> = [
-  [/temple\s*hall|(^|\D)212(\D|$)/, '/rentaspace/templehallhwy'],
-  [/western\s*hills|(^|\D)409(\D|$)/, '/rentaspace/westernhillstrl'],
-  [/mc\s*creary|(^|\D)3501(\D|$)/, '/rentaspace/mccrearyrd'],
-]
-
-// Granbury proper plus the Hood County / Somervell towns people drive in from.
-const SERVED_ZIPS = new Set(['76048', '76049', '76035', '76043', '76462', '76476', '76077'])
-const SERVED_CITIES = ['granbury', 'acton', 'cresson', 'glen rose', 'lipan', 'tolar', 'rainbow', 'pecan plantation', 'hood county']
-
-type SearchResult =
-  | { kind: 'facility'; path: string } // named a specific facility
-  | { kind: 'served' }                 // somewhere we cover — show all three
-  | { kind: 'unserved' }               // say where we actually are
-
-function resolveSearch(raw: string): SearchResult {
-  const q = raw.trim().toLowerCase().replace(/[.,]/g, ' ').replace(/\s+/g, ' ')
-  if (!q) return { kind: 'served' }
-
-  for (const [pattern, path] of FACILITY_ALIASES) {
-    if (pattern.test(q)) return { kind: 'facility', path }
-  }
-
-  const zip = q.match(/\b\d{5}\b/)?.[0]
-  if (zip) return SERVED_ZIPS.has(zip) ? { kind: 'served' } : { kind: 'unserved' }
-
-  return SERVED_CITIES.some((city) => q.includes(city)) ? { kind: 'served' } : { kind: 'unserved' }
-}
-
 const phoneIcon = (cls: string) => <Phone className={cls} strokeWidth={2} aria-hidden />
 
 export default function RentASpaceView() {
@@ -67,6 +34,16 @@ export default function RentASpaceView() {
   const [searchMsg, setSearchMsg] = useState<{ kind: 'served' | 'unserved'; label: string } | null>(null)
 
   const scrollToLocations = () => document.getElementById('locations')?.scrollIntoView({ behavior: 'smooth' })
+
+  // The homepage finder forwards its served searches as /rentaspace?near=<query>.
+  // window.location instead of useSearchParams keeps the page statically
+  // prerenderable without a Suspense boundary.
+  useEffect(() => {
+    const near = new URLSearchParams(window.location.search).get('near')?.trim().slice(0, 40)
+    if (!near) return
+    setSearchMsg({ kind: 'served', label: near })
+    requestAnimationFrame(() => document.getElementById('locations')?.scrollIntoView())
+  }, [])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
