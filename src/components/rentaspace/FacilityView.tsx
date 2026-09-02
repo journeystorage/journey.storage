@@ -373,9 +373,11 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                                   <p className="mt-1 text-[0.6875rem] font-bold text-[#5c8a52]">1st month ${Math.round(price / 2)}</p>
                                 </div>
                               </div>
-                              <div className="mt-3">
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-sage-green/15 px-2.5 py-1 text-[0.75rem] font-bold text-[#5c8a52]"><span className="h-1.5 w-1.5 rounded-full bg-sage-green" aria-hidden />{s.available} available now</span>
-                              </div>
+                              {s.available > 0 && s.available <= 3 && (
+                                <div className="mt-3">
+                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-sage-green/15 px-2.5 py-1 text-[0.75rem] font-bold text-[#5c8a52]"><span className="h-1.5 w-1.5 rounded-full bg-sage-green" aria-hidden />{s.available === 1 ? 'Only 1 left' : `Only ${s.available} left`}</span>
+                                </div>
+                              )}
                             </div>
                           </div>
                           <button onClick={() => setRentalSpace({ size: s.size!, price, category: group.category })} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>

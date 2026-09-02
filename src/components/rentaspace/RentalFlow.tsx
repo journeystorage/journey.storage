@@ -263,7 +263,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                   </div>
                 </div>
                 <label className="mt-5 block text-[0.75rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">Move-in date
-                  <input type="date" min={todayISO()} value={moveIn} onChange={(e) => setMoveIn(e.target.value)} className={`mt-2 ${FIELD} [color-scheme:dark]`} />
+                  <input type="date" min={todayISO()} value={moveIn} onChange={(e) => setMoveIn(e.target.value)} className={`mt-2 ${FIELD} [color-scheme:dark] block min-h-[3.25rem] appearance-none [-webkit-appearance:none] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-date-and-time-value]:m-0 [&::-webkit-date-and-time-value]:text-left`} />
                 </label>
               </div>
               {apiError && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{apiError} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
