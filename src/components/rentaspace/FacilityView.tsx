@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo, useRef, type FormEvent } from 'react'
-import { MapPin, Phone, Menu, Star, Check, ChevronRight, ChevronLeft, ChevronDown, X, Ruler, Sparkles } from 'lucide-react'
+import { MapPin, Phone, Menu, Star, Check, ChevronRight, ChevronLeft, ChevronDown, X, Ruler, Sparkles, Snowflake, Warehouse } from 'lucide-react'
 import { SizeArt, getSizeArt } from '@/lib/sizeArt'
 import { openSizeGuide } from '@/components/SizeGuideModal'
 import RentFooter from '@/components/rentaspace/RentFooter'
@@ -37,6 +37,8 @@ const liveSqft = (size: string | null): number | null => {
 // trailing "#1" group suffix.
 const cleanCat = (cat: string | null): string =>
   (cat ? cat.replace(/^.*?\s[-–]\s/, '').replace(/\bGr?anbury\b/gi, '').replace(/#\s*\d+/g, '').replace(/\s+/g, ' ').trim() : '') || 'Storage'
+// Climate-controlled vs standard, for the category filter + header treatment.
+const isClimate = (cat: string): boolean => /climate/i.test(cat)
 export type Facility = {
   slug: string
   name: string
@@ -143,6 +145,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
   const [live, setLive] = useState<{ status: 'off' | 'loading' | 'ok' | 'error'; spaces: LiveSpace[]; error?: string }>({ status: 'off', spaces: [] })
   const [rentalSpace, setRentalSpace] = useState<{ size: string; price: number; category?: string | null } | null>(null)
   const [payBill, setPayBill] = useState(false)
+  const [catFilter, setCatFilter] = useState<'all' | 'climate' | 'standard'>('all')
   const n = f.slides.length
   const gLen = f.gallery.length
   const reviewsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Journey Storage ${f.short} Granbury TX`)}`
@@ -190,6 +193,15 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       }))
       .sort((a, b) => a.min - b.min)
   }, [live])
+
+  // Category filter (Climate / Standard) — only surfaced when a facility has both.
+  const hasClimate = liveGroups.some((g) => isClimate(g.category))
+  const hasStandard = liveGroups.some((g) => !isClimate(g.category))
+  const showCatFilter = live.status === 'ok' && hasClimate && hasStandard
+  const visibleGroups = useMemo(
+    () => liveGroups.filter((g) => (catFilter === 'all' ? true : catFilter === 'climate' ? isClimate(g.category) : !isClimate(g.category))),
+    [liveGroups, catFilter],
+  )
 
   useEffect(() => {
     if (lightbox === null) return
@@ -338,12 +350,45 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
             <h2 className="track-tight mt-3 text-[1.75rem] font-black text-black lg:text-[2.25rem]">Choose your space</h2>
             <p className="mt-2 text-[1.0625rem] leading-relaxed text-stone">Reserve online in minutes — lock in the online rate, move in when you like. Month-to-month, no deposit, no long-term commitment.</p>
 
+            {showCatFilter && (
+              <div className="mt-7">
+                <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-stone/70">Filter by type</p>
+                <div className="inline-flex flex-wrap gap-1.5 rounded-full border border-black/[0.08] bg-warm-white p-1 shadow-[0_2px_10px_-6px_rgba(24,24,24,0.35)]">
+                  {([
+                    { key: 'all', label: 'All spaces', Icon: null },
+                    { key: 'climate', label: 'Climate Controlled', Icon: Snowflake },
+                    { key: 'standard', label: 'Standard', Icon: Warehouse },
+                  ] as const).map(({ key, label, Icon }) => {
+                    const active = catFilter === key
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => setCatFilter(key)}
+                        aria-pressed={active}
+                        className={`btn-spring inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[0.8125rem] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange ${active ? 'bg-charcoal text-warm-white shadow-[0_2px_8px_-3px_rgba(24,24,24,0.5)]' : 'text-charcoal hover:bg-black/[0.05]'}`}
+                      >
+                        {Icon && <Icon className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />}
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             {live.status === 'ok' && liveGroups.length > 0 ? (
               // ── LIVE availability + pricing (real Tenant Inc data) ──
-              liveGroups.map((group) => (
+              visibleGroups.map((group) => {
+                const climate = isClimate(group.category)
+                return (
                 <div key={group.category} className="mt-10">
-                  <div className="flex items-baseline justify-between border-b border-black/[0.08] pb-2">
-                    <h3 className="text-[1.25rem] font-black text-black">{group.category}</h3>
+                  <div className={`flex items-center justify-between border-b-2 pb-2.5 ${climate ? 'border-sage-green/40' : 'border-orange/35'}`}>
+                    <div className="flex items-center gap-2.5">
+                      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${climate ? 'bg-sage-green/15 text-[#5c8a52]' : 'bg-orange/12 text-orange'}`}>
+                        {climate ? <Snowflake className="h-[1.05rem] w-[1.05rem]" strokeWidth={2.25} aria-hidden /> : <Warehouse className="h-[1.05rem] w-[1.05rem]" strokeWidth={2.25} aria-hidden />}
+                      </span>
+                      <h3 className="text-[1.375rem] font-black tracking-[-0.01em] text-black">{group.category}</h3>
+                    </div>
                     <span className="text-[0.875rem] text-stone">{group.spaces.length} size{group.spaces.length > 1 ? 's' : ''} available</span>
                   </div>
                   <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -386,7 +431,8 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                     })}
                   </div>
                 </div>
-              ))
+                )
+              })
             ) : (
               // ── Fallback: curated sizes (while live loads, or if the feed is down) ──
               f.groups.map((group) => (
