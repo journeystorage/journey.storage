@@ -27,7 +27,12 @@ const ADMIN_FEE = 30
 const TAX_RATE = 0.0825 // TX example rate — final tax confirmed at the facility
 
 const money = (n: number) => `$${n.toFixed(2)}`
-const todayISO = () => new Date().toISOString().slice(0, 10)
+// Local calendar date (not UTC) — UTC rolls to "tomorrow" in the evening in
+// Texas, which blocked same-day (24/7) move-ins.
+const todayISO = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 
 // Journey signature radius — one large corner, three sharp.
 const R = 'rounded-tl-[20px] rounded-tr-[4px] rounded-br-[4px] rounded-bl-[4px]'

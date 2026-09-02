@@ -310,8 +310,8 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
 
         {n > 1 && (
           <>
-            <button onClick={() => go(-1)} aria-label="Previous photo" className="btn-spring absolute left-4 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 text-warm-white backdrop-blur hover:bg-black/70"><ChevronLeft className="h-6 w-6" aria-hidden /></button>
-            <button onClick={() => go(1)} aria-label="Next photo" className="btn-spring absolute right-4 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 text-warm-white backdrop-blur hover:bg-black/70"><ChevronRight className="h-6 w-6" aria-hidden /></button>
+            <button onClick={() => go(-1)} aria-label="Previous photo" className="btn-spring absolute left-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 text-warm-white backdrop-blur hover:bg-black/70 sm:grid"><ChevronLeft className="h-6 w-6" aria-hidden /></button>
+            <button onClick={() => go(1)} aria-label="Next photo" className="btn-spring absolute right-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 text-warm-white backdrop-blur hover:bg-black/70 sm:grid"><ChevronRight className="h-6 w-6" aria-hidden /></button>
             <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 gap-2">
               {f.slides.map((_, i) => (
                 <button key={i} onClick={() => setSlide(i)} aria-label={`Go to photo ${i + 1}`} className={`h-2 rounded-full transition-all duration-300 ${i === slide ? 'w-6 bg-orange' : 'w-2 bg-warm-white/60 hover:bg-warm-white'}`} />
@@ -331,7 +331,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       </div>
 
       {/* ── MAIN: spaces + sidebar ── */}
-      <section className="mx-auto max-w-content px-5 py-12 lg:px-16 lg:py-16">
+      <section id="spaces" className="mx-auto max-w-content px-5 py-12 lg:px-16 lg:py-16">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:gap-12">
           <div>
             <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Rent a space</span></div>
@@ -493,7 +493,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
           <h2 className="track-tighter mt-4 text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3rem]">Your space is waiting.</h2>
           <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] font-light text-warm-white/70 lg:text-[1.25rem]">Reserve your space at {f.short} today — clear pricing, month-to-month, rented online in minutes.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <button onClick={() => openReserve('')} className="btn-spring shadow-cta rounded-sm bg-orange px-8 py-3.5 font-bold text-warm-white">Reserve a space</button>
+            <button onClick={() => document.getElementById('spaces')?.scrollIntoView({ behavior: 'smooth' })} className="btn-spring shadow-cta rounded-sm bg-orange px-8 py-3.5 font-bold text-warm-white">Rent a space</button>
             <a href={f.tel} className="btn-spring rounded-sm border-2 border-warm-white/70 px-8 py-3.5 font-bold text-warm-white hover:bg-warm-white hover:text-black">Call us</a>
           </div>
         </div>
@@ -519,7 +519,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       {/* ── STICKY MOBILE CTA ── */}
       <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-black/10 bg-warm-white/95 p-3 backdrop-blur lg:hidden">
         <a href={f.tel} className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-black/85 py-3 font-bold text-black"><Phone className="h-4 w-4" strokeWidth={2} aria-hidden />Call</a>
-        <button onClick={() => openReserve('')} className="shadow-cta flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-orange py-3 font-bold text-warm-white">Reserve a space</button>
+        <button onClick={() => document.getElementById('spaces')?.scrollIntoView({ behavior: 'smooth' })} className="shadow-cta flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-orange py-3 font-bold text-warm-white">Rent a space</button>
       </div>
 
 
