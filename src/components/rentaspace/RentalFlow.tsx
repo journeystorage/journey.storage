@@ -58,6 +58,9 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const [card, setCard] = useState({ number: '', exp: '', cvc: '', zip: '' })
   const [processing, setProcessing] = useState(false)
   const [payingMsg, setPayingMsg] = useState<string | null>(null)
+  // The property's real lease template (e.g. the TSSA lease) from Hummingbird,
+  // shown at the Sign step so the customer reads exactly what gets signed.
+  const [leaseTpl, setLeaseTpl] = useState<{ name: string; html: string } | null>(null)
   const autopay = true // required — enrollment is not optional
 
   // ── Live API state (demo math is the graceful fallback) ──
@@ -234,6 +237,58 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const optionBase = `flex w-full items-center justify-between rounded-sm border p-4 text-left transition-colors duration-150`
   const dateLong = (iso: string) => new Date(iso + 'T00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 
+  // Load the real lease template once per facility. Fails soft: without it the
+  // step falls back to the built-in summary text.
+  useEffect(() => {
+    let alive = true
+    fetch(`/api/nectar/lease-template?facility=${facility.slug}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (alive && j?.html) setLeaseTpl({ name: j.name || 'Rental Agreement', html: j.html }) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [facility.slug])
+
+  // Fill the template's Carbone tokens ({d.Tenant.Name}) with what the customer
+  // entered — display only; Hummingbird merges the binding copy at checkout.
+  const mergedLeaseHtml = useMemo(() => {
+    if (!leaseTpl) return null
+    const parts = details.name.trim().split(/\s+/)
+    const last = parts.length > 1 ? parts[parts.length - 1] : ''
+    const first = (parts.length > 1 ? parts.slice(0, -1).join(' ') : details.name) || ''
+    const blank = '________'
+    const px = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
+    const map: Record<string, string> = {
+      'Tenant.Name': details.name || blank,
+      'Tenant.FirstName': first || blank,
+      'Tenant.LastName': last || blank,
+      'Tenant.Address1': details.address || blank,
+      'Tenant.City': details.city || blank,
+      'Tenant.State': details.state || blank,
+      'Tenant.PostalCode': details.zip || blank,
+      'Tenant.Email': details.email || blank,
+      'Tenant.CellPhone': details.phone || blank,
+      'Tenant.HomePhone': details.phone || blank,
+      'Tenant.MoveInDate': dateLong(moveIn),
+      'Tenant.RentDueDate': realQuote?.billDay != null ? String(realQuote.billDay) : blank,
+      'Tenant.GateCode': 'Assigned at move-in',
+      'Tenant.MonthlyCost': money(space.price),
+      'Tenant.TotalMoveInCost': money(effDueToday),
+      'Space.ID': 'Assigned at move-in',
+      'Space.Size': space.size,
+      'Space.Rent': money(space.price),
+      'Document.Date': dateLong(todayISO()),
+      'Facility.Name': `Journey Storage — ${facility.short}`,
+      'Facility.Address1': facility.address,
+      'Facility.City': facility.city,
+      'Facility.Phone': facility.phone,
+      'Facility.AdminFee': money(ADMIN_FEE),
+      'Signature': px,
+      'Initials': px,
+    }
+    return leaseTpl.html.replace(/\{d\.([A-Za-z0-9.]+)\}/g, (_, k: string) => map[k] ?? blank)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leaseTpl, details, moveIn, space.size, space.price, effDueToday, realQuote?.billDay, facility])
+
   return (
     <div className="fixed inset-0 z-[130] flex items-stretch justify-center overflow-y-auto bg-black/80 backdrop-blur-md sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Rent a ${space.size} space`}>
       <div className={`grain relative flex min-h-full w-full max-w-4xl flex-col overflow-hidden bg-black text-warm-white antialiased sm:min-h-0 sm:max-h-[92vh] sm:rounded-tl-[32px] sm:rounded-tr-[6px] sm:rounded-br-[6px] sm:rounded-bl-[6px]`}>
@@ -380,6 +435,13 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
               <Eyebrow label="Sign lease" />
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><FileText className="h-6 w-6 text-orange" aria-hidden />Lease agreement</h2>
               <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Review and sign your month-to-month rental agreement.</p>
+              {mergedLeaseHtml ? (
+                <>
+                  <p className="mt-4 rounded-sm border border-orange/25 bg-orange/[0.06] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/70"><b className="text-orange">{leaseTpl?.name}.</b> This is the agreement you sign — the binding copy is completed and emailed to you at checkout.</p>
+                  <iframe title={leaseTpl?.name ?? 'Rental agreement'} sandbox="" srcDoc={mergedLeaseHtml} className="mt-4 h-64 w-full rounded-sm border border-warm-white/10 bg-white" />
+                </>
+              ) : (
+                <>
               <p className="mt-4 rounded-sm border border-orange/25 bg-orange/[0.06] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/70"><b className="text-orange">Summary of terms.</b> Your full, binding rental agreement is generated and signed when you complete checkout.</p>
               <div className="mt-4 h-52 overflow-y-auto rounded-sm border border-warm-white/10 bg-warm-white/[0.04] p-4 text-[0.8125rem] leading-relaxed text-warm-white/70">
                 <p className="font-black tracking-[0.05em] text-warm-white">SELF-STORAGE RENTAL AGREEMENT</p>
@@ -391,6 +453,8 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 <p className="mt-2"><b className="text-warm-white/90">5. Termination.</b> Either party may terminate with proper notice per state law. This is a month-to-month tenancy with no long-term commitment.</p>
                 <p className="mt-2 text-warm-white/40">…continued in the full agreement.</p>
               </div>
+                </>
+              )}
               <button type="button" onClick={() => setFullLease(true)} className="mt-3 inline-flex items-center gap-1.5 text-[0.8125rem] font-bold text-orange underline-offset-4 transition-colors hover:underline">
                 <FileText className="h-3.5 w-3.5" aria-hidden />Read the full agreement
               </button>
@@ -481,10 +545,13 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
               <div className="flex items-center justify-between gap-4 border-b border-warm-white/[0.07] px-5 py-4 lg:px-7">
                 <div className="flex items-center gap-2.5">
                   <FileText className="h-5 w-5 text-orange" aria-hidden />
-                  <p className="text-[0.9375rem] font-black tracking-[-0.01em] text-warm-white">Self-Storage Rental Agreement</p>
+                  <p className="text-[0.9375rem] font-black tracking-[-0.01em] text-warm-white">{mergedLeaseHtml ? (leaseTpl?.name ?? 'Rental Agreement') : 'Self-Storage Rental Agreement'}</p>
                 </div>
                 <button onClick={() => setFullLease(false)} aria-label="Close full agreement" className="grid h-9 w-9 shrink-0 place-items-center rounded-sm bg-warm-white/[0.08] text-warm-white transition-colors hover:bg-warm-white/[0.16]"><X className="h-5 w-5" aria-hidden /></button>
               </div>
+              {mergedLeaseHtml ? (
+                <iframe title={leaseTpl?.name ?? 'Rental agreement'} sandbox="" srcDoc={mergedLeaseHtml} className="min-h-[55vh] w-full flex-1 bg-white" />
+              ) : (
               <div className="flex-1 overflow-y-auto px-5 py-6 text-[0.8125rem] leading-[1.7] text-warm-white/70 lg:px-7">
                 <p className="mb-4 rounded-sm border border-orange/25 bg-orange/[0.06] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/70"><b className="text-orange">Summary of terms.</b> Your full, binding rental agreement is generated and signed when you complete checkout, using Journey&rsquo;s official lease.</p>
                 <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/40">Journey Storage 001, LLC · {facility.address}, {facility.city}</p>
@@ -508,6 +575,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 ))}
                 <p className="mt-6 text-warm-white/40">By typing your name and continuing, you acknowledge you have read, understood, and agree to be bound by this Agreement. A signed PDF copy is emailed to you after checkout.</p>
               </div>
+              )}
               <div className="flex justify-end border-t border-warm-white/[0.07] px-5 py-4 lg:px-7">
                 <button onClick={() => setFullLease(false)} className={primaryBtn}>Got it</button>
               </div>
