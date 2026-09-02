@@ -127,10 +127,10 @@ function SizeVideo({ art, tint }: { art: string; tint: string }) {
     return () => io.disconnect()
   }, [])
   return (
-    <div ref={ref} className="relative aspect-[3/4] w-[86px] shrink-0 overflow-hidden rounded-xl shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)] transition-transform duration-300 ease-out will-change-transform hover:scale-[1.04] hover:shadow-[0_8px_22px_-8px_rgba(24,24,24,0.45)]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${tint} 100%)` }}>
-      <SizeArt artKey={art} className="absolute inset-0 h-full w-full" />
+    <div ref={ref} className="group relative aspect-[3/4] w-[76px] shrink-0 overflow-hidden rounded-xl shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)] transition-shadow duration-300 ease-out hover:shadow-[0_8px_22px_-8px_rgba(24,24,24,0.45)]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${tint} 100%)` }}>
+      <SizeArt artKey={art} className="absolute inset-0 h-full w-full transition-transform duration-300 ease-out will-change-transform group-hover:scale-110" />
       {show && (
-        <video src={`/videos/storage-${art}-sm.webm`} autoPlay muted loop playsInline preload="none" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+        <video src={`/videos/storage-${art}-sm.webm`} autoPlay muted loop playsInline preload="none" aria-hidden className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-out will-change-transform group-hover:scale-110" />
       )}
     </div>
   )
@@ -403,23 +403,19 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                             {artKey ? (
                               <SizeVideo art={artKey} tint={art?.tint ?? 'rgba(232,98,42,0.1)'} />
                             ) : (
-                              <div className="grid aspect-[3/4] w-[86px] shrink-0 place-items-center rounded-xl text-center shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)]" style={{ background: 'linear-gradient(165deg, #F5F0E8 0%, rgba(232,98,42,0.12) 100%)' }}>
-                                <span className="px-1 text-[0.95rem] font-black leading-tight text-charcoal">{s.size}</span>
+                              <div className="grid aspect-[3/4] w-[76px] shrink-0 place-items-center rounded-xl text-center shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)]" style={{ background: 'linear-gradient(165deg, #F5F0E8 0%, rgba(232,98,42,0.12) 100%)' }}>
+                                <span className="px-1 text-[0.9rem] font-black leading-tight text-charcoal">{s.size}</span>
                               </div>
                             )}
                             <div className="min-w-0 flex-1">
-                              <div className="flex items-start justify-between gap-2">
-                                <div>
-                                  <h4 className="whitespace-nowrap text-[1.375rem] font-black tracking-[-0.02em] text-black">{s.size}</h4>
-                                  <p className="mt-0.5 text-[0.8125rem] text-stone">{sqft ? `${sqft} sq ft · ` : ''}{group.category}</p>
-                                </div>
-                                <div className="shrink-0 text-right">
-                                  <p className="leading-none"><span className="text-[1.625rem] font-black text-orange">${price}</span><span className="text-[0.8125rem] font-bold text-stone">/mo online</span></p>
-                                  <p className="mt-1 text-[0.6875rem] font-bold text-[#5c8a52]">1st month ${Math.round(price / 2)}</p>
-                                </div>
+                              <div className="flex items-baseline justify-between gap-2">
+                                <h4 className="whitespace-nowrap text-[1.375rem] font-black tracking-[-0.02em] text-black">{s.size}</h4>
+                                <p className="shrink-0 whitespace-nowrap leading-none"><span className="text-[1.5rem] font-black text-orange">${price}</span><span className="text-[0.75rem] font-bold text-stone">/mo</span></p>
                               </div>
+                              <p className="mt-1 text-[0.8125rem] leading-snug text-stone">{sqft ? `${sqft} sq ft · ` : ''}{group.category}</p>
+                              <p className="mt-1.5 text-[0.75rem] font-bold text-[#5c8a52]">1st month ${Math.round(price / 2)}</p>
                               {s.available > 0 && s.available <= 3 && (
-                                <div className="mt-3">
+                                <div className="mt-2.5">
                                   <span className="inline-flex items-center gap-1.5 rounded-full bg-sage-green/15 px-2.5 py-1 text-[0.75rem] font-bold text-[#5c8a52]"><span className="h-1.5 w-1.5 rounded-full bg-sage-green" aria-hidden />{s.available === 1 ? 'Only 1 left' : `Only ${s.available} left`}</span>
                                 </div>
                               )}
@@ -449,18 +445,13 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
                           <div className="mb-5 flex items-start gap-4">
                             <SizeVideo art={u.art} tint={art?.tint ?? 'rgba(232,98,42,0.1)'} />
                             <div className="min-w-0 flex-1">
-                              <div className="flex items-start justify-between gap-2">
-                                <div>
-                                  <h4 className="text-[1.375rem] font-black tracking-[-0.02em] text-black">{u.size}</h4>
-                                  <p className="mt-0.5 text-[0.8125rem] text-stone">{u.sqft} sq ft · {u.fits}</p>
-                                </div>
-                                <div className="shrink-0 text-right">
-                                  <p className="text-[0.6875rem] font-bold uppercase tracking-wide text-stone">In store <span className="line-through">${u.walkIn}</span></p>
-                                  <p className="leading-none"><span className="text-[1.625rem] font-black text-orange">${u.online}</span><span className="text-[0.8125rem] font-bold text-stone">/mo online</span></p>
-                                  <p className="mt-1 text-[0.6875rem] font-bold text-[#5c8a52]">1st month ${Math.round(u.online / 2)}</p>
-                                </div>
+                              <div className="flex items-baseline justify-between gap-2">
+                                <h4 className="whitespace-nowrap text-[1.375rem] font-black tracking-[-0.02em] text-black">{u.size}</h4>
+                                <p className="shrink-0 whitespace-nowrap leading-none"><span className="text-[1.5rem] font-black text-orange">${u.online}</span><span className="text-[0.75rem] font-bold text-stone">/mo</span></p>
                               </div>
-                              <div className="mt-3 flex min-h-[3.25rem] flex-wrap content-start gap-1.5">
+                              <p className="mt-1 text-[0.8125rem] leading-snug text-stone">{u.sqft} sq ft · {u.fits}</p>
+                              <p className="mt-1 text-[0.6875rem] font-bold text-stone">In store <span className="line-through">${u.walkIn}</span> · <span className="text-[#5c8a52]">1st month ${Math.round(u.online / 2)}</span></p>
+                              <div className="mt-2.5 flex flex-wrap content-start gap-1.5">
                                 {u.tags.map((t) => (<span key={t} className={`h-fit rounded-full px-2.5 py-1 text-[0.75rem] font-bold ${t === 'Climate-controlled' ? 'bg-sage-green/15 text-[#5c8a52]' : 'bg-sand/25 text-charcoal'}`}>{t}</span>))}
                               </div>
                             </div>
