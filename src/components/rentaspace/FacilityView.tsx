@@ -533,7 +533,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
           <h2 className="track-tighter mt-4 text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3rem]">Your space is waiting.</h2>
           <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] font-light text-warm-white/70 lg:text-[1.25rem]">Reserve your space at {f.short} today — clear pricing, month-to-month, rented online in minutes.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <button onClick={() => document.getElementById('spaces')?.scrollIntoView({ behavior: 'smooth' })} className="btn-spring shadow-cta rounded-sm bg-orange px-8 py-3.5 font-bold text-warm-white">Rent a space</button>
+            <button onClick={() => document.getElementById('spaces')?.scrollIntoView({ behavior: 'smooth' })} className="btn-spring shadow-cta rounded-sm bg-orange px-8 py-3.5 font-bold text-warm-white">Rent a Space</button>
             <a href={f.tel} className="btn-spring rounded-sm border-2 border-warm-white/70 px-8 py-3.5 font-bold text-warm-white hover:bg-warm-white hover:text-black">Call us</a>
           </div>
         </div>
@@ -559,7 +559,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       {/* ── STICKY MOBILE CTA ── */}
       <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-black/10 bg-warm-white/95 p-3 backdrop-blur lg:hidden">
         <a href={f.tel} className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-black/85 py-3 font-bold text-black"><Phone className="h-4 w-4" strokeWidth={2} aria-hidden />Call</a>
-        <button onClick={() => document.getElementById('spaces')?.scrollIntoView({ behavior: 'smooth' })} className="shadow-cta flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-orange py-3 font-bold text-warm-white">Rent a space</button>
+        <button onClick={() => document.getElementById('spaces')?.scrollIntoView({ behavior: 'smooth' })} className="shadow-cta flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-orange py-3 font-bold text-warm-white">Rent a Space</button>
       </div>
 
 
