@@ -57,6 +57,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const [fullLease, setFullLease] = useState(false)
   const [card, setCard] = useState({ number: '', exp: '', cvc: '', zip: '' })
   const [processing, setProcessing] = useState(false)
+  const [payingMsg, setPayingMsg] = useState<string | null>(null)
   const autopay = true // required — enrollment is not optional
 
   // ── Live API state (demo math is the graceful fallback) ──
@@ -135,6 +136,15 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   }, [stepName, real, realPlans, facility.slug])
 
   // Commit the rental (real). Returns true on success; false → demo confirmation.
+  // While the charge + lease are committing, warn the browser before leaving —
+  // closing the tab mid-payment leaves the customer unsure whether they were charged.
+  useEffect(() => {
+    if (!payingMsg) return
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = '' }
+    window.addEventListener('beforeunload', warn)
+    return () => window.removeEventListener('beforeunload', warn)
+  }, [payingMsg])
+
   async function submitRent(): Promise<boolean> {
     if (!hold || !realQuote) return false // needs the single quote already fetched
     const parts = details.name.trim().split(/\s+/)
@@ -188,8 +198,25 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
     if (stepName === 'Payment') {
       setProcessing(true); setApiError(null)
       if (real && realQuote) {
+        // Staged reassurance while Tenant Payments charges the card and the
+        // lease is created — a single long server call the customer must wait out.
+        const stages: Array<[number, string]> = [
+          [0, 'Securing your payment…'],
+          [6, 'Processing your card…'],
+          [14, 'Creating your lease…'],
+          [26, 'Assigning your unit & gate code…'],
+          [40, 'Almost there — finalizing with the facility…'],
+        ]
+        const t0 = Date.now()
+        setPayingMsg(stages[0][1])
+        const tick = setInterval(() => {
+          const s = (Date.now() - t0) / 1000
+          for (let i = stages.length - 1; i >= 0; i--) { if (s >= stages[i][0]) { setPayingMsg(stages[i][1]); break } }
+        }, 1000)
         // Live: only advance on a real, confirmed lease — never fake success.
         const ok = await submitRent()
+        clearInterval(tick)
+        setPayingMsg(null)
         setProcessing(false)
         if (!ok) { setApiError('We couldn’t complete your rental just now. Please try again, or call us to finish.'); return }
         setStep((s) => s + 1); return
@@ -228,7 +255,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
               <p className="text-[0.75rem] text-warm-white/50">Journey.Storage™ — {facility.short}, Granbury TX</p>
             </div>
           </div>
-          <button onClick={onClose} aria-label="Close" className="grid h-9 w-9 shrink-0 place-items-center rounded-sm bg-warm-white/[0.08] text-warm-white transition-colors hover:bg-warm-white/[0.16]"><X className="h-5 w-5" aria-hidden /></button>
+          <button onClick={onClose} disabled={!!payingMsg} aria-label="Close" className="grid h-9 w-9 shrink-0 place-items-center rounded-sm bg-warm-white/[0.08] text-warm-white transition-colors hover:bg-warm-white/[0.16] disabled:pointer-events-none disabled:opacity-30"><X className="h-5 w-5" aria-hidden /></button>
         </div>
 
         {/* Progress rail */}
@@ -400,6 +427,15 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 </span>
               </div>
               {apiError && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-3 py-2.5 text-[0.8125rem] font-bold text-[#E8A87C]">{apiError} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
+              {payingMsg && (
+                <div className="mt-4 rounded-sm border border-orange/40 bg-orange/[0.12] px-4 py-3.5" role="status" aria-live="polite">
+                  <p className="flex items-center gap-2.5 text-[0.9375rem] font-bold text-warm-white">
+                    <span aria-hidden className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-orange border-t-transparent" />
+                    {payingMsg}
+                  </p>
+                  <p className="mt-1.5 text-[0.8125rem] leading-relaxed text-warm-white/70">This can take up to a minute. <b className="text-warm-white">Please don’t close or refresh this page</b> — we’ll take you to your confirmation automatically.</p>
+                </div>
+              )}
               {real ? (
                 <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Secured by Tenant Payments. Your card is charged {money(effDueToday)} today; autopay continues each cycle.</p>
               ) : (
@@ -482,13 +518,14 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
         {/* Footer nav */}
         {stepName !== 'Done' && (
           <div className="sticky bottom-0 z-[5] flex items-center justify-between gap-3 border-t border-warm-white/[0.07] bg-black/70 px-5 py-4 backdrop-blur-md lg:px-10">
-            <button onClick={step === 0 ? onClose : back} className="inline-flex items-center gap-1.5 rounded-sm px-4 py-2.5 font-bold text-warm-white/60 transition-colors hover:bg-warm-white/[0.06] hover:text-warm-white">
+            <button onClick={step === 0 ? onClose : back} disabled={processing} className="inline-flex items-center gap-1.5 rounded-sm px-4 py-2.5 font-bold text-warm-white/60 transition-colors hover:bg-warm-white/[0.06] hover:text-warm-white disabled:pointer-events-none disabled:opacity-30">
               <ChevronLeft className="h-4 w-4" aria-hidden />{step === 0 ? 'Cancel' : 'Back'}
             </button>
             <div className="flex items-center gap-3">
               {stepName === 'Review' && <span className="hidden text-[0.9375rem] font-black text-warm-white sm:inline">{money(effDueToday)} due today</span>}
               <button onClick={next} disabled={!canNext() || processing} className={primaryBtn}>
-                {processing ? 'Processing…' : stepName === 'Payment' ? `Pay ${money(effDueToday)}` : stepName === 'Sign lease' ? 'Sign & continue' : stepName === 'Review' ? 'Looks good' : 'Continue'}
+                {processing && <span aria-hidden className="h-4 w-4 animate-spin rounded-full border-2 border-warm-white/40 border-t-warm-white" />}
+                {processing ? (stepName === 'Payment' ? 'Processing payment…' : 'Processing…') : stepName === 'Payment' ? `Pay ${money(effDueToday)}` : stepName === 'Sign lease' ? 'Sign & continue' : stepName === 'Review' ? 'Looks good' : 'Continue'}
                 {!processing && <ChevronRight className="h-4 w-4" aria-hidden />}
               </button>
             </div>
