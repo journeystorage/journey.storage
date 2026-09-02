@@ -353,7 +353,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
             {showCatFilter && (
               <div className="mt-7">
                 <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-stone/70">Filter by type</p>
-                <div className="inline-flex flex-wrap gap-1.5 rounded-full border border-black/[0.08] bg-warm-white p-1 shadow-[0_2px_10px_-6px_rgba(24,24,24,0.35)]">
+                <div className="flex w-full flex-wrap justify-center gap-1.5 rounded-[1.75rem] border border-black/[0.08] bg-warm-white p-1.5 shadow-[0_2px_10px_-6px_rgba(24,24,24,0.35)] sm:inline-flex sm:w-auto sm:justify-start sm:rounded-full sm:p-1">
                   {([
                     { key: 'all', label: 'All spaces', Icon: null },
                     { key: 'climate', label: 'Climate Controlled', Icon: Snowflake },
