@@ -127,10 +127,10 @@ function SizeVideo({ art, tint }: { art: string; tint: string }) {
     return () => io.disconnect()
   }, [])
   return (
-    <div ref={ref} className="group relative aspect-[3/4] w-[76px] shrink-0 overflow-hidden rounded-xl shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)] transition-shadow duration-300 ease-out hover:shadow-[0_8px_22px_-8px_rgba(24,24,24,0.45)]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${tint} 100%)` }}>
-      <SizeArt artKey={art} className="absolute inset-0 h-full w-full transition-transform duration-300 ease-out will-change-transform group-hover:scale-110" />
+    <div ref={ref} className="relative aspect-[3/4] w-[76px] shrink-0 cursor-zoom-in overflow-hidden rounded-xl shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)] transition-transform duration-300 ease-out will-change-transform [transform-origin:top_left] hover:z-30 hover:scale-[1.8] hover:shadow-[0_16px_40px_-10px_rgba(24,24,24,0.5)]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${tint} 100%)` }}>
+      <SizeArt artKey={art} className="absolute inset-0 h-full w-full" />
       {show && (
-        <video src={`/videos/storage-${art}-sm.webm`} autoPlay muted loop playsInline preload="none" aria-hidden className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-out will-change-transform group-hover:scale-110" />
+        <video src={`/videos/storage-${art}-sm.webm`} autoPlay muted loop playsInline preload="none" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
       )}
     </div>
   )
