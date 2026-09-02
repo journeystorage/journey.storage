@@ -64,7 +64,7 @@ export default function RentASpaceView() {
   const router = useRouter()
   const [payBill, setPayBill] = useState(false)
   const [query, setQuery] = useState('')
-  const [notFound, setNotFound] = useState('')
+  const [searchMsg, setSearchMsg] = useState<{ kind: 'served' | 'unserved'; label: string } | null>(null)
 
   const scrollToLocations = () => document.getElementById('locations')?.scrollIntoView({ behavior: 'smooth' })
 
@@ -75,9 +75,11 @@ export default function RentASpaceView() {
       router.push(result.path)
       return
     }
-    // Served or not, the renter stays here and picks from the three locations —
-    // the notice only changes what we tell them on the way down.
-    setNotFound(result.kind === 'unserved' ? query.trim() : '')
+    // Served or not, the renter stays here and picks from the three locations.
+    // The acknowledgment renders AT the grid they land on — a message left
+    // behind in the hero scrolls out of view before anyone reads it.
+    const label = query.trim()
+    setSearchMsg(label ? { kind: result.kind, label } : null)
     scrollToLocations()
   }
 
@@ -141,7 +143,7 @@ export default function RentASpaceView() {
                   <input
                     type="text"
                     value={query}
-                    onChange={(e) => { setQuery(e.target.value); setNotFound('') }}
+                    onChange={(e) => { setQuery(e.target.value); setSearchMsg(null) }}
                     placeholder="Enter your ZIP or city"
                     aria-label="Search by ZIP or city"
                     autoComplete="postal-code"
@@ -154,14 +156,12 @@ export default function RentASpaceView() {
                 </button>
               </div>
               <p aria-live="polite" className="sr-only">
-                {notFound ? `No spaces in ${notFound} yet. All three of our facilities are in Granbury, Texas. Showing our Granbury locations.` : ''}
+                {searchMsg
+                  ? searchMsg.kind === 'served'
+                    ? `Good news: we have three facilities near ${searchMsg.label}. Showing our Granbury locations.`
+                    : `No spaces in ${searchMsg.label} yet. All three of our facilities are in Granbury, Texas. Showing our Granbury locations.`
+                  : ''}
               </p>
-              {notFound && (
-                <div className="mx-auto mt-4 max-w-lg rounded-xl border border-terracotta/40 bg-black/40 px-5 py-3 text-[0.9375rem] leading-relaxed text-warm-white/90 backdrop-blur-sm">
-                  No spaces in <span className="font-bold">{notFound}</span> yet — all three of our
-                  facilities are in <span className="font-bold">Granbury, TX</span>.
-                </div>
-              )}
               <div className="mt-4 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[0.875rem] text-warm-white/70">
                 <span>Popular sizes:</span>
                 <button type="button" onClick={() => document.getElementById('locations')?.scrollIntoView({ behavior: 'smooth' })} className="font-bold text-warm-white transition-colors hover:text-terracotta">5×10</button><span className="opacity-40">·</span>
@@ -202,6 +202,28 @@ export default function RentASpaceView() {
           <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Storage without the friction</span></div>
           <h2 className="track-tight mt-3 text-[2rem] font-black leading-tight text-black lg:text-[2.5rem]">Our Granbury locations</h2>
           <p className="mt-3 text-[1.0625rem] leading-relaxed text-stone">Three facilities across Granbury. Pick the one nearest you and reserve online — someone who understands your moment is close by.</p>
+          {searchMsg && (
+            <div
+              className={[
+                'mx-auto mt-6 inline-flex max-w-full items-center gap-2.5 rounded-full px-5 py-2.5 text-left text-[0.9375rem] font-bold',
+                searchMsg.kind === 'served'
+                  ? 'bg-sage-green/15 text-[#3f6b37]'
+                  : 'border border-terracotta/50 bg-orange/[0.07] text-charcoal',
+              ].join(' ')}
+            >
+              {searchMsg.kind === 'served' ? (
+                <>
+                  <CheckCircle2 className="h-5 w-5 shrink-0 text-sage-green" strokeWidth={2.2} aria-hidden />
+                  <span>Good news — 3 facilities near “{searchMsg.label}”. Pick yours below.</span>
+                </>
+              ) : (
+                <>
+                  <MapPin className="h-5 w-5 shrink-0 text-orange" strokeWidth={2.2} aria-hidden />
+                  <span>No spaces in “{searchMsg.label}” yet — but all three of our Granbury facilities rent online.</span>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
