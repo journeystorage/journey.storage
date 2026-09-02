@@ -37,6 +37,9 @@ const todayISO = () => {
 // Journey signature radius — one large corner, three sharp.
 const R = 'rounded-tl-[20px] rounded-tr-[4px] rounded-br-[4px] rounded-bl-[4px]'
 const FIELD = 'w-full rounded-sm border border-stone/30 bg-warm-white/[0.06] px-4 py-3 text-[0.9375rem] text-warm-white placeholder:text-stone transition-colors duration-150 focus:border-orange focus-visible:outline-none focus-visible:ring-0'
+// Date inputs need iOS Safari fixes: consistent height, native inset styling
+// stripped, value left-aligned (otherwise the box renders collapsed/off).
+const DATE_FIELD = `${FIELD} [color-scheme:dark] block min-h-[3.25rem] appearance-none [-webkit-appearance:none] [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-date-and-time-value]:m-0 [&::-webkit-date-and-time-value]:text-left`
 
 function Eyebrow({ label }: { label: string }) {
   return (
@@ -50,7 +53,7 @@ function Eyebrow({ label }: { label: string }) {
 export default function RentalFlow({ facility, space, preview = false, onClose }: { facility: { slug: string; short: string; address: string; city: string; phone: string; tel: string }; space: Space; preview?: boolean; onClose: () => void }) {
   const [step, setStep] = useState(0)
   const [moveIn, setMoveIn] = useState(todayISO())
-  const [details, setDetails] = useState({ name: '', email: '', phone: '', address: '', city: '', state: '', zip: '' })
+  const [details, setDetails] = useState({ name: '', email: '', phone: '', address: '', city: '', state: '', zip: '', dob: '', dlNumber: '', dlState: '', dlExp: '', isBusiness: false, businessName: '', military: false, militaryBranch: '' })
   const [planId, setPlanId] = useState<string>('p2')
   const [signature, setSignature] = useState('')
   const [agree, setAgree] = useState(false)
@@ -161,7 +164,12 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
         billDay: realQuote.billDay, webRate: realQuote.monthlyRent, totalDue: realQuote.dueToday, lineItems: realQuote.lineItems,
         promotionIds: hold.promotionId ? [hold.promotionId] : undefined,
         insuranceId: realPlans ? planId : undefined,
-        tenant: { first, last, email: details.email, phone: details.phone, address: details.address, city: details.city, state: details.state, zip: details.zip },
+        tenant: {
+          first, last, email: details.email, phone: details.phone, address: details.address, city: details.city, state: details.state, zip: details.zip,
+          dob: details.dob, dlNumber: details.dlNumber, dlState: details.dlState, dlExp: details.dlExp,
+          isBusiness: details.isBusiness, businessName: details.isBusiness ? details.businessName : undefined,
+          military: details.military, militaryBranch: details.military ? details.militaryBranch : undefined,
+        },
         card: { card_number: card.number.replace(/\s/g, ''), cvv2: card.cvc, exp_mo: mm, exp_yr: yy, name_on_card: details.name, address: details.address, city: details.city, state: details.state, zip: card.zip || details.zip },
       }) })
       const j = await r.json()
@@ -172,7 +180,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
 
   const canNext = () => {
     if (stepName === 'Move-in') return !!moveIn
-    if (stepName === 'Your details') return !!details.name && /.+@.+\..+/.test(details.email) && details.phone.length >= 7 && !!details.address && !!details.city && !!details.state && !!details.zip
+    if (stepName === 'Your details') return !!details.name && /.+@.+\..+/.test(details.email) && details.phone.length >= 7 && !!details.address && !!details.city && !!details.state && !!details.zip && !!details.dob && !!details.dlNumber && details.dlState.length === 2 && !!details.dlExp && (!details.isBusiness || !!details.businessName)
     if (stepName === 'Protection') return !!planId
     if (stepName === 'Sign lease') return agree && signature.trim().length >= 3
     if (stepName === 'Payment') return card.number.replace(/\s/g, '').length >= 12 && card.exp.length >= 4 && card.cvc.length >= 3
@@ -268,6 +276,16 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
       'Tenant.Email': details.email || blank,
       'Tenant.CellPhone': details.phone || blank,
       'Tenant.HomePhone': details.phone || blank,
+      'Tenant.DOB': details.dob ? dateLong(details.dob) : blank,
+      'Tenant.DLNumber': details.dlNumber || blank,
+      'Tenant.DLState': details.dlState || blank,
+      'Tenant.DLExpDate': details.dlExp ? dateLong(details.dlExp) : blank,
+      'Tenant.IsAnIndividual': details.isBusiness ? '☐' : '☒',
+      'Tenant.IsABusiness': details.isBusiness ? '☒' : '☐',
+      'Tenant.EmployerName': details.isBusiness ? details.businessName : blank,
+      'Tenant.ActiveMilitary': details.military ? '☒ Yes' : '☐ No',
+      'Tenant.MilitaryBranchName': details.military ? (details.militaryBranch || blank) : blank,
+      'Tenant.IsInReservesOrGuard': details.military ? '☒' : '☐',
       'Tenant.MoveInDate': dateLong(moveIn),
       'Tenant.RentDueDate': realQuote?.billDay != null ? String(realQuote.billDay) : blank,
       'Tenant.GateCode': 'Assigned at move-in',
@@ -369,6 +387,47 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                   <input placeholder="State" maxLength={2} value={details.state} onChange={(e) => setDetails({ ...details, state: e.target.value.toUpperCase() })} className={FIELD} />
                   <input placeholder="ZIP" inputMode="numeric" value={details.zip} onChange={(e) => setDetails({ ...details, zip: e.target.value })} className={FIELD} />
                 </div>
+              </div>
+
+              <p className="mt-6 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">Identification</p>
+              <div className="mt-2 space-y-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <label className="block">
+                    <span className="text-[0.6875rem] font-bold text-warm-white/45">Date of birth</span>
+                    <input type="date" max={todayISO()} value={details.dob} onChange={(e) => setDetails({ ...details, dob: e.target.value })} className={`${DATE_FIELD} mt-1`} />
+                  </label>
+                  <label className="block">
+                    <span className="text-[0.6875rem] font-bold text-warm-white/45">Driver&rsquo;s license / ID number</span>
+                    <input value={details.dlNumber} onChange={(e) => setDetails({ ...details, dlNumber: e.target.value })} placeholder="License or ID #" className={`${FIELD} mt-1`} />
+                  </label>
+                </div>
+                <div className="grid grid-cols-[110px_1fr] gap-3">
+                  <label className="block">
+                    <span className="text-[0.6875rem] font-bold text-warm-white/45">Issuing state</span>
+                    <input maxLength={2} value={details.dlState} onChange={(e) => setDetails({ ...details, dlState: e.target.value.toUpperCase() })} placeholder="TX" className={`${FIELD} mt-1`} />
+                  </label>
+                  <label className="block">
+                    <span className="text-[0.6875rem] font-bold text-warm-white/45">License expiration</span>
+                    <input type="date" min={todayISO()} value={details.dlExp} onChange={(e) => setDetails({ ...details, dlExp: e.target.value })} className={`${DATE_FIELD} mt-1`} />
+                  </label>
+                </div>
+              </div>
+
+              <div className="mt-6 space-y-3">
+                <label className="flex cursor-pointer items-start gap-3 text-[0.875rem] text-warm-white/80">
+                  <input type="checkbox" checked={details.isBusiness} onChange={(e) => setDetails({ ...details, isBusiness: e.target.checked })} className="mt-0.5 h-4 w-4 accent-orange" />
+                  <span>I&rsquo;m renting as a <b className="text-warm-white">business</b></span>
+                </label>
+                {details.isBusiness && (
+                  <input value={details.businessName} onChange={(e) => setDetails({ ...details, businessName: e.target.value })} placeholder="Business name" className={FIELD} />
+                )}
+                <label className="flex cursor-pointer items-start gap-3 text-[0.875rem] text-warm-white/80">
+                  <input type="checkbox" checked={details.military} onChange={(e) => setDetails({ ...details, military: e.target.checked })} className="mt-0.5 h-4 w-4 accent-orange" />
+                  <span>I am (or my spouse/dependent is) <b className="text-warm-white">active-duty military, reserves, or National Guard</b></span>
+                </label>
+                {details.military && (
+                  <input value={details.militaryBranch} onChange={(e) => setDetails({ ...details, militaryBranch: e.target.value })} placeholder="Branch of service (optional)" className={FIELD} />
+                )}
               </div>
             </div>
           )}

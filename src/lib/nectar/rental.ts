@@ -191,6 +191,17 @@ export interface Tenant {
   city: string
   state: string
   zip: string
+  // Identification + status (all verified to pass finalize validation; DL/DOB/
+  // company persist on the contact; rent_as_business + military go via the
+  // post-lease contact update below).
+  dob?: string // YYYY-MM-DD
+  dlNumber?: string
+  dlState?: string
+  dlExp?: string // YYYY-MM-DD
+  isBusiness?: boolean
+  businessName?: string
+  military?: boolean
+  militaryBranch?: string
 }
 export interface Card {
   card_number: string
@@ -208,7 +219,36 @@ const contactsFrom = (t: Tenant) => [{
   Addresses: [{ Address: { address: t.address, city: t.city, state: t.state, zip: t.zip }, type: 'primary' }],
   Phones: [{ phone: t.phone, sms: true, type: 'cell' }],
   email: t.email, first: t.first, last: t.last,
+  ...(t.dob ? { dob: t.dob } : {}),
+  ...(t.dlNumber ? { driver_license: t.dlNumber } : {}),
+  ...(t.dlState ? { driver_license_state: t.dlState } : {}),
+  ...(t.dlExp ? { driver_license_exp: t.dlExp } : {}),
+  ...(t.dlNumber ? { driver_license_country: 'USA' } : {}),
+  ...(t.isBusiness && t.businessName ? { company: t.businessName } : {}),
+  // Military keys are validated by the API but not yet persisted by it — sent
+  // anyway so the data lands if Tenant Inc enables persistence; the reliable
+  // copy goes into the contact notes post-lease.
+  ...(t.military ? { Military: { active: 1, ...(t.militaryBranch ? { branch: t.militaryBranch } : {}) } } : {}),
 }]
+
+/**
+ * Post-lease contact update for fields the finalize/lease path drops:
+ * rent_as_business (verified persisting via PUT) and the military declaration
+ * (recorded in notes so the back office always sees it). Never throws — this
+ * is secondary data and must not fail a completed rental.
+ */
+export async function updateContactExtras(contactId: string, t: Tenant): Promise<void> {
+  const body: Record<string, unknown> = {}
+  if (t.isBusiness) body.rent_as_business = true
+  if (t.military) {
+    body.notes = `Online rental: tenant self-reported active-duty military / reserves / National Guard${t.militaryBranch ? ` — branch: ${t.militaryBranch}` : ''}.`
+    body.Military = { active: 1, ...(t.militaryBranch ? { branch: t.militaryBranch } : {}) }
+  }
+  if (!Object.keys(body).length) return
+  try {
+    await nectarV2(`companies/${co()}/contacts/${contactId}`, { method: 'PUT', body })
+  } catch { /* secondary data — the rental already succeeded */ }
+}
 const paymentFrom = (c: Card, t: Tenant) => ({
   address: c.address, card_number: c.card_number, city: c.city, cvv2: c.cvv2,
   exp_mo: c.exp_mo, exp_yr: c.exp_yr, first: t.first, last: t.last,
@@ -275,7 +315,7 @@ export async function completeRental(i: CompleteRentalInput): Promise<RentalResu
   // 2. Create the lease — direct flow: hold_token, deliveryMethod.
   // pending:false fully ACTIVATES the tenant (pending:true left it as a lead).
   // The earlier 500 on pending:false was the double-lease-setup bug, now fixed.
-  const { data: leaseData } = await nectarV2<{ lease?: { lease_id?: string; payment_id?: string; payment_method_id?: string; status?: string; tenants?: Array<{ pin?: string }> } }>(
+  const { data: leaseData } = await nectarV2<{ lease?: { lease_id?: string; payment_id?: string; payment_method_id?: string; status?: string; tenants?: Array<{ pin?: string; contact_id?: string }> } }>(
     `companies/${co()}/units/${i.unitId}/lease`,
     { method: 'POST', body: {
       hold_token: i.holdToken, additional_months: 0, contacts, documents,
@@ -287,6 +327,10 @@ export async function completeRental(i: CompleteRentalInput): Promise<RentalResu
   )
   const lease = leaseData.lease ?? {}
   if (!lease.lease_id) throw new Error('Lease could not be created')
+  // Business/military flags the finalize path drops — applied to the contact
+  // after the lease exists; never blocks the rental (verified vs sandbox).
+  const contactId = lease.tenants?.[0]?.contact_id
+  if (contactId && (i.tenant.isBusiness || i.tenant.military)) await updateContactExtras(contactId, i.tenant)
   return {
     leaseId: lease.lease_id,
     paymentId: lease.payment_id,
