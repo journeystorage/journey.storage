@@ -353,22 +353,23 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
             {showCatFilter && (
               <div className="mt-7">
                 <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-stone/70">Filter by type</p>
-                <div className="flex w-full flex-wrap justify-center gap-1.5 rounded-[1.75rem] border border-black/[0.08] bg-warm-white p-1.5 shadow-[0_2px_10px_-6px_rgba(24,24,24,0.35)] sm:inline-flex sm:w-auto sm:justify-start sm:rounded-full sm:p-1">
+                <div className="grid w-full grid-cols-3 gap-1 rounded-full border border-black/[0.08] bg-warm-white p-1 shadow-[0_2px_10px_-6px_rgba(24,24,24,0.35)] sm:inline-flex sm:w-auto sm:gap-1.5">
                   {([
-                    { key: 'all', label: 'All spaces', Icon: null },
-                    { key: 'climate', label: 'Climate Controlled', Icon: Snowflake },
-                    { key: 'standard', label: 'Standard', Icon: Warehouse },
-                  ] as const).map(({ key, label, Icon }) => {
+                    { key: 'all', label: 'All spaces', short: 'All', Icon: null },
+                    { key: 'climate', label: 'Climate Controlled', short: 'Climate', Icon: Snowflake },
+                    { key: 'standard', label: 'Standard', short: 'Standard', Icon: Warehouse },
+                  ] as const).map(({ key, label, short, Icon }) => {
                     const active = catFilter === key
                     return (
                       <button
                         key={key}
                         onClick={() => setCatFilter(key)}
                         aria-pressed={active}
-                        className={`btn-spring inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[0.8125rem] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange ${active ? 'bg-charcoal text-warm-white shadow-[0_2px_8px_-3px_rgba(24,24,24,0.5)]' : 'text-charcoal hover:bg-black/[0.05]'}`}
+                        className={`btn-spring inline-flex items-center justify-center gap-1.5 rounded-full px-2 py-2 text-[0.8125rem] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange sm:px-3.5 sm:py-1.5 ${active ? 'bg-charcoal text-warm-white shadow-[0_2px_8px_-3px_rgba(24,24,24,0.5)]' : 'text-charcoal hover:bg-black/[0.05]'}`}
                       >
-                        {Icon && <Icon className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />}
-                        {label}
+                        {Icon && <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} aria-hidden />}
+                        <span className="sm:hidden">{short}</span>
+                        <span className="hidden sm:inline">{label}</span>
                       </button>
                     )
                   })}
