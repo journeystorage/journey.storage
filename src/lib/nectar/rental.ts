@@ -290,6 +290,16 @@ export interface RentalResult {
   status?: string
   documentUrl?: string
   signed: boolean
+  unitNumber?: string
+}
+
+/** Human unit number (e.g. "23") for a rented unit — best-effort, never throws. */
+async function getUnitNumber(unitId: string): Promise<string | undefined> {
+  try {
+    const { data } = await nectarV2<{ unit?: { number?: string | number } } & { number?: string | number }>(`companies/${co()}/units/${unitId}`)
+    const n = data.unit?.number ?? data.number
+    return n != null && String(n).trim() !== '' ? String(n) : undefined
+  } catch { return undefined }
 }
 
 /** Direct online move-in: documents/finalize (auto-signs) → lease (pending). */
@@ -331,7 +341,9 @@ export async function completeRental(i: CompleteRentalInput): Promise<RentalResu
   // after the lease exists; never blocks the rental (verified vs sandbox).
   const contactId = lease.tenants?.[0]?.contact_id
   if (contactId && (i.tenant.isBusiness || i.tenant.military)) await updateContactExtras(contactId, i.tenant)
+  const unitNumber = await getUnitNumber(i.unitId)
   return {
+    unitNumber,
     leaseId: lease.lease_id,
     paymentId: lease.payment_id,
     paymentMethodId: lease.payment_method_id,

@@ -67,7 +67,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const [hold, setHold] = useState<{ token: string; unitId: string; dossierToken?: string; spaceMixId?: string; promotionId?: string } | null>(null)
   const [realQuote, setRealQuote] = useState<{ dueToday: number; monthlyRent: number; billDay: number; lineItems: { name: string; amount: number }[] } | null>(null)
   const [realPlans, setRealPlans] = useState<{ id: string; coverage: number; premium: number }[] | null>(null)
-  const [rentResult, setRentResult] = useState<{ gatePin?: string | null; leaseId?: string } | null>(null)
+  const [rentResult, setRentResult] = useState<{ gatePin?: string | null; leaseId?: string; unitNumber?: string | null } | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
   const real = !!hold // live mode once a hold is placed
   const dims = useMemo(() => { const m = space.size.match(/(\d+)\s*×\s*(\d+)/); return m ? { width: Number(m[1]), length: Number(m[2]) } : {} as { width?: number; length?: number } }, [space.size])
@@ -170,7 +170,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
         card: { card_number: card.number.replace(/\s/g, ''), cvv2: card.cvc, exp_mo: mm, exp_yr: yy, name_on_card: details.name, address: details.address, city: details.city, state: details.state, zip: card.zip || details.zip },
       }) })
       const j = await r.json()
-      if (r.ok && j.ok) { setRentResult({ gatePin: j.gatePin, leaseId: j.leaseId }); return true }
+      if (r.ok && j.ok) { setRentResult({ gatePin: j.gatePin, leaseId: j.leaseId, unitNumber: j.unitNumber }); return true }
     } catch { /* fall through to demo */ }
     return false
   }
@@ -508,8 +508,8 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 <div className={`relative overflow-hidden ${R} border border-warm-white/10 bg-warm-white/[0.05] p-5 text-left`}>
                   <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(232,98,42,0.18) 0%, transparent 60%)' }} />
                   <p className="relative text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Your space</p>
-                  <p className="relative mt-1.5 text-[1.875rem] font-black text-warm-white">{space.size}</p>
-                  <p className="relative text-[0.75rem] text-warm-white/45">{rentResult ? 'Unit number in your confirmation email' : `${unitNo} · ${facility.address}`}</p>
+                  <p className="relative mt-1.5 text-[1.875rem] font-black text-warm-white">{rentResult?.unitNumber ? `Unit ${rentResult.unitNumber}` : space.size}</p>
+                  <p className="relative text-[0.75rem] text-warm-white/45">{rentResult ? (rentResult.unitNumber ? `${space.size} · ${facility.address}` : 'Unit number in your confirmation email') : `${unitNo} · ${facility.address}`}</p>
                 </div>
               </div>
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[0.8125rem]">

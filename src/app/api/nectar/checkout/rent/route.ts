@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       leaseId: result.leaseId,
+      unitNumber: result.unitNumber ?? null,
       gatePin: result.gatePin ?? null,
       signed: result.signed,
       documentUrl: result.documentUrl ?? null,
