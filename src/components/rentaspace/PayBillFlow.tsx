@@ -30,7 +30,12 @@ function Eyebrow({ label }: { label: string }) {
 
 type Account = { leaseId: string; name: string; code: string | null; balance: number }
 
-export default function PayBillFlow({ facility, onClose }: { facility: { short: string; phone: string; tel: string }; onClose: () => void }) {
+// `short` names the facility when opened from a facility page; omit it when
+// opened from the site nav (account lookup spans all locations) so the copy
+// doesn't read "Granbury, Granbury TX".
+export default function PayBillFlow({ facility, onClose }: { facility: { short?: string; phone: string; tel: string }; onClose: () => void }) {
+  const atFacility = facility.short ? ` at ${facility.short}` : ''
+  const yourAccount = facility.short ? `your ${facility.short} account` : 'your account'
   const [step, setStep] = useState(0)
   const [contact, setContact] = useState('')
   const [looking, setLooking] = useState(false)
@@ -116,7 +121,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
         <div className="sticky top-0 z-[5] flex items-center justify-between gap-4 border-b border-warm-white/[0.07] bg-black/70 px-5 py-4 backdrop-blur-md lg:px-10">
           <div>
             <p className="text-[0.9375rem] font-black leading-tight tracking-[-0.02em] text-warm-white">Pay your bill</p>
-            <p className="text-[0.75rem] text-warm-white/50">Journey.Storage™ — {facility.short}, Granbury TX</p>
+            <p className="text-[0.75rem] text-warm-white/50">Journey.Storage™ — {facility.short ? `${facility.short}, ` : ''}Granbury TX</p>
           </div>
           <button onClick={onClose} aria-label="Close" className="grid h-9 w-9 shrink-0 place-items-center rounded-sm bg-warm-white/[0.08] text-warm-white transition-colors hover:bg-warm-white/[0.16]"><X className="h-5 w-5" aria-hidden /></button>
         </div>
@@ -126,7 +131,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
             <div className="mx-auto max-w-md">
               <Eyebrow label="Find account" />
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><Search className="h-6 w-6 text-orange" aria-hidden />Find your account</h2>
-              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Enter the email or phone on your rental at {facility.short}.</p>
+              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Enter the email or phone on your rental{atFacility}.</p>
               <input value={contact} onChange={(e) => setContact(e.target.value)} placeholder="Email or phone" className={`mt-7 ${FIELD}`} />
               <p className="mt-3 text-[0.75rem] leading-relaxed text-warm-white/40">We&rsquo;ll find your balance and let you pay securely. No login required.</p>
               {lookupMsg && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{lookupMsg} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
@@ -152,7 +157,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
             <div className="mx-auto max-w-md">
               <Eyebrow label="Payment" />
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><CreditCard className="h-6 w-6 text-orange" aria-hidden />Payment</h2>
-              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Paying {money(amountDue)} on your {facility.short} account.</p>
+              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Paying {money(amountDue)} on {yourAccount}.</p>
               <div className="mt-7 space-y-3">
                 <input inputMode="numeric" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })} className={FIELD} />
                 <div className="grid grid-cols-2 gap-3">
@@ -177,7 +182,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
             <div className="mx-auto max-w-md py-4 text-center">
               <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-sage-green/20 text-sage-green ring-1 ring-sage-green/30"><Check className="h-9 w-9" strokeWidth={3} aria-hidden /></div>
               <h2 className="mt-5 text-[2rem] font-black leading-[1.02] tracking-[-0.02em] text-warm-white">Payment received</h2>
-              <p className="mt-3 text-[1rem] leading-[1.6] text-warm-white/50">Thanks{account?.name ? `, ${account.name.split(' ')[0]}` : ''}! We&rsquo;ve applied {money(amountDue)} to your {facility.short} account. A receipt is on its way.</p>
+              <p className="mt-3 text-[1rem] leading-[1.6] text-warm-white/50">Thanks{account?.name ? `, ${account.name.split(' ')[0]}` : ''}! We&rsquo;ve applied {money(amountDue)} to {yourAccount}. A receipt is on its way.</p>
               <div className={`mt-7 ${R} relative overflow-hidden border border-warm-white/10 bg-warm-white/[0.05] p-6 text-left`}>
                 <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(232,98,42,0.18) 0%, transparent 60%)' }} />
                 <dl className="relative space-y-2 text-[0.9375rem]">

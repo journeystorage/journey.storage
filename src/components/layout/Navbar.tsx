@@ -2,12 +2,19 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X, ChevronDown } from 'lucide-react'
-import { navLinks, ecosystemDropdownLinks } from '@/lib/constants'
+import { navLinks, ecosystemDropdownLinks, PHONE } from '@/lib/constants'
 import { scrollToSection } from '@/lib/utils'
 import { openSizeGuide } from '@/components/SizeGuideModal'
 import Button from '@/components/ui/Button'
+
+// Rarely opened, so keep it out of the bundle every page pays for.
+const PayBillFlow = dynamic(() => import('@/components/rentaspace/PayBillFlow'), { ssr: false })
+// Account lookup is company-wide (not per-property), so the nav can pay a bill
+// from anywhere; the facility fields are display/contact only.
+const PAY_BILL_IDENTITY = { phone: PHONE.display, tel: `tel:${PHONE.tel}` }
 
 export default function Navbar() {
   const pathname = usePathname()
@@ -21,6 +28,13 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [mobileEcoOpen, setMobileEcoOpen] = useState(false)
+  const [payBill, setPayBill] = useState(false)
+
+  const openPayBill = useCallback(() => {
+    setMobileOpen(false)
+    setDropdownOpen(false)
+    setPayBill(true)
+  }, [])
 
   // ── Scroll listener ──
   useEffect(() => {
@@ -204,8 +218,21 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* ── Desktop CTA ── */}
-          <div className="hidden lg:block">
+          {/* ── Desktop CTAs — Pay Bill stays subordinate to the one hero CTA ── */}
+          <div className="hidden lg:flex items-center gap-3">
+            <button
+              onClick={openPayBill}
+              className={[
+                'inline-flex min-h-[44px] cursor-pointer items-center justify-center rounded-xl border px-5 py-3',
+                'text-body-sm font-bold transition-colors duration-200 ease-out',
+                'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange',
+                darkHero
+                  ? 'border-warm-white/30 text-warm-white hover:border-warm-white/60 hover:bg-warm-white/10 active:bg-warm-white/[0.16]'
+                  : 'border-black/20 text-black hover:border-black/40 hover:bg-black/[0.05] active:bg-black/[0.08]',
+              ].join(' ')}
+            >
+              Pay Bill
+            </button>
             <Button
               variant="primary"
               onClick={() => handleNavClick('/rentaspace')}
@@ -362,8 +389,8 @@ export default function Navbar() {
             </nav>
           </div>
 
-          {/* CTA at bottom */}
-          <div className="relative z-10 px-8 pb-8">
+          {/* CTAs at bottom */}
+          <div className="relative z-10 flex flex-col gap-3 px-8 pb-8">
             <Button
               variant="primary"
               onClick={() => handleNavClick('/rentaspace')}
@@ -371,9 +398,17 @@ export default function Navbar() {
             >
               Rent a Space
             </Button>
+            <button
+              onClick={openPayBill}
+              className="inline-flex min-h-[44px] w-full cursor-pointer items-center justify-center rounded-xl border border-warm-white/30 px-5 py-3 text-body font-bold text-warm-white transition-colors duration-200 ease-out hover:border-warm-white/60 hover:bg-warm-white/10 active:bg-warm-white/[0.16] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+            >
+              Pay Bill
+            </button>
           </div>
         </div>
       )}
+
+      {payBill && <PayBillFlow facility={PAY_BILL_IDENTITY} onClose={() => setPayBill(false)} />}
     </>
   )
 }
