@@ -57,10 +57,11 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const [planId, setPlanId] = useState<string>('p2')
   const [signature, setSignature] = useState('')
   const [agree, setAgree] = useState(false)
-  const [fullLease, setFullLease] = useState(false)
   const [card, setCard] = useState({ number: '', exp: '', cvc: '', zip: '' })
   const [processing, setProcessing] = useState(false)
   const [payingMsg, setPayingMsg] = useState<string | null>(null)
+  // ClickWrap Superlease disclosures from Hummingbird. null = still loading.
+  const [disclosures, setDisclosures] = useState<Array<{ id: number; html: string }> | null>(null)
   const autopay = true // required — enrollment is not optional
 
   // ── Live API state (demo math is the graceful fallback) ──
@@ -241,6 +242,16 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const glassCard = `${R} border border-warm-white/10 bg-warm-white/[0.04]`
   const optionBase = `flex w-full items-center justify-between rounded-sm border p-4 text-left transition-colors duration-150`
   const dateLong = (iso: string) => new Date(iso + 'T00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+
+  // Pull the live disclosures once per facility; empty array = show the fallback note.
+  useEffect(() => {
+    let alive = true
+    fetch(`/api/nectar/disclosures?facility=${facility.slug}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (alive) setDisclosures(Array.isArray(j?.items) ? j.items : []) })
+      .catch(() => { if (alive) setDisclosures([]) })
+    return () => { alive = false }
+  }, [facility.slug])
 
   return (
     <div className="fixed inset-0 z-[130] flex items-stretch justify-center overflow-y-auto bg-black/80 backdrop-blur-md sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Rent a ${space.size} space`}>
@@ -429,23 +440,25 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
               <Eyebrow label="Sign lease" />
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><FileText className="h-6 w-6 text-orange" aria-hidden />Lease agreement</h2>
               <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Review and sign your month-to-month rental agreement.</p>
-              <p className="mt-4 rounded-sm border border-orange/25 bg-orange/[0.06] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/70"><b className="text-orange">Summary of terms.</b> Your full, binding rental agreement is generated and signed when you complete checkout.</p>
-              <div className="mt-4 h-52 overflow-y-auto rounded-sm border border-warm-white/10 bg-warm-white/[0.04] p-4 text-[0.8125rem] leading-relaxed text-warm-white/70">
-                <p className="font-black tracking-[0.05em] text-warm-white">SELF-STORAGE RENTAL AGREEMENT</p>
-                <p className="mt-2">This Agreement is between Journey Storage 001, LLC (&ldquo;Operator&rdquo;), {facility.address}, {facility.city}, and {details.name || 'the Occupant'} (&ldquo;Occupant&rdquo;) for one {space.size} storage space, on a month-to-month basis beginning {dateLong(moveIn)}.</p>
-                <p className="mt-2"><b className="text-warm-white/90">1. Rent.</b> Occupant agrees to pay {money(space.price)} per month, due on the billing date each month, with the first month discounted 50% under the current promotion. A one-time administrative fee of {money(ADMIN_FEE)} applies.</p>
-                <p className="mt-2"><b className="text-warm-white/90">2. Use.</b> The space is for storage of personal property only. No hazardous, flammable, perishable, or living things may be stored.</p>
-                <p className="mt-2"><b className="text-warm-white/90">3. Insurance.</b> Occupant must maintain coverage on stored goods, via the Operator&rsquo;s protection plan or the Occupant&rsquo;s own policy with proof of coverage.</p>
-                <p className="mt-2"><b className="text-warm-white/90">4. Access.</b> Occupant receives a personal gate code for 24/7 access. Codes are non-transferable.</p>
-                <p className="mt-2"><b className="text-warm-white/90">5. Termination.</b> Either party may terminate with proper notice per state law. This is a month-to-month tenancy with no long-term commitment.</p>
-                <p className="mt-2 text-warm-white/40">…continued in the full agreement.</p>
+              {/* The ClickWrap Superlease's General Disclosures, served live from
+                  Hummingbird — never hand-written lease language. */}
+              <div className="mt-5 rounded-sm border border-warm-white/10 bg-warm-white/[0.04] p-4">
+                <p className="text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-orange">General disclosures</p>
+                {disclosures === null ? (
+                  <p className="mt-3 text-[0.8125rem] leading-relaxed text-warm-white/40">Loading disclosures…</p>
+                ) : disclosures.length === 0 ? (
+                  <p className="mt-3 text-[0.8125rem] leading-relaxed text-warm-white/60">Your rental agreement and its disclosures are presented for signature when you complete checkout. Questions? Call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a>.</p>
+                ) : (
+                  <div className="mt-3 max-h-56 overflow-y-auto pr-1 text-[0.8125rem] leading-[1.7] text-warm-white/75 [&_li]:mt-1 [&_ol]:mt-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:mt-2 [&_p:first-child]:mt-0 [&_strong]:font-bold [&_strong]:text-warm-white [&_ul]:mt-2 [&_ul]:list-disc [&_ul]:pl-5">
+                    {disclosures.map((d) => (
+                      <div key={d.id} dangerouslySetInnerHTML={{ __html: d.html }} />
+                    ))}
+                  </div>
+                )}
               </div>
-              <button type="button" onClick={() => setFullLease(true)} className="mt-3 inline-flex items-center gap-1.5 text-[0.8125rem] font-bold text-orange underline-offset-4 transition-colors hover:underline">
-                <FileText className="h-3.5 w-3.5" aria-hidden />Read the full agreement
-              </button>
               <label className="mt-4 flex cursor-pointer items-start gap-3 text-[0.875rem] text-warm-white/80">
                 <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 h-4 w-4 accent-orange" />
-                <span>I have read and agree to the rental agreement, and I authorize the charges shown at review.</span>
+                <span>I have read and agree to the disclosures above and to the rental agreement, and I authorize the charges shown at review.</span>
               </label>
               <div className="mt-4">
                 <label className="block text-[0.75rem] font-bold uppercase tracking-[0.15em] text-warm-white/50">Type your full name to sign</label>
@@ -533,47 +546,6 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
             </div>
           )}
         </div>
-
-        {/* Full lease agreement overlay */}
-        {fullLease && (
-          <div className="absolute inset-0 z-[20] flex items-stretch justify-center bg-black/85 backdrop-blur-md sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="Full rental agreement">
-            <div className={`relative flex min-h-full w-full max-w-2xl flex-col overflow-hidden border border-warm-white/10 bg-black sm:min-h-0 sm:max-h-[88vh] sm:rounded-tl-[24px] sm:rounded-tr-[6px] sm:rounded-br-[6px] sm:rounded-bl-[6px]`}>
-              <div className="flex items-center justify-between gap-4 border-b border-warm-white/[0.07] px-5 py-4 lg:px-7">
-                <div className="flex items-center gap-2.5">
-                  <FileText className="h-5 w-5 text-orange" aria-hidden />
-                  <p className="text-[0.9375rem] font-black tracking-[-0.01em] text-warm-white">Self-Storage Rental Agreement</p>
-                </div>
-                <button onClick={() => setFullLease(false)} aria-label="Close full agreement" className="grid h-9 w-9 shrink-0 place-items-center rounded-sm bg-warm-white/[0.08] text-warm-white transition-colors hover:bg-warm-white/[0.16]"><X className="h-5 w-5" aria-hidden /></button>
-              </div>
-              <div className="flex-1 overflow-y-auto px-5 py-6 text-[0.8125rem] leading-[1.7] text-warm-white/70 lg:px-7">
-                <p className="mb-4 rounded-sm border border-orange/25 bg-orange/[0.06] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/70"><b className="text-orange">Summary of terms.</b> Your full, binding rental agreement is generated and signed when you complete checkout, using Journey&rsquo;s official lease.</p>
-                <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/40">Journey Storage 001, LLC · {facility.address}, {facility.city}</p>
-                <p className="mt-3">This Self-Storage Rental Agreement (the &ldquo;Agreement&rdquo;) is entered into between Journey Storage 001, LLC (&ldquo;Operator&rdquo;) and {details.name || 'the Occupant'} (&ldquo;Occupant&rdquo;) for the rental of one {space.size} storage space (the &ldquo;Space&rdquo;) at the facility above, on a month-to-month basis commencing {dateLong(moveIn)}.</p>
-                {[
-                  ['1. Rent & Fees', `Occupant agrees to pay ${money(space.price)} per month in advance, due on the billing date each month, with the first month discounted 50% under the current promotion. A one-time, non-refundable administrative fee of ${money(ADMIN_FEE)} is charged at move-in. Rent may be adjusted with at least 30 days’ written notice.`],
-                  ['2. Autopay', 'Occupant enrolls in automatic payments using the payment method on file. Autopay is required for online rentals and will be charged on each billing date until the Agreement is terminated.'],
-                  ['3. Permitted Use', 'The Space is to be used solely for the storage of personal property. Occupant shall not store hazardous, flammable, explosive, perishable, or illegal materials, nor any living thing (person, animal, or plant). Occupant shall not use the Space as a residence or place of business.'],
-                  ['4. Insurance / Protection', 'Occupant is required to maintain insurance covering the stored property. Occupant may enroll in the Operator’s protection plan or provide proof of a homeowner’s or renter’s policy, in which case the protection charge is removed. The Operator is not a warehouseman and does not insure Occupant’s property.'],
-                  ['5. Access', 'Occupant receives a personal gate code providing 24/7 access. Access codes are non-transferable and may be suspended for non-payment. Occupant is responsible for securing the Space with a lock.'],
-                  ['6. Care of Space', 'Occupant shall keep the Space clean and shall be liable for any damage beyond ordinary wear. Occupant shall not make alterations or attach anything to the walls, floor, or ceiling.'],
-                  ['7. Default & Lien', 'If Occupant fails to pay rent when due, the Operator may deny access, and after the statutory period may enforce a lien on the stored property and sell it in accordance with the Texas Self-Service Storage Facility Act.'],
-                  ['8. Termination', 'Either party may terminate this month-to-month Agreement with proper written notice as provided by state law. Upon termination, Occupant shall remove all property and leave the Space clean; the gate code will be deactivated.'],
-                  ['9. Release & Limitation of Liability', 'To the fullest extent permitted by law, the Operator is not liable for loss or damage to stored property from any cause, including theft, fire, water, pests, or mold. Occupant stores property at Occupant’s sole risk.'],
-                  ['10. Entire Agreement', 'This Agreement, together with the facility rules and any addenda, constitutes the entire agreement between the parties and supersedes prior understandings. It is governed by the laws of the State of Texas.'],
-                ].map(([h, body]) => (
-                  <div key={h} className="mt-4">
-                    <p className="font-bold text-warm-white/90">{h}</p>
-                    <p className="mt-1">{body}</p>
-                  </div>
-                ))}
-                <p className="mt-6 text-warm-white/40">By typing your name and continuing, you acknowledge you have read, understood, and agree to be bound by this Agreement. A signed PDF copy is emailed to you after checkout.</p>
-              </div>
-              <div className="flex justify-end border-t border-warm-white/[0.07] px-5 py-4 lg:px-7">
-                <button onClick={() => setFullLease(false)} className={primaryBtn}>Got it</button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Footer nav */}
         {stepName !== 'Done' && (
