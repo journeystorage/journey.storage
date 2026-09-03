@@ -456,6 +456,16 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                   </div>
                 )}
               </div>
+              <a
+                href={`/api/nectar/lease-template?facility=${facility.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center gap-1.5 text-[0.8125rem] font-bold text-orange underline-offset-4 transition-colors duration-150 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+              >
+                <FileText className="h-3.5 w-3.5" aria-hidden />
+                View the full rental agreement
+                <span aria-hidden>↗</span>
+              </a>
               <label className="mt-4 flex cursor-pointer items-start gap-3 text-[0.875rem] text-warm-white/80">
                 <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5 h-4 w-4 accent-orange" />
                 <span>I have read and agree to the disclosures above and to the rental agreement, and I authorize the charges shown at review.</span>
