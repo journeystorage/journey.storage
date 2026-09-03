@@ -67,7 +67,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const [hold, setHold] = useState<{ token: string; unitId: string; dossierToken?: string; spaceMixId?: string; promotionId?: string } | null>(null)
   const [realQuote, setRealQuote] = useState<{ dueToday: number; monthlyRent: number; billDay: number; lineItems: { name: string; amount: number }[] } | null>(null)
   const [realPlans, setRealPlans] = useState<{ id: string; coverage: number; premium: number }[] | null>(null)
-  const [rentResult, setRentResult] = useState<{ gatePin?: string | null; leaseId?: string; unitNumber?: string | null } | null>(null)
+  const [rentResult, setRentResult] = useState<{ gatePin?: string | null; leaseId?: string; unitNumber?: string | null; documentUrl?: string | null } | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
   const real = !!hold // live mode once a hold is placed
   const dims = useMemo(() => { const m = space.size.match(/(\d+)\s*×\s*(\d+)/); return m ? { width: Number(m[1]), length: Number(m[2]) } : {} as { width?: number; length?: number } }, [space.size])
@@ -170,7 +170,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
         card: { card_number: card.number.replace(/\s/g, ''), cvv2: card.cvc, exp_mo: mm, exp_yr: yy, name_on_card: details.name, address: details.address, city: details.city, state: details.state, zip: card.zip || details.zip },
       }) })
       const j = await r.json()
-      if (r.ok && j.ok) { setRentResult({ gatePin: j.gatePin, leaseId: j.leaseId, unitNumber: j.unitNumber }); return true }
+      if (r.ok && j.ok) { setRentResult({ gatePin: j.gatePin, leaseId: j.leaseId, unitNumber: j.unitNumber, documentUrl: j.documentUrl }); return true }
     } catch { /* fall through to demo */ }
     return false
   }
@@ -512,6 +512,17 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                   <p className="relative text-[0.75rem] text-warm-white/45">{rentResult ? (rentResult.unitNumber ? `${space.size} · ${facility.address}` : 'Unit number in your confirmation email') : `${unitNo} · ${facility.address}`}</p>
                 </div>
               </div>
+              {rentResult?.documentUrl && (
+                <a
+                  href={rentResult.documentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-5 inline-flex items-center gap-2 rounded-sm border border-warm-white/20 bg-warm-white/[0.06] px-4 py-2.5 text-[0.875rem] font-bold text-warm-white transition-colors duration-150 hover:border-orange hover:bg-orange/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                >
+                  <FileText className="h-4 w-4 text-orange" aria-hidden />
+                  View your signed lease
+                </a>
+              )}
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[0.8125rem]">
                 <span className="inline-flex items-center gap-1.5 rounded-sm border border-sage-green/25 bg-sage-green/10 px-3 py-1.5 font-bold text-sage-green"><FileText className="h-3.5 w-3.5" aria-hidden />Lease signed</span>
                 <span className="inline-flex items-center gap-1.5 rounded-sm border border-sage-green/25 bg-sage-green/10 px-3 py-1.5 font-bold text-sage-green"><Check className="h-3.5 w-3.5" aria-hidden />Paid {money(effDueToday)}</span>
