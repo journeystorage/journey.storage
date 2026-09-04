@@ -8,6 +8,8 @@
   --color-warm-white: #F5F0E8;
   --color-terracotta: #D4956A;
   --color-sand: #C4B89A;
+  /* Closed-deal status green — desaturated moss, keeps the warm earth palette */
+  --color-moss: #79A85C;
 
   /* Semantic deck tokens — dark by default */
   --color-deck-bg: #181818;

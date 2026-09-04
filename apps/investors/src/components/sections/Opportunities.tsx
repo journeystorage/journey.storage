@@ -14,30 +14,27 @@ interface Deal {
   photoAlt: string
   imageClassName: string
   caption: string
+  status: 'open' | 'completed'
   stats: { label: string; value: string }[]
   types: string[]
   strategy: string
   quote: string
 }
 
-const DEALS: Deal[] = [
-  {
-    name: 'Granbury',
-    location: 'Granbury, TX',
-    photo: '/images/deals/granbury/granbury-2.jpg',
-    photoAlt: 'Granbury self-storage facility, 773 spaces across 17 buildings',
-    imageClassName: 'object-cover scale-[1.4] object-[50%_70%] lg:object-[50%_30%]',
-    caption: '773-space facility across 17 buildings in a supply-constrained Texas market.',
-    stats: [
-      { label: 'Spaces', value: '773' },
-      { label: 'NRSF', value: '126,000' },
-      { label: 'Buildings', value: '17' },
-    ],
-    types: ['Drive-up', 'Climate', 'Commercial'],
-    strategy: 'Value-add acquisition',
-    quote:
-      'Acquired below replacement cost in a supply-constrained market with strong demographic tailwinds.',
+const STATUS = {
+  open: {
+    label: 'Accepting subscriptions',
+    dot: 'bg-orange',
+    text: 'text-orange',
   },
+  completed: {
+    label: 'Completed',
+    dot: 'bg-moss',
+    text: 'text-moss',
+  },
+} as const
+
+const DEALS: Deal[] = [
   {
     name: 'Springfield',
     location: 'Springfield, MO',
@@ -45,6 +42,7 @@ const DEALS: Deal[] = [
     photoAlt: 'Springfield self-storage portfolio, 11 facilities across the Springfield, Missouri MSA',
     imageClassName: 'object-cover object-center',
     caption: '11-facility, 640,000 NRSF portfolio across the Springfield, Missouri MSA.',
+    status: 'open',
     stats: [
       { label: 'Properties', value: '11' },
       { label: 'Spaces', value: '3,766' },
@@ -55,9 +53,29 @@ const DEALS: Deal[] = [
     quote:
       'Eleven-property roll-up in a fragmented home market — occupancy and rate upside under unified operations.',
   },
+  {
+    name: 'Granbury',
+    location: 'Granbury, TX',
+    photo: '/images/deals/granbury/granbury-2.jpg',
+    photoAlt: 'Granbury self-storage facility, 773 spaces across 17 buildings',
+    imageClassName: 'object-cover scale-[1.4] object-[50%_70%] lg:object-[50%_30%]',
+    caption: '773-space facility across 17 buildings in a supply-constrained Texas market.',
+    status: 'completed',
+    stats: [
+      { label: 'Spaces', value: '773' },
+      { label: 'NRSF', value: '126,000' },
+      { label: 'Buildings', value: '17' },
+    ],
+    types: ['Drive-up', 'Climate', 'Commercial'],
+    strategy: 'Value-add acquisition',
+    quote:
+      'Acquired below replacement cost in a supply-constrained market with strong demographic tailwinds.',
+  },
 ]
 
 function DealCard({ deal, onBookCall }: { deal: Deal; onBookCall: () => void }) {
+  const status = STATUS[deal.status]
+
   return (
     <div className="grid lg:gap-0 lg:grid-cols-[3fr_2fr] max-w-[1000px]">
 
@@ -102,9 +120,9 @@ function DealCard({ deal, onBookCall }: { deal: Deal; onBookCall: () => void }) 
               <p className="mt-1 text-body-sm text-warm-white/50">{deal.location}</p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-2 w-2 rounded-full bg-orange" />
-              <span className="text-[0.7rem] font-bold uppercase tracking-[0.15em] text-orange">
-                Accepting subscriptions
+              <span className={`inline-flex h-2 w-2 rounded-full ${status.dot}`} />
+              <span className={`text-[0.7rem] font-bold uppercase tracking-[0.15em] ${status.text}`}>
+                {status.label}
               </span>
             </div>
           </div>
