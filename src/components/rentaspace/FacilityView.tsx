@@ -21,7 +21,7 @@ export type UnitGroup = { category: string; blurb: string; units: Unit[] }
 // Live availability card from GET /api/nectar/spaces/[facility] (preview-only).
 type LiveSpace = { id: string; size: string | null; available: number; inStock: boolean; onlinePrice: number | null; fromPrice: number | null; category: string | null }
 
-const SIZE_ART_KEYS = new Set(['5x5', '5x10', '10x10', '10x15', '10x20', '10x30'])
+const SIZE_ART_KEYS = new Set(['5x5', '5x10', '10x10', '10x15', '10x20', '10x25', '10x30'])
 const liveArtKey = (size: string | null): string | null => {
   if (!size) return null
   const k = size.replace(/\s*×\s*/, 'x').toLowerCase()

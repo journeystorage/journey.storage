@@ -17,6 +17,7 @@ export const SIZE_ART: SizeArtEntry[] = [
   { key: '10x10', size: "10' × 10'", label: 'Small bedroom', sqft: 100, accent: 'rgb(212, 149, 106)', tint: 'rgba(212,149,106,0.16)', illo: 3 },
   { key: '10x15', size: "10' × 15'", label: 'Large bedroom', sqft: 150, accent: 'rgb(185, 108, 82)', tint: 'rgba(185,108,82,0.16)', illo: 4 },
   { key: '10x20', size: "10' × 20'", label: 'One-car garage', sqft: 200, accent: 'rgb(138, 122, 165)', tint: 'rgba(138,122,165,0.16)', illo: 5 },
+  { key: '10x25', size: "10' × 25'", label: 'Oversized garage', sqft: 250, accent: 'rgb(140, 146, 96)', tint: 'rgba(140,146,96,0.16)', illo: 5 },
   { key: '10x30', size: "10' × 30'", label: 'Two-car garage', sqft: 300, accent: 'rgb(93, 138, 133)', tint: 'rgba(93,138,133,0.18)', illo: 6 },
 ]
 
