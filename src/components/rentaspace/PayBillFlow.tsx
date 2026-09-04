@@ -60,6 +60,21 @@ const spaceLabel = (a: Account) =>
   [a.unitNumber ? `Unit ${a.unitNumber}` : null, a.unitSize].filter(Boolean).join(' · ') || 'Your space'
 
 /**
+ * Format a US phone as it's typed — "8175790607" → "(817) 579-0607".
+ * Left alone the moment it looks like an email (or anything with letters), so
+ * the one field still takes either.
+ */
+function formatContact(v: string): string {
+  if (/[a-zA-Z@]/.test(v)) return v
+  const raw = v.replace(/\D/g, '').slice(0, 11)
+  const d = raw.length === 11 && raw.startsWith('1') ? raw.slice(1) : raw
+  if (!d) return ''
+  if (d.length <= 3) return `(${d}`
+  if (d.length <= 6) return `(${d.slice(0, 3)}) ${d.slice(3)}`
+  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6, 10)}`
+}
+
+/**
  * One plain sentence saying what this payment covers. The space and property
  * are always shown directly above it, so this line doesn't repeat them.
  */
@@ -82,9 +97,12 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   const [step, setStep] = useState(0)
   const [contact, setContact] = useState('')
   const [looking, setLooking] = useState(false)
-  // A tenant can hold several spaces, sometimes at different properties.
+  // A tenant can hold several spaces, sometimes at different properties, and
+  // may want to settle more than one at once.
   const [accounts, setAccounts] = useState<Account[]>([])
-  const [account, setAccount] = useState<Account | null>(null)
+  const [picked, setPicked] = useState<string[]>([])
+  // Per-lease outcome — paying N spaces is N charges, so some can fail.
+  const [results, setResults] = useState<Array<{ leaseId: string; ok: boolean; error?: string }>>([])
   const [lookupMsg, setLookupMsg] = useState<string | null>(null)
   const [card, setCard] = useState({ number: '', exp: '', cvc: '' })
   const [billing, setBilling] = useState({ name: '', address1: '', city: '', state: '', zip: '' })
@@ -92,7 +110,14 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   const [payError, setPayError] = useState<string | null>(null)
 
   const stepName: StepName = STEPS[step]
-  const amountDue = account?.balance ?? 0
+  const payable = accounts.filter((a) => a.balance > 0)
+  const chosen = accounts.filter((a) => picked.includes(a.leaseId))
+  const amountDue = +chosen.reduce((s, a) => s + a.balance, 0).toFixed(2)
+  const toggle = (leaseId: string) =>
+    setPicked((p) => (p.includes(leaseId) ? p.filter((x) => x !== leaseId) : [...p, leaseId]))
+  const paidOk = accounts.filter((a) => results.some((r) => r.leaseId === a.leaseId && r.ok))
+  const paidFailed = accounts.filter((a) => results.some((r) => r.leaseId === a.leaseId && !r.ok))
+  const amountPaid = +paidOk.reduce((s, a) => s + a.balance, 0).toFixed(2)
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
@@ -103,7 +128,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
 
   const canNext = () => {
     if (stepName === 'Account') return /.+@.+\..+/.test(contact) || contact.replace(/\D/g, '').length >= 7
-    if (stepName === 'Balance') return !!account && amountDue > 0
+    if (stepName === 'Balance') return chosen.length > 0 && amountDue > 0
     if (stepName === 'Payment') return card.number.replace(/\s/g, '').length >= 12 && card.exp.length >= 4 && card.cvc.length >= 3 && !!billing.name && !!billing.address1 && !!billing.city && !!billing.state && !!billing.zip
     return true
   }
@@ -117,28 +142,43 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
       if (!j.found || !j.accounts?.length) { setLookupMsg('We couldn’t find an account for that email or phone. Double-check it, or call us.'); return false }
       const list = j.accounts as Account[]
       setAccounts(list)
-      // Pre-select when there's only one space, or the only one that owes.
-      const owing = list.filter((a) => a.balance > 0)
-      setAccount(list.length === 1 ? list[0] : owing.length === 1 ? owing[0] : null)
+      // Pre-select every space that owes — the common case is "pay what I owe".
+      setPicked(list.filter((a) => a.balance > 0).map((a) => a.leaseId))
       return true
     } catch { setLookupMsg('Something went wrong — please try again or call us.'); return false }
     finally { setLooking(false) }
   }
 
+  /**
+   * Each space is its own lease and its own charge, so pay them one at a time
+   * and record each outcome — a later one failing must not erase an earlier
+   * success, and the receipt has to say exactly what went through.
+   */
   async function pay(): Promise<boolean> {
-    if (!account) return false
+    if (!chosen.length) return false
     const [mm = '', yyRaw = ''] = card.exp.split('/').map((s) => s.trim())
     const yy = yyRaw.length === 2 ? `20${yyRaw}` : yyRaw
-    try {
-      const r = await fetch('/api/nectar/account/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
-        leaseId: account.leaseId, amount: amountDue,
-        card: { card_number: card.number.replace(/\s/g, ''), cvv2: card.cvc, exp_mo: mm, exp_yr: yy, name_on_card: billing.name, address: billing.address1, city: billing.city, state: billing.state, zip: billing.zip },
-      }) })
-      const j = await r.json()
-      if (r.ok && j.ok) return true
-      setPayError(j.error ?? 'Payment could not be processed.')
-    } catch { setPayError('Something went wrong — please try again or call us.') }
-    return false
+    const cardPayload = { card_number: card.number.replace(/\s/g, ''), cvv2: card.cvc, exp_mo: mm, exp_yr: yy, name_on_card: billing.name, address: billing.address1, city: billing.city, state: billing.state, zip: billing.zip }
+    const out: Array<{ leaseId: string; ok: boolean; error?: string }> = []
+    for (const a of chosen) {
+      try {
+        const r = await fetch('/api/nectar/account/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ leaseId: a.leaseId, amount: a.balance, card: cardPayload }) })
+        const j = await r.json()
+        out.push(r.ok && j.ok ? { leaseId: a.leaseId, ok: true } : { leaseId: a.leaseId, ok: false, error: j.error ?? 'Payment declined.' })
+      } catch {
+        out.push({ leaseId: a.leaseId, ok: false, error: 'Connection problem.' })
+      }
+    }
+    setResults(out)
+    const anyOk = out.some((r) => r.ok)
+    const failures = out.filter((r) => !r.ok)
+    if (failures.length && anyOk) {
+      setPayError(`We couldn’t complete ${failures.length} of ${out.length} payments — see below.`)
+    } else if (failures.length) {
+      setPayError(failures[0].error ?? 'Payment could not be processed.')
+    }
+    // Land on the receipt whenever anything succeeded, so the tenant sees it.
+    return anyOk
   }
 
   const next = async () => {
@@ -181,7 +221,15 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
               <Eyebrow label="Find account" />
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><Search className="h-6 w-6 text-orange" aria-hidden />Find your account</h2>
               <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Enter the email or phone on your rental{atFacility}.</p>
-              <input value={contact} onChange={(e) => setContact(e.target.value)} placeholder="Email or phone" className={`mt-7 ${FIELD}`} />
+              <input
+                value={contact}
+                onChange={(e) => setContact(formatContact(e.target.value))}
+                onKeyDown={(e) => { if (e.key === 'Enter' && canNext() && !looking) next() }}
+                inputMode="text"
+                autoComplete="email"
+                placeholder="Email or phone"
+                className={`mt-7 ${FIELD}`}
+              />
               <p className="mt-3 text-[0.75rem] leading-relaxed text-warm-white/40">We&rsquo;ll find your balance and let you pay securely. No login required.</p>
               {lookupMsg && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{lookupMsg} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
             </div>
@@ -192,77 +240,117 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
               <Eyebrow label={accounts.length > 1 ? 'Your spaces' : 'Balance'} />
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white">
                 <Wallet className="h-6 w-6 shrink-0 text-orange" aria-hidden />
-                {accounts.length > 1 ? 'Choose a space to pay' : 'Your balance'}
+                {payable.length > 1 ? 'Choose spaces to pay' : accounts.length > 1 ? 'Choose a space to pay' : 'Your balance'}
               </h2>
               <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/60">
                 <span className="font-bold text-warm-white">{accounts[0].name}</span>
                 {accounts.length > 1 && <> · {accounts.length} spaces{new Set(accounts.map((a) => a.propertyName).filter(Boolean)).size > 1 ? ' across 2+ locations' : ''}</>}
               </p>
 
-              <div className="mt-6 space-y-3">
+              {payable.length > 1 && (
+                <div className="mt-5 flex items-center justify-between gap-3">
+                  <p className="text-[0.8125rem] text-warm-white/55">Select the spaces you&rsquo;d like to pay.</p>
+                  <button
+                    type="button"
+                    onClick={() => setPicked(picked.length === payable.length ? [] : payable.map((a) => a.leaseId))}
+                    className="shrink-0 text-[0.8125rem] font-bold text-orange underline-offset-4 transition-colors hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                  >
+                    {picked.length === payable.length ? 'Clear all' : 'Select all'}
+                  </button>
+                </div>
+              )}
+
+              <div className="mt-4 space-y-3">
                 {accounts.map((a) => {
-                  const selected = account?.leaseId === a.leaseId
                   const owes = a.balance > 0
-                  const single = accounts.length === 1
+                  const selected = picked.includes(a.leaseId)
                   return (
                     <button
                       key={a.leaseId}
                       type="button"
-                      onClick={() => owes && setAccount(a)}
+                      onClick={() => owes && toggle(a.leaseId)}
                       disabled={!owes}
                       aria-pressed={selected}
                       className={`block w-full rounded-sm border p-4 text-left transition-colors duration-150 ${
                         selected ? 'border-orange bg-orange/[0.08]' : 'border-warm-white/12 bg-warm-white/[0.04]'
-                      } ${owes && !single ? 'cursor-pointer hover:border-warm-white/30' : 'cursor-default'} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange`}
+                      } ${owes ? 'cursor-pointer hover:border-warm-white/30' : 'cursor-default opacity-70'} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange`}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-[1.0625rem] font-black tracking-[-0.01em] text-warm-white">{spaceLabel(a)}</p>
-                          {a.propertyName && <p className="mt-0.5 text-[0.8125rem] text-warm-white/55">{a.propertyName}</p>}
-                          {a.code && <p className="mt-0.5 text-[0.6875rem] text-warm-white/35">Account {a.code}</p>}
-                        </div>
-                        <div className="shrink-0 text-right">
-                          <p className={`text-[1.25rem] font-black leading-none ${owes ? 'text-orange' : 'text-sage-green'}`}>{money(a.balance)}</p>
-                          {a.pastDue ? (
-                            <span className="mt-1.5 inline-block rounded-full bg-[#D4956A]/15 px-2 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-[#E8A87C]">Past due</span>
-                          ) : owes ? (
-                            a.dueDate && <p className="mt-1 text-[0.6875rem] text-warm-white/45">Due {dateShort(a.dueDate)}</p>
-                          ) : (
-                            <span className="mt-1.5 inline-flex items-center gap-1 text-[0.6875rem] font-bold text-sage-green"><Check className="h-3 w-3" aria-hidden />Paid</span>
-                          )}
+                      <div className="flex items-start gap-3">
+                        {owes && (
+                          <span
+                            aria-hidden
+                            className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-sm border transition-colors duration-150 ${
+                              selected ? 'border-orange bg-orange text-warm-white' : 'border-warm-white/30'
+                            }`}
+                          >
+                            {selected && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
+                          </span>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-[1.0625rem] font-black tracking-[-0.01em] text-warm-white">{spaceLabel(a)}</p>
+                              {a.propertyName && <p className="mt-0.5 text-[0.8125rem] text-warm-white/55">{a.propertyName}</p>}
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <p className={`text-[1.25rem] font-black leading-none ${owes ? 'text-orange' : 'text-sage-green'}`}>{money(a.balance)}</p>
+                              {a.pastDue ? (
+                                <span className="mt-1.5 inline-block rounded-full bg-[#D4956A]/15 px-2 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-[#E8A87C]">Past due</span>
+                              ) : owes ? (
+                                a.dueDate && <p className="mt-1 text-[0.6875rem] text-warm-white/45">Due {dateShort(a.dueDate)}</p>
+                              ) : (
+                                <span className="mt-1.5 inline-flex items-center gap-1 text-[0.6875rem] font-bold text-sage-green"><Check className="h-3 w-3" aria-hidden />Paid</span>
+                              )}
+                            </div>
+                          </div>
+                          <p className="mt-2.5 border-t border-warm-white/[0.07] pt-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">{whatYouArePaying(a)}</p>
                         </div>
                       </div>
-                      <p className="mt-2.5 border-t border-warm-white/[0.07] pt-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">{whatYouArePaying(a)}</p>
                     </button>
                   )
                 })}
               </div>
 
-              {accounts.every((a) => a.balance <= 0) && (
+              {accounts.every((a) => a.balance <= 0) ? (
                 <p className="mt-4 flex items-start gap-2 text-[0.9375rem] font-bold text-sage-green"><Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />You&rsquo;re all paid up — nothing due right now.</p>
-              )}
-              {accounts.length > 1 && accounts.some((a) => a.balance > 0) && !account && (
-                <p className="mt-4 text-[0.8125rem] text-warm-white/50">Pick the space you&rsquo;d like to pay. You can come back and pay the others after.</p>
-              )}
+              ) : chosen.length > 1 ? (
+                <div className="mt-4 flex items-baseline justify-between gap-3 rounded-sm border border-warm-white/12 bg-warm-white/[0.04] px-4 py-3">
+                  <span className="text-[0.875rem] font-bold text-warm-white">Total for {chosen.length} spaces</span>
+                  <span className="text-[1.25rem] font-black text-orange">{money(amountDue)}</span>
+                </div>
+              ) : payable.length > 0 && chosen.length === 0 ? (
+                <p className="mt-4 text-[0.8125rem] text-warm-white/50">Select at least one space to continue.</p>
+              ) : null}
             </div>
           )}
 
-          {stepName === 'Payment' && account && (
+          {stepName === 'Payment' && chosen.length > 0 && (
             <div className="mx-auto max-w-md">
               <Eyebrow label="Payment" />
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><CreditCard className="h-6 w-6 shrink-0 text-orange" aria-hidden />Payment</h2>
               {/* Exactly what's being paid, and on which space — tenants with
                   spaces at more than one property need this to be unambiguous. */}
               <div className={`mt-5 ${glassCard} p-4`}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Paying for</p>
-                    <p className="mt-1 text-[1.0625rem] font-black tracking-[-0.01em] text-warm-white">{spaceLabel(account)}</p>
-                    <p className="mt-0.5 text-[0.8125rem] text-warm-white/60">{[account.propertyName, account.name].filter(Boolean).join(' · ')}</p>
-                  </div>
-                  <p className="shrink-0 text-[1.5rem] font-black leading-none text-orange">{money(amountDue)}</p>
+                <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Paying for</p>
+                <p className="mt-1 text-[0.8125rem] text-warm-white/60">{chosen[0].name}</p>
+                <div className="mt-3 space-y-2.5">
+                  {chosen.map((a) => (
+                    <div key={a.leaseId} className="flex items-start justify-between gap-3 border-t border-warm-white/[0.07] pt-2.5">
+                      <div className="min-w-0">
+                        <p className="text-[0.9375rem] font-bold text-warm-white">{spaceLabel(a)}</p>
+                        <p className="mt-0.5 text-[0.75rem] text-warm-white/55">{[a.propertyName, whatYouArePaying(a)].filter(Boolean).join(' · ')}</p>
+                      </div>
+                      <p className="shrink-0 text-[0.9375rem] font-black text-warm-white">{money(a.balance)}</p>
+                    </div>
+                  ))}
                 </div>
-                <p className="mt-3 border-t border-warm-white/[0.07] pt-3 text-[0.75rem] leading-relaxed text-warm-white/60">{whatYouArePaying(account)}</p>
+                <div className="mt-3 flex items-baseline justify-between gap-3 border-t border-warm-white/15 pt-3">
+                  <span className="text-[0.875rem] font-bold text-warm-white">Total</span>
+                  <span className="text-[1.5rem] font-black leading-none text-orange">{money(amountDue)}</span>
+                </div>
+                {chosen.length > 1 && (
+                  <p className="mt-3 text-[0.6875rem] leading-relaxed text-warm-white/45">Each space is billed separately, so {chosen.length} charges totalling {money(amountDue)} will appear on your statement.</p>
+                )}
               </div>
               <div className="mt-6 space-y-3">
                 <input inputMode="numeric" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })} className={FIELD} />
@@ -280,28 +368,38 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
                 </div>
               </div>
               {payError && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{payError} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
-              <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Secured by Tenant Payments. Your card is charged {money(amountDue)} and applied to your account.</p>
+              <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Secured by Tenant Payments. Your card is charged {money(amountDue)} and applied to {chosen.length > 1 ? 'the spaces above' : 'your account'}.</p>
             </div>
           )}
 
           {stepName === 'Done' && (
             <div className="mx-auto max-w-md py-4 text-center">
               <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-sage-green/20 text-sage-green ring-1 ring-sage-green/30"><Check className="h-9 w-9" strokeWidth={3} aria-hidden /></div>
-              <h2 className="mt-5 text-[2rem] font-black leading-[1.02] tracking-[-0.02em] text-warm-white">Payment received</h2>
-              <p className="mt-3 text-[1rem] leading-[1.6] text-warm-white/50">Thanks{account?.name ? `, ${account.name.split(' ')[0]}` : ''}! We&rsquo;ve applied {money(amountDue)} to {account ? spaceLabel(account) : yourAccount}{account?.propertyName ? ` at ${account.propertyName}` : ''}. A receipt is on its way.</p>
+              <h2 className="mt-5 text-[2rem] font-black leading-[1.02] tracking-[-0.02em] text-warm-white">{paidFailed.length ? 'Partly paid' : 'Payment received'}</h2>
+              <p className="mt-3 text-[1rem] leading-[1.6] text-warm-white/50">
+                Thanks{paidOk[0]?.name ? `, ${paidOk[0].name.split(' ')[0]}` : ''}! We&rsquo;ve applied {money(amountPaid)} to {paidOk.length > 1 ? `${paidOk.length} spaces` : paidOk[0] ? spaceLabel(paidOk[0]) : yourAccount}. A receipt is on its way.
+              </p>
               <div className={`mt-7 ${R} relative overflow-hidden border border-warm-white/10 bg-warm-white/[0.05] p-6 text-left`}>
                 <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(232,98,42,0.18) 0%, transparent 60%)' }} />
                 <dl className="relative space-y-2 text-[0.9375rem]">
-                  {account?.name && <div className="flex justify-between gap-3"><dt className="text-warm-white/55">Name</dt><dd className="text-right font-bold text-warm-white">{account.name}</dd></div>}
-                  {account && <div className="flex justify-between gap-3"><dt className="text-warm-white/55">Space</dt><dd className="text-right font-bold text-warm-white">{spaceLabel(account)}</dd></div>}
-                  {account?.propertyName && <div className="flex justify-between gap-3"><dt className="text-warm-white/55">Location</dt><dd className="text-right font-bold text-warm-white">{account.propertyName}</dd></div>}
-                  {account?.code && <div className="flex justify-between gap-3"><dt className="text-warm-white/55">Account</dt><dd className="text-right font-bold text-warm-white">{account.code}</dd></div>}
-                  <div className="flex justify-between gap-3 border-t border-warm-white/[0.07] pt-2"><dt className="text-warm-white/55">Amount paid</dt><dd className="text-right font-bold text-warm-white">{money(amountDue)}</dd></div>
+                  {paidOk[0]?.name && <div className="flex justify-between gap-3"><dt className="text-warm-white/55">Name</dt><dd className="text-right font-bold text-warm-white">{paidOk[0].name}</dd></div>}
+                  {paidOk.map((a) => (
+                    <div key={a.leaseId} className="flex justify-between gap-3">
+                      <dt className="text-warm-white/55">{spaceLabel(a)}{a.propertyName ? <span className="block text-[0.75rem] text-warm-white/35">{a.propertyName}</span> : null}</dt>
+                      <dd className="text-right font-bold text-warm-white">{money(a.balance)}</dd>
+                    </div>
+                  ))}
+                  <div className="flex justify-between gap-3 border-t border-warm-white/[0.07] pt-2"><dt className="text-warm-white/55">Total paid</dt><dd className="text-right font-bold text-warm-white">{money(amountPaid)}</dd></div>
                 </dl>
               </div>
-              {accounts.filter((a) => a.leaseId !== account?.leaseId && a.balance > 0).length > 0 && (
-                <p className="mt-5 rounded-sm border border-orange/25 bg-orange/[0.06] px-4 py-3 text-[0.8125rem] leading-relaxed text-warm-white/70">
-                  You still have a balance on {accounts.filter((a) => a.leaseId !== account?.leaseId && a.balance > 0).map((a) => spaceLabel(a)).join(' and ')}. Reopen Pay Bill to take care of {accounts.filter((a) => a.leaseId !== account?.leaseId && a.balance > 0).length > 1 ? 'those' : 'that'} too.
+              {paidFailed.length > 0 && (
+                <p className="mt-5 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-left text-[0.8125rem] leading-relaxed text-[#E8A87C]">
+                  <b>We couldn&rsquo;t charge {paidFailed.map((a) => spaceLabel(a)).join(' or ')}.</b> Nothing was taken for {paidFailed.length > 1 ? 'those spaces' : 'that space'} — try again, or call <a href={facility.tel} className="underline">{facility.phone}</a>.
+                </p>
+              )}
+              {accounts.filter((a) => a.balance > 0 && !results.some((r) => r.leaseId === a.leaseId)).length > 0 && (
+                <p className="mt-4 rounded-sm border border-orange/25 bg-orange/[0.06] px-4 py-3 text-left text-[0.8125rem] leading-relaxed text-warm-white/70">
+                  You still have a balance on {accounts.filter((a) => a.balance > 0 && !results.some((r) => r.leaseId === a.leaseId)).map((a) => spaceLabel(a)).join(' and ')}. Reopen Pay Bill to take care of that too.
                 </p>
               )}
               <p className="mt-7 text-[0.75rem] text-warm-white/40">Questions? Call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a>.</p>
@@ -318,7 +416,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
             <div className="flex items-center gap-3">
               {stepName === 'Balance' && amountDue > 0 && <span className="hidden text-[0.9375rem] font-black text-warm-white sm:inline">{money(amountDue)} due</span>}
               <button onClick={next} disabled={!canNext() || looking || processing} className={primaryBtn}>
-                {looking ? 'Finding…' : processing ? 'Processing…' : stepName === 'Account' ? 'Find my balance' : stepName === 'Balance' ? (account ? 'Continue to payment' : 'Select a space') : `Pay ${money(amountDue)}`}
+                {looking ? 'Finding…' : processing ? 'Processing…' : stepName === 'Account' ? 'Find my balance' : stepName === 'Balance' ? (chosen.length ? 'Continue to payment' : 'Select a space') : `Pay ${money(amountDue)}`}
                 {!looking && !processing && <ChevronRight className="h-4 w-4" aria-hidden />}
               </button>
             </div>
