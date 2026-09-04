@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo, useRef, type FormEvent } from 'react'
-import { MapPin, Phone, Menu, Star, Check, ChevronRight, ChevronLeft, ChevronDown, X, Ruler, Sparkles, Snowflake, Warehouse } from 'lucide-react'
+import { MapPin, Phone, Star, Check, ChevronRight, ChevronLeft, ChevronDown, X, Ruler, Sparkles, Snowflake, Warehouse } from 'lucide-react'
 import { SizeArt, getSizeArt } from '@/lib/sizeArt'
 import { openSizeGuide } from '@/components/SizeGuideModal'
 import RentFooter from '@/components/rentaspace/RentFooter'
@@ -99,7 +99,13 @@ function Nav({ onSizeGuide, onPayBill }: { onSizeGuide: () => void; onPayBill?: 
             <a href={PHONE_TEL} className="btn-spring rounded-full border-2 border-warm-white/80 px-5 py-2 text-[0.9375rem] font-bold text-warm-white hover:bg-warm-white hover:text-black">Pay Bill</a>
           )}
         </div>
-        <button className="text-warm-white lg:hidden" aria-label="Menu"><Menu className="h-7 w-7" strokeWidth={2} aria-hidden /></button>
+        {/* Mobile: the desktop links collapse, so lead with the one action a
+            returning tenant needs here. */}
+        {onPayBill ? (
+          <button onClick={onPayBill} className="btn-spring rounded-full border-2 border-warm-white/80 px-4 py-1.5 text-[0.875rem] font-bold text-warm-white hover:bg-warm-white hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange lg:hidden">Pay Bill</button>
+        ) : (
+          <a href={PHONE_TEL} className="btn-spring rounded-full border-2 border-warm-white/80 px-4 py-1.5 text-[0.875rem] font-bold text-warm-white hover:bg-warm-white hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange lg:hidden">Pay Bill</a>
+        )}
       </nav>
     </header>
   )
