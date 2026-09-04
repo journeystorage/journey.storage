@@ -50,7 +50,9 @@ export const socialUrls = {
 // ─── Nav Configuration ───
 export const navLinks = [
   { label: 'Locations', href: `#${sectionIds.locations}` },
-  { label: 'Size Guide', href: '/size-guide' },
+  // The standalone /size-guide route was removed. This deep-link opens the
+  // size-guide modal and stays crawlable — same convention as the footer.
+  { label: 'Size Guide', href: '/?sizeguide' },
   { label: 'About Us', href: `#${sectionIds.about}` },
 ] as const
 
