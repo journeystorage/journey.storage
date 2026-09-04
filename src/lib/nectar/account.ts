@@ -175,11 +175,50 @@ export interface PayCard {
   zip: string
 }
 
-/** Post a payment against a lease. Returns a confirmation-safe result. */
-export async function payLease(leaseId: string, amount: number, card: PayCard): Promise<{ ok: boolean; requestId?: string; message?: string }> {
+/**
+ * Store a card on the lease and return its payment-method id.
+ *
+ * `auto_charge: true` is what enrols the lease in autopay — verified against
+ * the sandbox: storing a card this way flips the lease's
+ * `auto_pay_after_billing_date` from 0 to 1. A billing-address zip is required.
+ * The body is FLAT (a nested `payment_method` object is rejected).
+ */
+export async function savePaymentMethod(leaseId: string, card: PayCard, autopay: boolean): Promise<string> {
+  const { data } = await nectarV2<{ paymentMethod?: { id?: string } } & { id?: string }>(
+    `companies/${co()}/leases/${leaseId}/payment-methods`,
+    { method: 'POST', body: { type: 'card', ...card, auto_charge: autopay } },
+  )
+  const id = data.paymentMethod?.id ?? data.id
+  if (!id) throw new Error('Card could not be saved')
+  return id
+}
+
+export interface PayResult {
+  ok: boolean
+  autopayOn: boolean
+  requestId?: string
+  message?: string
+}
+
+/**
+ * Pay a lease: store the card, then charge it.
+ *
+ * The charge endpoint takes only `payment_amount` + a 10-char
+ * `payment_method_id` — it will NOT accept card details inline (a nested
+ * `payment_method` returns 400 "payment_method is not allowed"), which is why
+ * the card has to be stored first.
+ */
+export async function payLease(leaseId: string, amount: number, card: PayCard, autopay = false): Promise<PayResult> {
+  const paymentMethodId = await savePaymentMethod(leaseId, card, autopay)
   const { data, requestId } = await nectarV2<{ payment_id?: string; message?: string }>(
     `companies/${co()}/leases/${leaseId}/payment`,
-    { method: 'POST', body: { payment_amount: amount, payment_method: { type: 'card', ...card } } },
+    { method: 'POST', body: { payment_amount: amount, payment_method_id: paymentMethodId } },
   )
-  return { ok: !!(data?.payment_id ?? true), requestId, message: data?.message }
+  return { ok: !!(data?.payment_id ?? true), autopayOn: autopay, requestId, message: data?.message }
+}
+
+/** Turn on autopay without taking a payment now. */
+export async function enableAutopay(leaseId: string, card: PayCard): Promise<{ ok: boolean }> {
+  await savePaymentMethod(leaseId, card, true)
+  return { ok: true }
 }

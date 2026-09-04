@@ -106,6 +106,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   const [lookupMsg, setLookupMsg] = useState<string | null>(null)
   const [card, setCard] = useState({ number: '', exp: '', cvc: '' })
   const [billing, setBilling] = useState({ name: '', address1: '', city: '', state: '', zip: '' })
+  const [autopay, setAutopay] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [payError, setPayError] = useState<string | null>(null)
 
@@ -162,7 +163,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
     const out: Array<{ leaseId: string; ok: boolean; error?: string }> = []
     for (const a of chosen) {
       try {
-        const r = await fetch('/api/nectar/account/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ leaseId: a.leaseId, amount: a.balance, card: cardPayload }) })
+        const r = await fetch('/api/nectar/account/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ leaseId: a.leaseId, amount: a.balance, card: cardPayload, autopay }) })
         const j = await r.json()
         out.push(r.ok && j.ok ? { leaseId: a.leaseId, ok: true } : { leaseId: a.leaseId, ok: false, error: j.error ?? 'Payment declined.' })
       } catch {
@@ -367,6 +368,14 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
                   <input placeholder="ZIP" value={billing.zip} onChange={(e) => setBilling({ ...billing, zip: e.target.value })} className={FIELD} />
                 </div>
               </div>
+              {/* Autopay is stored on the card itself, so offer it right here. */}
+              <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-sm border border-warm-white/12 bg-warm-white/[0.04] p-4 text-[0.875rem] text-warm-white/80 transition-colors duration-150 hover:border-warm-white/25">
+                <input type="checkbox" checked={autopay} onChange={(e) => setAutopay(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 accent-orange" />
+                <span>
+                  <b className="text-warm-white">Turn on autopay</b> — save this card and charge {chosen.length > 1 ? 'these spaces' : 'this space'} automatically each month, so rent is never late.
+                  <span className="mt-1 block text-[0.75rem] leading-relaxed text-warm-white/45">You can turn it off any time by calling us.</span>
+                </span>
+              </label>
               {payError && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{payError} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
               <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Secured by Tenant Payments. Your card is charged {money(amountDue)} and applied to {chosen.length > 1 ? 'the spaces above' : 'your account'}.</p>
             </div>
@@ -392,6 +401,12 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
                   <div className="flex justify-between gap-3 border-t border-warm-white/[0.07] pt-2"><dt className="text-warm-white/55">Total paid</dt><dd className="text-right font-bold text-warm-white">{money(amountPaid)}</dd></div>
                 </dl>
               </div>
+              {autopay && paidOk.length > 0 && (
+                <p className="mt-4 inline-flex items-center gap-2 rounded-sm border border-sage-green/25 bg-sage-green/10 px-4 py-2.5 text-[0.8125rem] font-bold text-sage-green">
+                  <Check className="h-4 w-4 shrink-0" aria-hidden />
+                  Autopay is on for {paidOk.length > 1 ? `${paidOk.length} spaces` : spaceLabel(paidOk[0])}
+                </p>
+              )}
               {paidFailed.length > 0 && (
                 <p className="mt-5 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-left text-[0.8125rem] leading-relaxed text-[#E8A87C]">
                   <b>We couldn&rsquo;t charge {paidFailed.map((a) => spaceLabel(a)).join(' or ')}.</b> Nothing was taken for {paidFailed.length > 1 ? 'those spaces' : 'that space'} — try again, or call <a href={facility.tel} className="underline">{facility.phone}</a>.
