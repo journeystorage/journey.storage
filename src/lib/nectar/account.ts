@@ -1,6 +1,6 @@
 import 'server-only'
 import { nectarV2 } from './client'
-import { COMPANY_ID } from './facilities'
+import { COMPANY_ID, facilityByPropertyId } from './facilities'
 
 // ---------------------------------------------------------------------------
 // Account / Pay Bill — look a tenant up by email or phone, read the balance,
@@ -26,16 +26,62 @@ export interface AccountMatch {
   name: string
   code?: string
   unitId?: string
+  /** Human unit number, e.g. "85" or "B210". */
+  unitNumber?: string
+  /** Unit size label, e.g. "10' x 10'". */
+  unitSize?: string
+  propertyId?: string
+  propertyName?: string
   balance: number
+  monthlyRent?: number
+  /** Paid-through date (YYYY-MM-DD) when nothing is owed. */
+  paidThrough?: string
+  /** Open invoice, when there is one — drives the "what am I paying" line. */
+  dueDate?: string
+  periodStart?: string
+  periodEnd?: string
+  pastDue?: boolean
 }
 
-/** Find active leases whose tenant matches the given email or phone. */
+interface LeaseDetail {
+  balance?: number
+  open_balance?: number
+  code?: string
+  unit_id?: string
+  rent?: number
+  rent_paid_through?: string
+}
+interface UnitDetail {
+  number?: string | number
+  label?: string
+  property_id?: string
+}
+interface InvoiceRow {
+  paid?: number
+  balance?: number
+  amount?: number
+  due?: string
+  date?: string
+  period_start?: string
+  period_end?: string
+  unit_number?: string
+  property_id?: string
+}
+
+const today = () => new Date().toISOString().slice(0, 10)
+
+/**
+ * Find every active lease whose tenant matches the given email or phone.
+ * A tenant may hold several spaces — including at different properties — so all
+ * matches are returned, deduped by lease, each enriched with the unit number and
+ * property name so the payer can tell them apart.
+ */
 export async function findLeasesByContact(contact: string): Promise<AccountMatch[]> {
   const isEmail = contact.includes('@')
   const target = isEmail ? contact.trim().toLowerCase() : digits(contact)
   if (!target || (!isEmail && target.length < 7)) return []
 
-  const matches: AccountMatch[] = []
+  const byLease = new Map<string, AccountMatch>()
   for (let offset = 0; offset < 2000; offset += 100) {
     const { data } = await nectarV2<{ tenant?: TenantRow[]; paging?: { total?: number } }>(
       `companies/${co()}/tenants`,
@@ -48,24 +94,73 @@ export async function findLeasesByContact(contact: string): Promise<AccountMatch
       const email = (c.email ?? '').toLowerCase()
       const phones = (c.Phones ?? []).map((p) => digits(p.phone ?? ''))
       const hit = isEmail ? email === target : phones.some((p) => p.endsWith(target) || target.endsWith(p))
-      if (hit && t.lease_id) {
-        matches.push({ leaseId: t.lease_id, name: `${c.first ?? ''} ${c.last ?? ''}`.trim() || 'Your account', unitId: t.Lease?.unit_id, balance: 0 })
+      if (hit && t.lease_id && !byLease.has(t.lease_id)) {
+        byLease.set(t.lease_id, {
+          leaseId: t.lease_id,
+          name: `${c.first ?? ''} ${c.last ?? ''}`.trim() || 'Your account',
+          unitId: t.Lease?.unit_id,
+          balance: 0,
+        })
       }
     }
-    if (matches.length) break // email/phone is unique enough — stop at the first hit page
+    // Keep scanning: a tenant's spaces can straddle pages, and leases at
+    // different properties are separate rows.
     if (offset + 100 >= (data.paging?.total ?? 0)) break
   }
 
-  // Balance lives on the full lease, not the inline one.
-  for (const m of matches) {
-    try {
-      const { data } = await nectarV2<{ lease?: { balance?: number; open_balance?: number; code?: string } } & { balance?: number; open_balance?: number; code?: string }>(`companies/${co()}/leases/${m.leaseId}`)
-      const lz = (data.lease ?? data) as { balance?: number; open_balance?: number; code?: string }
-      m.balance = lz.open_balance ?? lz.balance ?? 0
-      m.code = lz.code
-    } catch { /* leave balance 0 */ }
-  }
-  return matches
+  // Enrich each lease: balance + rent from the lease, unit number/size and
+  // property from the unit, billing period from the open invoice.
+  await Promise.all(
+    [...byLease.values()].map(async (m) => {
+      try {
+        const { data } = await nectarV2<{ lease?: LeaseDetail } & LeaseDetail>(`companies/${co()}/leases/${m.leaseId}`)
+        const lz = (data.lease ?? data) as LeaseDetail
+        m.balance = lz.open_balance ?? lz.balance ?? 0
+        m.code = lz.code
+        m.monthlyRent = lz.rent
+        m.paidThrough = lz.rent_paid_through
+        if (!m.unitId && lz.unit_id) m.unitId = lz.unit_id
+      } catch { /* leave balance 0 */ }
+
+      const unitCall = m.unitId
+        ? nectarV2<{ unit?: UnitDetail } & UnitDetail>(`companies/${co()}/units/${m.unitId}`)
+            .then(({ data }) => {
+              const u = (data.unit ?? data) as UnitDetail
+              if (u.number != null && String(u.number).trim() !== '') m.unitNumber = String(u.number)
+              m.unitSize = u.label
+              m.propertyId = u.property_id
+              if (u.property_id) m.propertyName = facilityByPropertyId(u.property_id)?.displayName
+            })
+            .catch(() => {})
+        : Promise.resolve()
+
+      const invoiceCall = nectarV2<{ invoices?: InvoiceRow[] }>(`companies/${co()}/leases/${m.leaseId}/invoices`)
+        .then(({ data }) => {
+          const open = (data.invoices ?? [])
+            .filter((i) => !i.paid && (i.balance ?? 0) > 0)
+            .sort((a, b) => String(a.due ?? '').localeCompare(String(b.due ?? '')))[0]
+          if (!open) return
+          m.dueDate = open.due
+          m.periodStart = open.period_start
+          m.periodEnd = open.period_end
+          // `due` may carry a time component; compare on the date part only.
+          m.pastDue = !!open.due && open.due.slice(0, 10) < today()
+          if (!m.unitNumber && open.unit_number) m.unitNumber = open.unit_number
+          if (!m.propertyName && open.property_id) m.propertyName = facilityByPropertyId(open.property_id)?.displayName
+        })
+        .catch(() => {})
+
+      await Promise.all([unitCall, invoiceCall])
+    }),
+  )
+
+  // Owed first, then by property and unit so the list reads predictably.
+  return [...byLease.values()].sort(
+    (a, b) =>
+      Number(b.balance > 0) - Number(a.balance > 0) ||
+      (a.propertyName ?? '').localeCompare(b.propertyName ?? '') ||
+      (a.unitNumber ?? '').localeCompare(b.unitNumber ?? '', undefined, { numeric: true }),
+  )
 }
 
 export interface PayCard {

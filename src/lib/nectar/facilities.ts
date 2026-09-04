@@ -55,6 +55,11 @@ export const FACILITIES: Record<string, FacilityConfig> = {
 // Returns config for any KNOWN slug (even if its property id isn't configured yet)
 // so callers can distinguish "unknown facility" (404) from "known but no live data"
 // (handled downstream as 502). A missing property id surfaces when getSpaceMix runs.
+/** Reverse lookup: a unit/invoice carries a property_id, we want its name. */
+export function facilityByPropertyId(propertyId: string): FacilityConfig | undefined {
+  return Object.values(FACILITIES).find((f) => f.propertyId === propertyId);
+}
+
 export function facilityBySlug(slug: string): FacilityConfig | undefined {
   return FACILITIES[slug];
 }
