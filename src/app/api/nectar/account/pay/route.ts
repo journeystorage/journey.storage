@@ -15,8 +15,13 @@ interface PayBody {
 }
 
 export async function POST(req: NextRequest) {
-  if (process.env.NECTAR_CHECKOUT_LIVE !== 'true') {
-    return NextResponse.json({ error: 'Online bill pay is not available yet — please call to pay.' }, { status: 503 })
+  // Tenant Inc's payment endpoints currently 500 server-side for every valid
+  // request shape (leases/{id}/payment -> "contact_id" undefined; the company
+  // payments endpoint -> "lease_id" undefined), so a card cannot be charged.
+  // Kept behind its own switch, separate from rentals, so bill pay can be
+  // turned back on the moment they fix it — without touching online move-ins.
+  if (process.env.NECTAR_BILLPAY_LIVE !== 'true') {
+    return NextResponse.json({ error: 'Card payments are temporarily unavailable — please call us and we’ll take your payment over the phone.' }, { status: 503 })
   }
   let body: PayBody
   try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid request' }, { status: 400 }) }

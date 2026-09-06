@@ -107,6 +107,9 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   const [card, setCard] = useState({ number: '', exp: '', cvc: '' })
   const [billing, setBilling] = useState({ name: '', address1: '', city: '', state: '', zip: '' })
   const [autopay, setAutopay] = useState(false)
+  // Card payments are switched off while Tenant Inc's payment endpoint is
+  // failing; the lookup tells us whether to show the card form or route to phone.
+  const [payOnline, setPayOnline] = useState(true)
   const [processing, setProcessing] = useState(false)
   const [payError, setPayError] = useState<string | null>(null)
 
@@ -130,6 +133,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   const canNext = () => {
     if (stepName === 'Account') return /.+@.+\..+/.test(contact) || contact.replace(/\D/g, '').length >= 7
     if (stepName === 'Balance') return chosen.length > 0 && amountDue > 0
+    if (stepName === 'Payment' && !payOnline) return false // the call CTA lives in the panel
     if (stepName === 'Payment') return card.number.replace(/\s/g, '').length >= 12 && card.exp.length >= 4 && card.cvc.length >= 3 && !!billing.name && !!billing.address1 && !!billing.city && !!billing.state && !!billing.zip
     return true
   }
@@ -141,6 +145,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
       const j = await r.json()
       if (!r.ok) { setLookupMsg(j.error ?? 'Lookup failed.'); return false }
       if (!j.found || !j.accounts?.length) { setLookupMsg('We couldn’t find an account for that email or phone. Double-check it, or call us.'); return false }
+      setPayOnline(j.payOnline !== false)
       const list = j.accounts as Account[]
       setAccounts(list)
       // Pre-select every space that owes — the common case is "pay what I owe".
@@ -325,7 +330,36 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
             </div>
           )}
 
-          {stepName === 'Payment' && chosen.length > 0 && (
+          {stepName === 'Payment' && chosen.length > 0 && !payOnline && (
+            <div className="mx-auto max-w-md">
+              <Eyebrow label="Payment" />
+              <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><CreditCard className="h-6 w-6 shrink-0 text-orange" aria-hidden />Pay by phone</h2>
+              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/60">Card payments on the site are temporarily unavailable. Call us and we&rsquo;ll take your payment right away — we already have your details below.</p>
+              <div className={`mt-6 ${glassCard} p-4`}>
+                <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Have this ready</p>
+                <p className="mt-1 text-[0.8125rem] text-warm-white/60">{chosen[0].name}</p>
+                <div className="mt-3 space-y-2.5">
+                  {chosen.map((a) => (
+                    <div key={a.leaseId} className="flex items-start justify-between gap-3 border-t border-warm-white/[0.07] pt-2.5">
+                      <div className="min-w-0">
+                        <p className="text-[0.9375rem] font-bold text-warm-white">{spaceLabel(a)}</p>
+                        <p className="mt-0.5 text-[0.75rem] text-warm-white/55">{a.propertyName}</p>
+                      </div>
+                      <p className="shrink-0 text-[0.9375rem] font-black text-warm-white">{money(a.balance)}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 flex items-baseline justify-between gap-3 border-t border-warm-white/15 pt-3">
+                  <span className="text-[0.875rem] font-bold text-warm-white">Total due</span>
+                  <span className="text-[1.5rem] font-black leading-none text-orange">{money(amountDue)}</span>
+                </div>
+              </div>
+              <a href={facility.tel} className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-sm bg-orange px-6 py-4 text-[1.0625rem] font-bold text-warm-white shadow-[0_2px_8px_rgba(232,98,42,.3)] transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]">Call {facility.phone}</a>
+              <p className="mt-3 text-center text-[0.75rem] text-warm-white/40">Sorry for the detour — we&rsquo;re getting online card payments back as fast as we can.</p>
+            </div>
+          )}
+
+          {stepName === 'Payment' && chosen.length > 0 && payOnline && (
             <div className="mx-auto max-w-md">
               <Eyebrow label="Payment" />
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><CreditCard className="h-6 w-6 shrink-0 text-orange" aria-hidden />Payment</h2>
@@ -430,10 +464,12 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
             </button>
             <div className="flex items-center gap-3">
               {stepName === 'Balance' && amountDue > 0 && <span className="hidden text-[0.9375rem] font-black text-warm-white sm:inline">{money(amountDue)} due</span>}
+              {!(stepName === 'Payment' && !payOnline) && (
               <button onClick={next} disabled={!canNext() || looking || processing} className={primaryBtn}>
-                {looking ? 'Finding…' : processing ? 'Processing…' : stepName === 'Account' ? 'Find my balance' : stepName === 'Balance' ? (chosen.length ? 'Continue to payment' : 'Select a space') : `Pay ${money(amountDue)}`}
+                {looking ? 'Finding…' : processing ? 'Processing…' : stepName === 'Account' ? 'Find my balance' : stepName === 'Balance' ? (chosen.length ? (payOnline ? 'Continue to payment' : 'How to pay') : 'Select a space') : `Pay ${money(amountDue)}`}
                 {!looking && !processing && <ChevronRight className="h-4 w-4" aria-hidden />}
               </button>
+              )}
             </div>
           </div>
         )}
