@@ -13,6 +13,9 @@
 // sender, tenants get the email directly and the owner inbox is bcc'd.
 //
 // Env:
+//   MOVE_IN_EMAIL_DISABLED – set to "true" to stop sending entirely (use this
+//                            once Tenant Inc's own move-in email is branded,
+//                            so tenants don't get two confirmations)
 //   RESEND_API_KEY       – required to send anything
 //   MOVE_IN_EMAIL_FROM   – sender (falls back to LEAD_NOTIFY_FROM, then resend.dev)
 //   MOVE_IN_NOTIFY_TO    – internal copy recipient (default: lyvia@journey.storage)
@@ -264,6 +267,7 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
 // ── Send ────────────────────────────────────────────────────────────────────
 
 export async function sendMoveInConfirmation(data: MoveInEmailData): Promise<void> {
+  if (process.env.MOVE_IN_EMAIL_DISABLED === 'true') return
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
     console.warn('[move-in-email] RESEND_API_KEY not set; skipping confirmation email')
