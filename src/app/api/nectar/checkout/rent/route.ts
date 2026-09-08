@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { facilityBySlug } from '@/lib/nectar/facilities'
 import { completeRental, type Tenant, type Card } from '@/lib/nectar/rental'
+import { sendMoveInConfirmation } from '@/lib/move-in-email'
 
 interface RentBody {
   facility?: string
@@ -24,6 +25,8 @@ interface RentBody {
   lineItems?: Array<{ name: string; amount: number }>
   promotionIds?: string[]
   insuranceId?: string
+  /** Display label for the confirmation email, e.g. "10 × 10 · Climate Controlled". */
+  spaceLabel?: string
   tenant?: Tenant
   card?: Card
 }
@@ -60,6 +63,23 @@ export async function POST(req: NextRequest) {
         user_agent: req.headers.get('user-agent') || 'Mozilla/5.0',
       },
     })
+    // Branded move-in confirmation (fire-and-forget — the rental is already
+    // committed and charged, so email trouble must never fail this response).
+    await sendMoveInConfirmation({
+      facilitySlug: cfg.slug,
+      tenantFirst: tenant.first,
+      tenantEmail: tenant.email,
+      spaceLabel: body.spaceLabel,
+      unitNumber: result.unitNumber ?? null,
+      startDate,
+      billDay,
+      lineItems,
+      totalDue: totalDue ?? 0,
+      gatePin: result.gatePin ?? null,
+      signed: result.signed,
+      documentUrl: result.documentUrl ?? null,
+    })
+
     // Never echo card data. Confirmation-safe fields only.
     return NextResponse.json({
       ok: true,

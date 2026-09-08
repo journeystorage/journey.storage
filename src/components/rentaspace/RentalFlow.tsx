@@ -159,6 +159,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
     try {
       const r = await fetch('/api/nectar/checkout/rent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         facility: facility.slug, unitId: hold.unitId, holdToken: hold.token, dossierToken: hold.dossierToken, spaceMixId: hold.spaceMixId, startDate: moveIn,
+        spaceLabel: `${space.size}${space.category ? ` · ${space.category}` : ''}`,
         billDay: realQuote.billDay, webRate: realQuote.monthlyRent, totalDue: realQuote.dueToday, lineItems: realQuote.lineItems,
         promotionIds: hold.promotionId ? [hold.promotionId] : undefined,
         insuranceId: realPlans ? planId : undefined,
