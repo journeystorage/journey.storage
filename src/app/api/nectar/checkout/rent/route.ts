@@ -1,25 +1,34 @@
 // POST /api/nectar/checkout/rent
-// Commit an online move-in: reserve → documents/finalize → lease → autopay.
-// Built from the tenant.dev rental-flow docs. Card data is server-side only and
-// never logged. Gated behind NECTAR_CHECKOUT_LIVE so it stays dormant until the
-// full chain is smoke-tested against the live account with a throwaway tenant.
+// Commit an online move-in via the verified Direct Rental flow:
+//   lease-set-up (authoritative cost) → documents/finalize (auto-signs) → lease (pending).
+// Verified end-to-end against the sandbox (returns lease_id + gate PIN).
+// Card data is server-side only and never logged. Gated behind
+// NECTAR_CHECKOUT_LIVE so it stays dormant until deliberately switched on.
 
 import { NextRequest, NextResponse } from 'next/server'
 import { facilityBySlug } from '@/lib/nectar/facilities'
-import { reserveUnit, finalizeDocuments, createLease, setAutopay } from '@/lib/nectar/rental'
+import { completeRental, type Tenant, type Card } from '@/lib/nectar/rental'
+import { sendMoveInConfirmation } from '@/lib/move-in-email'
 
 interface RentBody {
   facility?: string
   unitId?: string
   holdToken?: string
+  dossierToken?: string
+  spaceMixId?: string
   startDate?: string
+  // From the single quote the client already fetched (do NOT re-run lease-setup:
+  // a second lease-setup on the same hold makes the lease step 500).
   billDay?: number
-  insuranceId?: string
+  webRate?: number
+  totalDue?: number
+  lineItems?: Array<{ name: string; amount: number }>
   promotionIds?: string[]
-  tenant?: { firstName?: string; lastName?: string; email?: string; phone?: string; address?: unknown }
-  payment?: { card?: unknown; address?: unknown }
-  autopay?: boolean
-  signatureMeta?: { ip?: string; user_agent?: string; location?: string }
+  insuranceId?: string
+  /** Display label for the confirmation email, e.g. "10 × 10 · Climate Controlled". */
+  spaceLabel?: string
+  tenant?: Tenant
+  card?: Card
 }
 
 export async function POST(req: NextRequest) {
@@ -30,50 +39,56 @@ export async function POST(req: NextRequest) {
   try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid request' }, { status: 400 }) }
   const cfg = body.facility ? facilityBySlug(body.facility) : undefined
   if (!cfg) return NextResponse.json({ error: 'Unknown facility' }, { status: 404 })
-  if (!body.unitId || !body.holdToken || !body.tenant?.email || !body.payment?.card) {
+  const { unitId, holdToken, startDate, tenant, card, lineItems, billDay, webRate, totalDue } = body
+  if (!unitId || !holdToken || !startDate || !tenant?.email || !card?.card_number || !lineItems?.length || billDay == null) {
     return NextResponse.json({ error: 'Missing rental details.' }, { status: 400 })
   }
   try {
-    // 1. Reserve → reservation_id / lease_id
-    const reservation = await reserveUnit(body.unitId, {
-      hold_token: body.holdToken,
-      bill_day: body.billDay,
-      start_date: body.startDate,
-      tenant: body.tenant,
+    const result = await completeRental({
+      unitId,
+      holdToken,
+      dossierToken: body.dossierToken,
+      spaceMixId: body.spaceMixId,
+      startDate,
+      billDay,
+      webRate: webRate ?? 0,
+      totalDue: totalDue ?? 0,
+      lineItems,
+      promotionIds: body.promotionIds,
+      insuranceId: body.insuranceId,
+      tenant,
+      card,
+      metadata: {
+        ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || '',
+        user_agent: req.headers.get('user-agent') || 'Mozilla/5.0',
+      },
+    })
+    // Branded move-in confirmation (fire-and-forget — the rental is already
+    // committed and charged, so email trouble must never fail this response).
+    await sendMoveInConfirmation({
+      facilitySlug: cfg.slug,
+      tenantFirst: tenant.first,
+      tenantEmail: tenant.email,
+      spaceLabel: body.spaceLabel,
+      unitNumber: result.unitNumber ?? null,
+      startDate,
+      billDay,
+      lineItems,
+      totalDue: totalDue ?? 0,
+      gatePin: result.gatePin ?? null,
+      signed: result.signed,
+      documentUrl: result.documentUrl ?? null,
     })
 
-    // 2. Finalize documents (ClickWrap / Super Lease auto-sign, or Traditional signing url)
-    const docs = await finalizeDocuments(body.unitId, {
-      hold_token: body.holdToken,
-      reservation_id: reservation.reservation_id,
-      bill_day: body.billDay,
-      metadata: body.signatureMeta,
-    })
-
-    // 3. Create the lease (carry documents + payment)
-    const lease = await createLease(body.unitId, {
-      hold_token: body.holdToken,
-      reservation_id: reservation.reservation_id,
-      documents: docs.documents,
-      payment_method: body.payment,
-      insurance_id: body.insuranceId,
-      promotions: body.promotionIds?.map((promotion_id) => ({ promotion_id })),
-      start_date: body.startDate,
-      bill_day: body.billDay,
-    })
-
-    // 4. Autopay (optional)
-    if (body.autopay && lease.lease_id && lease.payment_method_id) {
-      await setAutopay(lease.lease_id, lease.payment_method_id, true)
-    }
-
-    // Never echo card data. Return only confirmation-safe fields.
+    // Never echo card data. Confirmation-safe fields only.
     return NextResponse.json({
       ok: true,
-      leaseId: lease.lease_id,
-      signed: docs.signed ?? false,
-      documentUrl: docs.documents?.[0]?.src ?? docs.documents?.[0]?.url ?? null,
-      autopay: !!body.autopay,
+      leaseId: result.leaseId,
+      unitNumber: result.unitNumber ?? null,
+      gatePin: result.gatePin ?? null,
+      signed: result.signed,
+      documentUrl: result.documentUrl ?? null,
+      status: result.status ?? null,
     })
   } catch {
     return NextResponse.json({ error: 'We could not complete the rental — please call us to finish.' }, { status: 502 })
