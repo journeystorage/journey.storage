@@ -1,7 +1,11 @@
 // POST /api/nectar/account/verify/confirm  { contact, code }
 // Checks the emailed code and, on success, sets a short-lived HttpOnly cookie
 // proving this browser controls the account. Only that cookie unlocks actions
-// that create an obligation (adding a space).
+// that create an obligation (adding a space), and only when the caller
+// explicitly says it is acting on that account.
+//
+// The cookie is a browser-session cookie and Pay Bill clears it on close, so
+// verification is one-shot rather than a 30-minute free pass.
 
 import { NextRequest, NextResponse } from 'next/server'
 import { findContactFor } from '@/lib/nectar/account'
@@ -24,7 +28,8 @@ export async function POST(req: NextRequest) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 30 * 60,
+      // No maxAge: a browser-session cookie. Pay Bill also clears it on close,
+      // so returning to the page always requires a fresh code.
     })
     return res
   } catch {

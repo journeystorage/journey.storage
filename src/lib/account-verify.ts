@@ -24,7 +24,11 @@ import { createHmac, timingSafeEqual } from 'crypto'
  */
 
 const WINDOW_MS = 10 * 60 * 1000
-const SESSION_MS = 30 * 60 * 1000
+// A verified session is one-shot and short: long enough to pay and add a space
+// in one sitting, and torn down explicitly when Pay Bill closes (see
+// /api/nectar/account/verify/end). The cookie itself carries no maxAge either,
+// so it also dies with the browser session.
+const SESSION_MS = 15 * 60 * 1000
 const MAX_ATTEMPTS = 5
 const MAX_SENDS = 3
 const SEND_WINDOW_MS = 15 * 60 * 1000

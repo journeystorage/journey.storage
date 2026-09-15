@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { facilities as ALL_FACILITIES, PHONE } from '@/lib/constants'
 import { X, Check, ChevronLeft, ChevronRight, ChevronDown, Search, Wallet, CreditCard, CalendarClock, PlusCircle, ShieldCheck } from 'lucide-react'
+import { formatCardNumber, formatExpiry, formatZip, cardDigits } from '@/lib/card-format'
 
 /**
  * Pay Bill — real tenant payment.
@@ -123,7 +124,13 @@ function lateFeeOn(rent: number | null, f: FeeSchedule | null): number | null {
 // `short` names the facility when opened from a facility page; omit it when
 // opened from the site nav (account lookup spans all locations) so the copy
 // doesn't read "Granbury, Granbury TX".
-export default function PayBillFlow({ facility, onClose }: { facility: { short?: string; phone: string; tel: string }; onClose: () => void }) {
+export default function PayBillFlow({ facility, onClose: closePanel }: { facility: { short?: string; phone: string; tel: string }; onClose: () => void }) {
+  // Closing Pay Bill signs the tenant out first, so the next visit — and any
+  // rental they start afterwards — begins with no account attached.
+  const onClose = () => {
+    fetch('/api/nectar/account/verify/end', { method: 'POST' }).catch(() => {})
+    closePanel()
+  }
   const atFacility = facility.short ? ` at ${facility.short}` : ''
   const yourAccount = facility.short ? `your ${facility.short} account` : 'your account'
   const [step, setStep] = useState(0)
@@ -174,19 +181,20 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   const slugs = [...new Set(accounts.map((a) => a.propertySlug).filter(Boolean))] as string[]
   const homeProperty = slugs.length === 1 ? accounts.find((a) => a.propertySlug === slugs[0]) : null
 
+  // Signing in is ONE-TIME. Opening Pay Bill discards any session left over
+  // from a previous visit, so nobody is ever let straight through to a balance
+  // on the strength of an earlier code — and closing it (button, Escape, Done,
+  // or the tab going away) ends the session immediately. That also stops a
+  // Pay Bill sign-in from bleeding into an unrelated rental in the same browser.
   useEffect(() => {
-    let alive = true
-    fetch('/api/nectar/account/verify/status')
-      .then((r) => (r.ok ? r.json() : null))
-      .then(async (j) => {
-        if (!alive || !j?.verified) return
-        setVerifyStage('done')
-        setVerifiedTo(j.email ?? null)
-        // Still inside the 30-minute window — go straight to the balance.
-        if (await lookup()) setStep(1)
-      })
-      .catch(() => {})
-    return () => { alive = false }
+    fetch('/api/nectar/account/verify/end', { method: 'POST' }).catch(() => {})
+    const drop = () => {
+      // sendBeacon survives the page going away; fetch is the fallback.
+      if (navigator.sendBeacon?.('/api/nectar/account/verify/end')) return
+      fetch('/api/nectar/account/verify/end', { method: 'POST', keepalive: true }).catch(() => {})
+    }
+    window.addEventListener('pagehide', drop)
+    return () => { window.removeEventListener('pagehide', drop); drop() }
   }, [])
 
   useEffect(() => {
@@ -207,7 +215,8 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !renting) onClose() }
     window.addEventListener('keydown', onKey)
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
-  }, [onClose, renting])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [closePanel, renting])
 
   const canNext = () => {
     if (stepName === 'Account') {
@@ -217,7 +226,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
     // Nothing owed anywhere: the button becomes a plain "Done".
     if (stepName === 'Balance') return payable.length === 0 || (chosen.length > 0 && amountDue > 0)
     if (stepName === 'Payment' && !payOnline) return false // the call CTA lives in the panel
-    if (stepName === 'Payment') return card.number.replace(/\s/g, '').length >= 12 && card.exp.length >= 4 && card.cvc.length >= 3 && !!billing.name && !!billing.address1 && !!billing.city && !!billing.state && !!billing.zip
+    if (stepName === 'Payment') return cardDigits(card.number).length >= 12 && cardDigits(card.exp).length === 4 && card.cvc.length >= 3 && !!billing.name && !!billing.address1 && !!billing.city && !!billing.state && !!billing.zip
     return true
   }
 
@@ -726,10 +735,10 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
                 )}
               </div>
               <div className="mt-6 space-y-3">
-                <input inputMode="numeric" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })} className={FIELD} />
+                <input inputMode="numeric" autoComplete="cc-number" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })} className={FIELD} />
                 <div className="grid grid-cols-2 gap-3">
-                  <input placeholder="MM/YY" value={card.exp} onChange={(e) => setCard({ ...card, exp: e.target.value })} className={FIELD} />
-                  <input placeholder="CVC" value={card.cvc} onChange={(e) => setCard({ ...card, cvc: e.target.value })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="cc-exp" placeholder="MM/YY" value={card.exp} onChange={(e) => setCard({ ...card, exp: formatExpiry(e.target.value, card.exp) })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="cc-csc" placeholder="CVC" value={card.cvc} onChange={(e) => setCard({ ...card, cvc: cardDigits(e.target.value).slice(0, 4) })} className={FIELD} />
                 </div>
                 <p className="pt-2 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-warm-white/40">Billing address</p>
                 <input placeholder="Cardholder name" value={billing.name} onChange={(e) => setBilling({ ...billing, name: e.target.value })} className={FIELD} />
@@ -737,7 +746,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
                 <div className="grid grid-cols-[1fr_80px_100px] gap-3">
                   <input placeholder="City" value={billing.city} onChange={(e) => setBilling({ ...billing, city: e.target.value })} className={FIELD} />
                   <input placeholder="State" maxLength={2} value={billing.state} onChange={(e) => setBilling({ ...billing, state: e.target.value.toUpperCase() })} className={FIELD} />
-                  <input placeholder="ZIP" value={billing.zip} onChange={(e) => setBilling({ ...billing, zip: e.target.value })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="postal-code" placeholder="ZIP" value={billing.zip} onChange={(e) => setBilling({ ...billing, zip: formatZip(e.target.value) })} className={FIELD} />
                 </div>
               </div>
               {payError && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{payError} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
@@ -816,6 +825,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
             tel: `tel:${PHONE.tel}`,
           }}
           space={{ size: renting.size, price: renting.price, category: renting.category }}
+          onAccount
           onClose={() => setRenting(null)}
         />
       )}

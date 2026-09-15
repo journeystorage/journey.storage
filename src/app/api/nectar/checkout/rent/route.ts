@@ -34,6 +34,14 @@ interface RentBody {
   card?: Card
   /** Tenant asked for autopay; staff must enable it (API cannot). */
   autopayRequested?: boolean
+  /**
+   * True only when the flow was launched from inside verified Pay Bill, i.e.
+   * the tenant is knowingly adding a space to their own account. A rental
+   * started from the public site must never attach to whoever last verified in
+   * this browser, so the verified cookie is honoured only alongside this flag.
+   * The flag alone grants nothing — the signed cookie is still required.
+   */
+  onAccount?: boolean
 }
 
 export async function POST(req: NextRequest) {
@@ -47,8 +55,18 @@ export async function POST(req: NextRequest) {
   const { unitId, holdToken, startDate, tenant, card, lineItems, billDay, webRate, totalDue } = body
   // A verified tenant adding another space: the lease attaches to their existing
   // contact, so their personal details are neither needed nor trusted from the
-  // browser. The cookie is signed server-side and cannot be forged.
-  const existingContactId = readSession(req.cookies.get(VERIFY_COOKIE)?.value)?.contactId ?? undefined
+  // browser. The cookie is signed server-side and cannot be forged — but it is
+  // only consulted when the client says this is an on-account rental, so a
+  // public rental in the same browser stays a brand-new tenant.
+  const existingContactId = body.onAccount === true
+    ? readSession(req.cookies.get(VERIFY_COOKIE)?.value)?.contactId ?? undefined
+    : undefined
+  if (body.onAccount === true && !existingContactId) {
+    return NextResponse.json(
+      { error: 'Your sign-in expired — please verify your account again.', needsVerification: true },
+      { status: 401 },
+    )
+  }
   const needsDetails = !existingContactId
   if (!unitId || !holdToken || !startDate || !card?.card_number || !lineItems?.length || billDay == null) {
     return NextResponse.json({ error: 'Missing rental details.' }, { status: 400 })

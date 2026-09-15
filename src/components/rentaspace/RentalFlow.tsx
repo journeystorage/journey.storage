@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { X, Check, ChevronLeft, ChevronRight, ShieldCheck, FileText, CreditCard, KeyRound } from 'lucide-react'
+import { formatCardNumber, formatExpiry, formatZip, cardDigits } from '@/lib/card-format'
 
 /**
  * PREVIEW-ONLY online move-in flow. Mirrors the real Nectar rental sequence
@@ -50,7 +51,7 @@ function Eyebrow({ label }: { label: string }) {
   )
 }
 
-export default function RentalFlow({ facility, space, preview = false, onClose }: { facility: { slug: string; short: string; address: string; city: string; phone: string; tel: string }; space: Space; preview?: boolean; onClose: () => void }) {
+export default function RentalFlow({ facility, space, preview = false, onAccount = false, onClose }: { facility: { slug: string; short: string; address: string; city: string; phone: string; tel: string }; space: Space; preview?: boolean; onAccount?: boolean; onClose: () => void }) {
   const [step, setStep] = useState(0)
   const [moveIn, setMoveIn] = useState(todayISO())
   const [details, setDetails] = useState({ name: '', email: '', phone: '', address: '', city: '', state: '', zip: '', dob: '', dlNumber: '', dlState: '', dlExp: '', isBusiness: false, businessName: '', military: false, militaryBranch: '' })
@@ -62,15 +63,18 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const [payingMsg, setPayingMsg] = useState<string | null>(null)
   // ClickWrap Superlease disclosures from Hummingbird. null = still loading.
   const [disclosures, setDisclosures] = useState<Array<{ id: number; html: string }> | null>(null)
-  // An existing tenant who proved they control their account (Pay Bill → verify).
-  // Their details come off their contact record server-side, so this flow neither
-  // asks for them nor sends them.
+  // An existing tenant who proved they control their account. Only ever set
+  // when this flow was launched from inside verified Pay Bill (onAccount), never
+  // from a cookie that merely happens to be in the browser — otherwise a public
+  // rental would silently attach to whoever signed in last. Their details come
+  // off their contact record server-side, so this flow neither asks for them nor
+  // sends them.
   const [verified, setVerified] = useState<{ name: string | null } | null>(null)
   // Autopay CANNOT be switched on through Tenant Inc's API — verified on live
   // data: a lease created by this flow with auto_charge:true still came back
   // auto_pay_after_billing_date = 0. So this is a request we pass to staff, not
   // something we can claim is done.
-  const [autopay, setAutopay] = useState(true)
+  const [autopay, setAutopay] = useState(false)
 
   // ── Live API state (demo math is the graceful fallback) ──
   const [hold, setHold] = useState<{ token: string; unitId: string; dossierToken?: string; spaceMixId?: string; promotionId?: string } | null>(null)
@@ -172,6 +176,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
         promotionIds: hold.promotionId ? [hold.promotionId] : undefined,
         insuranceId: realPlans ? planId : undefined,
         autopayRequested: autopay,
+        onAccount,
         tenant: verified ? undefined : {
           first, last, email: details.email, phone: details.phone, address: details.address, city: details.city, state: details.state, zip: details.zip,
           dob: details.dob, dlNumber: details.dlNumber, dlState: details.dlState, dlExp: details.dlExp,
@@ -192,7 +197,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
     if (stepName === 'Your details') return !!details.name && /.+@.+\..+/.test(details.email) && details.phone.length >= 7 && !!details.address && !!details.city && !!details.state && !!details.zip && !!details.dob && !!details.dlNumber && details.dlState.length === 2 && !!details.dlExp && (!details.isBusiness || !!details.businessName)
     if (stepName === 'Protection') return !!planId
     if (stepName === 'Sign lease') return agree && signature.trim().length >= 3
-    if (stepName === 'Payment') return card.number.replace(/\s/g, '').length >= 12 && card.exp.length >= 4 && card.cvc.length >= 3
+    if (stepName === 'Payment') return cardDigits(card.number).length >= 12 && cardDigits(card.exp).length === 4 && card.cvc.length >= 3
     return true
   }
   const next = async () => {
@@ -255,13 +260,16 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const dateLong = (iso: string) => new Date(iso + 'T00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
 
   useEffect(() => {
+    // A rental started from the public site is always a fresh rental, even if
+    // the same browser signed in to Pay Bill earlier.
+    if (!onAccount) { setVerified(null); return }
     let alive = true
     fetch('/api/nectar/account/verify/status')
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => { if (alive && j?.verified) setVerified({ name: j.name ?? null }) })
       .catch(() => {})
     return () => { alive = false }
-  }, [])
+  }, [onAccount])
 
   // Pull the live disclosures once per facility; empty array = show the fallback note.
   useEffect(() => {
@@ -372,7 +380,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 <div className="grid grid-cols-[1fr_80px_110px] gap-3">
                   <input placeholder="City" value={details.city} onChange={(e) => setDetails({ ...details, city: e.target.value })} className={FIELD} />
                   <input placeholder="State" maxLength={2} value={details.state} onChange={(e) => setDetails({ ...details, state: e.target.value.toUpperCase() })} className={FIELD} />
-                  <input placeholder="ZIP" inputMode="numeric" value={details.zip} onChange={(e) => setDetails({ ...details, zip: e.target.value })} className={FIELD} />
+                  <input placeholder="ZIP" inputMode="numeric" value={details.zip} onChange={(e) => setDetails({ ...details, zip: formatZip(e.target.value) })} className={FIELD} />
                 </div>
               </div>
 
@@ -391,7 +399,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 <div className="grid grid-cols-[110px_1fr] gap-3">
                   <label className="block">
                     <span className="text-[0.6875rem] font-bold text-warm-white/45">Issuing state</span>
-                    <input maxLength={2} value={details.dlState} onChange={(e) => setDetails({ ...details, dlState: e.target.value.toUpperCase() })} placeholder="TX" className={`${FIELD} mt-1`} />
+                    <input maxLength={2} autoComplete="off" value={details.dlState} onChange={(e) => setDetails({ ...details, dlState: e.target.value.toUpperCase() })} className={`${FIELD} mt-1`} />
                   </label>
                   <label className="block">
                     <span className="text-[0.6875rem] font-bold text-warm-white/45">License expiration</span>
@@ -525,11 +533,11 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><CreditCard className="h-6 w-6 text-orange" aria-hidden />Payment</h2>
               <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Pay {money(effDueToday)} today to complete your rental.</p>
               <div className="mt-7 space-y-3">
-                <input inputMode="numeric" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })} className={FIELD} />
+                <input inputMode="numeric" autoComplete="cc-number" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })} className={FIELD} />
                 <div className="grid grid-cols-3 gap-3">
-                  <input placeholder="MM/YY" value={card.exp} onChange={(e) => setCard({ ...card, exp: e.target.value })} className={FIELD} />
-                  <input placeholder="CVC" value={card.cvc} onChange={(e) => setCard({ ...card, cvc: e.target.value })} className={FIELD} />
-                  <input placeholder="ZIP" value={card.zip} onChange={(e) => setCard({ ...card, zip: e.target.value })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="cc-exp" placeholder="MM/YY" value={card.exp} onChange={(e) => setCard({ ...card, exp: formatExpiry(e.target.value, card.exp) })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="cc-csc" placeholder="CVC" value={card.cvc} onChange={(e) => setCard({ ...card, cvc: cardDigits(e.target.value).slice(0, 4) })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="postal-code" placeholder="ZIP" value={card.zip} onChange={(e) => setCard({ ...card, zip: formatZip(e.target.value) })} className={FIELD} />
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between rounded-sm border border-warm-white/12 bg-warm-white/[0.03] p-4">
