@@ -408,13 +408,27 @@ export default function SmartEntryPage() {
             />
             <SetupStepper />
 
-            <div className="mt-10 flex items-start gap-[18px] rounded-[4px_16px_16px_4px] border border-orange/25 border-l-[3px] border-l-[#DB551C] bg-orange/[0.05] p-[22px] md:px-8 md:py-7">
-              <TriangleAlert size={26} className="mt-1 shrink-0 text-[#DB551C]" aria-hidden="true" />
-              <p className="max-w-[70ch] text-[16.5px] leading-[1.65] text-black/75">
-                <strong className="font-bold text-black">If you tap “Don’t Allow,” nothing will open.</strong> No
-                Bluetooth means no gate and no unit. Already tapped it? Phone Settings → Storage Smart Entry → switch
-                Bluetooth and Location back on.
-              </p>
+            <div className="mt-10 grid items-center gap-[22px] rounded-[4px_16px_16px_4px] border border-orange/25 border-l-[3px] border-l-[#DB551C] bg-orange/[0.05] p-[22px] md:grid-cols-[1fr_300px] md:px-8 md:py-7">
+              <div className="flex items-start gap-[18px]">
+                <TriangleAlert size={26} className="mt-1 shrink-0 text-[#DB551C]" aria-hidden="true" />
+                <p className="text-[16.5px] leading-[1.65] text-black/75">
+                  <strong className="font-bold text-black">If you tap “Don’t Allow,” nothing will open.</strong> No
+                  Bluetooth means no gate and no unit. Already tapped it? Phone Settings → Storage Smart Entry → switch
+                  Bluetooth and Location back on.
+                </p>
+              </div>
+              <figure className="m-0">
+                <PhoneFrame>
+                  <Image
+                    src={`${IMG}/app-home.webp`}
+                    alt="The app home screen once you’re logged in"
+                    width={600}
+                    height={1067}
+                    className="w-full rounded-[20px]"
+                  />
+                </PhoneFrame>
+                <Caption>What you’ll see once you’re in</Caption>
+              </figure>
             </div>
           </div>
         </section>
@@ -476,28 +490,26 @@ export default function SmartEntryPage() {
                 <figure className="m-0">
                   <PhoneFrame dark>
                     <Image
-                      src={`${IMG}/shot-tiles.png`}
-                      alt="App home screen: a grid of door tiles with one lit up in blue, the rest dimmed"
-                      width={480}
-                      height={872}
+                      src={`${IMG}/app-entries.webp`}
+                      alt="The Entries tab listing your gate and unit"
+                      width={600}
+                      height={1067}
                       className="w-full rounded-[20px]"
                     />
                   </PhoneFrame>
-                  <Caption dark>
-                    In range = <span className="text-orange">bright</span>
-                  </Caption>
+                  <Caption dark>The Entries tab</Caption>
                 </figure>
                 <figure className="m-0">
                   <PhoneFrame dark>
                     <Image
                       src={`${IMG}/shot-entries.png`}
-                      alt="The Entries tab, listing the units and entry points you have access to"
+                      alt="Entries list"
                       width={440}
                       height={980}
                       className="w-full rounded-[20px]"
                     />
                   </PhoneFrame>
-                  <Caption dark>The Entries tab</Caption>
+                  <Caption dark>Search by unit number</Caption>
                 </figure>
               </div>
             </div>
@@ -565,26 +577,24 @@ export default function SmartEntryPage() {
             />
 
             <div className="mt-12 grid gap-[22px] lg:grid-cols-[1.1fr_1fr_1fr] lg:items-start">
-              <div className="grid gap-[22px] sm:grid-cols-[1fr_0.9fr] sm:items-end lg:grid-cols-1">
+              <div className="grid grid-cols-2 items-end gap-[22px]">
                 <figure className="m-0">
-                  <div className="rounded-[14px] border border-warm-white/12 bg-[#FBF8F3] p-2.5">
+                  <PhoneFrame dark>
                     <Image
-                      src={`${IMG}/shot-share.png`}
-                      alt="The menu that opens from the plus button, listing Share Unit and Add Fob"
-                      width={660}
-                      height={266}
-                      className="w-full rounded-[8px] border border-black/[0.07] bg-white"
+                      src={`${IMG}/share-1-number.webp`}
+                      alt="Share access: type their cell number"
+                      width={600}
+                      height={1301}
+                      className="w-full rounded-[20px]"
                     />
-                  </div>
-                  <Caption dark>
-                    What the <span className="text-orange">+</span> opens
-                  </Caption>
+                  </PhoneFrame>
+                  <Caption dark>Type their number</Caption>
                 </figure>
                 <figure className="m-0">
                   <PhoneFrame dark>
                     <Image
                       src={`${IMG}/share-2-duration.png`}
-                      alt="Share Unit: pick how long. One day, three days, one week, or indefinitely."
+                      alt="Pick how long: one day, three days, one week, indefinitely"
                       width={600}
                       height={1301}
                       className="w-full rounded-[20px]"
@@ -603,6 +613,7 @@ export default function SmartEntryPage() {
                     <>Type their cell number and pick the unit.</>,
                   ],
                   note: 'Movers, family, a business partner. Revoke it whenever you want and it stops working immediately.',
+                  shot: false,
                 },
                 {
                   title: 'Add a fob',
@@ -612,6 +623,7 @@ export default function SmartEntryPage() {
                     <>Name it so you know whose it is.</>,
                   ],
                   note: 'For anyone who’d rather not use a phone. Same gate, same unit.',
+                  shot: true,
                 },
               ].map((c) => (
                 <div key={c.title} className="rounded-[18px_4px_18px_4px] border border-black/[0.06] bg-[#FBF8F3] p-[26px] text-black/70">
@@ -626,7 +638,20 @@ export default function SmartEntryPage() {
                     ))}
                   </ol>
                   <p className="mt-3.5 border-t border-black/[0.06] pt-3 text-[14px] leading-[1.5] text-stone">{c.note}</p>
-                  
+                  {c.shot && (
+                    <figure className="m-0 mt-4">
+                      <Image
+                        src={`${IMG}/shot-share.png`}
+                        alt="The + menu: Share Unit and Add Fob"
+                        width={660}
+                        height={266}
+                        className="w-full rounded-lg border border-black/10"
+                      />
+                      <Caption>
+                        What the <em className="not-italic text-[#B34516]">+</em> opens
+                      </Caption>
+                    </figure>
+                  )}
                 </div>
               ))}
             </div>

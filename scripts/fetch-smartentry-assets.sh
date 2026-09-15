@@ -36,6 +36,13 @@ fetch unit-3-lift.jpg     "https://januseurope.com/wp-content/uploads/2025/11/Go
 # Share flow (Janus Help Center): the duration picker
 fetch share-2-duration.png "https://www.janusintl.com/hs-fs/hubfs/IMG_2351-PNG.png"
 
+# Share flow step 1 (Janus Help Center) and the current app UI from the App Store
+# listing (id1241055944). Fetched 15 Sep 2026 and re-encoded to 600px-wide webp with
+# sharp; the page references the .webp names. Re-run this and re-encode to refresh.
+fetch share-1-number.png  "https://www.janusintl.com/hs-fs/hubfs/IMG_2349-PNG-1.png"
+fetch app-home.png        "https://is1-ssl.mzstatic.com/image/thumb/Purple112/v4/18/1e/b0/181eb0b8-c457-4acb-206e-8ee8fe0e7593/pr_source.png/1242x2208bb.png"
+fetch app-entries.png     "https://is1-ssl.mzstatic.com/image/thumb/Purple122/v4/b6/f7/06/b6f706f3-2ae4-c82c-f8f0-216676bc06bc/pr_source.png/1242x2208bb.png"
+
 echo
 echo "Note: hero and gate/unit files are saved with the original bytes (webp/png) under .jpg names;"
 echo "next/image sniffs the real format, so this is fine. Re-encode to real JPEG if you prefer."
