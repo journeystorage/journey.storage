@@ -211,10 +211,14 @@ export interface PayCard {
 /**
  * Store a card on the lease and return its payment-method id.
  *
- * `auto_charge: true` is what enrols the lease in autopay — verified against
- * the sandbox: storing a card this way flips the lease's
- * `auto_pay_after_billing_date` from 0 to 1. A billing-address zip is required.
- * The body is FLAT (a nested `payment_method` object is rejected).
+ * NOTE: `auto_charge` does NOT enrol the lease in autopay. Retested on the
+ * sandbox — a lease created with auto_charge:false still came back with
+ * auto_pay_after_billing_date = 2, while adding a card later with
+ * auto_charge:true left an autopay-off lease at 0. The flag comes from a
+ * property default applied at lease creation; the edge API exposes no way to
+ * turn autopay on, off, or move it to another card.
+ * A billing-address zip is required. The body is FLAT (a nested
+ * `payment_method` object is rejected).
  */
 export async function savePaymentMethod(leaseId: string, card: PayCard, autopay: boolean): Promise<string> {
   const { data } = await nectarV2<{ paymentMethod?: { id?: string } } & { id?: string }>(
