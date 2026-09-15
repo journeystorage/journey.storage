@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
         propertyName: m.propertyName ?? null,
         monthlyRent: m.monthlyRent ?? null,
         paidThrough: m.paidThrough ?? null,
+        nextDueDate: m.nextDueDate ?? null,
         dueDate: m.dueDate ?? null,
         periodStart: m.periodStart ?? null,
         periodEnd: m.periodEnd ?? null,

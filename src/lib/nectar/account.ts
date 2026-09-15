@@ -36,6 +36,12 @@ export interface AccountMatch {
   monthlyRent?: number
   /** Paid-through date (YYYY-MM-DD) when nothing is owed. */
   paidThrough?: string
+  /**
+   * When the next payment is due. Verified against live data: this is always
+   * rent_paid_through + 1 day, and it matches both the lease's bill_day and the
+   * open invoice's due date whenever one exists.
+   */
+  nextDueDate?: string
   /** Open invoice, when there is one — drives the "what am I paying" line. */
   dueDate?: string
   periodStart?: string
@@ -119,6 +125,13 @@ export async function findLeasesByContact(contact: string): Promise<AccountMatch
         m.code = lz.code
         m.monthlyRent = lz.rent
         m.paidThrough = lz.rent_paid_through
+        if (lz.rent_paid_through) {
+          const d = new Date(`${String(lz.rent_paid_through).slice(0, 10)}T00:00`)
+          if (!Number.isNaN(d.getTime())) {
+            d.setDate(d.getDate() + 1)
+            m.nextDueDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+          }
+        }
         if (!m.unitId && lz.unit_id) m.unitId = lz.unit_id
       } catch { /* leave balance 0 */ }
 

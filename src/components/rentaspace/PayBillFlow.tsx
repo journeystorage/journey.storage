@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Check, ChevronLeft, ChevronRight, Search, Wallet, CreditCard } from 'lucide-react'
+import { X, Check, ChevronLeft, ChevronRight, ChevronDown, Search, Wallet, CreditCard, CalendarClock } from 'lucide-react'
 
 /**
  * Pay Bill — real tenant payment.
@@ -38,6 +38,7 @@ type Account = {
   propertyName: string | null
   monthlyRent: number | null
   paidThrough: string | null
+  nextDueDate: string | null
   dueDate: string | null
   periodStart: string | null
   periodEnd: string | null
@@ -80,12 +81,29 @@ function formatContact(v: string): string {
  */
 function whatYouArePaying(a: Account): string {
   if (a.balance <= 0) {
+    if (a.nextDueDate) return `Paid through ${dateDay(a.paidThrough)} · next payment due ${dateShort(a.nextDueDate)}`
     return a.paidThrough ? `Nothing due — paid through ${dateShort(a.paidThrough)}.` : 'Nothing due right now.'
   }
   const due = a.dueDate ? ` · due ${dateShort(a.dueDate)}` : ''
   if (a.periodStart && a.periodEnd) return `Rent for ${dateDay(a.periodStart)} – ${dateDay(a.periodEnd)}${due}`
   if (a.monthlyRent) return `Monthly rent ${money(a.monthlyRent)}${due}`
   return `Outstanding account balance${due}`
+}
+
+type FeeSchedule = {
+  lateFeeFlat: number | null
+  lateFeePercent: number | null
+  lateFeeUpTo: number | null
+  nsfFee: number | null
+}
+
+/** What a late payment would cost on a given monthly rent, per the schedule. */
+function lateFeeOn(rent: number | null, f: FeeSchedule | null): number | null {
+  if (!f || !rent) return null
+  const { lateFeeFlat, lateFeePercent, lateFeeUpTo } = f
+  if (lateFeeUpTo != null && rent <= lateFeeUpTo) return lateFeeFlat ?? null
+  if (lateFeePercent != null) return +((rent * lateFeePercent) / 100).toFixed(2)
+  return lateFeeFlat ?? null
 }
 
 // `short` names the facility when opened from a facility page; omit it when
@@ -110,6 +128,9 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   // Card payments are switched off while Tenant Inc's payment endpoint is
   // failing; the lookup tells us whether to show the card form or route to phone.
   const [payOnline, setPayOnline] = useState(true)
+  // Real fee schedule from Hummingbird's product catalogue (/api/nectar/fees).
+  const [fees, setFees] = useState<FeeSchedule | null>(null)
+  const [showFees, setShowFees] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [payError, setPayError] = useState<string | null>(null)
 
@@ -124,6 +145,15 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   const amountPaid = +paidOk.reduce((s, a) => s + a.balance, 0).toFixed(2)
 
   useEffect(() => {
+    let alive = true
+    fetch('/api/nectar/fees')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (alive && j?.default) setFees(j.default as FeeSchedule) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [])
+
+  useEffect(() => {
     document.body.style.overflow = 'hidden'
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)
@@ -132,7 +162,8 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
 
   const canNext = () => {
     if (stepName === 'Account') return /.+@.+\..+/.test(contact) || contact.replace(/\D/g, '').length >= 7
-    if (stepName === 'Balance') return chosen.length > 0 && amountDue > 0
+    // Nothing owed anywhere: the button becomes a plain "Done".
+    if (stepName === 'Balance') return payable.length === 0 || (chosen.length > 0 && amountDue > 0)
     if (stepName === 'Payment' && !payOnline) return false // the call CTA lives in the panel
     if (stepName === 'Payment') return card.number.replace(/\s/g, '').length >= 12 && card.exp.length >= 4 && card.cvc.length >= 3 && !!billing.name && !!billing.address1 && !!billing.city && !!billing.state && !!billing.zip
     return true
@@ -327,6 +358,70 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
               ) : payable.length > 0 && chosen.length === 0 ? (
                 <p className="mt-4 text-[0.8125rem] text-warm-white/50">Select at least one space to continue.</p>
               ) : null}
+
+              {/* Supporting detail — due dates and what a late payment costs.
+                  Collapsed by default so it never competes with the balance. */}
+              {fees && (
+                <div className="mt-5 rounded-sm border border-warm-white/10 bg-warm-white/[0.03]">
+                  <button
+                    type="button"
+                    onClick={() => setShowFees((v) => !v)}
+                    aria-expanded={showFees}
+                    className="flex w-full cursor-pointer items-center justify-between gap-3 px-4 py-3 text-left transition-colors duration-150 hover:bg-warm-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                  >
+                    <span className="flex items-center gap-2 text-[0.8125rem] font-bold text-warm-white">
+                      <CalendarClock className="h-4 w-4 shrink-0 text-orange" aria-hidden />
+                      Due dates &amp; late fees
+                    </span>
+                    <ChevronDown className={`h-4 w-4 shrink-0 text-warm-white/50 transition-transform duration-200 ${showFees ? 'rotate-180' : ''}`} aria-hidden />
+                  </button>
+                  {showFees && (
+                    <div className="border-t border-warm-white/[0.07] px-4 py-4">
+                      <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">When rent is due</p>
+                      <dl className="mt-2 space-y-1.5">
+                        {accounts.map((a) => (
+                          <div key={a.leaseId} className="flex justify-between gap-3 text-[0.8125rem]">
+                            <dt className="text-warm-white/60">{spaceLabel(a)}</dt>
+                            <dd className={`shrink-0 text-right font-bold ${a.pastDue ? 'text-[#E8A87C]' : 'text-warm-white'}`}>
+                              {a.balance > 0
+                                ? `${dateShort(a.dueDate ?? a.nextDueDate)}${a.pastDue ? ' · past due' : ''}`
+                                : a.nextDueDate ? dateShort(a.nextDueDate) : '—'}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                      <p className="mt-3 text-[0.75rem] leading-relaxed text-warm-white/50">Rent is due on the same day each month — the date your lease started.</p>
+
+                      <p className="mt-4 border-t border-warm-white/[0.07] pt-4 text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">If a payment is late</p>
+                      <p className="mt-2 text-[0.8125rem] leading-relaxed text-warm-white/70">
+                        {fees.lateFeeUpTo != null && fees.lateFeeFlat != null && fees.lateFeePercent != null
+                          ? <>A late fee of {money(fees.lateFeeFlat)} applies on monthly rent up to {money(fees.lateFeeUpTo)}, otherwise {fees.lateFeePercent}% of your monthly rent.</>
+                          : fees.lateFeeFlat != null
+                            ? <>A late fee of {money(fees.lateFeeFlat)} applies.</>
+                            : <>Late fees are set by your facility&rsquo;s fee schedule.</>}
+                      </p>
+                      {accounts.some((a) => lateFeeOn(a.monthlyRent, fees) != null) && (
+                        <dl className="mt-2.5 space-y-1.5">
+                          {accounts.map((a) => {
+                            const lf = lateFeeOn(a.monthlyRent, fees)
+                            if (lf == null) return null
+                            return (
+                              <div key={a.leaseId} className="flex justify-between gap-3 text-[0.8125rem]">
+                                <dt className="text-warm-white/60">{spaceLabel(a)} · {money(a.monthlyRent ?? 0)}/mo</dt>
+                                <dd className="shrink-0 text-right font-bold text-warm-white">{money(lf)}</dd>
+                              </div>
+                            )
+                          })}
+                        </dl>
+                      )}
+                      {fees.nsfFee != null && (
+                        <p className="mt-3 text-[0.8125rem] leading-relaxed text-warm-white/70">A returned payment costs {money(fees.nsfFee)}.</p>
+                      )}
+                      <p className="mt-3 text-[0.6875rem] leading-relaxed text-warm-white/35">From your facility&rsquo;s current fee schedule. Your signed rental agreement governs.</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -465,8 +560,8 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
             <div className="flex items-center gap-3">
               {stepName === 'Balance' && amountDue > 0 && <span className="hidden text-[0.9375rem] font-black text-warm-white sm:inline">{money(amountDue)} due</span>}
               {!(stepName === 'Payment' && !payOnline) && (
-              <button onClick={next} disabled={!canNext() || looking || processing} className={primaryBtn}>
-                {looking ? 'Finding…' : processing ? 'Processing…' : stepName === 'Account' ? 'Find my balance' : stepName === 'Balance' ? (chosen.length ? (payOnline ? 'Continue to payment' : 'How to pay') : 'Select a space') : `Pay ${money(amountDue)}`}
+              <button onClick={payable.length === 0 && stepName === 'Balance' ? onClose : next} disabled={!canNext() || looking || processing} className={primaryBtn}>
+                {looking ? 'Finding…' : processing ? 'Processing…' : stepName === 'Account' ? 'Find my balance' : stepName === 'Balance' ? (payable.length === 0 ? 'Done' : chosen.length ? (payOnline ? 'Continue to payment' : 'How to pay') : 'Select a space') : `Pay ${money(amountDue)}`}
                 {!looking && !processing && <ChevronRight className="h-4 w-4" aria-hidden />}
               </button>
               )}
