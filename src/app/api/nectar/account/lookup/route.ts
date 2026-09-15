@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
         unitNumber: m.unitNumber ?? null,
         unitSize: m.unitSize ?? null,
         propertyName: m.propertyName ?? null,
+        propertySlug: m.propertySlug ?? null,
         monthlyRent: m.monthlyRent ?? null,
         paidThrough: m.paidThrough ?? null,
         nextDueDate: m.nextDueDate ?? null,

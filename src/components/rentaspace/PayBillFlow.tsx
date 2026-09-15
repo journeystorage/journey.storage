@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Check, ChevronLeft, ChevronRight, ChevronDown, Search, Wallet, CreditCard, CalendarClock } from 'lucide-react'
+import { X, Check, ChevronLeft, ChevronRight, ChevronDown, Search, Wallet, CreditCard, CalendarClock, PlusCircle } from 'lucide-react'
 
 /**
  * Pay Bill — real tenant payment.
@@ -36,6 +36,7 @@ type Account = {
   unitNumber: string | null
   unitSize: string | null
   propertyName: string | null
+  propertySlug: string | null
   monthlyRent: number | null
   paidThrough: string | null
   nextDueDate: string | null
@@ -143,6 +144,12 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   const paidOk = accounts.filter((a) => results.some((r) => r.leaseId === a.leaseId && r.ok))
   const paidFailed = accounts.filter((a) => results.some((r) => r.leaseId === a.leaseId && !r.ok))
   const amountPaid = +paidOk.reduce((s, a) => s + a.balance, 0).toFixed(2)
+  // Existing tenants are the easiest people to rent a second space to, so offer
+  // it once we know who they are. Send them to their own facility when they only
+  // use one, otherwise to the locations hub to choose.
+  const slugs = [...new Set(accounts.map((a) => a.propertySlug).filter(Boolean))] as string[]
+  const homeProperty = slugs.length === 1 ? accounts.find((a) => a.propertySlug === slugs[0]) : null
+  const addSpaceHref = homeProperty?.propertySlug ? `/rentaspace/${homeProperty.propertySlug}#spaces` : '/rentaspace#locations'
 
   useEffect(() => {
     let alive = true
@@ -358,6 +365,29 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
               ) : payable.length > 0 && chosen.length === 0 ? (
                 <p className="mt-4 text-[0.8125rem] text-warm-white/50">Select at least one space to continue.</p>
               ) : null}
+
+              {/* Quiet cross-sell: they're already identified, so make renting a
+                  second space one tap. Stays subordinate to the balance. */}
+              {accounts.length > 0 && (
+                <a
+                  href={addSpaceHref}
+                  onClick={onClose}
+                  className="group mt-5 flex items-center justify-between gap-4 rounded-sm border border-warm-white/12 bg-warm-white/[0.03] p-4 transition-colors duration-150 hover:border-orange/50 hover:bg-orange/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                >
+                  <span className="flex min-w-0 items-start gap-3">
+                    <PlusCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange" aria-hidden />
+                    <span className="min-w-0">
+                      <span className="block text-[0.9375rem] font-bold text-warm-white">Need more space?</span>
+                      <span className="mt-0.5 block text-[0.8125rem] leading-relaxed text-warm-white/55">
+                        {homeProperty?.propertyName
+                          ? <>Add another unit at {homeProperty.propertyName} — rent online in minutes.</>
+                          : <>Add another unit at any of our Granbury locations — rent online in minutes.</>}
+                      </span>
+                    </span>
+                  </span>
+                  <span aria-hidden className="shrink-0 text-[0.9375rem] font-bold text-orange transition-transform duration-150 group-hover:translate-x-0.5">&rarr;</span>
+                </a>
+              )}
 
               {/* Supporting detail — due dates and what a late payment costs.
                   Collapsed by default so it never competes with the balance. */}

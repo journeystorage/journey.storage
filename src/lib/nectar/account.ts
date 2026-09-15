@@ -32,6 +32,8 @@ export interface AccountMatch {
   unitSize?: string
   propertyId?: string
   propertyName?: string
+  /** Facility slug, so the UI can link to that location's spaces. */
+  propertySlug?: string
   balance: number
   monthlyRent?: number
   /** Paid-through date (YYYY-MM-DD) when nothing is owed. */
@@ -142,7 +144,11 @@ export async function findLeasesByContact(contact: string): Promise<AccountMatch
               if (u.number != null && String(u.number).trim() !== '') m.unitNumber = String(u.number)
               m.unitSize = u.label
               m.propertyId = u.property_id
-              if (u.property_id) m.propertyName = facilityByPropertyId(u.property_id)?.displayName
+              if (u.property_id) {
+                const f = facilityByPropertyId(u.property_id)
+                m.propertyName = f?.displayName
+                m.propertySlug = f?.slug
+              }
             })
             .catch(() => {})
         : Promise.resolve()
@@ -159,7 +165,11 @@ export async function findLeasesByContact(contact: string): Promise<AccountMatch
           // `due` may carry a time component; compare on the date part only.
           m.pastDue = !!open.due && open.due.slice(0, 10) < today()
           if (!m.unitNumber && open.unit_number) m.unitNumber = open.unit_number
-          if (!m.propertyName && open.property_id) m.propertyName = facilityByPropertyId(open.property_id)?.displayName
+          if (!m.propertyName && open.property_id) {
+            const f = facilityByPropertyId(open.property_id)
+            m.propertyName = f?.displayName
+            m.propertySlug = m.propertySlug ?? f?.slug
+          }
         })
         .catch(() => {})
 
