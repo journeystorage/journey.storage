@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
+import { facilities as ALL_FACILITIES, PHONE } from '@/lib/constants'
 import { X, Check, ChevronLeft, ChevronRight, ChevronDown, Search, Wallet, CreditCard, CalendarClock, PlusCircle, ShieldCheck } from 'lucide-react'
 
 /**
@@ -27,6 +29,15 @@ function Eyebrow({ label }: { label: string }) {
     </div>
   )
 }
+
+// Only loaded when a tenant actually decides to add a space.
+const RentalFlow = dynamic(() => import('@/components/rentaspace/RentalFlow'), { ssr: false })
+
+type LiveSpace = { size: string; onlinePrice: number; category: string | null; available: number }
+
+/** Tidy the raw back-office category, e.g. "McCreary Rd - Standard Storage". */
+const tidyCat = (c: string | null) =>
+  (c ? c.replace(/^.*?\s[-–]\s/, '').replace(/\bGr?anbury\b/gi, '').replace(/#\s*\d+/g, '').replace(/\s+/g, ' ').trim() : '') || 'Storage'
 
 type Account = {
   leaseId: string
@@ -139,6 +150,12 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   const [verifyCodeInput, setVerifyCodeInput] = useState('')
   const [verifyMsg, setVerifyMsg] = useState<string | null>(null)
   const [verifiedTo, setVerifiedTo] = useState<string | null>(null)
+  // Adding a space happens here rather than sending them back to the website.
+  const [addOpen, setAddOpen] = useState(false)
+  const [addSlug, setAddSlug] = useState<string | null>(null)
+  const [addSpaces, setAddSpaces] = useState<LiveSpace[] | null>(null)
+  const [addErr, setAddErr] = useState<string | null>(null)
+  const [renting, setRenting] = useState<{ slug: string; size: string; price: number; category: string | null } | null>(null)
   const [processing, setProcessing] = useState(false)
   const [payError, setPayError] = useState<string | null>(null)
 
@@ -156,7 +173,6 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   // use one, otherwise to the locations hub to choose.
   const slugs = [...new Set(accounts.map((a) => a.propertySlug).filter(Boolean))] as string[]
   const homeProperty = slugs.length === 1 ? accounts.find((a) => a.propertySlug === slugs[0]) : null
-  const addSpaceHref = homeProperty?.propertySlug ? `/rentaspace/${homeProperty.propertySlug}#spaces` : '/rentaspace#locations'
 
   useEffect(() => {
     let alive = true
@@ -182,12 +198,16 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
     return () => { alive = false }
   }, [])
 
+  // RentalFlow clears the scroll lock when it closes, but Pay Bill is still
+  // open behind it — put it back.
+  useEffect(() => { if (!renting) document.body.style.overflow = 'hidden' }, [renting])
+
   useEffect(() => {
     document.body.style.overflow = 'hidden'
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !renting) onClose() }
     window.addEventListener('keydown', onKey)
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
-  }, [onClose])
+  }, [onClose, renting])
 
   const canNext = () => {
     if (stepName === 'Account') {
@@ -216,6 +236,34 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
       return true
     } catch { setLookupMsg('Something went wrong — please try again or call us.'); return false }
     finally { setLooking(false) }
+  }
+
+  async function loadSpaces(slug: string) {
+    setAddSlug(slug); setAddSpaces(null); setAddErr(null)
+    try {
+      const r = await fetch(`/api/nectar/spaces/${slug}`)
+      const j = await r.json()
+      if (!r.ok) { setAddErr('We couldn’t load available sizes just now.'); return }
+      // One row per size+category, cheapest first.
+      const seen = new Set<string>()
+      const list: LiveSpace[] = []
+      for (const x of (j.spaces ?? []) as Array<{ size: string | null; inStock: boolean; onlinePrice: number | null; category: string | null; available: number }>) {
+        if (!x.size || !x.inStock || !(x.onlinePrice ?? 0)) continue
+        const key = `${x.size}|${tidyCat(x.category)}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        list.push({ size: x.size, onlinePrice: x.onlinePrice as number, category: x.category, available: x.available })
+      }
+      list.sort((a, b) => a.onlinePrice - b.onlinePrice)
+      setAddSpaces(list)
+      if (!list.length) setAddErr('Nothing is available online at that location right now — please call us.')
+    } catch { setAddErr('We couldn’t load available sizes just now.') }
+  }
+
+  function openAdd() {
+    setAddOpen(true)
+    const slug = homeProperty?.propertySlug ?? (slugs.length === 1 ? slugs[0] : null)
+    if (slug) loadSpaces(slug)
   }
 
   async function startVerify() {
@@ -446,24 +494,82 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
               ) : null}
 
               {accounts.length > 0 && (
-                <a
-                  href={addSpaceHref}
-                  onClick={onClose}
-                  className="group mt-5 flex items-center justify-between gap-4 rounded-sm border border-warm-white/12 bg-warm-white/[0.03] p-4 transition-colors duration-150 hover:border-orange/50 hover:bg-orange/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
-                >
-                  <span className="flex min-w-0 items-start gap-3">
-                    <PlusCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange" aria-hidden />
-                    <span className="min-w-0">
-                      <span className="block text-[0.9375rem] font-bold text-warm-white">Need more space?</span>
-                      <span className="mt-0.5 block text-[0.8125rem] leading-relaxed text-warm-white/55">
-                        {homeProperty?.propertyName
-                          ? <>Add another unit at {homeProperty.propertyName} — you&rsquo;re verified, so we already have your details.</>
-                          : <>Add another unit at any of our Granbury locations — you&rsquo;re verified, so we already have your details.</>}
+                <div className="mt-5 rounded-sm border border-warm-white/12 bg-warm-white/[0.03]">
+                  <button
+                    type="button"
+                    onClick={() => (addOpen ? setAddOpen(false) : openAdd())}
+                    aria-expanded={addOpen}
+                    className="flex w-full cursor-pointer items-center justify-between gap-3 p-4 text-left transition-colors duration-150 hover:bg-warm-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                  >
+                    <span className="flex min-w-0 items-start gap-3">
+                      <PlusCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange" aria-hidden />
+                      <span className="min-w-0">
+                        <span className="block text-[0.9375rem] font-bold text-warm-white">Need more space?</span>
+                        <span className="mt-0.5 block text-[0.8125rem] leading-relaxed text-warm-white/55">Add another unit right here — you&rsquo;re verified, so we already have your details.</span>
                       </span>
                     </span>
-                  </span>
-                  <span aria-hidden className="shrink-0 text-[0.9375rem] font-bold text-orange transition-transform duration-150 group-hover:translate-x-0.5">&rarr;</span>
-                </a>
+                    <ChevronDown className={`h-4 w-4 shrink-0 text-warm-white/50 transition-transform duration-200 ${addOpen ? 'rotate-180' : ''}`} aria-hidden />
+                  </button>
+
+                  {addOpen && (
+                    <div className="border-t border-warm-white/[0.07] px-4 py-4">
+                      {/* Which location, when they store at more than one */}
+                      {slugs.length > 1 && (
+                        <div className="mb-4">
+                          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Location</p>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {ALL_FACILITIES.map((f) => (
+                              <button
+                                key={f.slug}
+                                type="button"
+                                onClick={() => loadSpaces(f.slug)}
+                                className={`rounded-full border px-3 py-1.5 text-[0.8125rem] font-bold transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange ${
+                                  addSlug === f.slug ? 'border-orange bg-orange/[0.12] text-warm-white' : 'border-warm-white/20 text-warm-white/70 hover:border-warm-white/40'
+                                }`}
+                              >
+                                {f.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {!addSlug ? (
+                        <p className="text-[0.8125rem] text-warm-white/55">Pick a location to see what&rsquo;s available.</p>
+                      ) : addErr ? (
+                        <p className="text-[0.8125rem] leading-relaxed text-[#E8A87C]">{addErr} <a href={facility.tel} className="underline">{facility.phone}</a></p>
+                      ) : addSpaces === null ? (
+                        <p className="text-[0.8125rem] text-warm-white/45">Loading available sizes…</p>
+                      ) : (
+                        <>
+                          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Available now</p>
+                          <div className="mt-2 space-y-2">
+                            {addSpaces.map((sp) => (
+                              <button
+                                key={`${sp.size}|${sp.category}`}
+                                type="button"
+                                onClick={() => setRenting({ slug: addSlug, size: sp.size, price: sp.onlinePrice, category: tidyCat(sp.category) })}
+                                className="group flex w-full items-center justify-between gap-3 rounded-sm border border-warm-white/12 bg-warm-white/[0.04] p-3 text-left transition-colors duration-150 hover:border-orange/50 hover:bg-orange/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                              >
+                                <span className="min-w-0">
+                                  <span className="block text-[1rem] font-black tracking-[-0.01em] text-warm-white">{sp.size}</span>
+                                  <span className="mt-0.5 block text-[0.75rem] text-warm-white/55">
+                                    {tidyCat(sp.category)}{sp.available > 0 && sp.available <= 3 ? ` · only ${sp.available} left` : ''}
+                                  </span>
+                                </span>
+                                <span className="shrink-0 text-right">
+                                  <span className="block leading-none"><span className="text-[1.125rem] font-black text-orange">{money(sp.onlinePrice)}</span><span className="text-[0.6875rem] font-bold text-warm-white/50">/mo</span></span>
+                                  <span className="mt-1 block text-[0.6875rem] font-bold text-sage-green">1st month {money(Math.round(sp.onlinePrice / 2))}</span>
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                          <p className="mt-3 text-[0.6875rem] leading-relaxed text-warm-white/35">Pick a size to see the exact move-in cost. It&rsquo;s added to this account, under the same name and address.</p>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* Supporting detail — due dates and what a late payment costs.
@@ -504,19 +610,31 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
                         {accounts.map((a) => (
                           <div key={a.leaseId} className="flex justify-between gap-3 text-[0.8125rem]">
                             <dt className="text-warm-white/60">{spaceLabel(a)}</dt>
-                            <dd className="shrink-0 text-right">
-                              <span className={`font-bold ${a.autopayOn ? 'text-sage-green' : 'text-warm-white/70'}`}>{a.autopayOn ? 'On' : 'Off'}</span>
-                              {a.cardOnFile && <span className="block text-[0.6875rem] text-warm-white/45">{a.cardOnFile}</span>}
+                            <dd className={`shrink-0 text-right font-bold ${a.autopayOn ? 'text-sage-green' : 'text-warm-white/70'}`}>
+                              {a.autopayOn ? 'On' : 'Off'}
                             </dd>
                           </div>
                         ))}
                       </dl>
-                      <p className="mt-2.5 text-[0.75rem] leading-relaxed text-warm-white/50">
-                        {accounts.some((a) => a.cardOnFile) ? 'That’s the card we keep on file. ' : ''}
-                        To turn autopay {accounts.every((a) => a.autopayOn) ? 'off' : 'on'}, or to change that card, call{' '}
-                        <a href={facility.tel} className="font-bold text-orange underline-offset-4 hover:underline">{facility.phone}</a>{' '}
-                        — we can update it while you&rsquo;re on the line.
-                      </p>
+                      {accounts.some((a) => !a.autopayOn) && (
+                        <p className="mt-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">
+                          Want rent paid automatically each month? Call{' '}
+                          <a href={facility.tel} className="font-bold text-orange underline-offset-4 hover:underline">{facility.phone}</a>{' '}
+                          and we&rsquo;ll turn autopay on while you&rsquo;re on the line.
+                        </p>
+                      )}
+                      {accounts.some((a) => a.autopayOn) && (
+                        <p className="mt-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">
+                          {(() => {
+                            const on = accounts.filter((a) => a.autopayOn)
+                            const card = on.find((a) => a.cardOnFile)?.cardOnFile
+                            return card ? <>Autopay is charging <b className="text-warm-white">{card}</b>. </> : null
+                          })()}
+                          To change the card on file, call{' '}
+                          <a href={facility.tel} className="font-bold text-orange underline-offset-4 hover:underline">{facility.phone}</a>{' '}
+                          — we can swap it while you&rsquo;re on the line.
+                        </p>
+                      )}
 
                       <p className="mt-4 border-t border-warm-white/[0.07] pt-4 text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">If a payment is late</p>
                       <p className="mt-2 text-[0.8125rem] leading-relaxed text-warm-white/70">
@@ -687,6 +805,20 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
           </div>
         )}
       </div>
+    {renting && (
+        <RentalFlow
+          facility={{
+            slug: renting.slug,
+            short: ALL_FACILITIES.find((f) => f.slug === renting.slug)?.name ?? 'Granbury',
+            address: ALL_FACILITIES.find((f) => f.slug === renting.slug)?.street ?? '',
+            city: `${ALL_FACILITIES.find((f) => f.slug === renting.slug)?.city ?? 'Granbury'}, ${ALL_FACILITIES.find((f) => f.slug === renting.slug)?.region ?? 'TX'} ${ALL_FACILITIES.find((f) => f.slug === renting.slug)?.zip ?? ''}`.trim(),
+            phone: PHONE.display,
+            tel: `tel:${PHONE.tel}`,
+          }}
+          space={{ size: renting.size, price: renting.price, category: renting.category }}
+          onClose={() => setRenting(null)}
+        />
+      )}
     </div>
   )
 }
