@@ -17,13 +17,19 @@ const digits = (s: string) => s.replace(/\D/g, '')
 
 interface TenantRow {
   lease_id?: string
-  Contact?: { first?: string; last?: string; email?: string; Phones?: Array<{ phone?: string }> }
+  Contact?: { id?: string; first?: string; last?: string; email?: string; Phones?: Array<{ phone?: string }> }
   Lease?: { id?: string; unit_id?: string }
 }
 
 export interface AccountMatch {
   leaseId: string
   name: string
+  /**
+   * Hummingbird contact id and the email on file. Server-side only — never
+   * returned by the lookup API, since that endpoint needs no authentication.
+   */
+  contactId?: string
+  contactEmail?: string
   code?: string
   unitId?: string
   /** Human unit number, e.g. "85" or "B210". */
@@ -115,6 +121,8 @@ export async function findLeasesByContact(contact: string): Promise<AccountMatch
         byLease.set(t.lease_id, {
           leaseId: t.lease_id,
           name: `${c.first ?? ''} ${c.last ?? ''}`.trim() || 'Your account',
+          contactId: c.id,
+          contactEmail: c.email,
           unitId: t.Lease?.unit_id,
           balance: 0,
         })
@@ -258,4 +266,34 @@ export async function payLease(leaseId: string, amount: number, card: PayCard, a
 export async function enableAutopay(leaseId: string, card: PayCard): Promise<{ ok: boolean }> {
   await savePaymentMethod(leaseId, card, true)
   return { ok: true }
+}
+
+
+/**
+ * The contact behind an email/phone, for the ownership check. Returns the id we
+ * address the code to and the email it goes to — never surfaced to the browser.
+ */
+export async function findContactFor(contact: string): Promise<{ contactId: string; email: string; name: string } | null> {
+  const matches = await findLeasesByContact(contact)
+  const hit = matches.find((m) => m.contactId && m.contactEmail)
+  if (!hit?.contactId || !hit.contactEmail) return null
+  return { contactId: hit.contactId, email: hit.contactEmail, name: hit.name }
+}
+
+
+/**
+ * Name and email straight off the contact record, for a verified tenant whose
+ * details we deliberately don't accept from the browser.
+ */
+export async function getContactBasics(contactId: string): Promise<{ first: string; last: string; email: string } | null> {
+  try {
+    const { data } = await nectarV2<{ contact?: { first?: string; last?: string; email?: string } } & { first?: string; last?: string; email?: string }>(
+      `companies/${co()}/contacts/${contactId}`,
+    )
+    const c = (data.contact ?? data) as { first?: string; last?: string; email?: string }
+    if (!c?.email) return null
+    return { first: c.first ?? '', last: c.last ?? '', email: c.email }
+  } catch {
+    return null
+  }
 }

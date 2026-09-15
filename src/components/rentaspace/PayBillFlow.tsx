@@ -132,6 +132,12 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   // Real fee schedule from Hummingbird's product catalogue (/api/nectar/fees).
   const [fees, setFees] = useState<FeeSchedule | null>(null)
   const [showFees, setShowFees] = useState(false)
+  // Adding a space creates a lease in this person's name, so it stays locked
+  // until a code emailed to the address on file proves they control the account.
+  const [verifyStage, setVerifyStage] = useState<'idle' | 'sending' | 'code' | 'checking' | 'done'>('idle')
+  const [verifyCodeInput, setVerifyCodeInput] = useState('')
+  const [verifyMsg, setVerifyMsg] = useState<string | null>(null)
+  const [verifiedTo, setVerifiedTo] = useState<string | null>(null)
   const [processing, setProcessing] = useState(false)
   const [payError, setPayError] = useState<string | null>(null)
 
@@ -150,6 +156,15 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   const slugs = [...new Set(accounts.map((a) => a.propertySlug).filter(Boolean))] as string[]
   const homeProperty = slugs.length === 1 ? accounts.find((a) => a.propertySlug === slugs[0]) : null
   const addSpaceHref = homeProperty?.propertySlug ? `/rentaspace/${homeProperty.propertySlug}#spaces` : '/rentaspace#locations'
+
+  useEffect(() => {
+    let alive = true
+    fetch('/api/nectar/account/verify/status')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (alive && j?.verified) { setVerifyStage('done'); setVerifiedTo(j.email ?? null) } })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [])
 
   useEffect(() => {
     let alive = true
@@ -191,6 +206,27 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
       return true
     } catch { setLookupMsg('Something went wrong — please try again or call us.'); return false }
     finally { setLooking(false) }
+  }
+
+  async function startVerify() {
+    setVerifyStage('sending'); setVerifyMsg(null)
+    try {
+      const r = await fetch('/api/nectar/account/verify/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contact }) })
+      const j = await r.json()
+      if (!r.ok) { setVerifyMsg(j.error ?? 'We couldn’t send a code.'); setVerifyStage('idle'); return }
+      setVerifiedTo(j.email ?? null)
+      setVerifyStage('code')
+    } catch { setVerifyMsg('Something went wrong — please try again.'); setVerifyStage('idle') }
+  }
+
+  async function confirmVerify() {
+    setVerifyStage('checking'); setVerifyMsg(null)
+    try {
+      const r = await fetch('/api/nectar/account/verify/confirm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contact, code: verifyCodeInput }) })
+      const j = await r.json()
+      if (!r.ok) { setVerifyMsg(j.error ?? 'That code isn’t right.'); setVerifyStage('code'); return }
+      setVerifyStage('done')
+    } catch { setVerifyMsg('Something went wrong — please try again.'); setVerifyStage('code') }
   }
 
   /**
@@ -366,27 +402,75 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
                 <p className="mt-4 text-[0.8125rem] text-warm-white/50">Select at least one space to continue.</p>
               ) : null}
 
-              {/* Quiet cross-sell: they're already identified, so make renting a
-                  second space one tap. Stays subordinate to the balance. */}
+              {/* Renting another space puts a lease in this person's name, so it
+                  unlocks only after a code sent to the address on file. */}
               {accounts.length > 0 && (
-                <a
-                  href={addSpaceHref}
-                  onClick={onClose}
-                  className="group mt-5 flex items-center justify-between gap-4 rounded-sm border border-warm-white/12 bg-warm-white/[0.03] p-4 transition-colors duration-150 hover:border-orange/50 hover:bg-orange/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
-                >
-                  <span className="flex min-w-0 items-start gap-3">
+                <div className="mt-5 rounded-sm border border-warm-white/12 bg-warm-white/[0.03] p-4">
+                  <div className="flex items-start gap-3">
                     <PlusCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange" aria-hidden />
-                    <span className="min-w-0">
-                      <span className="block text-[0.9375rem] font-bold text-warm-white">Need more space?</span>
-                      <span className="mt-0.5 block text-[0.8125rem] leading-relaxed text-warm-white/55">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[0.9375rem] font-bold text-warm-white">Need more space?</p>
+                      <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-warm-white/55">
                         {homeProperty?.propertyName
-                          ? <>Add another unit at {homeProperty.propertyName} — rent online in minutes.</>
-                          : <>Add another unit at any of our Granbury locations — rent online in minutes.</>}
-                      </span>
-                    </span>
-                  </span>
-                  <span aria-hidden className="shrink-0 text-[0.9375rem] font-bold text-orange transition-transform duration-150 group-hover:translate-x-0.5">&rarr;</span>
-                </a>
+                          ? <>Add another unit at {homeProperty.propertyName} — we already have your details, so it takes a couple of minutes.</>
+                          : <>Add another unit at any of our Granbury locations — we already have your details.</>}
+                      </p>
+
+                      {verifyStage === 'done' ? (
+                        <a
+                          href={addSpaceHref}
+                          onClick={onClose}
+                          className="btn-spring mt-3 inline-flex items-center gap-2 rounded-sm bg-orange px-5 py-2.5 text-[0.875rem] font-bold text-warm-white shadow-[0_2px_8px_rgba(232,98,42,.3)] transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                        >
+                          <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
+                          Verified — choose a space
+                        </a>
+                      ) : verifyStage === 'code' || verifyStage === 'checking' ? (
+                        <div className="mt-3">
+                          <p className="text-[0.8125rem] leading-relaxed text-warm-white/70">
+                            We emailed a 6-digit code{verifiedTo ? <> to <b className="text-warm-white">{verifiedTo}</b></> : ''}. Enter it to confirm this is your account.
+                          </p>
+                          <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                            <input
+                              value={verifyCodeInput}
+                              onChange={(e) => setVerifyCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                              onKeyDown={(e) => { if (e.key === 'Enter' && verifyCodeInput.length === 6) confirmVerify() }}
+                              inputMode="numeric"
+                              autoComplete="one-time-code"
+                              placeholder="123456"
+                              aria-label="6-digit verification code"
+                              className="w-[8.5rem] rounded-sm border border-stone/30 bg-warm-white/[0.06] px-3 py-2.5 text-center text-[1.125rem] font-bold tracking-[0.3em] text-warm-white placeholder:tracking-normal placeholder:text-stone focus:border-orange focus-visible:outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={confirmVerify}
+                              disabled={verifyCodeInput.length !== 6 || verifyStage === 'checking'}
+                              className="btn-spring rounded-sm bg-orange px-4 py-2.5 text-[0.875rem] font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:hover:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                            >
+                              {verifyStage === 'checking' ? 'Checking…' : 'Confirm'}
+                            </button>
+                            <button type="button" onClick={startVerify} className="text-[0.75rem] font-bold text-warm-white/50 underline-offset-4 transition-colors hover:text-warm-white hover:underline">
+                              Resend
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={startVerify}
+                          disabled={verifyStage === 'sending'}
+                          className="btn-spring mt-3 inline-flex items-center gap-2 rounded-sm border border-orange/60 px-4 py-2.5 text-[0.875rem] font-bold text-orange transition-colors duration-150 hover:bg-orange/10 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                        >
+                          {verifyStage === 'sending' ? 'Sending a code…' : 'Add a space'}
+                        </button>
+                      )}
+                      {verifyMsg && <p className="mt-2 text-[0.75rem] font-bold text-[#E8A87C]">{verifyMsg}</p>}
+                      {verifyStage !== 'done' && (
+                        <p className="mt-2 text-[0.6875rem] leading-relaxed text-warm-white/35">For your security we confirm it&rsquo;s you before adding a lease to your account.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
               )}
 
               {/* Supporting detail — due dates and what a late payment costs.

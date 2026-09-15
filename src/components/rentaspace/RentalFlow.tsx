@@ -62,6 +62,10 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const [payingMsg, setPayingMsg] = useState<string | null>(null)
   // ClickWrap Superlease disclosures from Hummingbird. null = still loading.
   const [disclosures, setDisclosures] = useState<Array<{ id: number; html: string }> | null>(null)
+  // An existing tenant who proved they control their account (Pay Bill → verify).
+  // Their details come off their contact record server-side, so this flow neither
+  // asks for them nor sends them.
+  const [verified, setVerified] = useState<{ name: string | null } | null>(null)
   const autopay = true // required — enrollment is not optional
 
   // ── Live API state (demo math is the graceful fallback) ──
@@ -163,7 +167,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
         billDay: realQuote.billDay, webRate: realQuote.monthlyRent, totalDue: realQuote.dueToday, lineItems: realQuote.lineItems,
         promotionIds: hold.promotionId ? [hold.promotionId] : undefined,
         insuranceId: realPlans ? planId : undefined,
-        tenant: {
+        tenant: verified ? undefined : {
           first, last, email: details.email, phone: details.phone, address: details.address, city: details.city, state: details.state, zip: details.zip,
           dob: details.dob, dlNumber: details.dlNumber, dlState: details.dlState, dlExp: details.dlExp,
           isBusiness: details.isBusiness, businessName: details.isBusiness ? details.businessName : undefined,
@@ -179,6 +183,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
 
   const canNext = () => {
     if (stepName === 'Move-in') return !!moveIn
+    if (stepName === 'Your details' && verified) return true
     if (stepName === 'Your details') return !!details.name && /.+@.+\..+/.test(details.email) && details.phone.length >= 7 && !!details.address && !!details.city && !!details.state && !!details.zip && !!details.dob && !!details.dlNumber && details.dlState.length === 2 && !!details.dlExp && (!details.isBusiness || !!details.businessName)
     if (stepName === 'Protection') return !!planId
     if (stepName === 'Sign lease') return agree && signature.trim().length >= 3
@@ -243,6 +248,15 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const glassCard = `${R} border border-warm-white/10 bg-warm-white/[0.04]`
   const optionBase = `flex w-full items-center justify-between rounded-sm border p-4 text-left transition-colors duration-150`
   const dateLong = (iso: string) => new Date(iso + 'T00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+
+  useEffect(() => {
+    let alive = true
+    fetch('/api/nectar/account/verify/status')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (alive && j?.verified) setVerified({ name: j.name ?? null }) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [])
 
   // Pull the live disclosures once per facility; empty array = show the fallback note.
   useEffect(() => {
@@ -317,7 +331,28 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
             </div>
           )}
 
-          {stepName === 'Your details' && (
+          {stepName === 'Your details' && verified && (
+            <div className="mx-auto max-w-lg">
+              <Eyebrow label="About you" />
+              <h2 className="mt-4 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white">Renting on your account</h2>
+              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">You&rsquo;re signed in, so there&rsquo;s nothing to fill in — we already have your details on file.</p>
+              <div className={`mt-7 ${glassCard} p-5`}>
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sage-green/20 text-sage-green ring-1 ring-sage-green/30">
+                    <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Verified account</p>
+                    <p className="mt-1 text-[1.125rem] font-black tracking-[-0.01em] text-warm-white">{verified.name ?? 'Your account'}</p>
+                    <p className="mt-1 text-[0.8125rem] leading-relaxed text-warm-white/55">This space will be added to your account and billed under the same name and address we hold for your other units.</p>
+                  </div>
+                </div>
+              </div>
+              <p className="mt-4 text-[0.75rem] leading-relaxed text-warm-white/40">Need it in a different name or at a different address? Close this and call {facility.phone} — we&rsquo;ll set it up.</p>
+            </div>
+          )}
+
+          {stepName === 'Your details' && !verified && (
             <div className="mx-auto max-w-lg">
               <Eyebrow label="About you" />
               <h2 className="mt-4 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white">Tell us about you</h2>

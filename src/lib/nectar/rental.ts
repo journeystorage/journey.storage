@@ -249,11 +249,16 @@ export async function updateContactExtras(contactId: string, t: Tenant): Promise
     await nectarV2(`companies/${co()}/contacts/${contactId}`, { method: 'PUT', body })
   } catch { /* secondary data — the rental already succeeded */ }
 }
-const paymentFrom = (c: Card, t: Tenant) => ({
+const paymentFrom = (c: Card, t?: Tenant) => {
+  const parts = (c.name_on_card || '').trim().split(/\s+/).filter(Boolean)
+  const first = t?.first ?? (parts.length > 1 ? parts.slice(0, -1).join(' ') : parts[0] ?? '')
+  const last = t?.last ?? (parts.length > 1 ? parts[parts.length - 1] : '')
+  return {
   address: c.address, card_number: c.card_number, city: c.city, cvv2: c.cvv2,
-  exp_mo: c.exp_mo, exp_yr: c.exp_yr, first: t.first, last: t.last,
+  exp_mo: c.exp_mo, exp_yr: c.exp_yr, first, last,
   name_on_card: c.name_on_card, save_to_account: false, state: c.state, type: 'card', zip: c.zip, auto_charge: true,
-})
+  }
+}
 // Quote line items → the costs array documents/finalize + lease expect.
 // NOTE: the caller must NOT run a second lease-setup before this — a repeated
 // lease-setup on the same hold makes the lease step 500 (verified). We reuse
@@ -266,6 +271,14 @@ const costsFrom = (lineItems: Array<{ name: string; amount: number }>, startDate
   }))
 
 export interface CompleteRentalInput {
+  /**
+   * Existing Hummingbird contact to attach the lease to, for a verified tenant
+   * adding another space. `contacts: [{ id }]` is accepted by both
+   * documents/finalize and lease — confirmed against the sandbox, where the new
+   * lease came back on the same contact_id with no duplicate customer created.
+   * When set, the tenant's personal details are not re-sent.
+   */
+  existingContactId?: string
   unitId: string
   holdToken: string
   dossierToken?: string
@@ -277,7 +290,7 @@ export interface CompleteRentalInput {
   lineItems: Array<{ name: string; amount: number }> // from the single quote
   promotionIds?: string[]
   insuranceId?: string // enrolls + charges the coverage on the lease
-  tenant: Tenant
+  tenant?: Tenant
   card: Card
   metadata?: { ip?: string; user_agent?: string; location?: string }
 }
@@ -304,7 +317,7 @@ async function getUnitNumber(unitId: string): Promise<string | undefined> {
 
 /** Direct online move-in: documents/finalize (auto-signs) → lease (pending). */
 export async function completeRental(i: CompleteRentalInput): Promise<RentalResult> {
-  const contacts = contactsFrom(i.tenant)
+  const contacts = i.existingContactId || !i.tenant ? [{ id: i.existingContactId! }] : contactsFrom(i.tenant)
   const payment = paymentFrom(i.card, i.tenant)
   const costs = costsFrom(i.lineItems, i.startDate)
 
@@ -340,7 +353,7 @@ export async function completeRental(i: CompleteRentalInput): Promise<RentalResu
   // Business/military flags the finalize path drops — applied to the contact
   // after the lease exists; never blocks the rental (verified vs sandbox).
   const contactId = lease.tenants?.[0]?.contact_id
-  if (contactId && (i.tenant.isBusiness || i.tenant.military)) await updateContactExtras(contactId, i.tenant)
+  if (!i.existingContactId && i.tenant && contactId && (i.tenant.isBusiness || i.tenant.military)) await updateContactExtras(contactId, i.tenant)
   const unitNumber = await getUnitNumber(i.unitId)
   return {
     unitNumber,

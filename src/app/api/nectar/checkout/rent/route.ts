@@ -8,6 +8,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { facilityBySlug } from '@/lib/nectar/facilities'
 import { completeRental, type Tenant, type Card } from '@/lib/nectar/rental'
+import { VERIFY_COOKIE, readSession } from '@/lib/account-verify'
+import { getContactBasics } from '@/lib/nectar/account'
 import { sendMoveInConfirmation } from '@/lib/move-in-email'
 
 interface RentBody {
@@ -40,11 +42,23 @@ export async function POST(req: NextRequest) {
   const cfg = body.facility ? facilityBySlug(body.facility) : undefined
   if (!cfg) return NextResponse.json({ error: 'Unknown facility' }, { status: 404 })
   const { unitId, holdToken, startDate, tenant, card, lineItems, billDay, webRate, totalDue } = body
-  if (!unitId || !holdToken || !startDate || !tenant?.email || !card?.card_number || !lineItems?.length || billDay == null) {
+  // A verified tenant adding another space: the lease attaches to their existing
+  // contact, so their personal details are neither needed nor trusted from the
+  // browser. The cookie is signed server-side and cannot be forged.
+  const existingContactId = readSession(req.cookies.get(VERIFY_COOKIE)?.value) ?? undefined
+  const needsDetails = !existingContactId
+  if (!unitId || !holdToken || !startDate || !card?.card_number || !lineItems?.length || billDay == null) {
+    return NextResponse.json({ error: 'Missing rental details.' }, { status: 400 })
+  }
+  if (needsDetails && !tenant?.email) {
     return NextResponse.json({ error: 'Missing rental details.' }, { status: 400 })
   }
   try {
+    // For a verified tenant, name and email come off their contact record —
+    // never from the browser, which sends no personal details in that flow.
+    const basics = existingContactId ? await getContactBasics(existingContactId) : null
     const result = await completeRental({
+      existingContactId,
       unitId,
       holdToken,
       dossierToken: body.dossierToken,
@@ -67,8 +81,8 @@ export async function POST(req: NextRequest) {
     // committed and charged, so email trouble must never fail this response).
     await sendMoveInConfirmation({
       facilitySlug: cfg.slug,
-      tenantFirst: tenant.first,
-      tenantEmail: tenant.email,
+      tenantFirst: basics?.first ?? tenant?.first ?? '',
+      tenantEmail: basics?.email ?? tenant?.email ?? '',
       spaceLabel: body.spaceLabel,
       unitNumber: result.unitNumber ?? null,
       startDate,
