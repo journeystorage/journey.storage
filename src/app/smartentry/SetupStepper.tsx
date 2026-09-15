@@ -121,7 +121,7 @@ export default function SetupStepper() {
                     : 'border-transparent hover:bg-[#FBF8F3]/60',
                 ].join(' ')}
               >
-                <span className="text-[44px] font-black leading-[0.9] text-[#B34516]">{i + 1}</span>
+                <span className="font-[family-name:var(--font-barlow)] text-[44px] font-black leading-[0.9] text-[#B34516]">{i + 1}</span>
                 <span>
                   <span className="block text-[19px] font-semibold leading-tight text-black">{s.title}</span>
                   <span

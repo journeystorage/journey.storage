@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import { Barlow_Condensed, Work_Sans } from 'next/font/google'
 import {
   Download,
   ChevronDown,
@@ -36,6 +37,13 @@ import SetupStepper from './SetupStepper'
 //
 // Orange type on light backgrounds is #B34516 (Brand Guide v2.0); #FF6320 is
 // for fills and for type on dark.
+
+// Brand Guide v2.0 faces, scoped to this page: Barlow Condensed for display type
+// (h1, section h2s, step numbers, the phone number), Work Sans for everything else.
+// The site chrome (Navbar, Footer, marquee) stays in Lato.
+const barlow = Barlow_Condensed({ subsets: ['latin'], weight: ['700', '900'], variable: '--font-barlow', display: 'swap' })
+const workSans = Work_Sans({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'], variable: '--font-work-sans', display: 'swap' })
+const DISPLAY = 'font-[family-name:var(--font-barlow)]'
 
 const APP_URL = 'https://noke.app'
 const IMG = '/images/smartentry'
@@ -226,7 +234,8 @@ function SectionHead({
         <Eyebrow dark={dark}>{eyebrow}</Eyebrow>
         <h2
           className={[
-            'mt-3.5 max-w-[18ch] text-3xl font-black leading-[0.98] md:text-4xl lg:text-5xl',
+            DISPLAY,
+            'mt-3.5 max-w-[18ch] text-[clamp(34px,5vw,56px)] font-bold leading-[0.98]',
             dark ? 'text-warm-white' : 'text-black',
           ].join(' ')}
         >
@@ -273,7 +282,7 @@ export default function SmartEntryPage() {
       <div className="h-[64px] lg:h-[72px]" aria-hidden="true" />
       <MarqueeBanner />
 
-      <main className="bg-warm-white">
+      <main className={`${barlow.variable} ${workSans.variable} bg-warm-white font-[family-name:var(--font-work-sans)]`}>
         {/* ── Hero ───────────────────────────────────────────────── */}
         <header className="grain relative flex min-h-[min(92vh,860px)] items-end overflow-hidden bg-black text-warm-white">
           <Image
@@ -301,7 +310,7 @@ export default function SmartEntryPage() {
               <div className="text-[12px] font-bold uppercase tracking-[0.3em] text-orange">
                 No keys · No lock to buy · No office hours
               </div>
-              <h1 className="mt-4 text-[56px] font-black uppercase leading-[0.92] text-warm-white md:text-[96px] lg:text-[132px]">
+              <h1 className={`${DISPLAY} mt-4 text-[56px] font-black uppercase leading-[0.92] tracking-normal text-warm-white md:text-[96px] lg:text-[132px]`}>
                 Your phone
                 <br />
                 is your <span className="text-orange">key</span>
@@ -389,7 +398,7 @@ export default function SmartEntryPage() {
                   i > 0 ? 'border-l border-warm-white/12 pl-3' : '',
                 ].join(' ')}
               >
-                <b className="text-[26px] font-black leading-none text-orange">{n}</b>
+                <b className={`${DISPLAY} text-[26px] font-black leading-none text-orange`}>{n}</b>
                 <span>
                   {t} <span className="hidden md:inline">· {s}</span>
                 </span>
@@ -457,7 +466,7 @@ export default function SmartEntryPage() {
                     {!s.contain && (
                       <div className="pointer-events-none absolute inset-0 bg-terracotta/20 mix-blend-multiply" aria-hidden="true" />
                     )}
-                    <span className="absolute left-3.5 top-3.5 grid h-11 w-11 place-items-center rounded-full bg-orange text-[24px] font-black text-black">
+                    <span className={`${DISPLAY} absolute left-3.5 top-3.5 grid h-11 w-11 place-items-center rounded-full bg-orange text-[24px] font-black text-black`}>
                       {i + 1}
                     </span>
                   </div>
@@ -527,7 +536,7 @@ export default function SmartEntryPage() {
                   <div className="relative aspect-[3/4] overflow-hidden rounded-[18px_4px_18px_4px] bg-[#2a2826]">
                     <Image src={s.img} alt={s.alt} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
                     <div className="pointer-events-none absolute inset-0 bg-terracotta/20 mix-blend-multiply" aria-hidden="true" />
-                    <span className="absolute left-3.5 top-3.5 grid h-11 w-11 place-items-center rounded-full bg-orange text-[24px] font-black text-black">
+                    <span className={`${DISPLAY} absolute left-3.5 top-3.5 grid h-11 w-11 place-items-center rounded-full bg-orange text-[24px] font-black text-black`}>
                       {i + 1}
                     </span>
                     <Image
@@ -671,7 +680,7 @@ export default function SmartEntryPage() {
                 />
               </div>
               <div>
-                <h3 className="text-[32px] font-bold leading-none text-warm-white">Watch: sharing a key</h3>
+                <h3 className={`${DISPLAY} text-[32px] font-bold leading-none text-warm-white`}>Watch: sharing a key</h3>
                 <p className="mt-3 text-[16px] leading-[1.6]">Seventy seconds, start to finish.</p>
               </div>
             </div>
@@ -686,7 +695,7 @@ export default function SmartEntryPage() {
               {CAPS.map(({ Icon, k, v }) => (
                 <div key={k} className="bg-warm-white px-6 py-[26px]">
                   <Icon size={28} strokeWidth={1.7} className="mb-3.5 text-[#B34516]" aria-hidden="true" />
-                  <h3 className="text-[26px] font-bold leading-none text-black">{k}</h3>
+                  <h3 className={`${DISPLAY} text-[26px] font-bold leading-none text-black`}>{k}</h3>
                   <p className="mt-2.5 text-[15px] leading-[1.55] text-black/70">{v}</p>
                 </div>
               ))}
@@ -761,7 +770,7 @@ export default function SmartEntryPage() {
             >
               <div className="relative z-10">
                 <span className="text-[12px] font-bold uppercase tracking-[0.24em] text-orange">Still stuck</span>
-                <h2 className="mt-2.5 text-3xl font-black leading-none md:text-4xl lg:text-5xl">
+                <h2 className={`${DISPLAY} mt-2.5 text-[clamp(34px,5vw,54px)] font-bold leading-none`}>
                   Call us. A person picks up.
                 </h2>
                 <p className="mt-3 max-w-[40ch] text-warm-white/60">
@@ -771,7 +780,7 @@ export default function SmartEntryPage() {
               <div className="relative z-10">
                 <a
                   href={`tel:${PHONE.tel}`}
-                  className="inline-flex items-center gap-3 text-[36px] font-black leading-none text-warm-white no-underline md:text-[48px] lg:text-[60px]"
+                  className={`${DISPLAY} inline-flex items-center gap-3 text-[clamp(36px,5vw,60px)] font-black leading-none text-warm-white no-underline`}
                 >
                   <Phone size={28} className="hidden md:block" aria-hidden="true" />
                   {PHONE.display}
