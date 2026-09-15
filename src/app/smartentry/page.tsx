@@ -16,9 +16,6 @@ import {
   MapPin,
   Phone,
 } from 'lucide-react'
-import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
-import MarqueeBanner from '@/components/sections/MarqueeBanner'
 import { PHONE } from '@/lib/constants'
 import SetupStepper from './SetupStepper'
 
@@ -40,7 +37,8 @@ import SetupStepper from './SetupStepper'
 
 // Brand Guide v2.0 faces, scoped to this page: Barlow Condensed for display type
 // (h1, section h2s, step numbers, the phone number), Work Sans for everything else.
-// The site chrome (Navbar, Footer, marquee) stays in Lato.
+// The page carries its own dark nav and slim footer (mockup v2.7); the site's
+// Navbar, marquee and Footer are not rendered here.
 const barlow = Barlow_Condensed({ subsets: ['latin'], weight: ['700', '900'], variable: '--font-barlow', display: 'swap' })
 const workSans = Work_Sans({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'], variable: '--font-work-sans', display: 'swap' })
 const DISPLAY = 'font-[family-name:var(--font-barlow)]'
@@ -273,16 +271,64 @@ function PhoneFrame({ children, dark = false }: { children: React.ReactNode; dar
   )
 }
 
+/* ── Page chrome (matches mockup v2.7: dark sticky nav, slim footer) ── */
+
+const NAV = [
+  { href: '#setup', label: 'Set up' },
+  { href: '#gate', label: 'Gate' },
+  { href: '#unit', label: 'Your unit' },
+  { href: '#share', label: 'Share' },
+  { href: '#help', label: 'Help' },
+]
+
+function SmartEntryNav() {
+  return (
+    <nav className="sticky top-0 z-50 border-b border-warm-white/12 bg-[#181818]/[0.92] backdrop-blur-[10px]">
+      <div className="mx-auto flex h-16 w-full max-w-content items-center justify-between px-5 md:px-8 lg:px-16">
+        <a href="/" aria-label="Journey.Storage home" className="inline-flex focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange">
+          <Image src="/images/brand/logo-white-TM.svg" alt="Journey.Storage" width={193} height={14} className="h-[14px] w-auto" priority />
+        </a>
+        <div className="hidden items-center gap-7 lg:flex">
+          {NAV.map((n) => (
+            <a
+              key={n.href}
+              href={n.href}
+              className="text-[13px] font-semibold uppercase tracking-[0.06em] text-warm-white/70 no-underline transition-colors duration-150 hover:text-orange focus-visible:text-orange focus-visible:outline-none active:text-orange/80"
+            >
+              {n.label}
+            </a>
+          ))}
+        </div>
+        <a
+          href={`tel:${PHONE.tel}`}
+          className="rounded-[8px_2px_8px_2px] border border-warm-white/25 px-3.5 py-[9px] text-[14px] font-bold text-warm-white no-underline transition-colors duration-150 hover:bg-warm-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange active:bg-warm-white/15"
+        >
+          {PHONE.display}
+        </a>
+      </div>
+    </nav>
+  )
+}
+
+function SmartEntryFooter() {
+  return (
+    <footer className="bg-black py-10 text-[13px] text-warm-white/50">
+      <div className="mx-auto flex w-full max-w-content flex-wrap items-center justify-between gap-3 px-5 md:px-8 lg:px-16">
+        <Image src="/images/brand/logo-white-TM.svg" alt="Journey.Storage" width={165} height={12} className="h-3 w-auto opacity-80" />
+        <span>Space to move on. · journey.storage/smartentry · {PHONE.display}</span>
+      </div>
+    </footer>
+  )
+}
+
 /* ── Page ─────────────────────────────────────────────────────────── */
 
 export default function SmartEntryPage() {
   return (
-    <>
-      <Navbar />
-      <div className="h-[64px] lg:h-[72px]" aria-hidden="true" />
-      <MarqueeBanner />
+    <div className={`${barlow.variable} ${workSans.variable} font-[family-name:var(--font-work-sans)]`}>
+      <SmartEntryNav />
 
-      <main className={`${barlow.variable} ${workSans.variable} bg-warm-white font-[family-name:var(--font-work-sans)]`}>
+      <main className="bg-warm-white">
         {/* ── Hero ───────────────────────────────────────────────── */}
         <header className="grain relative flex min-h-[min(92vh,860px)] items-end overflow-hidden bg-black text-warm-white">
           <Image
@@ -792,7 +838,7 @@ export default function SmartEntryPage() {
         </section>
       </main>
 
-      <Footer />
-    </>
+      <SmartEntryFooter />
+    </div>
   )
 }
