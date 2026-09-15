@@ -66,7 +66,11 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   // Their details come off their contact record server-side, so this flow neither
   // asks for them nor sends them.
   const [verified, setVerified] = useState<{ name: string | null } | null>(null)
-  const autopay = true // required — enrollment is not optional
+  // Autopay CANNOT be switched on through Tenant Inc's API — verified on live
+  // data: a lease created by this flow with auto_charge:true still came back
+  // auto_pay_after_billing_date = 0. So this is a request we pass to staff, not
+  // something we can claim is done.
+  const [autopay, setAutopay] = useState(true)
 
   // ── Live API state (demo math is the graceful fallback) ──
   const [hold, setHold] = useState<{ token: string; unitId: string; dossierToken?: string; spaceMixId?: string; promotionId?: string } | null>(null)
@@ -167,6 +171,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
         billDay: realQuote.billDay, webRate: realQuote.monthlyRent, totalDue: realQuote.dueToday, lineItems: realQuote.lineItems,
         promotionIds: hold.promotionId ? [hold.promotionId] : undefined,
         insuranceId: realPlans ? planId : undefined,
+        autopayRequested: autopay,
         tenant: verified ? undefined : {
           first, last, email: details.email, phone: details.phone, address: details.address, city: details.city, state: details.state, zip: details.zip,
           dob: details.dob, dlNumber: details.dlNumber, dlState: details.dlState, dlExp: details.dlExp,
@@ -528,10 +533,9 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between rounded-sm border border-warm-white/12 bg-warm-white/[0.03] p-4">
-                <span className="text-[0.9375rem] font-bold text-warm-white">Enroll in autopay <span className="font-normal text-warm-white/45">— never miss a payment</span></span>
+                <span className="text-[0.9375rem] font-bold text-warm-white">Set up autopay <span className="font-normal text-warm-white/45">— never miss a payment</span></span>
                 <span className="flex items-center gap-2.5">
-                  <span className="rounded-sm bg-warm-white/[0.08] px-2 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-warm-white/50">Required</span>
-                  <input type="checkbox" checked readOnly disabled aria-label="Autopay enrollment (required)" className="h-4 w-4 accent-orange opacity-80" />
+                  <input type="checkbox" checked={autopay} onChange={(e) => setAutopay(e.target.checked)} aria-label="Set up autopay on this card" className="h-4 w-4 accent-orange" />
                 </span>
               </div>
               {apiError && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-3 py-2.5 text-[0.8125rem] font-bold text-[#E8A87C]">{apiError} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
@@ -545,7 +549,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 </div>
               )}
               {real ? (
-                <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Secured by Tenant Payments. Your card is charged {money(effDueToday)} today; autopay continues each cycle.</p>
+                <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Secured by Tenant Payments. Your card is charged {money(effDueToday)} today.{autopay ? ' We\u2019ll set autopay up on this card and email you once it\u2019s running.' : ''}</p>
               ) : (
                 <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55"><b className="text-warm-white/80">Demo only.</b> This is a preview — no card is charged and no rental is created. In production this is processed securely by Tenant Payments.</p>
               )}
@@ -585,7 +589,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[0.8125rem]">
                 <span className="inline-flex items-center gap-1.5 rounded-sm border border-sage-green/25 bg-sage-green/10 px-3 py-1.5 font-bold text-sage-green"><FileText className="h-3.5 w-3.5" aria-hidden />Lease signed</span>
                 <span className="inline-flex items-center gap-1.5 rounded-sm border border-sage-green/25 bg-sage-green/10 px-3 py-1.5 font-bold text-sage-green"><Check className="h-3.5 w-3.5" aria-hidden />Paid {money(effDueToday)}</span>
-                {autopay && <span className="inline-flex items-center gap-1.5 rounded-sm border border-sage-green/25 bg-sage-green/10 px-3 py-1.5 font-bold text-sage-green"><Check className="h-3.5 w-3.5" aria-hidden />Autopay on</span>}
+                {autopay && <span className="inline-flex items-center gap-1.5 rounded-sm border border-warm-white/20 bg-warm-white/[0.06] px-3 py-1.5 font-bold text-warm-white/70"><Check className="h-3.5 w-3.5" aria-hidden />Autopay requested</span>}
               </div>
               <p className="mt-7 text-[0.75rem] text-warm-white/40">{rentResult ? 'Rental complete.' : 'Preview — no real rental was created.'} Questions? Call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a>.</p>
               <button onClick={onClose} className={`mt-6 ${primaryBtn}`}>{rentResult ? 'Done' : 'Close'}</button>

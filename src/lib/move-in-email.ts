@@ -49,6 +49,12 @@ export interface MoveInEmailData {
   gatePin?: string | null
   signed: boolean
   documentUrl?: string | null
+  /**
+   * Whether the tenant asked for autopay. It cannot be enabled through Tenant
+   * Inc's API, so this is a request for staff — the email must not claim it is
+   * already running.
+   */
+  autopayRequested?: boolean
 }
 
 function esc(value: string): string {
@@ -153,7 +159,8 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
     .join('')
 
   const badges =
-    (data.signed ? badge('Lease signed') : '') + badge('Payment received') + badge('Autopay enrolled')
+    (data.signed ? badge('Lease signed') : '') + badge('Payment received') +
+    (data.autopayRequested ? badge('Autopay requested') : '')
 
   const gatePanel = pin
     ? `<tr><td style="padding:20px 32px 6px">
@@ -219,7 +226,7 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
       ${factRow('Facility', esc(fac.name), esc(fac.address))}
       ${factRow('Space', spaceLabel, unit ? `Unit ${unit}` : undefined)}
       ${factRow('Move-in date', esc(longDate(data.startDate)))}
-      ${factRow('Billing', `Autopay on &middot; bills the ${ordinal(data.billDay)}`, 'Month-to-month &middot; cancel anytime', true)}
+      ${factRow('Billing', `Bills the ${ordinal(data.billDay)} each month`, data.autopayRequested ? 'Autopay requested &middot; we&rsquo;ll confirm by email' : 'Month-to-month &middot; cancel anytime', true)}
     </table>
   </td></tr>
 

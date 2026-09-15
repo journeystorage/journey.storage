@@ -11,6 +11,7 @@ import { completeRental, type Tenant, type Card } from '@/lib/nectar/rental'
 import { VERIFY_COOKIE, readSession } from '@/lib/account-verify'
 import { getContactBasics } from '@/lib/nectar/account'
 import { sendMoveInConfirmation } from '@/lib/move-in-email'
+import { sendLeadNotification } from '@/lib/lead-email'
 
 interface RentBody {
   facility?: string
@@ -31,6 +32,8 @@ interface RentBody {
   spaceLabel?: string
   tenant?: Tenant
   card?: Card
+  /** Tenant asked for autopay; staff must enable it (API cannot). */
+  autopayRequested?: boolean
 }
 
 export async function POST(req: NextRequest) {
@@ -92,7 +95,22 @@ export async function POST(req: NextRequest) {
       gatePin: result.gatePin ?? null,
       signed: result.signed,
       documentUrl: result.documentUrl ?? null,
+      autopayRequested: body.autopayRequested === true,
     })
+
+    // Autopay can't be enabled through the API (verified on live data: a lease
+    // created here with auto_charge:true still came back auto_pay = 0), so the
+    // tenant's request is routed to staff to set up in the back office.
+    if (body.autopayRequested === true) {
+      const who = [basics?.first, basics?.last].filter(Boolean).join(' ') || [tenant?.first, tenant?.last].filter(Boolean).join(' ') || 'New tenant'
+      await sendLeadNotification({
+        name: who,
+        email: basics?.email ?? tenant?.email ?? '',
+        phone: tenant?.phone,
+        formSource: 'autopay-request',
+        message: `AUTOPAY REQUESTED — please enable it in Hummingbird.\n\nTenant: ${who}\nFacility: ${cfg.displayName}\nUnit: ${result.unitNumber ?? '(see lease)'}\nLease: ${result.leaseId}\nBills the ${billDay} of each month.\n\nThe tenant ticked "Set up autopay" at checkout and their card is on file. The API cannot switch autopay on, so it needs doing in the back office.`,
+      }).catch(() => {})
+    }
 
     // Never echo card data. Confirmation-safe fields only.
     return NextResponse.json({
