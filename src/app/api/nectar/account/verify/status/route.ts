@@ -7,9 +7,9 @@ import { VERIFY_COOKIE, readSession } from '@/lib/account-verify'
 import { getContactBasics } from '@/lib/nectar/account'
 
 export async function GET(req: NextRequest) {
-  const contactId = readSession(req.cookies.get(VERIFY_COOKIE)?.value)
-  if (!contactId) return NextResponse.json({ verified: false }, { headers: { 'Cache-Control': 'no-store' } })
-  const basics = await getContactBasics(contactId)
+  const session = readSession(req.cookies.get(VERIFY_COOKIE)?.value)
+  if (!session) return NextResponse.json({ verified: false }, { headers: { 'Cache-Control': 'no-store' } })
+  const basics = await getContactBasics(session.contactId)
   return NextResponse.json(
     { verified: true, name: [basics?.first, basics?.last].filter(Boolean).join(' ') || null, email: basics?.email ?? null },
     { headers: { 'Cache-Control': 'no-store' } },

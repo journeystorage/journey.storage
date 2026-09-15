@@ -92,26 +92,43 @@ export function verifyCode(contact: string, submitted: string): boolean {
   return false
 }
 
-/** Signed, self-describing session value for the verified-account cookie. */
-export function issueSession(contactId: string): string {
+export interface VerifiedSession {
+  /** Contact record to attach a new lease to. */
+  contactId: string
+  /** Normalised email/phone that was verified — the key the account is read by. */
+  contact: string
+}
+
+/**
+ * Signed cookie value. Carries the verified contact as well as the id, because
+ * one email can map to several contact records: reading the account by contact
+ * returns all of the tenant's spaces, while the id alone would return only some.
+ */
+export function issueSession(session: VerifiedSession): string {
   const exp = Date.now() + SESSION_MS
-  const payload = `${contactId}.${exp}`
+  const payload = Buffer.from(JSON.stringify({ ...session, exp })).toString('base64url')
   const sig = hmac(`session:${payload}`).toString('base64url')
   return `${payload}.${sig}`
 }
 
-/** Returns the verified contactId, or null when absent/expired/tampered. */
-export function readSession(value: string | undefined | null): string | null {
+/** Returns the verified session, or null when absent/expired/tampered. */
+export function readSession(value: string | undefined | null): VerifiedSession | null {
   if (!value) return null
-  const parts = value.split('.')
-  if (parts.length !== 3) return null
-  const [contactId, expStr, sig] = parts
-  const exp = Number(expStr)
-  if (!contactId || !Number.isFinite(exp) || exp < Date.now()) return null
-  const expected = Buffer.from(hmac(`session:${contactId}.${expStr}`).toString('base64url'))
+  const idx = value.lastIndexOf('.')
+  if (idx <= 0) return null
+  const payload = value.slice(0, idx)
+  const sig = value.slice(idx + 1)
+  const expected = Buffer.from(hmac(`session:${payload}`).toString('base64url'))
   const got = Buffer.from(sig)
   if (expected.length !== got.length || !timingSafeEqual(expected, got)) return null
-  return contactId
+  try {
+    const parsed = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as VerifiedSession & { exp?: number }
+    if (!parsed?.contactId || !parsed?.contact) return null
+    if (!Number.isFinite(parsed.exp) || (parsed.exp as number) < Date.now()) return null
+    return { contactId: parsed.contactId, contact: parsed.contact }
+  } catch {
+    return null
+  }
 }
 
 /** "l***a@journey.storage" — enough to recognise, not enough to harvest. */

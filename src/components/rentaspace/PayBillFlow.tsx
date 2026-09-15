@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Check, ChevronLeft, ChevronRight, ChevronDown, Search, Wallet, CreditCard, CalendarClock, PlusCircle } from 'lucide-react'
+import { X, Check, ChevronLeft, ChevronRight, ChevronDown, Search, Wallet, CreditCard, CalendarClock, PlusCircle, ShieldCheck } from 'lucide-react'
 
 /**
  * Pay Bill — real tenant payment.
@@ -45,6 +45,7 @@ type Account = {
   periodEnd: string | null
   pastDue: boolean
   autopayOn: boolean
+  cardOnFile: string | null
 }
 
 // The API mixes "YYYY-MM-DD" and "YYYY-MM-DD HH:MM:SS"; keep the date part and
@@ -161,7 +162,13 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
     let alive = true
     fetch('/api/nectar/account/verify/status')
       .then((r) => (r.ok ? r.json() : null))
-      .then((j) => { if (alive && j?.verified) { setVerifyStage('done'); setVerifiedTo(j.email ?? null) } })
+      .then(async (j) => {
+        if (!alive || !j?.verified) return
+        setVerifyStage('done')
+        setVerifiedTo(j.email ?? null)
+        // Still inside the 30-minute window — go straight to the balance.
+        if (await lookup()) setStep(1)
+      })
       .catch(() => {})
     return () => { alive = false }
   }, [])
@@ -183,7 +190,10 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   }, [onClose])
 
   const canNext = () => {
-    if (stepName === 'Account') return /.+@.+\..+/.test(contact) || contact.replace(/\D/g, '').length >= 7
+    if (stepName === 'Account') {
+      if (verifyStage === 'code' || verifyStage === 'checking') return verifyCodeInput.length === 6
+      return /.+@.+\..+/.test(contact) || contact.replace(/\D/g, '').length >= 7
+    }
     // Nothing owed anywhere: the button becomes a plain "Done".
     if (stepName === 'Balance') return payable.length === 0 || (chosen.length > 0 && amountDue > 0)
     if (stepName === 'Payment' && !payOnline) return false // the call CTA lives in the panel
@@ -194,7 +204,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
   async function lookup() {
     setLooking(true); setLookupMsg(null)
     try {
-      const r = await fetch('/api/nectar/account/lookup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contact }) })
+      const r = await fetch('/api/nectar/account/lookup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
       const j = await r.json()
       if (!r.ok) { setLookupMsg(j.error ?? 'Lookup failed.'); return false }
       if (!j.found || !j.accounts?.length) { setLookupMsg('We couldn’t find an account for that email or phone. Double-check it, or call us.'); return false }
@@ -226,6 +236,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
       const j = await r.json()
       if (!r.ok) { setVerifyMsg(j.error ?? 'That code isn’t right.'); setVerifyStage('code'); return }
       setVerifyStage('done')
+      if (await lookup()) setStep(1)
     } catch { setVerifyMsg('Something went wrong — please try again.'); setVerifyStage('code') }
   }
 
@@ -296,31 +307,63 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
         </div>
 
         <div className="relative z-[3] flex-1 overflow-y-auto px-5 py-8 lg:px-10 lg:py-10">
-          {stepName === 'Account' && (
+          {stepName === 'Account' && verifyStage !== 'code' && verifyStage !== 'checking' && (
             <div className="mx-auto max-w-md">
               <Eyebrow label="Find account" />
-              <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><Search className="h-6 w-6 text-orange" aria-hidden />Find your account</h2>
-              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Enter the email or phone on your rental{atFacility}.</p>
+              <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><Search className="h-6 w-6 shrink-0 text-orange" aria-hidden />Find your account</h2>
+              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Enter the email or phone on your rental{atFacility}. We&rsquo;ll email a code to the address on your account to confirm it&rsquo;s you.</p>
               <input
                 value={contact}
                 onChange={(e) => setContact(formatContact(e.target.value))}
-                onKeyDown={(e) => { if (e.key === 'Enter' && canNext() && !looking) next() }}
+                onKeyDown={(e) => { if (e.key === 'Enter' && canNext() && verifyStage !== 'sending') startVerify() }}
                 inputMode="text"
                 autoComplete="email"
                 placeholder="Email or phone"
                 className={`mt-7 ${FIELD}`}
               />
-              <p className="mt-3 text-[0.75rem] leading-relaxed text-warm-white/40">We&rsquo;ll find your balance and let you pay securely. No login required.</p>
+              <p className="mt-3 text-[0.75rem] leading-relaxed text-warm-white/40">Your balance and unit details are only shown once you&rsquo;ve confirmed the code — so nobody else can look up your account.</p>
+              {verifyMsg && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{verifyMsg} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
               {lookupMsg && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{lookupMsg} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
+            </div>
+          )}
+
+          {stepName === 'Account' && (verifyStage === 'code' || verifyStage === 'checking') && (
+            <div className="mx-auto max-w-md">
+              <Eyebrow label="Confirm it's you" />
+              <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><ShieldCheck className="h-6 w-6 shrink-0 text-orange" aria-hidden />Enter your code</h2>
+              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/60">
+                We sent a 6-digit code{verifiedTo ? <> to <b className="text-warm-white">{verifiedTo}</b></> : ' to the email on your account'}. It&rsquo;s good for about 15 minutes.
+              </p>
+              <input
+                value={verifyCodeInput}
+                onChange={(e) => setVerifyCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onKeyDown={(e) => { if (e.key === 'Enter' && verifyCodeInput.length === 6) confirmVerify() }}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                autoFocus
+                placeholder="123456"
+                aria-label="6-digit verification code"
+                className="mt-7 w-full rounded-sm border border-stone/30 bg-warm-white/[0.06] px-4 py-4 text-center text-[1.75rem] font-black tracking-[0.35em] text-warm-white placeholder:tracking-[0.2em] placeholder:font-normal placeholder:text-stone focus:border-orange focus-visible:outline-none"
+              />
+              <div className="mt-4 flex flex-wrap items-center gap-4">
+                <button type="button" onClick={startVerify} className="text-[0.8125rem] font-bold text-orange underline-offset-4 transition-colors duration-150 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">
+                  Send a new code
+                </button>
+                <button type="button" onClick={() => { setVerifyStage('idle'); setVerifyCodeInput(''); setVerifyMsg(null) }} className="text-[0.8125rem] font-bold text-warm-white/50 underline-offset-4 transition-colors duration-150 hover:text-warm-white hover:underline">
+                  Use a different email or phone
+                </button>
+              </div>
+              {verifyMsg && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{verifyMsg} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
+              <p className="mt-4 text-[0.75rem] leading-relaxed text-warm-white/40">Didn&rsquo;t get it? Check your spam folder, or call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a> and we&rsquo;ll help.</p>
             </div>
           )}
 
           {stepName === 'Balance' && accounts.length > 0 && (
             <div className="mx-auto max-w-md">
-              <Eyebrow label={accounts.length > 1 ? 'Your spaces' : 'Balance'} />
+              <Eyebrow label={payable.length === 0 ? 'Your account' : 'Your spaces'} />
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white">
                 <Wallet className="h-6 w-6 shrink-0 text-orange" aria-hidden />
-                {payable.length > 1 ? 'Choose spaces to pay' : accounts.length > 1 ? 'Choose a space to pay' : 'Your balance'}
+                {payable.length === 0 ? 'Your account' : payable.length > 1 ? 'Choose spaces to pay' : 'Choose a space to pay'}
               </h2>
               <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/60">
                 <span className="font-bold text-warm-white">{accounts[0].name}</span>
@@ -402,75 +445,25 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
                 <p className="mt-4 text-[0.8125rem] text-warm-white/50">Select at least one space to continue.</p>
               ) : null}
 
-              {/* Renting another space puts a lease in this person's name, so it
-                  unlocks only after a code sent to the address on file. */}
               {accounts.length > 0 && (
-                <div className="mt-5 rounded-sm border border-warm-white/12 bg-warm-white/[0.03] p-4">
-                  <div className="flex items-start gap-3">
+                <a
+                  href={addSpaceHref}
+                  onClick={onClose}
+                  className="group mt-5 flex items-center justify-between gap-4 rounded-sm border border-warm-white/12 bg-warm-white/[0.03] p-4 transition-colors duration-150 hover:border-orange/50 hover:bg-orange/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                >
+                  <span className="flex min-w-0 items-start gap-3">
                     <PlusCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange" aria-hidden />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[0.9375rem] font-bold text-warm-white">Need more space?</p>
-                      <p className="mt-0.5 text-[0.8125rem] leading-relaxed text-warm-white/55">
+                    <span className="min-w-0">
+                      <span className="block text-[0.9375rem] font-bold text-warm-white">Need more space?</span>
+                      <span className="mt-0.5 block text-[0.8125rem] leading-relaxed text-warm-white/55">
                         {homeProperty?.propertyName
-                          ? <>Add another unit at {homeProperty.propertyName} — we already have your details, so it takes a couple of minutes.</>
-                          : <>Add another unit at any of our Granbury locations — we already have your details.</>}
-                      </p>
-
-                      {verifyStage === 'done' ? (
-                        <a
-                          href={addSpaceHref}
-                          onClick={onClose}
-                          className="btn-spring mt-3 inline-flex items-center gap-2 rounded-sm bg-orange px-5 py-2.5 text-[0.875rem] font-bold text-warm-white shadow-[0_2px_8px_rgba(232,98,42,.3)] transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
-                        >
-                          <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
-                          Verified — choose a space
-                        </a>
-                      ) : verifyStage === 'code' || verifyStage === 'checking' ? (
-                        <div className="mt-3">
-                          <p className="text-[0.8125rem] leading-relaxed text-warm-white/70">
-                            We emailed a 6-digit code{verifiedTo ? <> to <b className="text-warm-white">{verifiedTo}</b></> : ''}. Enter it to confirm this is your account.
-                          </p>
-                          <div className="mt-2.5 flex flex-wrap items-center gap-2">
-                            <input
-                              value={verifyCodeInput}
-                              onChange={(e) => setVerifyCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                              onKeyDown={(e) => { if (e.key === 'Enter' && verifyCodeInput.length === 6) confirmVerify() }}
-                              inputMode="numeric"
-                              autoComplete="one-time-code"
-                              placeholder="123456"
-                              aria-label="6-digit verification code"
-                              className="w-[8.5rem] rounded-sm border border-stone/30 bg-warm-white/[0.06] px-3 py-2.5 text-center text-[1.125rem] font-bold tracking-[0.3em] text-warm-white placeholder:tracking-normal placeholder:text-stone focus:border-orange focus-visible:outline-none"
-                            />
-                            <button
-                              type="button"
-                              onClick={confirmVerify}
-                              disabled={verifyCodeInput.length !== 6 || verifyStage === 'checking'}
-                              className="btn-spring rounded-sm bg-orange px-4 py-2.5 text-[0.875rem] font-bold text-warm-white transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:hover:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
-                            >
-                              {verifyStage === 'checking' ? 'Checking…' : 'Confirm'}
-                            </button>
-                            <button type="button" onClick={startVerify} className="text-[0.75rem] font-bold text-warm-white/50 underline-offset-4 transition-colors hover:text-warm-white hover:underline">
-                              Resend
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={startVerify}
-                          disabled={verifyStage === 'sending'}
-                          className="btn-spring mt-3 inline-flex items-center gap-2 rounded-sm border border-orange/60 px-4 py-2.5 text-[0.875rem] font-bold text-orange transition-colors duration-150 hover:bg-orange/10 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
-                        >
-                          {verifyStage === 'sending' ? 'Sending a code…' : 'Add a space'}
-                        </button>
-                      )}
-                      {verifyMsg && <p className="mt-2 text-[0.75rem] font-bold text-[#E8A87C]">{verifyMsg}</p>}
-                      {verifyStage !== 'done' && (
-                        <p className="mt-2 text-[0.6875rem] leading-relaxed text-warm-white/35">For your security we confirm it&rsquo;s you before adding a lease to your account.</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                          ? <>Add another unit at {homeProperty.propertyName} — you&rsquo;re verified, so we already have your details.</>
+                          : <>Add another unit at any of our Granbury locations — you&rsquo;re verified, so we already have your details.</>}
+                      </span>
+                    </span>
+                  </span>
+                  <span aria-hidden className="shrink-0 text-[0.9375rem] font-bold text-orange transition-transform duration-150 group-hover:translate-x-0.5">&rarr;</span>
+                </a>
               )}
 
               {/* Supporting detail — due dates and what a late payment costs.
@@ -511,14 +504,16 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
                         {accounts.map((a) => (
                           <div key={a.leaseId} className="flex justify-between gap-3 text-[0.8125rem]">
                             <dt className="text-warm-white/60">{spaceLabel(a)}</dt>
-                            <dd className={`shrink-0 text-right font-bold ${a.autopayOn ? 'text-sage-green' : 'text-warm-white/70'}`}>
-                              {a.autopayOn ? 'On' : 'Off'}
+                            <dd className="shrink-0 text-right">
+                              <span className={`font-bold ${a.autopayOn ? 'text-sage-green' : 'text-warm-white/70'}`}>{a.autopayOn ? 'On' : 'Off'}</span>
+                              {a.cardOnFile && <span className="block text-[0.6875rem] text-warm-white/45">{a.cardOnFile}</span>}
                             </dd>
                           </div>
                         ))}
                       </dl>
                       <p className="mt-2.5 text-[0.75rem] leading-relaxed text-warm-white/50">
-                        To turn autopay {accounts.every((a) => a.autopayOn) ? 'off' : 'on'}, or to change the card we keep on file, call{' '}
+                        {accounts.some((a) => a.cardOnFile) ? 'That’s the card we keep on file. ' : ''}
+                        To turn autopay {accounts.every((a) => a.autopayOn) ? 'off' : 'on'}, or to change that card, call{' '}
                         <a href={facility.tel} className="font-bold text-orange underline-offset-4 hover:underline">{facility.phone}</a>{' '}
                         — we can update it while you&rsquo;re on the line.
                       </p>
@@ -676,8 +671,15 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
             <div className="flex items-center gap-3">
               {stepName === 'Balance' && amountDue > 0 && <span className="hidden text-[0.9375rem] font-black text-warm-white sm:inline">{money(amountDue)} due</span>}
               {!(stepName === 'Payment' && !payOnline) && (
-              <button onClick={payable.length === 0 && stepName === 'Balance' ? onClose : next} disabled={!canNext() || looking || processing} className={primaryBtn}>
-                {looking ? 'Finding…' : processing ? 'Processing…' : stepName === 'Account' ? 'Find my balance' : stepName === 'Balance' ? (payable.length === 0 ? 'Done' : chosen.length ? (payOnline ? 'Continue to payment' : 'How to pay') : 'Select a space') : `Pay ${money(amountDue)}`}
+              <button onClick={
+                stepName === 'Account'
+                  ? (verifyStage === 'code' || verifyStage === 'checking' ? confirmVerify : startVerify)
+                  : payable.length === 0 && stepName === 'Balance' ? onClose : next
+              } disabled={!canNext() || looking || processing} className={primaryBtn}>
+                {looking ? 'Finding…' : processing ? 'Processing…'
+                  : stepName === 'Account'
+                    ? (verifyStage === 'sending' ? 'Sending code…' : verifyStage === 'checking' ? 'Checking…' : (verifyStage === 'code' ? 'Confirm code' : 'Send me a code'))
+                  : stepName === 'Balance' ? (payable.length === 0 ? 'Done' : chosen.length ? (payOnline ? 'Continue to payment' : 'How to pay') : 'Select a space') : `Pay ${money(amountDue)}`}
                 {!looking && !processing && <ChevronRight className="h-4 w-4" aria-hidden />}
               </button>
               )}

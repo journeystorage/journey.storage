@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
   // A verified tenant adding another space: the lease attaches to their existing
   // contact, so their personal details are neither needed nor trusted from the
   // browser. The cookie is signed server-side and cannot be forged.
-  const existingContactId = readSession(req.cookies.get(VERIFY_COOKIE)?.value) ?? undefined
+  const existingContactId = readSession(req.cookies.get(VERIFY_COOKIE)?.value)?.contactId ?? undefined
   const needsDetails = !existingContactId
   if (!unitId || !holdToken || !startDate || !card?.card_number || !lineItems?.length || billDay == null) {
     return NextResponse.json({ error: 'Missing rental details.' }, { status: 400 })

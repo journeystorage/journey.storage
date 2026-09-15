@@ -63,6 +63,11 @@ export interface AccountMatch {
    * autopay card is refused), so changes go through staff.
    */
   autopayOn?: boolean
+  /**
+   * Card kept on file for this lease, e.g. "Visa ending 5007". Only ever
+   * returned after the tenant has verified ownership of the account.
+   */
+  cardOnFile?: string
 }
 
 interface LeaseDetail {
@@ -171,6 +176,18 @@ export async function findLeasesByContact(contact: string): Promise<AccountMatch
             .catch(() => {})
         : Promise.resolve()
 
+      const cardCall = nectarV2<{ paymentMethods?: Array<{ card_end?: string; card_type?: string }> }>(
+        `companies/${co()}/leases/${m.leaseId}/payment-methods`,
+      )
+        .then(({ data }) => {
+          const pm = (data.paymentMethods ?? [])[0]
+          if (!pm?.card_end) return
+          const brand = (pm.card_type ?? '').trim()
+          const pretty = brand ? brand.charAt(0).toUpperCase() + brand.slice(1).toLowerCase() : 'Card'
+          m.cardOnFile = `${pretty} ending ${pm.card_end}`
+        })
+        .catch(() => {})
+
       const invoiceCall = nectarV2<{ invoices?: InvoiceRow[] }>(`companies/${co()}/leases/${m.leaseId}/invoices`)
         .then(({ data }) => {
           const open = (data.invoices ?? [])
@@ -191,7 +208,7 @@ export async function findLeasesByContact(contact: string): Promise<AccountMatch
         })
         .catch(() => {})
 
-      await Promise.all([unitCall, invoiceCall])
+      await Promise.all([unitCall, invoiceCall, cardCall])
     }),
   )
 

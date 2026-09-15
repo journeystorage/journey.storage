@@ -3,12 +3,18 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { findLeasesByContact } from '@/lib/nectar/account'
+import { VERIFY_COOKIE, readSession } from '@/lib/account-verify'
 
 export async function POST(req: NextRequest) {
-  let body: { contact?: string }
-  try { body = await req.json() } catch { return NextResponse.json({ error: 'Invalid request' }, { status: 400 }) }
-  const contact = (body.contact ?? '').trim()
-  if (!contact) return NextResponse.json({ error: 'Enter the email or phone on your account.' }, { status: 400 })
+  // Balances, unit numbers and the card on file are only shown to someone who
+  // has proved they control the account. The contact comes from the signed
+  // cookie, never the request body, so a verified tenant can only read their
+  // own account and not look anyone else up.
+  const session = readSession(req.cookies.get(VERIFY_COOKIE)?.value)
+  if (!session) {
+    return NextResponse.json({ error: 'Verify your account to see your balance.', needsVerification: true }, { status: 401 })
+  }
+  const contact = session.contact
   try {
     const matches = await findLeasesByContact(contact)
     return NextResponse.json({
@@ -32,6 +38,7 @@ export async function POST(req: NextRequest) {
         periodStart: m.periodStart ?? null,
         periodEnd: m.periodEnd ?? null,
         pastDue: !!m.pastDue,
+        cardOnFile: m.cardOnFile ?? null,
         autopayOn: !!m.autopayOn,
       })),
     })
