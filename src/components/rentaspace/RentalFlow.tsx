@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { X, Check, ChevronLeft, ChevronRight, ShieldCheck, FileText, CreditCard, KeyRound } from 'lucide-react'
+import { formatCardNumber, formatExpiry, formatZip, cardDigits } from '@/lib/card-format'
 
 /**
  * PREVIEW-ONLY online move-in flow. Mirrors the real Nectar rental sequence
@@ -50,7 +51,7 @@ function Eyebrow({ label }: { label: string }) {
   )
 }
 
-export default function RentalFlow({ facility, space, preview = false, onClose }: { facility: { slug: string; short: string; address: string; city: string; phone: string; tel: string }; space: Space; preview?: boolean; onClose: () => void }) {
+export default function RentalFlow({ facility, space, preview = false, onAccount = false, onClose }: { facility: { slug: string; short: string; address: string; city: string; phone: string; tel: string }; space: Space; preview?: boolean; onAccount?: boolean; onClose: () => void }) {
   const [step, setStep] = useState(0)
   const [moveIn, setMoveIn] = useState(todayISO())
   const [details, setDetails] = useState({ name: '', email: '', phone: '', address: '', city: '', state: '', zip: '', dob: '', dlNumber: '', dlState: '', dlExp: '', isBusiness: false, businessName: '', military: false, militaryBranch: '' })
@@ -62,7 +63,18 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const [payingMsg, setPayingMsg] = useState<string | null>(null)
   // ClickWrap Superlease disclosures from Hummingbird. null = still loading.
   const [disclosures, setDisclosures] = useState<Array<{ id: number; html: string }> | null>(null)
-  const autopay = true // required — enrollment is not optional
+  // An existing tenant who proved they control their account. Only ever set
+  // when this flow was launched from inside verified Pay Bill (onAccount), never
+  // from a cookie that merely happens to be in the browser — otherwise a public
+  // rental would silently attach to whoever signed in last. Their details come
+  // off their contact record server-side, so this flow neither asks for them nor
+  // sends them.
+  const [verified, setVerified] = useState<{ name: string | null } | null>(null)
+  // Autopay CANNOT be switched on through Tenant Inc's API — verified on live
+  // data: a lease created by this flow with auto_charge:true still came back
+  // auto_pay_after_billing_date = 0. So this is a request we pass to staff, not
+  // something we can claim is done.
+  const [autopay, setAutopay] = useState(false)
 
   // ── Live API state (demo math is the graceful fallback) ──
   const [hold, setHold] = useState<{ token: string; unitId: string; dossierToken?: string; spaceMixId?: string; promotionId?: string } | null>(null)
@@ -163,7 +175,9 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
         billDay: realQuote.billDay, webRate: realQuote.monthlyRent, totalDue: realQuote.dueToday, lineItems: realQuote.lineItems,
         promotionIds: hold.promotionId ? [hold.promotionId] : undefined,
         insuranceId: realPlans ? planId : undefined,
-        tenant: {
+        autopayRequested: autopay,
+        onAccount,
+        tenant: verified ? undefined : {
           first, last, email: details.email, phone: details.phone, address: details.address, city: details.city, state: details.state, zip: details.zip,
           dob: details.dob, dlNumber: details.dlNumber, dlState: details.dlState, dlExp: details.dlExp,
           isBusiness: details.isBusiness, businessName: details.isBusiness ? details.businessName : undefined,
@@ -179,10 +193,11 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
 
   const canNext = () => {
     if (stepName === 'Move-in') return !!moveIn
+    if (stepName === 'Your details' && verified) return true
     if (stepName === 'Your details') return !!details.name && /.+@.+\..+/.test(details.email) && details.phone.length >= 7 && !!details.address && !!details.city && !!details.state && !!details.zip && !!details.dob && !!details.dlNumber && details.dlState.length === 2 && !!details.dlExp && (!details.isBusiness || !!details.businessName)
     if (stepName === 'Protection') return !!planId
     if (stepName === 'Sign lease') return agree && signature.trim().length >= 3
-    if (stepName === 'Payment') return card.number.replace(/\s/g, '').length >= 12 && card.exp.length >= 4 && card.cvc.length >= 3
+    if (stepName === 'Payment') return cardDigits(card.number).length >= 12 && cardDigits(card.exp).length === 4 && card.cvc.length >= 3
     return true
   }
   const next = async () => {
@@ -243,6 +258,18 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
   const glassCard = `${R} border border-warm-white/10 bg-warm-white/[0.04]`
   const optionBase = `flex w-full items-center justify-between rounded-sm border p-4 text-left transition-colors duration-150`
   const dateLong = (iso: string) => new Date(iso + 'T00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+
+  useEffect(() => {
+    // A rental started from the public site is always a fresh rental, even if
+    // the same browser signed in to Pay Bill earlier.
+    if (!onAccount) { setVerified(null); return }
+    let alive = true
+    fetch('/api/nectar/account/verify/status')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (alive && j?.verified) setVerified({ name: j.name ?? null }) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [onAccount])
 
   // Pull the live disclosures once per facility; empty array = show the fallback note.
   useEffect(() => {
@@ -317,7 +344,28 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
             </div>
           )}
 
-          {stepName === 'Your details' && (
+          {stepName === 'Your details' && verified && (
+            <div className="mx-auto max-w-lg">
+              <Eyebrow label="About you" />
+              <h2 className="mt-4 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white">Renting on your account</h2>
+              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">You&rsquo;re signed in, so there&rsquo;s nothing to fill in — we already have your details on file.</p>
+              <div className={`mt-7 ${glassCard} p-5`}>
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sage-green/20 text-sage-green ring-1 ring-sage-green/30">
+                    <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Verified account</p>
+                    <p className="mt-1 text-[1.125rem] font-black tracking-[-0.01em] text-warm-white">{verified.name ?? 'Your account'}</p>
+                    <p className="mt-1 text-[0.8125rem] leading-relaxed text-warm-white/55">This space will be added to your account and billed under the same name and address we hold for your other units.</p>
+                  </div>
+                </div>
+              </div>
+              <p className="mt-4 text-[0.75rem] leading-relaxed text-warm-white/40">Need it in a different name or at a different address? Close this and call {facility.phone} — we&rsquo;ll set it up.</p>
+            </div>
+          )}
+
+          {stepName === 'Your details' && !verified && (
             <div className="mx-auto max-w-lg">
               <Eyebrow label="About you" />
               <h2 className="mt-4 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white">Tell us about you</h2>
@@ -332,7 +380,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 <div className="grid grid-cols-[1fr_80px_110px] gap-3">
                   <input placeholder="City" value={details.city} onChange={(e) => setDetails({ ...details, city: e.target.value })} className={FIELD} />
                   <input placeholder="State" maxLength={2} value={details.state} onChange={(e) => setDetails({ ...details, state: e.target.value.toUpperCase() })} className={FIELD} />
-                  <input placeholder="ZIP" inputMode="numeric" value={details.zip} onChange={(e) => setDetails({ ...details, zip: e.target.value })} className={FIELD} />
+                  <input placeholder="ZIP" inputMode="numeric" value={details.zip} onChange={(e) => setDetails({ ...details, zip: formatZip(e.target.value) })} className={FIELD} />
                 </div>
               </div>
 
@@ -351,7 +399,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 <div className="grid grid-cols-[110px_1fr] gap-3">
                   <label className="block">
                     <span className="text-[0.6875rem] font-bold text-warm-white/45">Issuing state</span>
-                    <input maxLength={2} value={details.dlState} onChange={(e) => setDetails({ ...details, dlState: e.target.value.toUpperCase() })} placeholder="TX" className={`${FIELD} mt-1`} />
+                    <input maxLength={2} autoComplete="off" value={details.dlState} onChange={(e) => setDetails({ ...details, dlState: e.target.value.toUpperCase() })} className={`${FIELD} mt-1`} />
                   </label>
                   <label className="block">
                     <span className="text-[0.6875rem] font-bold text-warm-white/45">License expiration</span>
@@ -485,18 +533,17 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
               <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><CreditCard className="h-6 w-6 text-orange" aria-hidden />Payment</h2>
               <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Pay {money(effDueToday)} today to complete your rental.</p>
               <div className="mt-7 space-y-3">
-                <input inputMode="numeric" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })} className={FIELD} />
+                <input inputMode="numeric" autoComplete="cc-number" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })} className={FIELD} />
                 <div className="grid grid-cols-3 gap-3">
-                  <input placeholder="MM/YY" value={card.exp} onChange={(e) => setCard({ ...card, exp: e.target.value })} className={FIELD} />
-                  <input placeholder="CVC" value={card.cvc} onChange={(e) => setCard({ ...card, cvc: e.target.value })} className={FIELD} />
-                  <input placeholder="ZIP" value={card.zip} onChange={(e) => setCard({ ...card, zip: e.target.value })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="cc-exp" placeholder="MM/YY" value={card.exp} onChange={(e) => setCard({ ...card, exp: formatExpiry(e.target.value, card.exp) })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="cc-csc" placeholder="CVC" value={card.cvc} onChange={(e) => setCard({ ...card, cvc: cardDigits(e.target.value).slice(0, 4) })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="postal-code" placeholder="ZIP" value={card.zip} onChange={(e) => setCard({ ...card, zip: formatZip(e.target.value) })} className={FIELD} />
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between rounded-sm border border-warm-white/12 bg-warm-white/[0.03] p-4">
-                <span className="text-[0.9375rem] font-bold text-warm-white">Enroll in autopay <span className="font-normal text-warm-white/45">— never miss a payment</span></span>
+                <span className="text-[0.9375rem] font-bold text-warm-white">Set up autopay <span className="font-normal text-warm-white/45">— never miss a payment</span></span>
                 <span className="flex items-center gap-2.5">
-                  <span className="rounded-sm bg-warm-white/[0.08] px-2 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-warm-white/50">Required</span>
-                  <input type="checkbox" checked readOnly disabled aria-label="Autopay enrollment (required)" className="h-4 w-4 accent-orange opacity-80" />
+                  <input type="checkbox" checked={autopay} onChange={(e) => setAutopay(e.target.checked)} aria-label="Set up autopay on this card" className="h-4 w-4 accent-orange" />
                 </span>
               </div>
               {apiError && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-3 py-2.5 text-[0.8125rem] font-bold text-[#E8A87C]">{apiError} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
@@ -510,7 +557,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
                 </div>
               )}
               {real ? (
-                <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Secured by Tenant Payments. Your card is charged {money(effDueToday)} today; autopay continues each cycle.</p>
+                <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Secured by Tenant Payments. Your card is charged {money(effDueToday)} today.{autopay ? ' We\u2019ll set autopay up on this card and email you once it\u2019s running.' : ''}</p>
               ) : (
                 <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55"><b className="text-warm-white/80">Demo only.</b> This is a preview — no card is charged and no rental is created. In production this is processed securely by Tenant Payments.</p>
               )}
@@ -550,7 +597,7 @@ export default function RentalFlow({ facility, space, preview = false, onClose }
               <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-[0.8125rem]">
                 <span className="inline-flex items-center gap-1.5 rounded-sm border border-sage-green/25 bg-sage-green/10 px-3 py-1.5 font-bold text-sage-green"><FileText className="h-3.5 w-3.5" aria-hidden />Lease signed</span>
                 <span className="inline-flex items-center gap-1.5 rounded-sm border border-sage-green/25 bg-sage-green/10 px-3 py-1.5 font-bold text-sage-green"><Check className="h-3.5 w-3.5" aria-hidden />Paid {money(effDueToday)}</span>
-                {autopay && <span className="inline-flex items-center gap-1.5 rounded-sm border border-sage-green/25 bg-sage-green/10 px-3 py-1.5 font-bold text-sage-green"><Check className="h-3.5 w-3.5" aria-hidden />Autopay on</span>}
+                {autopay && <span className="inline-flex items-center gap-1.5 rounded-sm border border-warm-white/20 bg-warm-white/[0.06] px-3 py-1.5 font-bold text-warm-white/70"><Check className="h-3.5 w-3.5" aria-hidden />Autopay requested</span>}
               </div>
               <p className="mt-7 text-[0.75rem] text-warm-white/40">{rentResult ? 'Rental complete.' : 'Preview — no real rental was created.'} Questions? Call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a>.</p>
               <button onClick={onClose} className={`mt-6 ${primaryBtn}`}>{rentResult ? 'Done' : 'Close'}</button>

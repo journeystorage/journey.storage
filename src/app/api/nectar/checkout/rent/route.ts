@@ -8,7 +8,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { facilityBySlug } from '@/lib/nectar/facilities'
 import { completeRental, type Tenant, type Card } from '@/lib/nectar/rental'
+import { VERIFY_COOKIE, readSession } from '@/lib/account-verify'
+import { getContactBasics } from '@/lib/nectar/account'
 import { sendMoveInConfirmation } from '@/lib/move-in-email'
+import { sendLeadNotification } from '@/lib/lead-email'
 
 interface RentBody {
   facility?: string
@@ -29,6 +32,16 @@ interface RentBody {
   spaceLabel?: string
   tenant?: Tenant
   card?: Card
+  /** Tenant asked for autopay; staff must enable it (API cannot). */
+  autopayRequested?: boolean
+  /**
+   * True only when the flow was launched from inside verified Pay Bill, i.e.
+   * the tenant is knowingly adding a space to their own account. A rental
+   * started from the public site must never attach to whoever last verified in
+   * this browser, so the verified cookie is honoured only alongside this flag.
+   * The flag alone grants nothing — the signed cookie is still required.
+   */
+  onAccount?: boolean
 }
 
 export async function POST(req: NextRequest) {
@@ -40,11 +53,33 @@ export async function POST(req: NextRequest) {
   const cfg = body.facility ? facilityBySlug(body.facility) : undefined
   if (!cfg) return NextResponse.json({ error: 'Unknown facility' }, { status: 404 })
   const { unitId, holdToken, startDate, tenant, card, lineItems, billDay, webRate, totalDue } = body
-  if (!unitId || !holdToken || !startDate || !tenant?.email || !card?.card_number || !lineItems?.length || billDay == null) {
+  // A verified tenant adding another space: the lease attaches to their existing
+  // contact, so their personal details are neither needed nor trusted from the
+  // browser. The cookie is signed server-side and cannot be forged — but it is
+  // only consulted when the client says this is an on-account rental, so a
+  // public rental in the same browser stays a brand-new tenant.
+  const existingContactId = body.onAccount === true
+    ? readSession(req.cookies.get(VERIFY_COOKIE)?.value)?.contactId ?? undefined
+    : undefined
+  if (body.onAccount === true && !existingContactId) {
+    return NextResponse.json(
+      { error: 'Your sign-in expired — please verify your account again.', needsVerification: true },
+      { status: 401 },
+    )
+  }
+  const needsDetails = !existingContactId
+  if (!unitId || !holdToken || !startDate || !card?.card_number || !lineItems?.length || billDay == null) {
+    return NextResponse.json({ error: 'Missing rental details.' }, { status: 400 })
+  }
+  if (needsDetails && !tenant?.email) {
     return NextResponse.json({ error: 'Missing rental details.' }, { status: 400 })
   }
   try {
+    // For a verified tenant, name and email come off their contact record —
+    // never from the browser, which sends no personal details in that flow.
+    const basics = existingContactId ? await getContactBasics(existingContactId) : null
     const result = await completeRental({
+      existingContactId,
       unitId,
       holdToken,
       dossierToken: body.dossierToken,
@@ -67,8 +102,8 @@ export async function POST(req: NextRequest) {
     // committed and charged, so email trouble must never fail this response).
     await sendMoveInConfirmation({
       facilitySlug: cfg.slug,
-      tenantFirst: tenant.first,
-      tenantEmail: tenant.email,
+      tenantFirst: basics?.first ?? tenant?.first ?? '',
+      tenantEmail: basics?.email ?? tenant?.email ?? '',
       spaceLabel: body.spaceLabel,
       unitNumber: result.unitNumber ?? null,
       startDate,
@@ -78,7 +113,22 @@ export async function POST(req: NextRequest) {
       gatePin: result.gatePin ?? null,
       signed: result.signed,
       documentUrl: result.documentUrl ?? null,
+      autopayRequested: body.autopayRequested === true,
     })
+
+    // Autopay can't be enabled through the API (verified on live data: a lease
+    // created here with auto_charge:true still came back auto_pay = 0), so the
+    // tenant's request is routed to staff to set up in the back office.
+    if (body.autopayRequested === true) {
+      const who = [basics?.first, basics?.last].filter(Boolean).join(' ') || [tenant?.first, tenant?.last].filter(Boolean).join(' ') || 'New tenant'
+      await sendLeadNotification({
+        name: who,
+        email: basics?.email ?? tenant?.email ?? '',
+        phone: tenant?.phone,
+        formSource: 'autopay-request',
+        message: `AUTOPAY REQUESTED — please enable it in Hummingbird.\n\nTenant: ${who}\nFacility: ${cfg.displayName}\nUnit: ${result.unitNumber ?? '(see lease)'}\nLease: ${result.leaseId}\nBills the ${billDay} of each month.\n\nThe tenant ticked "Set up autopay" at checkout and their card is on file. The API cannot switch autopay on, so it needs doing in the back office.`,
+      }).catch(() => {})
+    }
 
     // Never echo card data. Confirmation-safe fields only.
     return NextResponse.json({

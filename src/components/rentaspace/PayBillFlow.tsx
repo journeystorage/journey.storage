@@ -1,21 +1,22 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { X, Check, ChevronLeft, ChevronRight, Search, Wallet, CreditCard } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
+import { facilities as ALL_FACILITIES, PHONE } from '@/lib/constants'
+import { X, Check, ChevronLeft, ChevronRight, ChevronDown, Search, Wallet, CreditCard, CalendarClock, PlusCircle, ShieldCheck } from 'lucide-react'
+import { formatCardNumber, formatExpiry, formatZip, cardDigits } from '@/lib/card-format'
 
 /**
- * PREVIEW-ONLY Pay Bill flow. Mirrors the real Nectar tenant-payment sequence:
- *   1. Get tenant details (Customer & Tenant Information) → read `balance`
- *   2. If balance due → POST facilities/{fid}/tenants/{tid}/payments?liveData=true (periods=0)
- *   3. If no balance → GET prepay quote (periods=N) → POST payment
- * Billing address is mandatory in the paymentInstrument. Runs client-side in
- * demo mode — no lookup, no charge — until the GDS pay API is wired.
+ * Pay Bill — real tenant payment.
+ *   1. Look up the account by email/phone (/api/nectar/account/lookup)
+ *   2. Show the live balance
+ *   3. Pay by card (/api/nectar/account/pay → leases/{id}/payment)
+ * Card data is sent to our server route only; never stored client-side.
  */
 
 const STEPS = ['Account', 'Balance', 'Payment', 'Done'] as const
 type StepName = (typeof STEPS)[number]
 const WATERMARK: Record<StepName, string> = { Account: 'BILL', Balance: 'BALANCE', Payment: 'PAY', Done: 'PAID' }
-const TAX_RATE = 0.0825
 
 const money = (n: number) => `$${n.toFixed(2)}`
 const R = 'rounded-tl-[20px] rounded-tr-[4px] rounded-br-[4px] rounded-bl-[4px]'
@@ -30,41 +31,313 @@ function Eyebrow({ label }: { label: string }) {
   )
 }
 
-export default function PayBillFlow({ facility, onClose }: { facility: { short: string; phone: string; tel: string }; onClose: () => void }) {
+// Only loaded when a tenant actually decides to add a space.
+const RentalFlow = dynamic(() => import('@/components/rentaspace/RentalFlow'), { ssr: false })
+
+type LiveSpace = { size: string; onlinePrice: number; category: string | null; available: number }
+
+/** Tidy the raw back-office category, e.g. "McCreary Rd - Standard Storage". */
+const tidyCat = (c: string | null) =>
+  (c ? c.replace(/^.*?\s[-–]\s/, '').replace(/\bGr?anbury\b/gi, '').replace(/#\s*\d+/g, '').replace(/\s+/g, ' ').trim() : '') || 'Storage'
+
+type Account = {
+  leaseId: string
+  name: string
+  code: string | null
+  balance: number
+  unitNumber: string | null
+  unitSize: string | null
+  propertyName: string | null
+  propertySlug: string | null
+  monthlyRent: number | null
+  paidThrough: string | null
+  nextDueDate: string | null
+  dueDate: string | null
+  periodStart: string | null
+  periodEnd: string | null
+  pastDue: boolean
+  autopayOn: boolean
+  cardOnFile: string | null
+}
+
+// The API mixes "YYYY-MM-DD" and "YYYY-MM-DD HH:MM:SS"; keep the date part and
+// parse as local so the day never shifts.
+const asDate = (v?: string | null) => {
+  const d = (v ?? '').slice(0, 10)
+  return /^\d{4}-\d{2}-\d{2}$/.test(d) ? new Date(`${d}T00:00`) : null
+}
+const dateShort = (v?: string | null) =>
+  asDate(v)?.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) ?? ''
+const dateDay = (v?: string | null) =>
+  asDate(v)?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) ?? ''
+
+/** "Unit 85 · 10' x 10'" — whatever of it we know. */
+const spaceLabel = (a: Account) =>
+  [a.unitNumber ? `Unit ${a.unitNumber}` : null, a.unitSize].filter(Boolean).join(' · ') || 'Your space'
+
+/**
+ * Format a US phone as it's typed — "8175790607" → "(817) 579-0607".
+ * Left alone the moment it looks like an email (or anything with letters), so
+ * the one field still takes either.
+ */
+function formatContact(v: string): string {
+  if (/[a-zA-Z@]/.test(v)) return v
+  const raw = v.replace(/\D/g, '').slice(0, 11)
+  const d = raw.length === 11 && raw.startsWith('1') ? raw.slice(1) : raw
+  if (!d) return ''
+  if (d.length <= 3) return `(${d}`
+  if (d.length <= 6) return `(${d.slice(0, 3)}) ${d.slice(3)}`
+  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6, 10)}`
+}
+
+/**
+ * One plain sentence saying what this payment covers. The space and property
+ * are always shown directly above it, so this line doesn't repeat them.
+ */
+function whatYouArePaying(a: Account): string {
+  if (a.balance <= 0) {
+    if (a.nextDueDate) return `Paid through ${dateDay(a.paidThrough)} · next payment due ${dateShort(a.nextDueDate)}`
+    return a.paidThrough ? `Nothing due — paid through ${dateShort(a.paidThrough)}.` : 'Nothing due right now.'
+  }
+  const due = a.dueDate ? ` · due ${dateShort(a.dueDate)}` : ''
+  if (a.periodStart && a.periodEnd) return `Rent for ${dateDay(a.periodStart)} – ${dateDay(a.periodEnd)}${due}`
+  if (a.monthlyRent) return `Monthly rent ${money(a.monthlyRent)}${due}`
+  return `Outstanding account balance${due}`
+}
+
+type FeeSchedule = {
+  lateFeeFlat: number | null
+  lateFeePercent: number | null
+  lateFeeUpTo: number | null
+  nsfFee: number | null
+}
+
+/** What a late payment would cost on a given monthly rent, per the schedule. */
+function lateFeeOn(rent: number | null, f: FeeSchedule | null): number | null {
+  if (!f || !rent) return null
+  const { lateFeeFlat, lateFeePercent, lateFeeUpTo } = f
+  if (lateFeeUpTo != null && rent <= lateFeeUpTo) return lateFeeFlat ?? null
+  if (lateFeePercent != null) return +((rent * lateFeePercent) / 100).toFixed(2)
+  return lateFeeFlat ?? null
+}
+
+// `short` names the facility when opened from a facility page; omit it when
+// opened from the site nav (account lookup spans all locations) so the copy
+// doesn't read "Granbury, Granbury TX".
+export default function PayBillFlow({ facility, onClose: closePanel }: { facility: { short?: string; phone: string; tel: string }; onClose: () => void }) {
+  // Closing Pay Bill signs the tenant out first, so the next visit — and any
+  // rental they start afterwards — begins with no account attached.
+  const onClose = () => {
+    fetch('/api/nectar/account/verify/end', { method: 'POST' }).catch(() => {})
+    closePanel()
+  }
+  const atFacility = facility.short ? ` at ${facility.short}` : ''
+  const yourAccount = facility.short ? `your ${facility.short} account` : 'your account'
   const [step, setStep] = useState(0)
   const [contact, setContact] = useState('')
   const [looking, setLooking] = useState(false)
+  // A tenant can hold several spaces, sometimes at different properties, and
+  // may want to settle more than one at once.
+  const [accounts, setAccounts] = useState<Account[]>([])
+  const [picked, setPicked] = useState<string[]>([])
+  // Per-lease outcome — paying N spaces is N charges, so some can fail.
+  const [results, setResults] = useState<Array<{ leaseId: string; ok: boolean; error?: string }>>([])
+  const [lookupMsg, setLookupMsg] = useState<string | null>(null)
   const [card, setCard] = useState({ number: '', exp: '', cvc: '' })
   const [billing, setBilling] = useState({ name: '', address1: '', city: '', state: '', zip: '' })
+  // Card payments are switched off while Tenant Inc's payment endpoint is
+  // failing; the lookup tells us whether to show the card form or route to phone.
+  const [payOnline, setPayOnline] = useState(true)
+  // Real fee schedule from Hummingbird's product catalogue (/api/nectar/fees).
+  const [fees, setFees] = useState<FeeSchedule | null>(null)
+  const [showFees, setShowFees] = useState(false)
+  // Adding a space creates a lease in this person's name, so it stays locked
+  // until a code emailed to the address on file proves they control the account.
+  const [verifyStage, setVerifyStage] = useState<'idle' | 'sending' | 'code' | 'checking' | 'done'>('idle')
+  const [verifyCodeInput, setVerifyCodeInput] = useState('')
+  const [verifyMsg, setVerifyMsg] = useState<string | null>(null)
+  const [verifiedTo, setVerifiedTo] = useState<string | null>(null)
+  // Adding a space happens here rather than sending them back to the website.
+  const [addOpen, setAddOpen] = useState(false)
+  const [addSlug, setAddSlug] = useState<string | null>(null)
+  const [addSpaces, setAddSpaces] = useState<LiveSpace[] | null>(null)
+  const [addErr, setAddErr] = useState<string | null>(null)
+  const [renting, setRenting] = useState<{ slug: string; size: string; price: number; category: string | null } | null>(null)
   const [processing, setProcessing] = useState(false)
+  const [payError, setPayError] = useState<string | null>(null)
 
   const stepName: StepName = STEPS[step]
+  const payable = accounts.filter((a) => a.balance > 0)
+  const chosen = accounts.filter((a) => picked.includes(a.leaseId))
+  const amountDue = +chosen.reduce((s, a) => s + a.balance, 0).toFixed(2)
+  const toggle = (leaseId: string) =>
+    setPicked((p) => (p.includes(leaseId) ? p.filter((x) => x !== leaseId) : [...p, leaseId]))
+  const paidOk = accounts.filter((a) => results.some((r) => r.leaseId === a.leaseId && r.ok))
+  const paidFailed = accounts.filter((a) => results.some((r) => r.leaseId === a.leaseId && !r.ok))
+  const amountPaid = +paidOk.reduce((s, a) => s + a.balance, 0).toFixed(2)
+  // Existing tenants are the easiest people to rent a second space to, so offer
+  // it once we know who they are. Send them to their own facility when they only
+  // use one, otherwise to the locations hub to choose.
+  const slugs = [...new Set(accounts.map((a) => a.propertySlug).filter(Boolean))] as string[]
+  const homeProperty = slugs.length === 1 ? accounts.find((a) => a.propertySlug === slugs[0]) : null
 
-  // Demo account — in production this is the tenant record from the lookup.
-  const account = useMemo(() => {
-    const monthly = 95
-    const balanceDue = +(monthly + monthly * TAX_RATE).toFixed(2)
-    return { name: 'Your account', space: '10 × 10', monthly, balanceDue, nextDue: 'the 1st' }
+  // Signing in is ONE-TIME. Opening Pay Bill discards any session left over
+  // from a previous visit, so nobody is ever let straight through to a balance
+  // on the strength of an earlier code — and closing it (button, Escape, Done,
+  // or the tab going away) ends the session immediately. That also stops a
+  // Pay Bill sign-in from bleeding into an unrelated rental in the same browser.
+  useEffect(() => {
+    fetch('/api/nectar/account/verify/end', { method: 'POST' }).catch(() => {})
+    const drop = () => {
+      // sendBeacon survives the page going away; fetch is the fallback.
+      if (navigator.sendBeacon?.('/api/nectar/account/verify/end')) return
+      fetch('/api/nectar/account/verify/end', { method: 'POST', keepalive: true }).catch(() => {})
+    }
+    window.addEventListener('pagehide', drop)
+    return () => { window.removeEventListener('pagehide', drop); drop() }
   }, [])
-  const confirmation = useMemo(() => `JS-${100000 + Math.floor(Math.random() * 899999)}`, [])
+
+  useEffect(() => {
+    let alive = true
+    fetch('/api/nectar/fees')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (alive && j?.default) setFees(j.default as FeeSchedule) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [])
+
+  // RentalFlow clears the scroll lock when it closes, but Pay Bill is still
+  // open behind it — put it back.
+  useEffect(() => { if (!renting) document.body.style.overflow = 'hidden' }, [renting])
 
   useEffect(() => {
     document.body.style.overflow = 'hidden'
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !renting) onClose() }
     window.addEventListener('keydown', onKey)
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey) }
-  }, [onClose])
-
-  const amountDue = account.balanceDue
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [closePanel, renting])
 
   const canNext = () => {
-    if (stepName === 'Account') return /.+@.+\..+/.test(contact) || contact.replace(/\D/g, '').length >= 7
-    if (stepName === 'Payment') return card.number.replace(/\s/g, '').length >= 12 && card.exp.length >= 4 && card.cvc.length >= 3 && billing.name && billing.address1 && billing.city && billing.state && billing.zip
+    if (stepName === 'Account') {
+      if (verifyStage === 'code' || verifyStage === 'checking') return verifyCodeInput.length === 6
+      return /.+@.+\..+/.test(contact) || contact.replace(/\D/g, '').length >= 7
+    }
+    // Nothing owed anywhere: the button becomes a plain "Done".
+    if (stepName === 'Balance') return payable.length === 0 || (chosen.length > 0 && amountDue > 0)
+    if (stepName === 'Payment' && !payOnline) return false // the call CTA lives in the panel
+    if (stepName === 'Payment') return cardDigits(card.number).length >= 12 && cardDigits(card.exp).length === 4 && card.cvc.length >= 3 && !!billing.name && !!billing.address1 && !!billing.city && !!billing.state && !!billing.zip
     return true
   }
-  const next = () => {
-    if (stepName === 'Account') { setLooking(true); setTimeout(() => { setLooking(false); setStep(1) }, 1100); return }
-    if (stepName === 'Payment') { setProcessing(true); setTimeout(() => { setProcessing(false); setStep(3) }, 1400); return }
+
+  async function lookup() {
+    setLooking(true); setLookupMsg(null)
+    try {
+      const r = await fetch('/api/nectar/account/lookup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+      const j = await r.json()
+      if (!r.ok) { setLookupMsg(j.error ?? 'Lookup failed.'); return false }
+      if (!j.found || !j.accounts?.length) { setLookupMsg('We couldn’t find an account for that email or phone. Double-check it, or call us.'); return false }
+      setPayOnline(j.payOnline !== false)
+      const list = j.accounts as Account[]
+      setAccounts(list)
+      // Pre-select every space that owes — the common case is "pay what I owe".
+      setPicked(list.filter((a) => a.balance > 0).map((a) => a.leaseId))
+      return true
+    } catch { setLookupMsg('Something went wrong — please try again or call us.'); return false }
+    finally { setLooking(false) }
+  }
+
+  async function loadSpaces(slug: string) {
+    setAddSlug(slug); setAddSpaces(null); setAddErr(null)
+    try {
+      const r = await fetch(`/api/nectar/spaces/${slug}`)
+      const j = await r.json()
+      if (!r.ok) { setAddErr('We couldn’t load available sizes just now.'); return }
+      // One row per size+category, cheapest first.
+      const seen = new Set<string>()
+      const list: LiveSpace[] = []
+      for (const x of (j.spaces ?? []) as Array<{ size: string | null; inStock: boolean; onlinePrice: number | null; category: string | null; available: number }>) {
+        if (!x.size || !x.inStock || !(x.onlinePrice ?? 0)) continue
+        const key = `${x.size}|${tidyCat(x.category)}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        list.push({ size: x.size, onlinePrice: x.onlinePrice as number, category: x.category, available: x.available })
+      }
+      list.sort((a, b) => a.onlinePrice - b.onlinePrice)
+      setAddSpaces(list)
+      if (!list.length) setAddErr('Nothing is available online at that location right now — please call us.')
+    } catch { setAddErr('We couldn’t load available sizes just now.') }
+  }
+
+  function openAdd() {
+    setAddOpen(true)
+    const slug = homeProperty?.propertySlug ?? (slugs.length === 1 ? slugs[0] : null)
+    if (slug) loadSpaces(slug)
+  }
+
+  async function startVerify() {
+    setVerifyStage('sending'); setVerifyMsg(null)
+    try {
+      const r = await fetch('/api/nectar/account/verify/start', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contact }) })
+      const j = await r.json()
+      if (!r.ok) { setVerifyMsg(j.error ?? 'We couldn’t send a code.'); setVerifyStage('idle'); return }
+      setVerifiedTo(j.email ?? null)
+      setVerifyStage('code')
+    } catch { setVerifyMsg('Something went wrong — please try again.'); setVerifyStage('idle') }
+  }
+
+  async function confirmVerify() {
+    setVerifyStage('checking'); setVerifyMsg(null)
+    try {
+      const r = await fetch('/api/nectar/account/verify/confirm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contact, code: verifyCodeInput }) })
+      const j = await r.json()
+      if (!r.ok) { setVerifyMsg(j.error ?? 'That code isn’t right.'); setVerifyStage('code'); return }
+      setVerifyStage('done')
+      if (await lookup()) setStep(1)
+    } catch { setVerifyMsg('Something went wrong — please try again.'); setVerifyStage('code') }
+  }
+
+  /**
+   * Each space is its own lease and its own charge, so pay them one at a time
+   * and record each outcome — a later one failing must not erase an earlier
+   * success, and the receipt has to say exactly what went through.
+   */
+  async function pay(): Promise<boolean> {
+    if (!chosen.length) return false
+    const [mm = '', yyRaw = ''] = card.exp.split('/').map((s) => s.trim())
+    const yy = yyRaw.length === 2 ? `20${yyRaw}` : yyRaw
+    const cardPayload = { card_number: card.number.replace(/\s/g, ''), cvv2: card.cvc, exp_mo: mm, exp_yr: yy, name_on_card: billing.name, address: billing.address1, city: billing.city, state: billing.state, zip: billing.zip }
+    const out: Array<{ leaseId: string; ok: boolean; error?: string }> = []
+    for (const a of chosen) {
+      try {
+        const r = await fetch('/api/nectar/account/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ leaseId: a.leaseId, amount: a.balance, card: cardPayload }) })
+        const j = await r.json()
+        out.push(r.ok && j.ok ? { leaseId: a.leaseId, ok: true } : { leaseId: a.leaseId, ok: false, error: j.error ?? 'Payment declined.' })
+      } catch {
+        out.push({ leaseId: a.leaseId, ok: false, error: 'Connection problem.' })
+      }
+    }
+    setResults(out)
+    const anyOk = out.some((r) => r.ok)
+    const failures = out.filter((r) => !r.ok)
+    if (failures.length && anyOk) {
+      setPayError(`We couldn’t complete ${failures.length} of ${out.length} payments — see below.`)
+    } else if (failures.length) {
+      setPayError(failures[0].error ?? 'Payment could not be processed.')
+    }
+    // Land on the receipt whenever anything succeeded, so the tenant sees it.
+    return anyOk
+  }
+
+  const next = async () => {
+    if (stepName === 'Account') { if (await lookup()) setStep(1); return }
+    if (stepName === 'Payment') {
+      setProcessing(true); setPayError(null)
+      const ok = await pay()
+      setProcessing(false)
+      if (ok) setStep(3)
+      return
+    }
     setStep((s) => Math.min(s + 1, STEPS.length - 1))
   }
   const back = () => setStep((s) => Math.max(s - 1, 0))
@@ -83,56 +356,389 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
 
         {/* Header */}
         <div className="sticky top-0 z-[5] flex items-center justify-between gap-4 border-b border-warm-white/[0.07] bg-black/70 px-5 py-4 backdrop-blur-md lg:px-10">
-          <div className="flex items-center gap-3">
-            <span className="rounded-sm bg-orange px-2.5 py-1 text-[0.625rem] font-black uppercase tracking-[0.15em] text-warm-white">Preview</span>
-            <div>
-              <p className="text-[0.9375rem] font-black leading-tight tracking-[-0.02em] text-warm-white">Pay your bill</p>
-              <p className="text-[0.75rem] text-warm-white/50">Journey.Storage™ — {facility.short}, Granbury TX</p>
-            </div>
+          <div>
+            <p className="text-[0.9375rem] font-black leading-tight tracking-[-0.02em] text-warm-white">Pay your bill</p>
+            <p className="text-[0.75rem] text-warm-white/50">Journey.Storage™ — {facility.short ? `${facility.short}, ` : ''}Granbury TX</p>
           </div>
           <button onClick={onClose} aria-label="Close" className="grid h-9 w-9 shrink-0 place-items-center rounded-sm bg-warm-white/[0.08] text-warm-white transition-colors hover:bg-warm-white/[0.16]"><X className="h-5 w-5" aria-hidden /></button>
         </div>
 
         <div className="relative z-[3] flex-1 overflow-y-auto px-5 py-8 lg:px-10 lg:py-10">
-          {stepName === 'Account' && (
+          {stepName === 'Account' && verifyStage !== 'code' && verifyStage !== 'checking' && (
             <div className="mx-auto max-w-md">
               <Eyebrow label="Find account" />
-              <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><Search className="h-6 w-6 text-orange" aria-hidden />Find your account</h2>
-              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Enter the email or phone on your rental at {facility.short}.</p>
-              <input value={contact} onChange={(e) => setContact(e.target.value)} placeholder="Email or phone" className={`mt-7 ${FIELD}`} />
-              <p className="mt-3 text-[0.75rem] leading-relaxed text-warm-white/40">We&rsquo;ll find your balance and let you pay securely. No login required.</p>
+              <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><Search className="h-6 w-6 shrink-0 text-orange" aria-hidden />Find your account</h2>
+              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Enter the email or phone on your rental{atFacility}. We&rsquo;ll email a code to the address on your account to confirm it&rsquo;s you.</p>
+              <input
+                value={contact}
+                onChange={(e) => setContact(formatContact(e.target.value))}
+                onKeyDown={(e) => { if (e.key === 'Enter' && canNext() && verifyStage !== 'sending') startVerify() }}
+                inputMode="text"
+                autoComplete="email"
+                placeholder="Email or phone"
+                className={`mt-7 ${FIELD}`}
+              />
+              <p className="mt-3 text-[0.75rem] leading-relaxed text-warm-white/40">Your balance and unit details are only shown once you&rsquo;ve confirmed the code — so nobody else can look up your account.</p>
+              {verifyMsg && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{verifyMsg} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
+              {lookupMsg && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{lookupMsg} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
             </div>
           )}
 
-          {stepName === 'Balance' && (
+          {stepName === 'Account' && (verifyStage === 'code' || verifyStage === 'checking') && (
             <div className="mx-auto max-w-md">
-              <Eyebrow label="Balance" />
-              <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><Wallet className="h-6 w-6 text-orange" aria-hidden />Your balance</h2>
-              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">{account.space} space at {facility.short}</p>
-
-              <div className={`mt-7 ${glassCard} p-5`}>
-                <div className="flex items-baseline justify-between">
-                  <span className="text-[0.9375rem] text-warm-white/70">Amount due now</span>
-                  <span className="text-[1.75rem] font-black text-orange">{money(account.balanceDue)}</span>
-                </div>
-                <dl className="mt-3 space-y-1.5 border-t border-warm-white/10 pt-3 text-[0.8125rem]">
-                  <div className="flex justify-between"><dt className="text-warm-white/55">Monthly rent</dt><dd className="text-warm-white/80">{money(account.monthly)}</dd></div>
-                  <div className="flex justify-between"><dt className="text-warm-white/55">Tax</dt><dd className="text-warm-white/80">{money(+(account.monthly * TAX_RATE).toFixed(2))}</dd></div>
-                </dl>
+              <Eyebrow label="Confirm it's you" />
+              <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><ShieldCheck className="h-6 w-6 shrink-0 text-orange" aria-hidden />Enter your code</h2>
+              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/60">
+                We sent a 6-digit code{verifiedTo ? <> to <b className="text-warm-white">{verifiedTo}</b></> : ' to the email on your account'}. It&rsquo;s good for about 15 minutes.
+              </p>
+              <input
+                value={verifyCodeInput}
+                onChange={(e) => setVerifyCodeInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                onKeyDown={(e) => { if (e.key === 'Enter' && verifyCodeInput.length === 6) confirmVerify() }}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                autoFocus
+                placeholder="123456"
+                aria-label="6-digit verification code"
+                className="mt-7 w-full rounded-sm border border-stone/30 bg-warm-white/[0.06] px-4 py-4 text-center text-[1.75rem] font-black tracking-[0.35em] text-warm-white placeholder:tracking-[0.2em] placeholder:font-normal placeholder:text-stone focus:border-orange focus-visible:outline-none"
+              />
+              <div className="mt-4 flex flex-wrap items-center gap-4">
+                <button type="button" onClick={startVerify} className="text-[0.8125rem] font-bold text-orange underline-offset-4 transition-colors duration-150 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">
+                  Send a new code
+                </button>
+                <button type="button" onClick={() => { setVerifyStage('idle'); setVerifyCodeInput(''); setVerifyMsg(null) }} className="text-[0.8125rem] font-bold text-warm-white/50 underline-offset-4 transition-colors duration-150 hover:text-warm-white hover:underline">
+                  Use a different email or phone
+                </button>
               </div>
+              {verifyMsg && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{verifyMsg} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
+              <p className="mt-4 text-[0.75rem] leading-relaxed text-warm-white/40">Didn&rsquo;t get it? Check your spam folder, or call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a> and we&rsquo;ll help.</p>
             </div>
           )}
 
-          {stepName === 'Payment' && (
+          {stepName === 'Balance' && accounts.length > 0 && (
+            <div className="mx-auto max-w-md">
+              <Eyebrow label={payable.length === 0 ? 'Your account' : 'Your spaces'} />
+              <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white">
+                <Wallet className="h-6 w-6 shrink-0 text-orange" aria-hidden />
+                {payable.length === 0 ? 'Your account' : payable.length > 1 ? 'Choose spaces to pay' : 'Choose a space to pay'}
+              </h2>
+              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/60">
+                <span className="font-bold text-warm-white">{accounts[0].name}</span>
+                {accounts.length > 1 && <> · {accounts.length} spaces{new Set(accounts.map((a) => a.propertyName).filter(Boolean)).size > 1 ? ' across 2+ locations' : ''}</>}
+              </p>
+
+              {payable.length > 1 && (
+                <div className="mt-5 flex items-center justify-between gap-3">
+                  <p className="text-[0.8125rem] text-warm-white/55">Select the spaces you&rsquo;d like to pay.</p>
+                  <button
+                    type="button"
+                    onClick={() => setPicked(picked.length === payable.length ? [] : payable.map((a) => a.leaseId))}
+                    className="shrink-0 text-[0.8125rem] font-bold text-orange underline-offset-4 transition-colors hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                  >
+                    {picked.length === payable.length ? 'Clear all' : 'Select all'}
+                  </button>
+                </div>
+              )}
+
+              <div className="mt-4 space-y-3">
+                {accounts.map((a) => {
+                  const owes = a.balance > 0
+                  const selected = picked.includes(a.leaseId)
+                  return (
+                    <button
+                      key={a.leaseId}
+                      type="button"
+                      onClick={() => owes && toggle(a.leaseId)}
+                      disabled={!owes}
+                      aria-pressed={selected}
+                      className={`block w-full rounded-sm border p-4 text-left transition-colors duration-150 ${
+                        selected ? 'border-orange bg-orange/[0.08]' : 'border-warm-white/12 bg-warm-white/[0.04]'
+                      } ${owes ? 'cursor-pointer hover:border-warm-white/30' : 'cursor-default opacity-70'} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange`}
+                    >
+                      <div className="flex items-start gap-3">
+                        {owes && (
+                          <span
+                            aria-hidden
+                            className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-sm border transition-colors duration-150 ${
+                              selected ? 'border-orange bg-orange text-warm-white' : 'border-warm-white/30'
+                            }`}
+                          >
+                            {selected && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
+                          </span>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-[1.0625rem] font-black tracking-[-0.01em] text-warm-white">{spaceLabel(a)}</p>
+                              {a.propertyName && <p className="mt-0.5 text-[0.8125rem] text-warm-white/55">{a.propertyName}</p>}
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <p className={`text-[1.25rem] font-black leading-none ${owes ? 'text-orange' : 'text-sage-green'}`}>{money(a.balance)}</p>
+                              {a.pastDue ? (
+                                <span className="mt-1.5 inline-block rounded-full bg-[#D4956A]/15 px-2 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-[#E8A87C]">Past due</span>
+                              ) : owes ? (
+                                a.dueDate && <p className="mt-1 text-[0.6875rem] text-warm-white/45">Due {dateShort(a.dueDate)}</p>
+                              ) : (
+                                <span className="mt-1.5 inline-flex items-center gap-1 text-[0.6875rem] font-bold text-sage-green"><Check className="h-3 w-3" aria-hidden />Paid</span>
+                              )}
+                            </div>
+                          </div>
+                          <p className="mt-2.5 border-t border-warm-white/[0.07] pt-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">{whatYouArePaying(a)}</p>
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {accounts.every((a) => a.balance <= 0) ? (
+                <p className="mt-4 flex items-start gap-2 text-[0.9375rem] font-bold text-sage-green"><Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />You&rsquo;re all paid up — nothing due right now.</p>
+              ) : chosen.length > 1 ? (
+                <div className="mt-4 flex items-baseline justify-between gap-3 rounded-sm border border-warm-white/12 bg-warm-white/[0.04] px-4 py-3">
+                  <span className="text-[0.875rem] font-bold text-warm-white">Total for {chosen.length} spaces</span>
+                  <span className="text-[1.25rem] font-black text-orange">{money(amountDue)}</span>
+                </div>
+              ) : payable.length > 0 && chosen.length === 0 ? (
+                <p className="mt-4 text-[0.8125rem] text-warm-white/50">Select at least one space to continue.</p>
+              ) : null}
+
+              {accounts.length > 0 && (
+                <div className="mt-5 rounded-sm border border-warm-white/12 bg-warm-white/[0.03]">
+                  <button
+                    type="button"
+                    onClick={() => (addOpen ? setAddOpen(false) : openAdd())}
+                    aria-expanded={addOpen}
+                    className="flex w-full cursor-pointer items-center justify-between gap-3 p-4 text-left transition-colors duration-150 hover:bg-warm-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                  >
+                    <span className="flex min-w-0 items-start gap-3">
+                      <PlusCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange" aria-hidden />
+                      <span className="min-w-0">
+                        <span className="block text-[0.9375rem] font-bold text-warm-white">Need more space?</span>
+                        <span className="mt-0.5 block text-[0.8125rem] leading-relaxed text-warm-white/55">Add another unit right here — you&rsquo;re verified, so we already have your details.</span>
+                      </span>
+                    </span>
+                    <ChevronDown className={`h-4 w-4 shrink-0 text-warm-white/50 transition-transform duration-200 ${addOpen ? 'rotate-180' : ''}`} aria-hidden />
+                  </button>
+
+                  {addOpen && (
+                    <div className="border-t border-warm-white/[0.07] px-4 py-4">
+                      {/* Which location, when they store at more than one */}
+                      {slugs.length > 1 && (
+                        <div className="mb-4">
+                          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Location</p>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {ALL_FACILITIES.map((f) => (
+                              <button
+                                key={f.slug}
+                                type="button"
+                                onClick={() => loadSpaces(f.slug)}
+                                className={`rounded-full border px-3 py-1.5 text-[0.8125rem] font-bold transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange ${
+                                  addSlug === f.slug ? 'border-orange bg-orange/[0.12] text-warm-white' : 'border-warm-white/20 text-warm-white/70 hover:border-warm-white/40'
+                                }`}
+                              >
+                                {f.name}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {!addSlug ? (
+                        <p className="text-[0.8125rem] text-warm-white/55">Pick a location to see what&rsquo;s available.</p>
+                      ) : addErr ? (
+                        <p className="text-[0.8125rem] leading-relaxed text-[#E8A87C]">{addErr} <a href={facility.tel} className="underline">{facility.phone}</a></p>
+                      ) : addSpaces === null ? (
+                        <p className="text-[0.8125rem] text-warm-white/45">Loading available sizes…</p>
+                      ) : (
+                        <>
+                          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Available now</p>
+                          <div className="mt-2 space-y-2">
+                            {addSpaces.map((sp) => (
+                              <button
+                                key={`${sp.size}|${sp.category}`}
+                                type="button"
+                                onClick={() => setRenting({ slug: addSlug, size: sp.size, price: sp.onlinePrice, category: tidyCat(sp.category) })}
+                                className="group flex w-full items-center justify-between gap-3 rounded-sm border border-warm-white/12 bg-warm-white/[0.04] p-3 text-left transition-colors duration-150 hover:border-orange/50 hover:bg-orange/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                              >
+                                <span className="min-w-0">
+                                  <span className="block text-[1rem] font-black tracking-[-0.01em] text-warm-white">{sp.size}</span>
+                                  <span className="mt-0.5 block text-[0.75rem] text-warm-white/55">
+                                    {tidyCat(sp.category)}{sp.available > 0 && sp.available <= 3 ? ` · only ${sp.available} left` : ''}
+                                  </span>
+                                </span>
+                                <span className="shrink-0 text-right">
+                                  <span className="block leading-none"><span className="text-[1.125rem] font-black text-orange">{money(sp.onlinePrice)}</span><span className="text-[0.6875rem] font-bold text-warm-white/50">/mo</span></span>
+                                  <span className="mt-1 block text-[0.6875rem] font-bold text-sage-green">1st month {money(Math.round(sp.onlinePrice / 2))}</span>
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                          <p className="mt-3 text-[0.6875rem] leading-relaxed text-warm-white/35">Pick a size to see the exact move-in cost. It&rsquo;s added to this account, under the same name and address.</p>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Supporting detail — due dates and what a late payment costs.
+                  Collapsed by default so it never competes with the balance. */}
+              {fees && (
+                <div className="mt-5 rounded-sm border border-warm-white/10 bg-warm-white/[0.03]">
+                  <button
+                    type="button"
+                    onClick={() => setShowFees((v) => !v)}
+                    aria-expanded={showFees}
+                    className="flex w-full cursor-pointer items-center justify-between gap-3 px-4 py-3 text-left transition-colors duration-150 hover:bg-warm-white/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                  >
+                    <span className="flex items-center gap-2 text-[0.8125rem] font-bold text-warm-white">
+                      <CalendarClock className="h-4 w-4 shrink-0 text-orange" aria-hidden />
+                      Due dates, autopay &amp; fees
+                    </span>
+                    <ChevronDown className={`h-4 w-4 shrink-0 text-warm-white/50 transition-transform duration-200 ${showFees ? 'rotate-180' : ''}`} aria-hidden />
+                  </button>
+                  {showFees && (
+                    <div className="border-t border-warm-white/[0.07] px-4 py-4">
+                      <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">When rent is due</p>
+                      <dl className="mt-2 space-y-1.5">
+                        {accounts.map((a) => (
+                          <div key={a.leaseId} className="flex justify-between gap-3 text-[0.8125rem]">
+                            <dt className="text-warm-white/60">{spaceLabel(a)}</dt>
+                            <dd className={`shrink-0 text-right font-bold ${a.pastDue ? 'text-[#E8A87C]' : 'text-warm-white'}`}>
+                              {a.balance > 0
+                                ? `${dateShort(a.dueDate ?? a.nextDueDate)}${a.pastDue ? ' · past due' : ''}`
+                                : a.nextDueDate ? dateShort(a.nextDueDate) : '—'}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                      <p className="mt-3 text-[0.75rem] leading-relaxed text-warm-white/50">Rent is due on the same day each month.</p>
+
+                      <p className="mt-4 border-t border-warm-white/[0.07] pt-4 text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Autopay</p>
+                      <dl className="mt-2 space-y-1.5">
+                        {accounts.map((a) => (
+                          <div key={a.leaseId} className="flex justify-between gap-3 text-[0.8125rem]">
+                            <dt className="text-warm-white/60">{spaceLabel(a)}</dt>
+                            <dd className={`shrink-0 text-right font-bold ${a.autopayOn ? 'text-sage-green' : 'text-warm-white/70'}`}>
+                              {a.autopayOn ? 'On' : 'Off'}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                      {accounts.some((a) => !a.autopayOn) && (
+                        <p className="mt-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">
+                          Want rent paid automatically each month? Call{' '}
+                          <a href={facility.tel} className="font-bold text-orange underline-offset-4 hover:underline">{facility.phone}</a>{' '}
+                          and we&rsquo;ll turn autopay on while you&rsquo;re on the line.
+                        </p>
+                      )}
+                      {accounts.some((a) => a.autopayOn) && (
+                        <p className="mt-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">
+                          {(() => {
+                            const on = accounts.filter((a) => a.autopayOn)
+                            const card = on.find((a) => a.cardOnFile)?.cardOnFile
+                            return card ? <>Autopay is charging <b className="text-warm-white">{card}</b>. </> : null
+                          })()}
+                          To change the card on file, call{' '}
+                          <a href={facility.tel} className="font-bold text-orange underline-offset-4 hover:underline">{facility.phone}</a>{' '}
+                          — we can swap it while you&rsquo;re on the line.
+                        </p>
+                      )}
+
+                      <p className="mt-4 border-t border-warm-white/[0.07] pt-4 text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">If a payment is late</p>
+                      <p className="mt-2 text-[0.8125rem] leading-relaxed text-warm-white/70">
+                        {fees.lateFeeUpTo != null && fees.lateFeeFlat != null && fees.lateFeePercent != null
+                          ? <>A late fee of {money(fees.lateFeeFlat)} applies on monthly rent up to {money(fees.lateFeeUpTo)}, otherwise {fees.lateFeePercent}% of your monthly rent.</>
+                          : fees.lateFeeFlat != null
+                            ? <>A late fee of {money(fees.lateFeeFlat)} applies.</>
+                            : <>Late fees are set by your facility&rsquo;s fee schedule.</>}
+                      </p>
+                      {accounts.some((a) => lateFeeOn(a.monthlyRent, fees) != null) && (
+                        <dl className="mt-2.5 space-y-1.5">
+                          {accounts.map((a) => {
+                            const lf = lateFeeOn(a.monthlyRent, fees)
+                            if (lf == null) return null
+                            return (
+                              <div key={a.leaseId} className="flex justify-between gap-3 text-[0.8125rem]">
+                                <dt className="text-warm-white/60">{spaceLabel(a)} · {money(a.monthlyRent ?? 0)}/mo</dt>
+                                <dd className="shrink-0 text-right font-bold text-warm-white">{money(lf)}</dd>
+                              </div>
+                            )
+                          })}
+                        </dl>
+                      )}
+                      {fees.nsfFee != null && (
+                        <p className="mt-3 text-[0.8125rem] leading-relaxed text-warm-white/70">A returned payment costs {money(fees.nsfFee)}.</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {stepName === 'Payment' && chosen.length > 0 && !payOnline && (
             <div className="mx-auto max-w-md">
               <Eyebrow label="Payment" />
-              <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><CreditCard className="h-6 w-6 text-orange" aria-hidden />Payment</h2>
-              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/50">Paying {money(amountDue)} on your {facility.short} account.</p>
-              <div className="mt-7 space-y-3">
-                <input inputMode="numeric" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: e.target.value })} className={FIELD} />
+              <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><CreditCard className="h-6 w-6 shrink-0 text-orange" aria-hidden />Pay by phone</h2>
+              <p className="mt-2 text-[1rem] leading-[1.6] text-warm-white/60">Card payments on the site are temporarily unavailable. Call us and we&rsquo;ll take your payment right away — we already have your details below.</p>
+              <div className={`mt-6 ${glassCard} p-4`}>
+                <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Have this ready</p>
+                <p className="mt-1 text-[0.8125rem] text-warm-white/60">{chosen[0].name}</p>
+                <div className="mt-3 space-y-2.5">
+                  {chosen.map((a) => (
+                    <div key={a.leaseId} className="flex items-start justify-between gap-3 border-t border-warm-white/[0.07] pt-2.5">
+                      <div className="min-w-0">
+                        <p className="text-[0.9375rem] font-bold text-warm-white">{spaceLabel(a)}</p>
+                        <p className="mt-0.5 text-[0.75rem] text-warm-white/55">{a.propertyName}</p>
+                      </div>
+                      <p className="shrink-0 text-[0.9375rem] font-black text-warm-white">{money(a.balance)}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 flex items-baseline justify-between gap-3 border-t border-warm-white/15 pt-3">
+                  <span className="text-[0.875rem] font-bold text-warm-white">Total due</span>
+                  <span className="text-[1.5rem] font-black leading-none text-orange">{money(amountDue)}</span>
+                </div>
+              </div>
+              <a href={facility.tel} className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-sm bg-orange px-6 py-4 text-[1.0625rem] font-bold text-warm-white shadow-[0_2px_8px_rgba(232,98,42,.3)] transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]">Call {facility.phone}</a>
+              <p className="mt-3 text-center text-[0.75rem] text-warm-white/40">Sorry for the detour — we&rsquo;re getting online card payments back as fast as we can.</p>
+            </div>
+          )}
+
+          {stepName === 'Payment' && chosen.length > 0 && payOnline && (
+            <div className="mx-auto max-w-md">
+              <Eyebrow label="Payment" />
+              <h2 className="mt-4 flex items-center gap-2.5 text-[1.75rem] font-black leading-[1.05] tracking-[-0.02em] text-warm-white"><CreditCard className="h-6 w-6 shrink-0 text-orange" aria-hidden />Payment</h2>
+              {/* Exactly what's being paid, and on which space — tenants with
+                  spaces at more than one property need this to be unambiguous. */}
+              <div className={`mt-5 ${glassCard} p-4`}>
+                <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Paying for</p>
+                <p className="mt-1 text-[0.8125rem] text-warm-white/60">{chosen[0].name}</p>
+                <div className="mt-3 space-y-2.5">
+                  {chosen.map((a) => (
+                    <div key={a.leaseId} className="flex items-start justify-between gap-3 border-t border-warm-white/[0.07] pt-2.5">
+                      <div className="min-w-0">
+                        <p className="text-[0.9375rem] font-bold text-warm-white">{spaceLabel(a)}</p>
+                        <p className="mt-0.5 text-[0.75rem] text-warm-white/55">{[a.propertyName, whatYouArePaying(a)].filter(Boolean).join(' · ')}</p>
+                      </div>
+                      <p className="shrink-0 text-[0.9375rem] font-black text-warm-white">{money(a.balance)}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 flex items-baseline justify-between gap-3 border-t border-warm-white/15 pt-3">
+                  <span className="text-[0.875rem] font-bold text-warm-white">Total</span>
+                  <span className="text-[1.5rem] font-black leading-none text-orange">{money(amountDue)}</span>
+                </div>
+                {chosen.length > 1 && (
+                  <p className="mt-3 text-[0.6875rem] leading-relaxed text-warm-white/45">Each space is billed separately, so {chosen.length} charges totalling {money(amountDue)} will appear on your statement.</p>
+                )}
+              </div>
+              <div className="mt-6 space-y-3">
+                <input inputMode="numeric" autoComplete="cc-number" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })} className={FIELD} />
                 <div className="grid grid-cols-2 gap-3">
-                  <input placeholder="MM/YY" value={card.exp} onChange={(e) => setCard({ ...card, exp: e.target.value })} className={FIELD} />
-                  <input placeholder="CVC" value={card.cvc} onChange={(e) => setCard({ ...card, cvc: e.target.value })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="cc-exp" placeholder="MM/YY" value={card.exp} onChange={(e) => setCard({ ...card, exp: formatExpiry(e.target.value, card.exp) })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="cc-csc" placeholder="CVC" value={card.cvc} onChange={(e) => setCard({ ...card, cvc: cardDigits(e.target.value).slice(0, 4) })} className={FIELD} />
                 </div>
                 <p className="pt-2 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-warm-white/40">Billing address</p>
                 <input placeholder="Cardholder name" value={billing.name} onChange={(e) => setBilling({ ...billing, name: e.target.value })} className={FIELD} />
@@ -140,28 +746,46 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
                 <div className="grid grid-cols-[1fr_80px_100px] gap-3">
                   <input placeholder="City" value={billing.city} onChange={(e) => setBilling({ ...billing, city: e.target.value })} className={FIELD} />
                   <input placeholder="State" maxLength={2} value={billing.state} onChange={(e) => setBilling({ ...billing, state: e.target.value.toUpperCase() })} className={FIELD} />
-                  <input placeholder="ZIP" value={billing.zip} onChange={(e) => setBilling({ ...billing, zip: e.target.value })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="postal-code" placeholder="ZIP" value={billing.zip} onChange={(e) => setBilling({ ...billing, zip: formatZip(e.target.value) })} className={FIELD} />
                 </div>
               </div>
-              <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55"><b className="text-warm-white/80">Demo only.</b> This is a preview — no card is charged. In production, payments post to your Tenant Inc account securely.</p>
+              {payError && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{payError} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
+              <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Secured by Tenant Payments. Your card is charged {money(amountDue)} and applied to {chosen.length > 1 ? 'the spaces above' : 'your account'}.</p>
             </div>
           )}
 
           {stepName === 'Done' && (
             <div className="mx-auto max-w-md py-4 text-center">
               <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-sage-green/20 text-sage-green ring-1 ring-sage-green/30"><Check className="h-9 w-9" strokeWidth={3} aria-hidden /></div>
-              <h2 className="mt-5 text-[2rem] font-black leading-[1.02] tracking-[-0.02em] text-warm-white">Payment received</h2>
-              <p className="mt-3 text-[1rem] leading-[1.6] text-warm-white/50">Thanks! We&rsquo;ve applied {money(amountDue)} to your {facility.short} account. A receipt is on its way.</p>
+              <h2 className="mt-5 text-[2rem] font-black leading-[1.02] tracking-[-0.02em] text-warm-white">{paidFailed.length ? 'Partly paid' : 'Payment received'}</h2>
+              <p className="mt-3 text-[1rem] leading-[1.6] text-warm-white/50">
+                Thanks{paidOk[0]?.name ? `, ${paidOk[0].name.split(' ')[0]}` : ''}! We&rsquo;ve applied {money(amountPaid)} to {paidOk.length > 1 ? `${paidOk.length} spaces` : paidOk[0] ? spaceLabel(paidOk[0]) : yourAccount}. A receipt is on its way.
+              </p>
               <div className={`mt-7 ${R} relative overflow-hidden border border-warm-white/10 bg-warm-white/[0.05] p-6 text-left`}>
                 <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(232,98,42,0.18) 0%, transparent 60%)' }} />
                 <dl className="relative space-y-2 text-[0.9375rem]">
-                  <div className="flex justify-between"><dt className="text-warm-white/55">Confirmation</dt><dd className="font-black tracking-[0.05em] text-warm-white">{confirmation}</dd></div>
-                  <div className="flex justify-between"><dt className="text-warm-white/55">Amount paid</dt><dd className="font-bold text-warm-white">{money(amountDue)}</dd></div>
-                  <div className="flex justify-between"><dt className="text-warm-white/55">New balance</dt><dd className="font-bold text-sage-green">$0.00</dd></div>
+                  {paidOk[0]?.name && <div className="flex justify-between gap-3"><dt className="text-warm-white/55">Name</dt><dd className="text-right font-bold text-warm-white">{paidOk[0].name}</dd></div>}
+                  {paidOk.map((a) => (
+                    <div key={a.leaseId} className="flex justify-between gap-3">
+                      <dt className="text-warm-white/55">{spaceLabel(a)}{a.propertyName ? <span className="block text-[0.75rem] text-warm-white/35">{a.propertyName}</span> : null}</dt>
+                      <dd className="text-right font-bold text-warm-white">{money(a.balance)}</dd>
+                    </div>
+                  ))}
+                  <div className="flex justify-between gap-3 border-t border-warm-white/[0.07] pt-2"><dt className="text-warm-white/55">Total paid</dt><dd className="text-right font-bold text-warm-white">{money(amountPaid)}</dd></div>
                 </dl>
               </div>
-              <p className="mt-7 text-[0.75rem] text-warm-white/40">Preview — no real payment was made. Questions? Call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a>.</p>
-              <button onClick={onClose} className={`mt-6 ${primaryBtn}`}>Close preview</button>
+              {paidFailed.length > 0 && (
+                <p className="mt-5 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-left text-[0.8125rem] leading-relaxed text-[#E8A87C]">
+                  <b>We couldn&rsquo;t charge {paidFailed.map((a) => spaceLabel(a)).join(' or ')}.</b> Nothing was taken for {paidFailed.length > 1 ? 'those spaces' : 'that space'} — try again, or call <a href={facility.tel} className="underline">{facility.phone}</a>.
+                </p>
+              )}
+              {accounts.filter((a) => a.balance > 0 && !results.some((r) => r.leaseId === a.leaseId)).length > 0 && (
+                <p className="mt-4 rounded-sm border border-orange/25 bg-orange/[0.06] px-4 py-3 text-left text-[0.8125rem] leading-relaxed text-warm-white/70">
+                  You still have a balance on {accounts.filter((a) => a.balance > 0 && !results.some((r) => r.leaseId === a.leaseId)).map((a) => spaceLabel(a)).join(' and ')}. Reopen Pay Bill to take care of that too.
+                </p>
+              )}
+              <p className="mt-7 text-[0.75rem] text-warm-white/40">Questions? Call <a href={facility.tel} className="font-bold text-orange">{facility.phone}</a>.</p>
+              <button onClick={onClose} className={`mt-6 ${primaryBtn}`}>Done</button>
             </div>
           )}
         </div>
@@ -172,15 +796,39 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short: 
               <ChevronLeft className="h-4 w-4" aria-hidden />{step === 0 ? 'Cancel' : 'Back'}
             </button>
             <div className="flex items-center gap-3">
-              {stepName === 'Balance' && <span className="hidden text-[0.9375rem] font-black text-warm-white sm:inline">{money(amountDue)} total</span>}
-              <button onClick={next} disabled={!canNext() || looking || processing} className={primaryBtn}>
-                {looking ? 'Finding…' : processing ? 'Processing…' : stepName === 'Account' ? 'Find my balance' : stepName === 'Balance' ? 'Continue to payment' : `Pay ${money(amountDue)}`}
+              {stepName === 'Balance' && amountDue > 0 && <span className="hidden text-[0.9375rem] font-black text-warm-white sm:inline">{money(amountDue)} due</span>}
+              {!(stepName === 'Payment' && !payOnline) && (
+              <button onClick={
+                stepName === 'Account'
+                  ? (verifyStage === 'code' || verifyStage === 'checking' ? confirmVerify : startVerify)
+                  : payable.length === 0 && stepName === 'Balance' ? onClose : next
+              } disabled={!canNext() || looking || processing} className={primaryBtn}>
+                {looking ? 'Finding…' : processing ? 'Processing…'
+                  : stepName === 'Account'
+                    ? (verifyStage === 'sending' ? 'Sending code…' : verifyStage === 'checking' ? 'Checking…' : (verifyStage === 'code' ? 'Confirm code' : 'Send me a code'))
+                  : stepName === 'Balance' ? (payable.length === 0 ? 'Done' : chosen.length ? (payOnline ? 'Continue to payment' : 'How to pay') : 'Select a space') : `Pay ${money(amountDue)}`}
                 {!looking && !processing && <ChevronRight className="h-4 w-4" aria-hidden />}
               </button>
+              )}
             </div>
           </div>
         )}
       </div>
+    {renting && (
+        <RentalFlow
+          facility={{
+            slug: renting.slug,
+            short: ALL_FACILITIES.find((f) => f.slug === renting.slug)?.name ?? 'Granbury',
+            address: ALL_FACILITIES.find((f) => f.slug === renting.slug)?.street ?? '',
+            city: `${ALL_FACILITIES.find((f) => f.slug === renting.slug)?.city ?? 'Granbury'}, ${ALL_FACILITIES.find((f) => f.slug === renting.slug)?.region ?? 'TX'} ${ALL_FACILITIES.find((f) => f.slug === renting.slug)?.zip ?? ''}`.trim(),
+            phone: PHONE.display,
+            tel: `tel:${PHONE.tel}`,
+          }}
+          space={{ size: renting.size, price: renting.price, category: renting.category }}
+          onAccount
+          onClose={() => setRenting(null)}
+        />
+      )}
     </div>
   )
 }
