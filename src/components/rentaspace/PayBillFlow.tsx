@@ -44,6 +44,7 @@ type Account = {
   periodStart: string | null
   periodEnd: string | null
   pastDue: boolean
+  autopayOn: boolean
 }
 
 // The API mixes "YYYY-MM-DD" and "YYYY-MM-DD HH:MM:SS"; keep the date part and
@@ -401,7 +402,7 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
                   >
                     <span className="flex items-center gap-2 text-[0.8125rem] font-bold text-warm-white">
                       <CalendarClock className="h-4 w-4 shrink-0 text-orange" aria-hidden />
-                      Due dates &amp; late fees
+                      Due dates, autopay &amp; fees
                     </span>
                     <ChevronDown className={`h-4 w-4 shrink-0 text-warm-white/50 transition-transform duration-200 ${showFees ? 'rotate-180' : ''}`} aria-hidden />
                   </button>
@@ -420,7 +421,24 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
                           </div>
                         ))}
                       </dl>
-                      <p className="mt-3 text-[0.75rem] leading-relaxed text-warm-white/50">Rent is due on the same day each month — the date your lease started.</p>
+                      <p className="mt-3 text-[0.75rem] leading-relaxed text-warm-white/50">Rent is due on the same day each month.</p>
+
+                      <p className="mt-4 border-t border-warm-white/[0.07] pt-4 text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Autopay</p>
+                      <dl className="mt-2 space-y-1.5">
+                        {accounts.map((a) => (
+                          <div key={a.leaseId} className="flex justify-between gap-3 text-[0.8125rem]">
+                            <dt className="text-warm-white/60">{spaceLabel(a)}</dt>
+                            <dd className={`shrink-0 text-right font-bold ${a.autopayOn ? 'text-sage-green' : 'text-warm-white/70'}`}>
+                              {a.autopayOn ? 'On' : 'Off'}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                      <p className="mt-2.5 text-[0.75rem] leading-relaxed text-warm-white/50">
+                        To turn autopay {accounts.every((a) => a.autopayOn) ? 'off' : 'on'}, or to change the card we keep on file, call{' '}
+                        <a href={facility.tel} className="font-bold text-orange underline-offset-4 hover:underline">{facility.phone}</a>{' '}
+                        — we can update it while you&rsquo;re on the line.
+                      </p>
 
                       <p className="mt-4 border-t border-warm-white/[0.07] pt-4 text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">If a payment is late</p>
                       <p className="mt-2 text-[0.8125rem] leading-relaxed text-warm-white/70">
@@ -447,7 +465,6 @@ export default function PayBillFlow({ facility, onClose }: { facility: { short?:
                       {fees.nsfFee != null && (
                         <p className="mt-3 text-[0.8125rem] leading-relaxed text-warm-white/70">A returned payment costs {money(fees.nsfFee)}.</p>
                       )}
-                      <p className="mt-3 text-[0.6875rem] leading-relaxed text-warm-white/35">From your facility&rsquo;s current fee schedule. Your signed rental agreement governs.</p>
                     </div>
                   )}
                 </div>

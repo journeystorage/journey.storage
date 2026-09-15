@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
         periodStart: m.periodStart ?? null,
         periodEnd: m.periodEnd ?? null,
         pastDue: !!m.pastDue,
+        autopayOn: !!m.autopayOn,
       })),
     })
   } catch {

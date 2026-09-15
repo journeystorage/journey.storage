@@ -49,6 +49,14 @@ export interface AccountMatch {
   periodStart?: string
   periodEnd?: string
   pastDue?: boolean
+  /**
+   * Whether this lease is enrolled in autopay. Hummingbird stores it as
+   * `auto_pay_after_billing_date` — 0 is off, a positive number is the day
+   * offset it charges on. Read-only: the edge API exposes no way to switch it
+   * on, off, or onto a different card (every route 404s, and deleting the
+   * autopay card is refused), so changes go through staff.
+   */
+  autopayOn?: boolean
 }
 
 interface LeaseDetail {
@@ -58,6 +66,7 @@ interface LeaseDetail {
   unit_id?: string
   rent?: number
   rent_paid_through?: string
+  auto_pay_after_billing_date?: number
 }
 interface UnitDetail {
   number?: string | number
@@ -127,6 +136,7 @@ export async function findLeasesByContact(contact: string): Promise<AccountMatch
         m.code = lz.code
         m.monthlyRent = lz.rent
         m.paidThrough = lz.rent_paid_through
+        m.autopayOn = (lz.auto_pay_after_billing_date ?? 0) > 0
         if (lz.rent_paid_through) {
           const d = new Date(`${String(lz.rent_paid_through).slice(0, 10)}T00:00`)
           if (!Number.isNaN(d.getTime())) {
