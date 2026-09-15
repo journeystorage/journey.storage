@@ -13,7 +13,7 @@ const csp = [
     "style-src 'self' 'unsafe-inline'",
     "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://ssl.google-analytics.com https://googleads.g.doubleclick.net https://www.googleadservices.com https://www.google.com",
     "connect-src 'self' https://www.google-analytics.com https://*.analytics.google.com https://*.google-analytics.com https://www.googletagmanager.com https://stats.g.doubleclick.net",
-    "frame-src https://www.googletagmanager.com https://td.doubleclick.net https://www.google.com",
+    "frame-src https://www.googletagmanager.com https://td.doubleclick.net https://www.google.com https://www.youtube-nocookie.com",
 ].join('; ')
 
 // Defense-in-depth headers applied to every route.
