@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { X, Check, ChevronLeft, ChevronRight, ShieldCheck, FileText, CreditCard, KeyRound } from 'lucide-react'
-import { formatCardNumber, formatExpiry, formatZip, cardDigits } from '@/lib/card-format'
+import { formatCardNumber, formatExpiry, formatZip, cardDigits, parseExpiry, expiryIsPast } from '@/lib/card-format'
 
 /**
  * PREVIEW-ONLY online move-in flow. Mirrors the real Nectar rental sequence
@@ -166,8 +166,11 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
     const parts = details.name.trim().split(/\s+/)
     const last = parts.length > 1 ? parts.pop()! : parts[0]
     const first = parts.join(' ') || details.name
-    const [mm = '', yyRaw = ''] = card.exp.split('/').map((s) => s.trim())
-    const yy = yyRaw.length === 2 ? `20${yyRaw}` : yyRaw
+    // MM/YY and MM/YYYY both have to survive intact — a mangled year reads as
+    // an expired card at the gateway and the renter just sees "declined".
+    const exp = parseExpiry(card.exp)
+    if (!exp) return false
+    const { mm, yyyy: yy } = exp
     try {
       const r = await fetch('/api/nectar/checkout/rent', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
         facility: facility.slug, unitId: hold.unitId, holdToken: hold.token, dossierToken: hold.dossierToken, spaceMixId: hold.spaceMixId, startDate: moveIn,
@@ -197,7 +200,7 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
     if (stepName === 'Your details') return !!details.name && /.+@.+\..+/.test(details.email) && details.phone.length >= 7 && !!details.address && !!details.city && !!details.state && !!details.zip && !!details.dob && !!details.dlNumber && details.dlState.length === 2 && !!details.dlExp && (!details.isBusiness || !!details.businessName)
     if (stepName === 'Protection') return !!planId
     if (stepName === 'Sign lease') return agree && signature.trim().length >= 3
-    if (stepName === 'Payment') return cardDigits(card.number).length >= 12 && cardDigits(card.exp).length === 4 && card.cvc.length >= 3
+    if (stepName === 'Payment') return cardDigits(card.number).length >= 12 && !!parseExpiry(card.exp) && !expiryIsPast(card.exp) && card.cvc.length >= 3
     return true
   }
   const next = async () => {
@@ -535,10 +538,13 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
               <div className="mt-7 space-y-3">
                 <input inputMode="numeric" autoComplete="cc-number" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })} className={FIELD} />
                 <div className="grid grid-cols-3 gap-3">
-                  <input inputMode="numeric" autoComplete="cc-exp" placeholder="MM/YY" value={card.exp} onChange={(e) => setCard({ ...card, exp: formatExpiry(e.target.value, card.exp) })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="cc-exp" maxLength={7} placeholder="MM/YY" value={card.exp} onChange={(e) => setCard({ ...card, exp: formatExpiry(e.target.value, card.exp) })} className={FIELD} />
                   <input inputMode="numeric" autoComplete="cc-csc" placeholder="CVC" value={card.cvc} onChange={(e) => setCard({ ...card, cvc: cardDigits(e.target.value).slice(0, 4) })} className={FIELD} />
                   <input inputMode="numeric" autoComplete="postal-code" placeholder="ZIP" value={card.zip} onChange={(e) => setCard({ ...card, zip: formatZip(e.target.value) })} className={FIELD} />
                 </div>
+                {expiryIsPast(card.exp) && (
+                  <p className="text-[0.8125rem] font-bold text-[#E8A87C]">That expiry date has passed — check the date on your card.</p>
+                )}
               </div>
               <div className="mt-4 flex items-center justify-between rounded-sm border border-warm-white/12 bg-warm-white/[0.03] p-4">
                 <span className="text-[0.9375rem] font-bold text-warm-white">Set up autopay <span className="font-normal text-warm-white/45">— never miss a payment</span></span>

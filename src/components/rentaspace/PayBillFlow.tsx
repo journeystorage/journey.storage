@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { facilities as ALL_FACILITIES, PHONE } from '@/lib/constants'
 import { X, Check, ChevronLeft, ChevronRight, ChevronDown, Search, Wallet, CreditCard, CalendarClock, PlusCircle, ShieldCheck } from 'lucide-react'
-import { formatCardNumber, formatExpiry, formatZip, cardDigits } from '@/lib/card-format'
+import { formatCardNumber, formatExpiry, formatZip, cardDigits, parseExpiry, expiryIsPast } from '@/lib/card-format'
 
 /**
  * Pay Bill — real tenant payment.
@@ -226,7 +226,7 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
     // Nothing owed anywhere: the button becomes a plain "Done".
     if (stepName === 'Balance') return payable.length === 0 || (chosen.length > 0 && amountDue > 0)
     if (stepName === 'Payment' && !payOnline) return false // the call CTA lives in the panel
-    if (stepName === 'Payment') return cardDigits(card.number).length >= 12 && cardDigits(card.exp).length === 4 && card.cvc.length >= 3 && !!billing.name && !!billing.address1 && !!billing.city && !!billing.state && !!billing.zip
+    if (stepName === 'Payment') return cardDigits(card.number).length >= 12 && !!parseExpiry(card.exp) && !expiryIsPast(card.exp) && card.cvc.length >= 3 && !!billing.name && !!billing.address1 && !!billing.city && !!billing.state && !!billing.zip
     return true
   }
 
@@ -304,8 +304,9 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
    */
   async function pay(): Promise<boolean> {
     if (!chosen.length) return false
-    const [mm = '', yyRaw = ''] = card.exp.split('/').map((s) => s.trim())
-    const yy = yyRaw.length === 2 ? `20${yyRaw}` : yyRaw
+    const exp = parseExpiry(card.exp)
+    if (!exp) { setPayError('Check the expiry date on your card.'); return false }
+    const { mm, yyyy: yy } = exp
     const cardPayload = { card_number: card.number.replace(/\s/g, ''), cvv2: card.cvc, exp_mo: mm, exp_yr: yy, name_on_card: billing.name, address: billing.address1, city: billing.city, state: billing.state, zip: billing.zip }
     const out: Array<{ leaseId: string; ok: boolean; error?: string }> = []
     for (const a of chosen) {
@@ -737,9 +738,12 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
               <div className="mt-6 space-y-3">
                 <input inputMode="numeric" autoComplete="cc-number" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })} className={FIELD} />
                 <div className="grid grid-cols-2 gap-3">
-                  <input inputMode="numeric" autoComplete="cc-exp" placeholder="MM/YY" value={card.exp} onChange={(e) => setCard({ ...card, exp: formatExpiry(e.target.value, card.exp) })} className={FIELD} />
+                  <input inputMode="numeric" autoComplete="cc-exp" maxLength={7} placeholder="MM/YY" value={card.exp} onChange={(e) => setCard({ ...card, exp: formatExpiry(e.target.value, card.exp) })} className={FIELD} />
                   <input inputMode="numeric" autoComplete="cc-csc" placeholder="CVC" value={card.cvc} onChange={(e) => setCard({ ...card, cvc: cardDigits(e.target.value).slice(0, 4) })} className={FIELD} />
                 </div>
+                {expiryIsPast(card.exp) && (
+                  <p className="text-[0.8125rem] font-bold text-[#E8A87C]">That expiry date has passed — check the date on your card.</p>
+                )}
                 <p className="pt-2 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-warm-white/40">Billing address</p>
                 <input placeholder="Cardholder name" value={billing.name} onChange={(e) => setBilling({ ...billing, name: e.target.value })} className={FIELD} />
                 <input placeholder="Street address" value={billing.address1} onChange={(e) => setBilling({ ...billing, address1: e.target.value })} className={FIELD} />
