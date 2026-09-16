@@ -255,6 +255,26 @@ export async function savePaymentMethod(leaseId: string, card: PayCard, autopay:
   return id
 }
 
+
+/**
+ * A card already stored on this lease matching the one being paid with, by
+ * brand-agnostic last four. Returns its payment-method id, or null when the
+ * card is genuinely new. Never throws — a failed lookup just means "store it".
+ */
+async function findStoredCard(leaseId: string, card: PayCard): Promise<string | null> {
+  const last4 = card.card_number.replace(/\D/g, '').slice(-4)
+  if (last4.length !== 4) return null
+  try {
+    const { data } = await nectarV2<{ paymentMethods?: Array<{ id?: string; card_end?: string }> }>(
+      `companies/${co()}/leases/${leaseId}/payment-methods`,
+    )
+    const hit = (data.paymentMethods ?? []).find((pm) => pm.card_end === last4 && pm.id)
+    return hit?.id ?? null
+  } catch {
+    return null
+  }
+}
+
 export interface PayResult {
   ok: boolean
   autopayOn: boolean
@@ -271,7 +291,11 @@ export interface PayResult {
  * the card has to be stored first.
  */
 export async function payLease(leaseId: string, amount: number, card: PayCard, autopay = false): Promise<PayResult> {
-  const paymentMethodId = await savePaymentMethod(leaseId, card, autopay)
+  // Reuse a card already on the lease rather than storing another copy.
+  // Storing unconditionally meant every failed attempt left a duplicate behind
+  // (one live lease collected four cards over three retries), which clutters
+  // the back office and makes it impossible to tell which card is real.
+  const paymentMethodId = (await findStoredCard(leaseId, card)) ?? (await savePaymentMethod(leaseId, card, autopay))
   const { data, requestId } = await nectarV2<{ payment_id?: string; message?: string }>(
     `companies/${co()}/leases/${leaseId}/payment`,
     { method: 'POST', body: { payment_amount: amount, payment_method_id: paymentMethodId } },
