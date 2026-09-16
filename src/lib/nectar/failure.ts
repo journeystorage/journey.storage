@@ -22,6 +22,9 @@ export type FailureKind =
   | 'provider_error'
   | 'misconfigured'
 
+/** What the customer was doing, so the copy reads correctly. */
+export type FailureSubject = 'rental' | 'payment'
+
 export interface Failure {
   kind: FailureKind
   /**
@@ -51,52 +54,61 @@ const PATTERNS: Array<{ re: RegExp; kind: FailureKind }> = [
   { re: /gateway|processor|merchant|acquirer|payment.?method|transaction/i, kind: 'processor_unavailable' },
 ]
 
-const COPY: Record<FailureKind, { message: string; retryCard: boolean; status: number }> = {
-  card_declined: {
-    message: 'Your bank declined the card. Nothing has been charged. Try a different card, or call your bank and try again.',
-    retryCard: true,
-    status: 402,
-  },
-  card_invalid: {
-    message: 'That card number wasn’t accepted. Check the digits and try again — nothing has been charged.',
-    retryCard: true,
-    status: 402,
-  },
-  card_expired: {
-    message: 'That card came back as expired. Check the expiry date, or use another card — nothing has been charged.',
-    retryCard: true,
-    status: 402,
-  },
-  space_unavailable: {
-    message: 'That space was taken while you were checking out. Nothing has been charged — pick another space and we’ll hold it for you.',
-    retryCard: false,
-    status: 409,
-  },
-  hold_expired: {
-    message: 'Your 15-minute hold on the space ran out before checkout finished. Nothing has been charged — start again and it will go through.',
-    retryCard: false,
-    status: 409,
-  },
-  duplicate_account: {
-    message: 'We already have an account under these details, so we couldn’t finish this online. Nothing has been charged — give us a call and we’ll add the space to your account.',
-    retryCard: false,
-    status: 409,
-  },
-  processor_unavailable: {
-    message: 'Our payment processor wouldn’t complete the charge. This is on our side, not your card, and nothing has been charged. Please call us and we’ll finish the rental over the phone.',
-    retryCard: false,
-    status: 502,
-  },
-  provider_error: {
-    message: 'Our storage system didn’t complete the rental. This is on our side, not your card, and nothing has been charged. Please call us and we’ll finish it over the phone.',
-    retryCard: false,
-    status: 502,
-  },
-  misconfigured: {
-    message: 'Online rentals are temporarily unavailable. Nothing has been charged — please call us and we’ll get you moved in.',
-    retryCard: false,
-    status: 503,
-  },
+const COPY = (what: FailureSubject): Record<FailureKind, { message: string; retryCard: boolean; status: number }> => {
+  // "we couldn't finish your rental" vs "we couldn't take your payment".
+  const failed = what === 'rental' ? 'complete your rental' : 'take your payment'
+  const ours = what === 'rental'
+    ? 'Our storage system didn’t complete the rental.'
+    : 'Our storage system wouldn’t accept the payment.'
+  return {
+    card_declined: {
+      message: 'Your bank declined the card. Nothing has been charged. Try a different card, or call your bank and try again.',
+      retryCard: true,
+      status: 402,
+    },
+    card_invalid: {
+      message: 'That card number wasn’t accepted. Check the digits and try again — nothing has been charged.',
+      retryCard: true,
+      status: 402,
+    },
+    card_expired: {
+      message: 'That card came back as expired. Check the expiry date, or use another card — nothing has been charged.',
+      retryCard: true,
+      status: 402,
+    },
+    space_unavailable: {
+      message: 'That space was taken while you were checking out. Nothing has been charged — pick another space and we’ll hold it for you.',
+      retryCard: false,
+      status: 409,
+    },
+    hold_expired: {
+      message: 'Your 15-minute hold on the space ran out before checkout finished. Nothing has been charged — start again and it will go through.',
+      retryCard: false,
+      status: 409,
+    },
+    duplicate_account: {
+      message: `We already have a card profile on this account, so we couldn’t ${failed} online. Nothing has been charged — please call us and we’ll take it over the phone.`,
+      retryCard: false,
+      status: 409,
+    },
+    processor_unavailable: {
+      message: `Our payment processor wouldn’t complete the charge. This is on our side, not your card, and nothing has been charged. Please call us and we’ll ${failed} over the phone.`,
+      retryCard: false,
+      status: 502,
+    },
+    provider_error: {
+      message: `${ours} This is on our side, not your card, and nothing has been charged. Please call us and we’ll ${failed} over the phone.`,
+      retryCard: false,
+      status: 502,
+    },
+    misconfigured: {
+      message: what === 'rental'
+        ? 'Online rentals are temporarily unavailable. Nothing has been charged — please call us and we’ll get you moved in.'
+        : 'Online payments are temporarily unavailable. Nothing has been charged — please call us and we’ll take your payment.',
+      retryCard: false,
+      status: 503,
+    },
+  }
 }
 
 /**
@@ -105,7 +117,11 @@ const COPY: Record<FailureKind, { message: string; retryCard: boolean; status: n
  * exact request. Card details are never in the error path, so nothing
  * sensitive is logged here.
  */
-export function classifyFailure(err: unknown, context: Record<string, unknown> = {}): Failure & { reference: string } {
+export function classifyFailure(
+  err: unknown,
+  context: Record<string, unknown> = {},
+  what: FailureSubject = 'rental',
+): Failure & { reference: string } {
   const ne = err instanceof NectarError ? err : null
   const text = [ne?.message, ne?.code, typeof ne?.detail === 'string' ? ne.detail : JSON.stringify(ne?.detail ?? ''), err instanceof Error ? err.message : String(err)]
     .filter(Boolean)
@@ -122,7 +138,7 @@ export function classifyFailure(err: unknown, context: Record<string, unknown> =
   }
 
   const reference = (ne?.requestId ?? '').slice(0, 8) || Math.random().toString(36).slice(2, 10)
-  console.error('[checkout] rental failed', {
+  console.error(`[checkout] ${what} failed`, {
     reference,
     kind,
     providerStatus: ne?.status,
@@ -132,7 +148,7 @@ export function classifyFailure(err: unknown, context: Record<string, unknown> =
     ...context,
   })
   return {
-    ...COPY[kind],
+    ...COPY(what)[kind],
     kind,
     reference,
     providerMessage: ne?.message ?? (err instanceof Error ? err.message : undefined),

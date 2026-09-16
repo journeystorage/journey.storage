@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { payLease, type PayCard } from '@/lib/nectar/account'
 import { classifyFailure } from '@/lib/nectar/failure'
+import { sendLeadNotification } from '@/lib/lead-email'
 
 interface PayBody {
   leaseId?: string
@@ -38,9 +39,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: res.ok, autopayOn: res.autopayOn, requestId: res.requestId ?? null })
   } catch (err) {
     // Same as the rental: say whether it was the card or us.
-    const f = classifyFailure(err, { route: 'account/pay', leaseId })
+    const f = classifyFailure(err, { route: 'account/pay', leaseId }, 'payment')
+    // Production logs aren't reachable from a dev machine, and a tenant who
+    // can't pay is a tenant who goes delinquent — so the provider's verbatim
+    // reason comes back with the response and also goes to staff by email.
+    await sendLeadNotification({
+      name: 'Pay Bill failure',
+      email: '',
+      formSource: 'paybill-failed',
+      message: [
+        'A TENANT COULD NOT PAY ONLINE — they may need a call back.',
+        '',
+        `Lease:     ${leaseId}`,
+        `Amount:    $${Number(amount).toFixed(2)}`,
+        `What we told them: ${f.message}`,
+        '',
+        '--- for the Tenant Inc ticket ---',
+        `Reference:        ${f.reference}`,
+        `Classified as:    ${f.kind}`,
+        `Provider status:  ${f.providerStatus ?? '(none)'}`,
+        `Provider message: ${f.providerMessage ?? '(none)'}`,
+      ].join('\n'),
+    }).catch(() => {})
     return NextResponse.json(
-      { error: f.message, kind: f.kind, retryCard: f.retryCard, reference: f.reference },
+      { error: f.message, kind: f.kind, retryCard: f.retryCard, reference: f.reference, detail: f.providerMessage ?? null },
       { status: f.status },
     )
   }

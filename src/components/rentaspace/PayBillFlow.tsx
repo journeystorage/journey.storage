@@ -165,6 +165,9 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
   const [renting, setRenting] = useState<{ slug: string; size: string; price: number; category: string | null } | null>(null)
   const [processing, setProcessing] = useState(false)
   const [payError, setPayError] = useState<string | null>(null)
+  // The provider's own words + reference, shown small under the error so a
+  // tenant on the phone — or we — can see what actually went wrong.
+  const [payDetail, setPayDetail] = useState<{ detail: string | null; reference: string | null } | null>(null)
 
   const stepName: StepName = STEPS[step]
   const payable = accounts.filter((a) => a.balance > 0)
@@ -313,6 +316,7 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
       try {
         const r = await fetch('/api/nectar/account/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ leaseId: a.leaseId, amount: a.balance, card: cardPayload }) })
         const j = await r.json()
+        if (!(r.ok && j.ok) && (j?.detail || j?.reference)) setPayDetail({ detail: j.detail ?? null, reference: j.reference ?? null })
         out.push(r.ok && j.ok ? { leaseId: a.leaseId, ok: true } : { leaseId: a.leaseId, ok: false, error: j.error ?? 'Payment declined.' })
       } catch {
         out.push({ leaseId: a.leaseId, ok: false, error: 'Connection problem.' })
@@ -333,7 +337,7 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
   const next = async () => {
     if (stepName === 'Account') { if (await lookup()) setStep(1); return }
     if (stepName === 'Payment') {
-      setProcessing(true); setPayError(null)
+      setProcessing(true); setPayError(null); setPayDetail(null)
       const ok = await pay()
       setProcessing(false)
       if (ok) setStep(3)
@@ -753,7 +757,18 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
                   <input inputMode="numeric" autoComplete="postal-code" placeholder="ZIP" value={billing.zip} onChange={(e) => setBilling({ ...billing, zip: formatZip(e.target.value) })} className={FIELD} />
                 </div>
               </div>
-              {payError && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3 text-[0.8125rem] font-bold text-[#E8A87C]">{payError} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
+              {payError && (
+                <div className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3" role="alert">
+                  <p className="text-[0.8125rem] font-bold leading-relaxed text-[#E8A87C]">{payError} <a href={facility.tel} className="underline">{facility.phone}</a></p>
+                  {(payDetail?.detail || payDetail?.reference) && (
+                    <p className="mt-2 break-words text-[0.6875rem] leading-relaxed text-warm-white/45">
+                      {payDetail.detail ? <>Details: {payDetail.detail}</> : null}
+                      {payDetail.detail && payDetail.reference ? ' · ' : null}
+                      {payDetail.reference ? <>Reference {payDetail.reference}</> : null}
+                    </p>
+                  )}
+                </div>
+              )}
               <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Secured by Tenant Payments. Your card is charged {money(amountDue)} and applied to {chosen.length > 1 ? 'the spaces above' : 'your account'}.</p>
             </div>
           )}
