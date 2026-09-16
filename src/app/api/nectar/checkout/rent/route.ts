@@ -146,6 +146,35 @@ export async function POST(req: NextRequest) {
     // different things from the renter, and the old single message told them
     // neither — while throwing away the only record of the real cause.
     const f = classifyFailure(err, { facility: cfg.slug, unitId, startDate })
+    // A failed online rental is a customer about to be lost, and production
+    // logs aren't reachable from a dev machine — so email staff the renter's
+    // details together with the provider's own words. They can finish the
+    // rental by phone, and we get the real cause without guessing.
+    const who = [tenant?.first, tenant?.last].filter(Boolean).join(' ') || 'Online renter'
+    await sendLeadNotification({
+      name: who,
+      email: tenant?.email ?? '',
+      phone: tenant?.phone,
+      formSource: 'rental-failed',
+      message: [
+        `ONLINE RENTAL FAILED — please call this person back.`,
+        ``,
+        `Renter:   ${who}${tenant?.email ? ` <${tenant.email}>` : ''}${tenant?.phone ? ` · ${tenant.phone}` : ''}`,
+        `Facility: ${cfg.displayName}`,
+        `Space:    ${body.spaceLabel ?? '(not recorded)'}`,
+        `Move-in:  ${startDate}`,
+        `Due today: $${(totalDue ?? 0).toFixed(2)}`,
+        ``,
+        `What we told them: ${f.message}`,
+        ``,
+        `--- for the Tenant Inc ticket ---`,
+        `Reference:        ${f.reference}`,
+        `Classified as:    ${f.kind}`,
+        `Provider status:  ${f.providerStatus ?? '(none)'}`,
+        `Provider message: ${f.providerMessage ?? '(none)'}`,
+        `Unit id:          ${unitId}`,
+      ].join('\n'),
+    }).catch(() => {})
     return NextResponse.json(
       { error: f.message, kind: f.kind, retryCard: f.retryCard, reference: f.reference },
       { status: f.status },

@@ -24,6 +24,13 @@ export type FailureKind =
 
 export interface Failure {
   kind: FailureKind
+  /**
+   * The provider's own message. Kept so a failure can be reported to staff by
+   * email — production logs aren't readable from here, and without this the
+   * real cause is lost the moment the request ends.
+   */
+  providerMessage?: string
+  providerStatus?: number
   /** What the customer reads. */
   message: string
   /** True when trying a different card is the fix — keeps them on the step. */
@@ -124,5 +131,11 @@ export function classifyFailure(err: unknown, context: Record<string, unknown> =
     providerDetail: ne?.detail,
     ...context,
   })
-  return { ...COPY[kind], kind, reference }
+  return {
+    ...COPY[kind],
+    kind,
+    reference,
+    providerMessage: ne?.message ?? (err instanceof Error ? err.message : undefined),
+    providerStatus: ne?.status,
+  }
 }
