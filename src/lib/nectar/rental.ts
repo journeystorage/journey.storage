@@ -148,7 +148,12 @@ export async function resolveBookableUnit(
   const tiers = (await getTiers(propertyId, group.id)).filter((t) => (t.vacant?.count ?? 0) > 0)
   if (!tiers.length) return null
   const dimMatch = (t: Tier) => want.width != null && want.length != null && Number(t.width) === want.width && Number(t.length) === want.length
-  const tier = tiers.find(dimMatch) ?? tiers[0]
+  // When a size was asked for, hold THAT size or nothing. Falling back to
+  // whatever tier happened to be first would quietly rent someone a different
+  // space at a different price than the one they chose.
+  const asked = want.width != null && want.length != null
+  const tier = asked ? tiers.find(dimMatch) : tiers[0]
+  if (!tier) return null
   const offers = await getOffers(propertyId, tier.tier_id)
   const offer = offers.find((o) => o.unit_id)
   if (!offer?.unit_id) return null

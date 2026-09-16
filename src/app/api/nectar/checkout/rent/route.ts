@@ -12,6 +12,7 @@ import { VERIFY_COOKIE, readSession } from '@/lib/account-verify'
 import { getContactBasics } from '@/lib/nectar/account'
 import { sendMoveInConfirmation } from '@/lib/move-in-email'
 import { sendLeadNotification } from '@/lib/lead-email'
+import { classifyFailure } from '@/lib/nectar/failure'
 
 interface RentBody {
   facility?: string
@@ -140,7 +141,14 @@ export async function POST(req: NextRequest) {
       documentUrl: result.documentUrl ?? null,
       status: result.status ?? null,
     })
-  } catch {
-    return NextResponse.json({ error: 'We could not complete the rental — please call us to finish.' }, { status: 502 })
+  } catch (err) {
+    // Say WHAT failed. A declined card and a provider outage need completely
+    // different things from the renter, and the old single message told them
+    // neither — while throwing away the only record of the real cause.
+    const f = classifyFailure(err, { facility: cfg.slug, unitId, startDate })
+    return NextResponse.json(
+      { error: f.message, kind: f.kind, retryCard: f.retryCard, reference: f.reference },
+      { status: f.status },
+    )
   }
 }

@@ -61,6 +61,8 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
   const [card, setCard] = useState({ number: '', exp: '', cvc: '', zip: '' })
   const [processing, setProcessing] = useState(false)
   const [payingMsg, setPayingMsg] = useState<string | null>(null)
+  // Why the commit failed, as classified by the server (card vs space vs us).
+  const [failure, setFailure] = useState<{ message: string; retryCard: boolean; reference: string | null } | null>(null)
   // ClickWrap Superlease disclosures from Hummingbird. null = still loading.
   const [disclosures, setDisclosures] = useState<Array<{ id: number; html: string }> | null>(null)
   // An existing tenant who proved they control their account. Only ever set
@@ -190,7 +192,12 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
       }) })
       const j = await r.json()
       if (r.ok && j.ok) { setRentResult({ gatePin: j.gatePin, leaseId: j.leaseId, unitNumber: j.unitNumber, documentUrl: j.documentUrl }); return true }
-    } catch { /* fall through to demo */ }
+      // The route classifies the failure — a declined card, a space that went,
+      // or a problem on our side — so pass that through instead of a shrug.
+      if (j?.error) setFailure({ message: j.error, retryCard: j.retryCard === true, reference: j.reference ?? null })
+    } catch {
+      setFailure({ message: 'We couldn’t reach our system to finish the rental. Nothing has been charged — please check your connection and try again, or call us.', retryCard: false, reference: null })
+    }
     return false
   }
 
@@ -224,7 +231,7 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
       setStep((s) => s + 1); return
     }
     if (stepName === 'Payment') {
-      setProcessing(true); setApiError(null)
+      setProcessing(true); setApiError(null); setFailure(null)
       if (real && realQuote) {
         // Staged reassurance while Tenant Payments charges the card and the
         // lease is created — a single long server call the customer must wait out.
@@ -246,7 +253,9 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
         clearInterval(tick)
         setPayingMsg(null)
         setProcessing(false)
-        if (!ok) { setApiError('We couldn’t complete your rental just now. Please try again, or call us to finish.'); return }
+        // submitRent has already set the specific reason; only fall back to a
+        // generic line if it somehow didn't.
+        if (!ok) { setFailure((f) => f ?? { message: 'We couldn’t complete your rental just now. Nothing has been charged — please try again, or call us to finish.', retryCard: false, reference: null }); return }
         setStep((s) => s + 1); return
       }
       // Demo/preview: no hold or no live quote → simulated confirmation.
@@ -553,6 +562,22 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
                 </span>
               </div>
               {apiError && <p className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-3 py-2.5 text-[0.8125rem] font-bold text-[#E8A87C]">{apiError} <a href={facility.tel} className="underline">{facility.phone}</a></p>}
+              {failure && (
+                <div className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3.5" role="alert">
+                  <p className="text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-[#E8A87C]">
+                    {failure.retryCard ? 'Card not accepted' : 'Rental not completed'}
+                  </p>
+                  <p className="mt-1.5 text-[0.875rem] font-bold leading-relaxed text-warm-white">{failure.message}</p>
+                  {!failure.retryCard && (
+                    <p className="mt-2 text-[0.8125rem] font-bold text-[#E8A87C]">
+                      <a href={facility.tel} className="underline">{facility.phone}</a>
+                    </p>
+                  )}
+                  {failure.reference && (
+                    <p className="mt-2 text-[0.6875rem] text-warm-white/45">Reference {failure.reference} — quote this if you call.</p>
+                  )}
+                </div>
+              )}
               {payingMsg && (
                 <div className="mt-4 rounded-sm border border-orange/40 bg-orange/[0.12] px-4 py-3.5" role="status" aria-live="polite">
                   <p className="flex items-center gap-2.5 text-[0.9375rem] font-bold text-warm-white">

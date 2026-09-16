@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { payLease, type PayCard } from '@/lib/nectar/account'
+import { classifyFailure } from '@/lib/nectar/failure'
 
 interface PayBody {
   leaseId?: string
@@ -35,7 +36,12 @@ export async function POST(req: NextRequest) {
     const res = await payLease(leaseId, amount, card, autopay === true)
     // Never echo card data.
     return NextResponse.json({ ok: res.ok, autopayOn: res.autopayOn, requestId: res.requestId ?? null })
-  } catch {
-    return NextResponse.json({ error: 'We couldn’t process your payment — please try again or call us.' }, { status: 502 })
+  } catch (err) {
+    // Same as the rental: say whether it was the card or us.
+    const f = classifyFailure(err, { route: 'account/pay', leaseId })
+    return NextResponse.json(
+      { error: f.message, kind: f.kind, retryCard: f.retryCard, reference: f.reference },
+      { status: f.status },
+    )
   }
 }
