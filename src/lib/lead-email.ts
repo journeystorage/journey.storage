@@ -54,6 +54,8 @@ const SOURCE_LABELS: Record<string, { subject: (name: string) => string; eyebrow
   'paybill-failed': { subject: () => 'Pay Bill payment FAILED', eyebrow: 'Pay Bill payment failed' },
   'paybill-paid': { subject: () => 'Pay Bill payment received', eyebrow: 'Pay Bill payment received' },
   'autopay-request': { subject: (n) => `Autopay requested — ${n}`, eyebrow: 'Autopay requested' },
+  'ops-alert': { subject: (n) => `Action needed — ${n}`, eyebrow: 'Action needed' },
+  'ops-digest': { subject: () => 'Daily summary', eyebrow: 'Daily summary' },
 }
 
 export async function sendLeadNotification(lead: LeadNotification): Promise<void> {
