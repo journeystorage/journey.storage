@@ -1,5 +1,9 @@
 # Map Generation Manual — Pitch Deck
 
+> **Retired.** The Granbury deck was deleted from the site and this manual's
+> components no longer exist in the repo. Kept only as a method reference for
+> building maps in a future deck.
+
 This document covers how to generate and maintain the maps used in the Granbury investor pitch deck.
 
 ---

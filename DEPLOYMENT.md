@@ -182,18 +182,17 @@ This is a known limitation of Hostinger shared hosting. Consider migrating to Ve
 
 ---
 
-## Pitch Deck PDF — Generated Client-Side
+## Granbury Investor Deck — Deleted
 
-The Granbury pitch deck's **Download PDF** button generates the PDF **in the
-browser at click time** via `html2canvas-pro` + `jspdf` (see
-`apps/investors/src/app/deck/granbury/DeckNav.tsx`). Both libraries are
-dynamically imported only on click, so they're not in the initial bundle.
+The deck at `direct.journey.storage/deck/granbury` was **deleted** once the
+raise closed and the investment was funded. The route, its PDF export script,
+and its deck-only images are gone; the URL 404s.
 
-There is **no pre-committed PDF** anymore. The previous ~23 MB static PDFs in
-`apps/investors/public/deck/` were unreferenced dead weight (nothing served
-them) and have been removed to shrink the investors deploy artifact. Do **not**
-re-add pre-generated PDFs unless you also switch the button back to serving a
-static file — don't keep both mechanisms.
+`granbury-2.jpg` stays in `apps/investors/public/images/deals/granbury/` — the
+public homepage deal card still uses it.
+
+> **Do not restore this route.** Its URL was circulated. If a future deal needs
+> a web deck, build it at a new path behind real authentication.
 
 ---
 
