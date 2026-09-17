@@ -314,11 +314,15 @@ export async function enableAutopay(leaseId: string, card: PayCard): Promise<{ o
  * The contact behind an email/phone, for the ownership check. Returns the id we
  * address the code to and the email it goes to — never surfaced to the browser.
  */
-export async function findContactFor(contact: string): Promise<{ contactId: string; email: string; name: string } | null> {
+export async function findContactFor(
+  contact: string,
+): Promise<{ contactId: string; email: string; name: string; matches: AccountMatch[] } | null> {
   const matches = await findLeasesByContact(contact)
   const hit = matches.find((m) => m.contactId && m.contactEmail)
   if (!hit?.contactId || !hit.contactEmail) return null
-  return { contactId: hit.contactId, email: hit.contactEmail, name: hit.name }
+  // `matches` rides along so callers don't pay for a second full tenant scan
+  // (it pages every active tenant) just to report what the tenant owes.
+  return { contactId: hit.contactId, email: hit.contactEmail, name: hit.name, matches }
 }
 
 

@@ -35,6 +35,23 @@ export async function POST(req: NextRequest) {
   if (!card.zip) return NextResponse.json({ error: 'A billing ZIP code is required.' }, { status: 400 })
   try {
     const res = await payLease(leaseId, amount, card, autopay === true)
+    // A tenant paying online is worth knowing about — and the ledger is the
+    // only trustworthy confirmation, so quote it rather than our own say-so.
+    await sendLeadNotification({
+      name: 'Pay Bill payment',
+      email: '',
+      formSource: 'paybill-paid',
+      message: [
+        `A tenant paid $${Number(amount).toFixed(2)} online.`,
+        '',
+        `Lease:   ${leaseId}`,
+        `Amount:  $${Number(amount).toFixed(2)}`,
+        `Autopay: ${res.autopayOn ? 'enrolled on this card' : 'not changed'}`,
+        '',
+        'Confirm it posted: the lease ledger should show a matching "payment" row',
+        'and the balance at 0. Our own success flag is not proof.',
+      ].join('\n'),
+    }).catch(() => {})
     // Never echo card data.
     return NextResponse.json({ ok: res.ok, autopayOn: res.autopayOn, requestId: res.requestId ?? null })
   } catch (err) {
