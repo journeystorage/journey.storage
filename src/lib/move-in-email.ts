@@ -20,6 +20,8 @@
 //   MOVE_IN_EMAIL_FROM   – sender (falls back to LEAD_NOTIFY_FROM, then resend.dev)
 //   MOVE_IN_NOTIFY_TO    – internal copy recipient (default: lyvia@journey.storage)
 
+import { brandedFrom } from './email-shell'
+
 const OWNER_INBOX = 'lyvia@journey.storage'
 const DEFAULT_FROM = 'Journey.Storage <onboarding@resend.dev>'
 const SITE = 'https://journey.storage'
@@ -92,11 +94,17 @@ function longDate(ymd: string): string {
 // Outlook ignores most non-inline CSS, so the mockup's classes are translated
 // property-for-property onto the elements.
 
-const FONT = "'Lato',-apple-system,'Segoe UI',Arial,sans-serif"
+// Work Sans for everything read; Montserrat is the only sanctioned fallback
+// (Brand Guide v2 — Lato is logo artwork only, and never a serif).
+const FONT = "'Work Sans',Montserrat,sans-serif"
+const DISPLAY_FONT = "'Barlow Condensed','Work Sans',Montserrat,sans-serif"
 const INK = '#181818'
-const ORANGE = '#E8622A'
+const ORANGE = '#FF6320'
+// Plain orange type on a light ground is 2.62:1 and FAILS; Blaze 700 is 4.90:1.
+// Orange stays for fills and rules only.
+const ORANGE_INK = '#B34516'
 const WARM = '#F5F0E8'
-const STONE = '#8A857B'
+const STONE = '#888680'
 const LINE = '#ece7dd'
 const MUTED = '#6f6a60'
 
@@ -106,7 +114,7 @@ const CHECK_SVG = (color: string, size: number) =>
 function eyebrow(label: string): string {
   return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 14px"><tr>
     <td style="width:26px;border-top:1px solid ${ORANGE};font-size:0;line-height:0">&nbsp;</td>
-    <td style="padding-left:10px;font-family:${FONT};font-size:11px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:${ORANGE}">${label}</td>
+    <td style="padding-left:10px;font-family:${FONT};font-size:11px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:${ORANGE_INK}">${label}</td>
   </tr></table>`
 }
 
@@ -124,7 +132,7 @@ function badge(label: string): string {
 function nextStep(n: number, title: string, detail: string, last = false): string {
   return `<tr>
     <td style="width:44px;padding:12px 0;border-bottom:${last ? '0' : '1px solid #f2eee6'};vertical-align:top">
-      <span style="display:inline-block;width:30px;height:30px;border-radius:50%;background:rgba(232,98,42,.12);color:${ORANGE};font-family:${FONT};font-weight:900;font-size:14px;line-height:30px;text-align:center">${n}</span>
+      <span style="display:inline-block;width:30px;height:30px;border-radius:50%;background:rgba(255,99,32,.12);color:${ORANGE_INK};font-family:${FONT};font-weight:900;font-size:14px;line-height:30px;text-align:center">${n}</span>
     </td>
     <td style="padding:12px 0;border-bottom:${last ? '0' : '1px solid #f2eee6'};vertical-align:top">
       <div style="font-family:${FONT};font-size:14.5px;font-weight:700;color:${INK};margin:3px 0 2px">${title}</div>
@@ -185,13 +193,13 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
     nextStep(
       pin ? 2 : 1,
       'Manage everything online',
-      `View payments, update your card, or move out from <a href="${SITE}/rentaspace" style="color:${ORANGE};font-weight:700;text-decoration:none">journey.storage</a> &mdash; no phone call needed.`,
+      `View payments, update your card, or move out from <a href="${SITE}/rentaspace" style="color:${ORANGE_INK};font-weight:700;text-decoration:none">journey.storage</a> &mdash; no phone call needed.`,
     ),
     nextStep(
       pin ? 3 : 2,
       'Keep your lease handy',
       docUrl
-        ? `Your signed rental agreement is ready &mdash; <a href="${docUrl}" style="color:${ORANGE};font-weight:700;text-decoration:none">download it here (PDF)</a>.`
+        ? `Your signed rental agreement is ready &mdash; <a href="${docUrl}" style="color:${ORANGE_INK};font-weight:700;text-decoration:none">download it here (PDF)</a>.`
         : `Your signed rental agreement is on file &mdash; call us any time for a copy.`,
       true,
     ),
@@ -199,15 +207,16 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
 
   const html = `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${subject}</title></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${subject}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Work+Sans:ital,wght@0,400;0,600;1,300&display=swap"></head>
 <body style="margin:0;padding:0;background:#e9e5dc">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e9e5dc"><tr><td align="center" style="padding:28px 16px 56px">
 
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#FBF8F2;border-radius:16px;overflow:hidden">
 
   <!-- masthead -->
-  <tr><td bgcolor="#181818" style="background:${INK} radial-gradient(120% 160% at 100% -10%, rgba(232,98,42,.22), transparent 55%);padding:22px 32px">
-    <span style="font-family:${FONT};font-weight:900;font-size:20px;letter-spacing:.02em;color:${WARM}"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${ORANGE};margin-right:9px"></span>JOURNEY<span style="color:#b7b2a8;font-weight:700">.STORAGE</span><span style="font-size:10px;vertical-align:super;color:${STONE}">&trade;</span></span>
+  <tr><td bgcolor="#181818" style="background:${INK} radial-gradient(120% 160% at 100% -10%, rgba(255,99,32,.22), transparent 55%);padding:22px 32px">
+    <img src="${SITE}/images/brand/email-wordmark-white.png" alt="JOURNEY.STORAGE&trade;" width="200" height="15" style="display:block;width:200px;height:auto;border:0;outline:none;text-decoration:none">
   </td></tr>
 
   <!-- hero -->
@@ -237,7 +246,7 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${receiptRows}</table>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;border-top:1px solid ${LINE}"><tr>
         <td style="padding-top:13px;font-family:${FONT};font-size:15px;font-weight:900;color:${INK}">Paid today</td>
-        <td align="right" style="padding-top:13px;font-family:${FONT};font-size:22px;font-weight:900;color:${ORANGE}">${money(data.totalDue)}</td>
+        <td align="right" style="padding-top:13px;font-family:${FONT};font-size:22px;font-weight:900;color:${ORANGE_INK}">${money(data.totalDue)}</td>
       </tr></table>
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:14px"><tr>${badges}</tr></table>
     </td></tr></table>
@@ -251,13 +260,13 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
 
   <!-- CTA -->
   <tr><td align="center" style="padding:6px 32px 30px">
-    <a href="${SITE}/rentaspace" style="display:inline-block;background:${ORANGE};color:#ffffff;text-decoration:none;font-family:${FONT};font-weight:900;font-size:15px;letter-spacing:.01em;padding:15px 34px;border-radius:6px">Manage my account</a>
-    <p style="margin:14px 0 0;font-family:${FONT};font-size:13px;color:${STONE}">Questions? Call us at <a href="${PHONE_TEL}" style="color:${ORANGE};font-weight:700;text-decoration:none">${PHONE_DISPLAY}</a> &mdash; Mon&ndash;Fri 8:30&ndash;5, Sat 8:30&ndash;3.</p>
+    <a href="${SITE}/rentaspace" style="display:inline-block;background:${ORANGE};color:${INK};text-decoration:none;font-family:${FONT};font-weight:900;font-size:15px;letter-spacing:.01em;padding:15px 34px;border-radius:6px">Manage my account</a>
+    <p style="margin:14px 0 0;font-family:${FONT};font-size:13px;color:${STONE}">Questions? Call us at <a href="${PHONE_TEL}" style="color:${ORANGE_INK};font-weight:700;text-decoration:none">${PHONE_DISPLAY}</a> &mdash; Mon&ndash;Fri 8:30&ndash;5, Sat 8:30&ndash;3.</p>
   </td></tr>
 
   <!-- footer -->
   <tr><td align="center" style="background:${INK};padding:30px 32px">
-    <div style="font-family:${FONT};font-weight:900;font-size:15px;color:${WARM};letter-spacing:.02em"><span style="display:inline-block;width:7px;height:7px;border-radius:2px;background:${ORANGE};margin-right:7px"></span>JOURNEY.STORAGE&trade;</div>
+    <img src="${SITE}/images/brand/email-wordmark-white.png" alt="JOURNEY.STORAGE&trade;" width="164" height="12" style="display:inline-block;width:164px;height:auto;border:0;outline:none;text-decoration:none">
     <p style="margin:10px auto 0;max-width:380px;font-family:${FONT};font-size:12.5px;line-height:1.6;color:#a49e93">Clean, secure, month-to-month self storage in Granbury, TX.<br>212 Temple Hall Hwy &middot; 409 Western Hills Trl &middot; 3501 McCreary Rd</p>
     <p style="margin:16px auto 0;font-family:${FONT};font-size:11.5px;line-height:1.6;color:#77726a">Formerly Granbury Self Storage &middot; You received this because you rented a space online.<br>&copy; ${new Date().getFullYear()} Journey Storage 001, LLC</p>
   </td></tr>
@@ -281,7 +290,7 @@ export async function sendMoveInConfirmation(data: MoveInEmailData): Promise<voi
     return
   }
 
-  const from = process.env.MOVE_IN_EMAIL_FROM || process.env.LEAD_NOTIFY_FROM || DEFAULT_FROM
+  const from = brandedFrom(process.env.MOVE_IN_EMAIL_FROM || process.env.LEAD_NOTIFY_FROM || DEFAULT_FROM)
   const ownerInbox = process.env.MOVE_IN_NOTIFY_TO || OWNER_INBOX
   const verifiedSender = !/@resend\.dev/i.test(from)
 

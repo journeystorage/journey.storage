@@ -6,28 +6,33 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { findContactFor } from '@/lib/nectar/account'
 import { canSend, codeFor, currentWindow, maskEmail } from '@/lib/account-verify'
+import { emailShell, brandedFrom, p, label, panel, BRAND } from '@/lib/email-shell'
 
 async function sendCode(to: string, name: string, code: string): Promise<boolean> {
   const key = process.env.RESEND_API_KEY
   if (!key) return false
-  const from = process.env.LEAD_NOTIFY_FROM || 'Journey Storage <onboarding@resend.dev>'
+  const from = brandedFrom(process.env.LEAD_NOTIFY_FROM)
   const first = (name || '').split(' ')[0] || 'there'
-  const html = `<!doctype html><html><body style="margin:0;background:#F5F0E8;font-family:Lato,Helvetica,Arial,sans-serif;color:#181818">
-<div style="max-width:520px;margin:0 auto;padding:32px 24px">
-  <div style="border-top:4px solid #E8622A;background:#181818;color:#F5F0E8;padding:18px 22px;font-weight:900;letter-spacing:-.02em">JOURNEY<span style="color:#E8622A">.</span>STORAGE</div>
-  <div style="background:#fff;padding:28px 24px;box-shadow:0 1px 2px rgba(24,24,24,.06)">
-    <p style="margin:0 0 14px;font-size:15px;line-height:1.6">Hi ${first},</p>
-    <p style="margin:0 0 20px;font-size:15px;line-height:1.6">Here is your verification code for your Journey Storage account:</p>
-    <p style="margin:0 0 20px;font-size:34px;font-weight:900;letter-spacing:.18em;color:#E8622A">${code}</p>
-    <p style="margin:0 0 8px;font-size:13px;line-height:1.6;color:#3A3835">It expires in about 15 minutes and can only be used on your account.</p>
-    <p style="margin:0;font-size:13px;line-height:1.6;color:#8A857B">If you didn't request this, you can ignore this email — nothing has changed on your account.</p>
-  </div>
-</div></body></html>`
+  const html = emailShell({
+    preheader: `Your Journey.Storage code: ${code}`,
+    eyebrow: 'Your account',
+    heading: 'Here’s your verification code',
+    bodyHtml:
+      p(`Hi ${first},`) +
+      p('Use this code to sign in and see your balance. It works for about 15 minutes, and only on your account.') +
+      panel(
+        label('Verification code') +
+        `<p style="margin:0;font-family:'Barlow Condensed','Work Sans',Montserrat,sans-serif;font-weight:700;font-size:40px;line-height:1.1;letter-spacing:.18em;color:${BRAND.orange700}">${code}</p>`,
+      ) +
+      p('Didn’t ask for this? You can ignore it — nothing on your account has changed.', { muted: true, small: true }),
+    footNote: 'We’ll never ask for your card details by email or text.',
+    slogan: false,
+  })
   try {
     const r = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from, to, subject: `Your Journey Storage code: ${code}`, html }),
+      body: JSON.stringify({ from, to, subject: `Your Journey.Storage code: ${code}`, html }),
     })
     return r.ok
   } catch {

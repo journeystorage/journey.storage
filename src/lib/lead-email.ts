@@ -14,6 +14,8 @@
 //                        switch to e.g. "Journey Storage <notify@journey.storage>"
 //                        once journey.storage is verified in Resend)
 
+import { emailShell, brandedFrom, p, label, panel, rows } from './email-shell'
+
 export type LeadNotification = {
   name: string
   email: string
@@ -40,13 +42,6 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;')
 }
 
-function row(label: string, value?: string): string {
-  if (!value) return ''
-  return `<tr>
-    <td style="padding:6px 16px 6px 0;color:#6b6b6b;font:600 13px/1.5 system-ui,sans-serif;white-space:nowrap;vertical-align:top">${label}</td>
-    <td style="padding:6px 0;color:#111;font:400 14px/1.6 system-ui,sans-serif">${escapeHtml(value)}</td>
-  </tr>`
-}
 
 export async function sendLeadNotification(lead: LeadNotification): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY
@@ -56,7 +51,7 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
     return
   }
 
-  const from = process.env.LEAD_NOTIFY_FROM || DEFAULT_FROM
+  const from = brandedFrom(process.env.LEAD_NOTIFY_FROM || DEFAULT_FROM)
   const ownerInbox = process.env.LEAD_NOTIFY_TO || DEFAULT_TO
 
   // Resend only delivers to the account-owner inbox (lyvia@) until
@@ -85,17 +80,26 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
   const subject = lead.subject || `New Contact Us submission — ${lead.name}`
   const eyebrow = isMoveout ? 'Move-out request' : 'New contact'
 
-  const html = `<div style="max-width:560px;margin:0 auto;padding:24px;background:#fff">
-    <p style="margin:0 0 4px;color:#e0531f;font:700 12px/1.4 system-ui,sans-serif;letter-spacing:.12em;text-transform:uppercase">${eyebrow}</p>
-    <h1 style="margin:0 0 20px;color:#111;font:800 22px/1.3 system-ui,sans-serif">${escapeHtml(lead.name)}</h1>
-    <table style="border-collapse:collapse;width:100%">
-      ${row('Email', lead.email)}
-      ${row('Phone', lead.phone)}
-      ${row('ZIP', lead.zip)}
-      ${row('Message', lead.message)}
-      ${row('Source', lead.formSource)}
-    </table>
-  </div>`
+  // Same branded frame as everything else we send — these land in staff
+  // inboxes, and consistency is what makes the brand read as one company.
+  const html = emailShell({
+    preheader: subject,
+    eyebrow,
+    heading: escapeHtml(lead.name),
+    bodyHtml: panel(
+      rows(
+        ([
+          ['Email', lead.email],
+          ['Phone', lead.phone],
+          ['ZIP', lead.zip],
+          ['Source', lead.formSource],
+        ] as Array<[string, string | undefined]>)
+          .filter((r): r is [string, string] => !!r[1])
+          .map(([k, v]) => [k, escapeHtml(v)] as [string, string]),
+      ),
+    ) + (lead.message ? label('Message') + p(escapeHtml(lead.message).replace(/\n/g, '<br>')) : ''),
+    slogan: false,
+  })
 
   const text = [
     `New Contact Us submission`,
@@ -155,7 +159,7 @@ async function sendSupportCopy(opts: {
   if (!key) return
   const to = process.env.SUPPORT_NOTIFY_TO || 'support@journey.storage'
   // The support account is unverified, so it must send from a resend.dev address.
-  const from = process.env.SUPPORT_NOTIFY_FROM || 'Journey.Storage <onboarding@resend.dev>'
+  const from = brandedFrom(process.env.SUPPORT_NOTIFY_FROM)
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
