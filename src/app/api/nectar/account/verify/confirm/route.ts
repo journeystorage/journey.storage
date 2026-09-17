@@ -35,6 +35,11 @@ export async function POST(req: NextRequest) {
       email: found.email,
       phone: undefined,
       formSource: 'paybill-signin',
+      // The amount belongs in the subject — this is a call-back list, and it
+      // should be triageable from the inbox without opening anything.
+      subject: owing.length
+        ? `Pay Bill sign-in — ${found.name} owes ${money(total)}`
+        : `Pay Bill sign-in — ${found.name} (paid up)`,
       message: [
         owing.length
           ? `${found.name} signed in to Pay Bill and owes ${money(total)}.`

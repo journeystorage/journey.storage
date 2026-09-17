@@ -156,6 +156,7 @@ export async function POST(req: NextRequest) {
       email: tenant?.email ?? '',
       phone: tenant?.phone,
       formSource: 'rental-failed',
+      subject: `Online rental FAILED — ${who} at ${cfg.displayName}`,
       message: [
         `ONLINE RENTAL FAILED — please call this person back.`,
         ``,

@@ -43,6 +43,19 @@ function escapeHtml(value: string): string {
 }
 
 
+
+/**
+ * How each automated notice titles itself. Anything not listed keeps the
+ * generic contact-form wording, which is correct for the actual contact form.
+ */
+const SOURCE_LABELS: Record<string, { subject: (name: string) => string; eyebrow: string }> = {
+  'rental-failed': { subject: (n) => `Online rental FAILED — ${n}`, eyebrow: 'Online rental failed' },
+  'paybill-signin': { subject: (n) => `Pay Bill sign-in — ${n}`, eyebrow: 'Pay Bill sign-in' },
+  'paybill-failed': { subject: () => 'Pay Bill payment FAILED', eyebrow: 'Pay Bill payment failed' },
+  'paybill-paid': { subject: () => 'Pay Bill payment received', eyebrow: 'Pay Bill payment received' },
+  'autopay-request': { subject: (n) => `Autopay requested — ${n}`, eyebrow: 'Autopay requested' },
+}
+
 export async function sendLeadNotification(lead: LeadNotification): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
@@ -76,9 +89,13 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
         .filter((addr, i, arr) => arr.findIndex((a) => a.toLowerCase() === addr.toLowerCase()) === i)
     : []
 
+  // Every automated notice used to arrive titled "New Contact Us submission",
+  // which made a failed rental look like a web enquiry. Each source now says
+  // what it actually is, in the subject line and in the email's own eyebrow.
+  const known = SOURCE_LABELS[lead.formSource]
   const isMoveout = lead.formSource.includes('moveout')
-  const subject = lead.subject || `New Contact Us submission — ${lead.name}`
-  const eyebrow = isMoveout ? 'Move-out request' : 'New contact'
+  const subject = lead.subject || known?.subject(lead.name) || `New Contact Us submission — ${lead.name}`
+  const eyebrow = known?.eyebrow ?? (isMoveout ? 'Move-out request' : 'New contact')
 
   // Same branded frame as everything else we send — these land in staff
   // inboxes, and consistency is what makes the brand read as one company.

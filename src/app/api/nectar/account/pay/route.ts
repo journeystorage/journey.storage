@@ -38,9 +38,10 @@ export async function POST(req: NextRequest) {
     // A tenant paying online is worth knowing about — and the ledger is the
     // only trustworthy confirmation, so quote it rather than our own say-so.
     await sendLeadNotification({
-      name: 'Pay Bill payment',
+      name: `Payment of $${Number(amount).toFixed(2)} received`,
       email: '',
       formSource: 'paybill-paid',
+      subject: `Pay Bill payment received — $${Number(amount).toFixed(2)}`,
       message: [
         `A tenant paid $${Number(amount).toFixed(2)} online.`,
         '',
@@ -61,9 +62,10 @@ export async function POST(req: NextRequest) {
     // can't pay is a tenant who goes delinquent — so the provider's verbatim
     // reason comes back with the response and also goes to staff by email.
     await sendLeadNotification({
-      name: 'Pay Bill failure',
+      name: `Payment of $${Number(amount).toFixed(2)} could not be taken`,
       email: '',
       formSource: 'paybill-failed',
+      subject: `Pay Bill payment FAILED — $${Number(amount).toFixed(2)}`,
       message: [
         'A TENANT COULD NOT PAY ONLINE — they may need a call back.',
         '',
