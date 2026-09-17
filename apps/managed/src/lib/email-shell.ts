@@ -44,7 +44,19 @@ const DISPLAY_FONT = "'Barlow Condensed','Work Sans',Montserrat,sans-serif"
  */
 export function brandedFrom(raw: string | undefined, fallbackAddress = 'onboarding@resend.dev'): string {
   const address = (raw?.match(/<([^>]+)>/)?.[1] ?? (raw?.includes('@') ? raw : '') ?? '').trim() || fallbackAddress
-  return `"${SENDER_NAME}" <${address}>`
+  return `${encodeDisplayName(SENDER_NAME)} <${address}>`
+}
+
+/**
+ * A display name safe for a mail header. The ™ is non-ASCII, and a raw
+ * high-byte display name is rejected by some senders, so encode it as an
+ * RFC 2047 encoded-word — which mail clients decode back to JOURNEY.STORAGE™.
+ * Pure-ASCII names are just quoted.
+ */
+function encodeDisplayName(name: string): string {
+  // eslint-disable-next-line no-control-regex
+  if (!/[^\x00-\x7F]/.test(name)) return `"${name}"`
+  return `=?UTF-8?B?${Buffer.from(name, 'utf8').toString('base64')}?=`
 }
 
 export interface ShellOptions {

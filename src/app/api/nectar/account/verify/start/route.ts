@@ -34,8 +34,15 @@ async function sendCode(to: string, name: string, code: string): Promise<boolean
       headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ from, to, subject: `Your Journey.Storage code: ${code}`, html }),
     })
+    if (!r.ok) {
+      // Resend's rejection text names the cause (unverified domain, bad
+      // sender, rate limit). Without this the failure is invisible in prod.
+      const detail = await r.text().catch(() => '')
+      console.error('[verify] code send rejected', { status: r.status, from, detail: detail.slice(0, 400) })
+    }
     return r.ok
-  } catch {
+  } catch (e) {
+    console.error('[verify] code send threw', e)
     return false
   }
 }
