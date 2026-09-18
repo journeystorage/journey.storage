@@ -40,11 +40,6 @@ us rather than verified. It was wrong three times this week — A083 (collected
 a day later), B210 and Clifford Bishop (never collected). Deliberately parked,
 2026-09-18.
 
-**Replace the retired logo SVGs.** `public/images/brand/logo-*.svg` are the
-retired grey artwork with an off-brand orange (`#e96b30`). Corrected v2 files
-exist at `mockups/assets/manual/`. The emails use corrected PNGs already; the
-website itself still uses the old SVGs.
-
 **Root SPF and DMARC.** journey.storage has neither, which affects mail sent by
 hand from Google Workspace. Resend's own records are done and verified.
 
@@ -68,11 +63,19 @@ hand from Google Workspace. Resend's own records are done and verified.
 
 ---
 
+## Not to do
+
+**Do not replace or recolour the logo files.** Brand Guide v3.0 locks them and
+the orange (`#E8622A`). This was listed here as "ready to build" from the
+superseded v2 guide — acting on it is what got reverted on 2026-09-18.
+
+---
+
 ## Done (for reference)
 
 - Daily ops sweep + GitHub Actions schedule, urgent alerts and a daily digest
 - People signals: abandoned checkouts, unused sign-in codes, repeated card failures
-- Branded email frame across every system; JOURNEY.STORAGE™ sender
+- Every email on Brand Guide v3.0 — Lato, locked logo and orange; JOURNEY.STORAGE™ sender
 - Resend domain verified, so tenant emails actually reach tenants
 - One-time Pay Bill sign-in; rental and Pay Bill sessions fully separated
 - Card field formatting, and the expiry-truncation bug that broke live rentals
