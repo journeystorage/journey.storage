@@ -1,0 +1,38 @@
+# Daily operational sweep.
+#
+# Runs the checks over every active lease and emails what needs acting on.
+# GitHub is deliberately the trigger rather than anything inside the app: if
+# our own email is broken, this job fails and GitHub notifies through a channel
+# that does not depend on it — which is the only way an email outage is
+# detectable at all.
+name: Daily ops sweep
+
+on:
+  schedule:
+    # 13:00 UTC = 8am Central (9am during standard time). Cron here is UTC only.
+    - cron: '0 13 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run the sweep
+        env:
+          OPS_TOKEN: ${{ secrets.OPS_TOKEN }}
+        run: |
+          if [ -z "$OPS_TOKEN" ]; then
+            echo "OPS_TOKEN secret is not set — add it in Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          # The sweep reads every lease, so give it room.
+          code=$(curl -sS --max-time 600 -o response.json -w '%{http_code}' \
+            -H "x-ops-token: $OPS_TOKEN" \
+            https://journey.storage/api/ops/sweep)
+          echo "HTTP $code"
+          cat response.json
+          echo
+          if [ "$code" != "200" ]; then
+            echo "::error::The daily sweep failed (HTTP $code). Alert emails may not have been sent."
+            exit 1
+          fi
