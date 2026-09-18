@@ -69,9 +69,24 @@ export function newLeaseWithoutAutopay(all: LeaseSnapshot[]): Finding | null {
   }
 }
 
-/** A space rented for nothing. */
+/**
+ * Tenants who legitimately occupy a space at no charge: house accounts, and
+ * the previous owner while she moves out. Without this the check would nag
+ * every single day about something nobody intends to fix. Override with
+ * OPS_ZERO_RENT_IGNORE as a comma-separated list of names.
+ */
+const zeroRentIgnored = (): string[] =>
+  (process.env.OPS_ZERO_RENT_IGNORE ?? 'GRANBURY SELF STORAGE,TRACY BOLT')
+    .split(',')
+    .map((n) => n.trim().toLowerCase())
+    .filter(Boolean)
+
+/** A space rented for nothing, excluding the ones we mean to be free. */
 export function zeroRent(all: LeaseSnapshot[], floor = 1): Finding | null {
-  const hits = all.filter((s) => s.rent < floor)
+  const ignored = zeroRentIgnored()
+  const hits = all.filter(
+    (s) => s.rent < floor && !ignored.some((n) => s.name.toLowerCase().includes(n)),
+  )
   if (!hits.length) return null
   return {
     severity: 'urgent',
