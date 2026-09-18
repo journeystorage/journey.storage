@@ -20,7 +20,7 @@
 //   MOVE_IN_EMAIL_FROM   – sender (falls back to LEAD_NOTIFY_FROM, then resend.dev)
 //   MOVE_IN_NOTIFY_TO    – internal copy recipient (default: lyvia@journey.storage)
 
-import { brandedFrom } from './email-shell'
+import { brandedFrom, emailShell, p, section, miniList, rows, panel, pills, steps, link, heroFigure } from './email-shell'
 
 const OWNER_INBOX = 'lyvia@journey.storage'
 const DEFAULT_FROM = 'Journey.Storage <onboarding@resend.dev>'
@@ -94,58 +94,12 @@ function longDate(ymd: string): string {
 // Outlook ignores most non-inline CSS, so the mockup's classes are translated
 // property-for-property onto the elements.
 
-// Work Sans for everything read; Montserrat is the only sanctioned fallback
-// (Brand Guide v2 — Lato is logo artwork only, and never a serif).
-const FONT = "'Work Sans',Montserrat,sans-serif"
-const DISPLAY_FONT = "'Barlow Condensed','Work Sans',Montserrat,sans-serif"
-const INK = '#181818'
-const ORANGE = '#FF6320'
-// Plain orange type on a light ground is 2.62:1 and FAILS; Blaze 700 is 4.90:1.
-// Orange stays for fills and rules only.
-const ORANGE_INK = '#B34516'
-const WARM = '#F5F0E8'
-const STONE = '#888680'
-const LINE = '#ece7dd'
-const MUTED = '#6f6a60'
-
-const CHECK_SVG = (color: string, size: number) =>
-  `<span style="color:${color};font-size:${size}px;font-weight:900;line-height:1">&#10003;</span>`
-
-function eyebrow(label: string): string {
-  return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 14px"><tr>
-    <td style="width:26px;border-top:1px solid ${ORANGE};font-size:0;line-height:0">&nbsp;</td>
-    <td style="padding-left:10px;font-family:${FONT};font-size:11px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:${ORANGE_INK}">${label}</td>
-  </tr></table>`
-}
-
-function factRow(k: string, v: string, sub?: string, last = false): string {
-  return `<tr>
-    <td style="padding:13px 0;border-bottom:${last ? '0' : `1px solid ${LINE}`};font-family:${FONT};font-size:14.5px;color:${STONE};font-weight:700;width:42%;vertical-align:top">${k}</td>
-    <td align="right" style="padding:13px 0;border-bottom:${last ? '0' : `1px solid ${LINE}`};font-family:${FONT};font-size:14.5px;color:${INK};font-weight:700;vertical-align:top">${v}${sub ? `<br><span style="color:${STONE};font-weight:400;font-size:12.5px">${sub}</span>` : ''}</td>
-  </tr>`
-}
-
-function badge(label: string): string {
-  return `<td style="padding:0 8px 8px 0"><span style="display:inline-block;background:rgba(122,175,110,.14);color:#4f7a46;border:1px solid rgba(122,175,110,.3);border-radius:6px;padding:6px 11px;font-family:${FONT};font-size:12.5px;font-weight:700">&#10003;&nbsp;&nbsp;${label}</span></td>`
-}
-
-function nextStep(n: number, title: string, detail: string, last = false): string {
-  return `<tr>
-    <td style="width:44px;padding:12px 0;border-bottom:${last ? '0' : '1px solid #f2eee6'};vertical-align:top">
-      <span style="display:inline-block;width:30px;height:30px;border-radius:50%;background:rgba(255,99,32,.12);color:${ORANGE_INK};font-family:${FONT};font-weight:900;font-size:14px;line-height:30px;text-align:center">${n}</span>
-    </td>
-    <td style="padding:12px 0;border-bottom:${last ? '0' : '1px solid #f2eee6'};vertical-align:top">
-      <div style="font-family:${FONT};font-size:14.5px;font-weight:700;color:${INK};margin:3px 0 2px">${title}</div>
-      <div style="font-family:${FONT};font-size:13px;line-height:1.55;color:${MUTED}">${detail}</div>
-    </td>
-  </tr>`
-}
+// Presentation lives in ./email-shell — this file only decides content.
 
 export function renderMoveInEmail(data: MoveInEmailData): { subject: string; html: string } {
   const fac = FACILITY_DISPLAY[data.facilitySlug] ?? { name: data.facilitySlug, address: 'Granbury, TX' }
   const first = esc(data.tenantFirst.trim() || 'there')
   const pin = data.gatePin?.trim() || ''
-  const pinSpaced = esc(pin.split('').join(' '))
   const spaceLabel = data.spaceLabel ? esc(data.spaceLabel.slice(0, 80)) : 'Self storage space'
   const unit = data.unitNumber ? esc(String(data.unitNumber).slice(0, 20)) : ''
   const docUrl = data.documentUrl && /^https:\/\//.test(data.documentUrl) ? data.documentUrl : ''
@@ -154,133 +108,66 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
     ? 'You’re all moved in — your gate code & receipt'
     : 'You’re all moved in — your receipt'
 
-  const receiptRows = data.lineItems
-    .map((li) => {
-      const negative = li.amount < 0
-      const color = negative ? '#5c8a52' : '#3A3835'
-      const weight = negative ? 700 : 400
-      return `<tr>
-        <td style="padding:5px 0;font-family:${FONT};font-size:14px;color:${color};font-weight:${weight}">${esc(li.name.slice(0, 80))}</td>
-        <td align="right" style="padding:5px 0;font-family:${FONT};font-size:14px;font-weight:700;color:${negative ? '#5c8a52' : INK}">${money(li.amount)}</td>
-      </tr>`
-    })
-    .join('')
+  // The receipt, with the total set apart under a rule.
+  const receipt = panel(
+    rows(data.lineItems.map((li) => [esc(li.name.slice(0, 80)), money(li.amount)] as [string, string])) +
+    `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:12px;border-top:1px solid rgba(34,34,34,0.12)"><tr>
+      <td style="padding-top:14px;font-family:'Lato',system-ui,-apple-system,'Segoe UI',sans-serif;font-weight:800;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#222222">Paid today</td>
+      <td align="right" style="padding-top:14px;font-family:'Lato',system-ui,-apple-system,'Segoe UI',sans-serif;font-weight:800;font-size:24px;font-variant-numeric:tabular-nums;color:#222222">${money(data.totalDue)}</td>
+    </tr></table>` +
+    pills([
+      ...(data.signed ? ['Lease signed'] : []),
+      'Payment received',
+      ...(data.autopayRequested ? ['Autopay requested'] : []),
+    ]),
+  )
 
-  const badges =
-    (data.signed ? badge('Lease signed') : '') + badge('Payment received') +
-    (data.autopayRequested ? badge('Autopay requested') : '')
-
-  const gatePanel = pin
-    ? `<tr><td style="padding:20px 32px 6px">
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#181818" style="background:${INK} radial-gradient(90% 130% at 100% 0%, rgba(232,98,42,.20), transparent 58%);border-radius:14px 4px 4px 4px"><tr><td style="padding:24px 26px">
-          <div style="font-family:${FONT};font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;color:#a49e93">&#128273;&nbsp; Your gate code</div>
-          <div style="margin:8px 0 2px;font-family:${FONT};font-size:44px;font-weight:900;letter-spacing:.10em;color:${WARM};line-height:1">${pinSpaced}</div>
-          <div style="font-family:${FONT};font-size:12.5px;color:#a49e93">24/7 access, every day of the year &middot; non-transferable</div>
-        </td></tr></table>
-      </td></tr>`
-    : ''
-
-  const steps = [
-    ...(pin
-      ? [
-          nextStep(
-            1,
-            'Head over anytime',
-            `Use gate code <strong style="color:${INK}">${esc(pin)}</strong> at the keypad for 24/7 access to your space.`,
-          ),
-        ]
-      : []),
-    nextStep(
-      pin ? 2 : 1,
-      'Manage everything online',
-      `View payments, update your card, or move out from <a href="${SITE}/rentaspace" style="color:${ORANGE_INK};font-weight:700;text-decoration:none">journey.storage</a> &mdash; no phone call needed.`,
-    ),
-    nextStep(
-      pin ? 3 : 2,
+  const next: Array<[string, string]> = [
+    ...(pin ? [['Head over anytime', `Use gate code <b>${esc(pin)}</b> at the keypad for 24/7 access to your space.`] as [string, string]] : []),
+    ['Manage everything online', `View payments, update your card, or move out from ${link(`${SITE}/rentaspace`, 'journey.storage')} — no phone call needed.`],
+    [
       'Keep your lease handy',
       docUrl
-        ? `Your signed rental agreement is ready &mdash; <a href="${docUrl}" style="color:${ORANGE_INK};font-weight:700;text-decoration:none">download it here (PDF)</a>.`
-        : `Your signed rental agreement is on file &mdash; call us any time for a copy.`,
-      true,
-    ),
-  ].join('')
+        ? `Your signed rental agreement is ready — ${link(docUrl, 'download it here (PDF)')}.`
+        : 'Your signed rental agreement is on file — call us any time for a copy.',
+    ],
+  ]
 
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><title>${subject}</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Work+Sans:ital,wght@0,400;0,600;1,300&display=swap"></head>
-<body style="margin:0;padding:0;background:#e9e5dc">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e9e5dc"><tr><td align="center" style="padding:28px 16px 56px">
-
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#FBF8F2;border-radius:16px;overflow:hidden">
-
-  <!-- masthead -->
-  <tr><td bgcolor="#181818" style="background:${INK} radial-gradient(120% 160% at 100% -10%, rgba(255,99,32,.22), transparent 55%);padding:22px 32px">
-    <img src="${SITE}/images/brand/email-wordmark-white.png" alt="JOURNEY.STORAGE&trade;" width="200" height="15" style="display:block;width:200px;height:auto;border:0;outline:none;text-decoration:none">
-  </td></tr>
-
-  <!-- hero -->
-  <tr><td align="center" style="padding:40px 32px 8px">
-    <table role="presentation" cellpadding="0" cellspacing="0"><tr><td align="center" style="width:60px;height:60px;border-radius:50%;background:rgba(122,175,110,.16)">${CHECK_SVG('#5c8a52', 28)}</td></tr></table>
-    <h1 style="margin:18px 0 0;font-family:${FONT};font-size:30px;line-height:1.08;font-weight:900;letter-spacing:-.03em;color:${INK}">You&rsquo;re all moved in, ${first}!</h1>
-    <p style="margin:12px auto 0;max-width:400px;font-family:${FONT};font-size:15px;line-height:1.65;color:${MUTED}">Your space at ${esc(fac.name)} is rented and ready. Everything you need is right here.</p>
-  </td></tr>
-
-  ${gatePanel}
-
-  <!-- rental details -->
-  <tr><td style="padding:26px 32px 6px">
-    ${eyebrow('Your rental')}
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-      ${factRow('Facility', esc(fac.name), esc(fac.address))}
-      ${factRow('Space', spaceLabel, unit ? `Unit ${unit}` : undefined)}
-      ${factRow('Move-in date', esc(longDate(data.startDate)))}
-      ${factRow('Billing', `Bills the ${ordinal(data.billDay)} each month`, data.autopayRequested ? 'Autopay requested &middot; we&rsquo;ll confirm by email' : 'Month-to-month &middot; cancel anytime', true)}
-    </table>
-  </td></tr>
-
-  <!-- receipt -->
-  <tr><td style="padding:20px 32px 6px">
-    ${eyebrow('Paid today')}
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${WARM};border-radius:12px"><tr><td style="padding:20px 22px">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${receiptRows}</table>
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:10px;border-top:1px solid ${LINE}"><tr>
-        <td style="padding-top:13px;font-family:${FONT};font-size:15px;font-weight:900;color:${INK}">Paid today</td>
-        <td align="right" style="padding-top:13px;font-family:${FONT};font-size:22px;font-weight:900;color:${ORANGE_INK}">${money(data.totalDue)}</td>
-      </tr></table>
-      <table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:14px"><tr>${badges}</tr></table>
-    </td></tr></table>
-  </td></tr>
-
-  <!-- what's next -->
-  <tr><td style="padding:20px 32px 8px">
-    ${eyebrow('What’s next')}
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${steps}</table>
-  </td></tr>
-
-  <!-- CTA -->
-  <tr><td align="center" style="padding:6px 32px 30px">
-    <a href="${SITE}/rentaspace" style="display:inline-block;background:${ORANGE};color:${INK};text-decoration:none;font-family:${FONT};font-weight:900;font-size:15px;letter-spacing:.01em;padding:15px 34px;border-radius:6px">Manage my account</a>
-    <p style="margin:14px 0 0;font-family:${FONT};font-size:13px;color:${STONE}">Questions? Call us at <a href="${PHONE_TEL}" style="color:${ORANGE_INK};font-weight:700;text-decoration:none">${PHONE_DISPLAY}</a> &mdash; Mon&ndash;Fri 8:30&ndash;5, Sat 8:30&ndash;3.</p>
-  </td></tr>
-
-  <!-- footer -->
-  <tr><td align="center" style="background:${INK};padding:30px 32px">
-    <img src="${SITE}/images/brand/email-wordmark-white.png" alt="JOURNEY.STORAGE&trade;" width="164" height="12" style="display:inline-block;width:164px;height:auto;border:0;outline:none;text-decoration:none">
-    <p style="margin:10px auto 0;max-width:380px;font-family:${FONT};font-size:12.5px;line-height:1.6;color:#a49e93">Clean, secure, month-to-month self storage in Granbury, TX.<br>212 Temple Hall Hwy &middot; 409 Western Hills Trl &middot; 3501 McCreary Rd</p>
-    <p style="margin:16px auto 0;font-family:${FONT};font-size:11.5px;line-height:1.6;color:#77726a">Formerly Granbury Self Storage &middot; You received this because you rented a space online.<br>&copy; ${new Date().getFullYear()} Journey Storage 001, LLC</p>
-  </td></tr>
-
-</table>
-
-</td></tr></table>
-</body>
-</html>`
+  const html = emailShell({
+    preheader: pin ? `Your gate code is ${pin}. Everything for your new space is inside.` : 'Everything for your new space is inside.',
+    eyebrow: 'Move-in confirmed',
+    heading: `You’re all <b>moved in, ${first}</b>`,
+    // The one thing they need on day one, in the dark band where it reads first.
+    highlight: pin
+      ? heroFigure(esc(pin.split('').join(' ')), 'Your gate code', '24/7 access, every day of the year · non-transferable')
+      : undefined,
+    bodyHtml:
+      p(`Your space at ${esc(fac.name)} is rented and ready. Everything you need is right here.`) +
+      section('Your rental') +
+      miniList([
+        ['Facility', `${esc(fac.name)}<br><span style="font-weight:400;font-size:12px;color:#615C53">${esc(fac.address)}</span>`],
+        ['Space', `${spaceLabel}${unit ? `<br><span style="font-weight:400;font-size:12px;color:#615C53">Unit ${unit}</span>` : ''}`],
+        ['Move-in date', esc(longDate(data.startDate))],
+        [
+          'Billing',
+          `Bills the ${ordinal(data.billDay)} each month<br><span style="font-weight:400;font-size:12px;color:#615C53">${
+            data.autopayRequested ? 'Autopay requested · we’ll confirm by email' : 'Month-to-month · cancel anytime'
+          }</span>`,
+        ],
+      ]) +
+      section('Receipt') +
+      receipt +
+      section('What’s next') +
+      steps(next),
+    cta: { label: 'Manage my account', href: `${SITE}/rentaspace` },
+    footNote: `Questions? Call us at ${link(PHONE_TEL, PHONE_DISPLAY)} — Mon–Fri 8:30–5, Sat 8:30–3.`,
+    legal:
+      'Clean, secure, month-to-month self storage in Granbury, TX · 212 Temple Hall Hwy · 409 Western Hills Trl · 3501 McCreary Rd.<br>' +
+      `Formerly Granbury Self Storage · You received this because you rented a space online.<br>© ${new Date().getFullYear()} Journey Storage 001, LLC`,
+  })
 
   return { subject, html }
 }
-
-// ── Send ────────────────────────────────────────────────────────────────────
 
 export async function sendMoveInConfirmation(data: MoveInEmailData): Promise<void> {
   if (process.env.MOVE_IN_EMAIL_DISABLED === 'true') return

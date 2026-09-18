@@ -13,12 +13,12 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { timingSafeEqual } from 'crypto'
-import { takeSnapshot, money, moneyShort } from '@/lib/ops/snapshot'
+import { takeSnapshot, money, moneyShort, prettyContact, shortDate } from '@/lib/ops/snapshot'
 import { runAllChecks, runPeopleChecks, collectedYesterday, portfolioSummary, findingLines, type Finding } from '@/lib/ops/checks'
 import { stat, statBand, section, dataTable, callout, miniList, p as para } from '@/lib/email-shell'
 import { getSpaceMix } from '@/lib/nectar/spaces'
 import { FACILITIES } from '@/lib/nectar/facilities'
-import { sendLeadNotification } from '@/lib/lead-email'
+import { sendLeadNotification, renderLeadNotification } from '@/lib/lead-email'
 
 export const maxDuration = 300
 export const dynamic = 'force-dynamic'
@@ -58,14 +58,59 @@ async function facilityHealth() {
 const block = (f: Finding) =>
   [`${f.group}${f.total ? ` — ${money(f.total)}` : ''}`, ...findingLines(f).map((l) => `  · ${l}`), `  → ${f.action}`, ''].join('\n')
 
-/** One finding as a scannable block: figure first, then the rows, then what to do. */
-const findingHtml = (f: Finding) =>
+/** A finding's headline figures, for the dark hero band. */
+const findingFigures = (f: Finding) =>
   statBand([
-    stat(f.total != null ? money(f.total) : String(f.rows.length), f.total != null ? 'at stake' : 'to deal with', 'alert'),
+    stat(f.total != null ? moneyShort(f.total) : String(f.rows.length), f.total != null ? 'at stake' : 'to deal with', 'alert'),
     stat(String(f.rows.length), f.rows.length === 1 ? 'account' : 'accounts'),
-  ]) +
-  dataTable(f.rows.map((r) => ({ ...r, amount: r.amount != null ? money(r.amount) : undefined }))) +
-  callout(f.action)
+  ])
+
+/** How many rows an alert lists before summarising the rest. */
+const ROW_CAP = 15
+
+/**
+ * A finding's detail, for the cream band. The instruction comes first — on a
+ * 50-row list it would otherwise sit at the bottom where nobody reaches it.
+ * Long lists get a per-facility breakdown, since each site has its own inbox
+ * and staff, then the worst rows, then one line for the remainder.
+ */
+const findingBody = (f: Finding) => {
+  const rowsHtml = (list: Finding['rows']) =>
+    dataTable(list.map((r) => ({
+      ...r,
+      amount: r.amount != null ? money(r.amount) : undefined,
+      contact: prettyContact(r.contact),
+    })))
+
+  const facilityOf = (where?: string) => (where ?? 'Unknown site').split(' · ')[0]
+  const byFacility = new Map<string, { n: number; total: number }>()
+  for (const r of f.rows) {
+    const k = facilityOf(r.where)
+    const cur = byFacility.get(k) ?? { n: 0, total: 0 }
+    byFacility.set(k, { n: cur.n + 1, total: cur.total + (r.amount ?? 0) })
+  }
+
+  const shown = f.rows.slice(0, ROW_CAP)
+  const rest = f.rows.slice(ROW_CAP)
+  const restTotal = rest.reduce((t, r) => t + (r.amount ?? 0), 0)
+
+  return (
+    callout(f.action) +
+    (f.rows.length > 8 && byFacility.size > 1
+      ? section('By facility') +
+        miniList(
+          [...byFacility.entries()]
+            .sort((a, b) => b[1].total - a[1].total)
+            .map(([k, v]) => [k, `${v.n} · ${f.total != null ? money(v.total) : ''}`.replace(/ · $/, '')] as [string, string]),
+        )
+      : '') +
+    section(rest.length ? `Top ${ROW_CAP} of ${f.rows.length}` : 'Accounts', rest.length ? undefined : f.rows.length) +
+    rowsHtml(shown) +
+    (rest.length
+      ? para(`…and ${rest.length} more${restTotal ? ` totalling ${money(restTotal)}` : ''}. The full list is in Hummingbird.`, { muted: true, small: true })
+      : '')
+  )
+}
 
 export async function GET(req: NextRequest) {
   if (!authorised(req)) return NextResponse.json({ error: 'Not authorised' }, { status: 401 })
@@ -84,10 +129,24 @@ export async function GET(req: NextRequest) {
     const watch = findings.filter((f) => f.severity === 'watch')
 
     const composed: Array<{ subject: string; body: string; html?: string }> = []
-    const deliver = async (subject: string, body: string, source: string, name: string, bodyHtml?: string) => {
-      composed.push({ subject, body, html: bodyHtml })
+    const deliver = async (
+      subject: string,
+      body: string,
+      source: string,
+      name: string,
+      bodyHtml?: string,
+      heading?: string,
+      highlightHtml?: string,
+    ) => {
+      const lead = {
+        name, email: '', formSource: source, subject, message: body,
+        bodyHtml, heading: heading ?? name, highlightHtml,
+      }
+      // The preview is rendered by the same function the sender uses, so what
+      // a dry run shows is exactly what would arrive.
+      composed.push({ subject, body, html: renderLeadNotification(lead).html })
       if (dryRun) return
-      await sendLeadNotification({ name, email: '', formSource: source, subject, message: body, bodyHtml, heading: name }).catch(() => {})
+      await sendLeadNotification(lead).catch(() => {})
     }
 
     // Urgent items get their own email so they are not buried in the digest.
@@ -97,7 +156,9 @@ export async function GET(req: NextRequest) {
         [block(f), '', 'Found by the daily sweep of every active lease.'].join('\n'),
         'ops-alert',
         f.group,
-        findingHtml(f),
+        findingBody(f),
+        f.headline ?? f.group,
+        findingFigures(f),
       )
     }
     if (health.problems.length) {
@@ -122,21 +183,25 @@ export async function GET(req: NextRequest) {
     const shown = topPayments.slice(0, 5)
     const restTotal = topPayments.slice(5).reduce((t, x) => t + x.amount, 0)
 
+    // The three figures that decide whether today needs anything live in the
+    // dark hero, where the one orange figure is allowed to carry the alarm.
+    const digestFigures = statBand([
+      stat(moneyShort(collected.total), 'collected', 'good'),
+      stat(moneyShort(summary.owingTotal), 'outstanding', summary.owingTotal > 0 ? 'alert' : 'normal'),
+      stat(String(summary.owingCount), 'accounts owing'),
+    ])
     const digestHtml =
-      // The three figures that decide whether today needs anything.
-      statBand([
-        stat(moneyShort(collected.total), 'collected', 'good'),
-        stat(moneyShort(summary.owingTotal), 'outstanding', summary.owingTotal > 0 ? 'alert' : 'normal'),
-        stat(String(summary.owingCount), 'accounts owing'),
-      ]) +
       (urgent.length
-        ? callout(`${urgent.length} item${urgent.length === 1 ? '' : 's'} need attention — each sent as its own email so it doesn’t get lost in here.`)
+        ? callout(
+            `${urgent.length} item${urgent.length === 1 ? '' : 's'} sent as ${urgent.length === 1 ? 'its' : 'their'} own email${urgent.length === 1 ? '' : 's'}, so nothing gets lost in here: ${urgent.map((f) => f.group.toLowerCase()).join(', ')}.`,
+            'Needs attention',
+          )
         : para('Nothing needs attention today.', { muted: true })) +
       // Health before history: these change slowly and are worth watching.
       section('Portfolio') +
       miniList([
         ['Active leases', String(summary.leases)],
-        ['Contracted rent', `${money(summary.monthlyRent)}/mo`],
+        ['Contracted rent', `${moneyShort(summary.monthlyRent)}/mo`],
         ['On autopay', `${summary.autopayOn} of ${summary.leases} (${pct}%)`],
         ['Not on autopay', `${summary.leases - summary.autopayOn}`],
       ]) +
@@ -144,19 +209,21 @@ export async function GET(req: NextRequest) {
       miniList(
         health.rows.map((r) => {
           const [name, ...rest] = r.split(':')
-          return [name.trim(), rest.join(':').trim()] as [string, string]
+          // API timing only matters when it's slow, and that raises its own alert.
+          const v = rest.join(':').replace(/\s*·\s*API \d+ms/, '').replace(' vacant across ', ' vacant · ').replace(' sizes, ', ' sizes · ').trim()
+          return [name.trim(), v] as [string, string]
         }),
       ) +
       // The routine good news, summarised rather than itemised — the total is
       // already in the band above, so only the largest few earn their space.
       section('Money in', collected.count) +
       (collected.count
-        ? dataTable(shown.map((x) => ({ who: x.name, where: x.place, note: x.date, amount: money(x.amount) }))) +
+        ? dataTable(shown.map((x) => ({ who: x.name, where: x.place, note: shortDate(x.date), amount: money(x.amount) }))) +
           (topPayments.length > 5
             ? para(`…and ${topPayments.length - 5} more payments totalling ${money(restTotal)}.`, { muted: true, small: true })
             : '')
         : para('No payments in the last two days.', { muted: true })) +
-      (watch.length ? watch.map((f) => section(f.group, f.rows.length) + findingHtml(f)).join('') : '')
+      (watch.length ? watch.map((f) => section(f.group, f.rows.length) + findingBody(f)).join('') : '')
 
     await deliver(
       `Daily summary — ${money(collected.total)} in, ${money(summary.owingTotal)} outstanding`,
@@ -178,6 +245,8 @@ export async function GET(req: NextRequest) {
       'ops-digest',
       'Daily summary',
       digestHtml,
+      'Your day <b>at a glance</b>',
+      digestFigures,
     )
 
     return NextResponse.json({

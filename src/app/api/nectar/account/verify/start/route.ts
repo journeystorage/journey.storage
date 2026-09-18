@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { findContactFor } from '@/lib/nectar/account'
 import { canSend, codeFor, currentWindow, maskEmail } from '@/lib/account-verify'
-import { emailShell, brandedFrom, p, label, panel, BRAND } from '@/lib/email-shell'
+import { emailShell, brandedFrom, p, label, panel, bigFigure } from '@/lib/email-shell'
 import { recordEvent } from '@/lib/ops/events'
 
 async function sendCode(to: string, name: string, code: string): Promise<boolean> {
@@ -17,14 +17,11 @@ async function sendCode(to: string, name: string, code: string): Promise<boolean
   const html = emailShell({
     preheader: `Your Journey.Storage code: ${code}`,
     eyebrow: 'Your account',
-    heading: 'Here’s your verification code',
+    heading: 'Here’s your <b>sign-in code</b>',
     bodyHtml:
       p(`Hi ${first},`) +
       p('Use this code to sign in and see your balance. It works for about 15 minutes, and only on your account.') +
-      panel(
-        label('Verification code') +
-        `<p style="margin:0;font-family:'Barlow Condensed','Work Sans',Montserrat,sans-serif;font-weight:700;font-size:40px;line-height:1.1;letter-spacing:.18em;color:${BRAND.orange700}">${code}</p>`,
-      ) +
+      panel(label('Verification code') + bigFigure(code)) +
       p('Didn’t ask for this? You can ignore it — nothing on your account has changed.', { muted: true, small: true }),
     footNote: 'We’ll never ask for your card details by email or text.',
     slogan: false,

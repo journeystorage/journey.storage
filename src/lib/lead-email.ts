@@ -35,8 +35,13 @@ export type LeadNotification = {
    * than name/email/phone rows. Compose it with the helpers in email-shell.
    */
   bodyHtml?: string
-  /** Heading override, when the lead "name" is not the right title. */
+  /**
+   * Heading override, when the lead "name" is not the right title. Sentence
+   * case with the payload in <b> to get the v3 Light/ExtraBold split.
+   */
   heading?: string
+  /** Dark-band content under the heading — headline figures. */
+  highlightHtml?: string
 }
 
 const DEFAULT_TO = 'lyvia@journey.storage'
@@ -64,6 +69,46 @@ const SOURCE_LABELS: Record<string, { subject: (name: string) => string; eyebrow
   'autopay-request': { subject: (n) => `Autopay requested — ${n}`, eyebrow: 'Autopay requested' },
   'ops-alert': { subject: (n) => `Action needed — ${n}`, eyebrow: 'Action needed' },
   'ops-digest': { subject: () => 'Daily summary', eyebrow: 'Daily summary' },
+}
+
+/**
+ * The subject and branded HTML for a notification, without sending it. The
+ * sender uses this, and so does the ops sweep's dry run — so a preview is
+ * exactly what would land in the inbox, not an approximation of it.
+ */
+export function renderLeadNotification(lead: LeadNotification): { subject: string; html: string } {
+  // Every automated notice used to arrive titled "New Contact Us submission",
+  // which made a failed rental look like a web enquiry. Each source now says
+  // what it actually is, in the subject line and in the email's own eyebrow.
+  const known = SOURCE_LABELS[lead.formSource]
+  const isMoveout = lead.formSource.includes('moveout')
+  const subject = lead.subject || known?.subject(lead.name) || `New Contact Us submission — ${lead.name}`
+  const eyebrow = known?.eyebrow ?? (isMoveout ? 'Move-out request' : 'New contact')
+
+  // Same branded frame as everything else we send — these land in staff
+  // inboxes, and consistency is what makes the brand read as one company.
+  const html = emailShell({
+    preheader: subject,
+    eyebrow,
+    heading: lead.heading ?? escapeHtml(lead.name),
+    highlight: lead.highlightHtml,
+    // A caller that has built its own body (the ops sweep) passes it through;
+    // everything else gets the standard field panel.
+    bodyHtml: lead.bodyHtml ?? panel(
+      rows(
+        ([
+          ['Email', lead.email],
+          ['Phone', lead.phone],
+          ['ZIP', lead.zip],
+          ['Source', lead.formSource],
+        ] as Array<[string, string | undefined]>)
+          .filter((r): r is [string, string] => !!r[1])
+          .map(([k, v]) => [k, escapeHtml(v)] as [string, string]),
+      ),
+    ) + (lead.message ? label('Message') + p(escapeHtml(lead.message).replace(/\n/g, '<br>')) : ''),
+    slogan: false,
+  })
+  return { subject, html }
 }
 
 export async function sendLeadNotification(lead: LeadNotification): Promise<void> {
@@ -99,36 +144,7 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
         .filter((addr, i, arr) => arr.findIndex((a) => a.toLowerCase() === addr.toLowerCase()) === i)
     : []
 
-  // Every automated notice used to arrive titled "New Contact Us submission",
-  // which made a failed rental look like a web enquiry. Each source now says
-  // what it actually is, in the subject line and in the email's own eyebrow.
-  const known = SOURCE_LABELS[lead.formSource]
-  const isMoveout = lead.formSource.includes('moveout')
-  const subject = lead.subject || known?.subject(lead.name) || `New Contact Us submission — ${lead.name}`
-  const eyebrow = known?.eyebrow ?? (isMoveout ? 'Move-out request' : 'New contact')
-
-  // Same branded frame as everything else we send — these land in staff
-  // inboxes, and consistency is what makes the brand read as one company.
-  const html = emailShell({
-    preheader: subject,
-    eyebrow,
-    heading: lead.heading ?? escapeHtml(lead.name),
-    // A caller that has built its own body (the ops sweep) passes it through;
-    // everything else gets the standard field panel.
-    bodyHtml: lead.bodyHtml ?? panel(
-      rows(
-        ([
-          ['Email', lead.email],
-          ['Phone', lead.phone],
-          ['ZIP', lead.zip],
-          ['Source', lead.formSource],
-        ] as Array<[string, string | undefined]>)
-          .filter((r): r is [string, string] => !!r[1])
-          .map(([k, v]) => [k, escapeHtml(v)] as [string, string]),
-      ),
-    ) + (lead.message ? label('Message') + p(escapeHtml(lead.message).replace(/\n/g, '<br>')) : ''),
-    slogan: false,
-  })
+  const { subject, html } = renderLeadNotification(lead)
 
   const text = [
     `New Contact Us submission`,
