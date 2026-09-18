@@ -128,7 +128,12 @@ export async function takeSnapshot(): Promise<LeaseSnapshot[]> {
 export const where = (s: LeaseSnapshot) =>
   `${s.propertyName ?? 'Unknown site'}${s.unitNumber ? ` · Unit ${s.unitNumber}` : ''}`
 
-export const money = (n: number) => `$${n.toFixed(2)}`
+export const money = (n: number) =>
+  `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+
+/** Rounded, for headline figures where cents are noise. */
+export const moneyShort = (n: number) =>
+  `$${Math.round(n).toLocaleString('en-US')}`
 
 /** Days between an ISO date and now; negative means the future. */
 export function daysSince(iso?: string): number | null {

@@ -151,3 +151,81 @@ export function emailShell(o: ShellOptions): string {
 </table>
 </body></html>`
 }
+
+// ---------------------------------------------------------------------------
+// Blocks for operational mail, where the job is to be scanned rather than read.
+// Figures are set in tabular numerals and right-aligned so columns line up, and
+// each block leads with the number that decides whether to act.
+// ---------------------------------------------------------------------------
+
+/** A single headline figure with its label underneath. */
+export const stat = (value: string, label: string, tone: 'normal' | 'alert' | 'good' = 'normal') => {
+  const colour = tone === 'alert' ? BRAND.orange700 : tone === 'good' ? '#4E7A44' : BRAND.black
+  return `<td style="padding:0 8px 0 0;vertical-align:top">
+    <div style="font-family:${DISPLAY_FONT};font-weight:700;font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums;color:${colour}">${value}</div>
+    <div style="margin-top:3px;font-family:${BODY_FONT};font-weight:600;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:${BRAND.stone}">${label}</div>
+  </td>`
+}
+
+/** A row of stats — pass the cells from `stat()`. */
+export const statBand = (cells: string[]) =>
+  `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:0 0 22px;border-top:2px solid ${BRAND.black};padding-top:14px"><tr>${cells.join('')}</tr></table>`
+
+/** Section heading with a rule, so blocks are separable at a glance. */
+export const section = (title: string, count?: number) =>
+  `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:26px 0 10px">
+    <tr>
+      <td style="font-family:${BODY_FONT};font-weight:600;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:${BRAND.black};white-space:nowrap;padding-right:10px">${title}${count != null ? ` <span style="color:${BRAND.stone}">(${count})</span>` : ''}</td>
+      <td style="width:100%"><div style="height:1px;background:rgba(24,24,24,0.15);font-size:0;line-height:0">&nbsp;</div></td>
+    </tr>
+  </table>`
+
+export interface EmailRow {
+  who: string
+  where?: string
+  amount?: string
+  note?: string
+  contact?: string
+  severe?: boolean
+}
+
+/**
+ * The workhorse: one line per person, money right-aligned, the ones that need
+ * attention first marked with a coloured rule rather than a shouty background.
+ */
+export const dataTable = (rows: EmailRow[]) =>
+  `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="border-collapse:collapse">
+    ${rows
+      .map(
+        (r) => `<tr>
+      <td style="padding:9px 10px 9px ${r.severe ? '10px' : '11px'};border-bottom:1px solid rgba(24,24,24,0.08);${r.severe ? `border-left:3px solid ${BRAND.orange};` : `border-left:1px solid rgba(24,24,24,0.10);`}">
+        <div style="font-family:${BODY_FONT};font-weight:600;font-size:14px;color:${BRAND.black}">${r.who}</div>
+        ${r.where ? `<div style="font-family:${BODY_FONT};font-weight:400;font-size:12px;color:${BRAND.charcoal}">${r.where}</div>` : ''}
+        ${r.note ? `<div style="font-family:${BODY_FONT};font-weight:400;font-size:11px;color:${BRAND.stone}">${r.note}</div>` : ''}
+        ${r.contact ? `<div style="font-family:${BODY_FONT};font-weight:400;font-size:11px;color:${BRAND.stone}">${r.contact}</div>` : ''}
+      </td>
+      <td align="right" style="padding:9px 0 9px 10px;border-bottom:1px solid rgba(24,24,24,0.08);white-space:nowrap;vertical-align:top">
+        ${r.amount ? `<span style="font-family:${BODY_FONT};font-weight:600;font-size:15px;font-variant-numeric:tabular-nums;color:${BRAND.black}">${r.amount}</span>` : ''}
+      </td>
+    </tr>`,
+      )
+      .join('')}
+  </table>`
+
+/** What to do, set apart from the data. */
+export const callout = (text: string) =>
+  `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:12px 0 0"><tr>
+    <td style="padding:11px 14px;background:rgba(255,99,32,0.08);border-left:3px solid ${BRAND.orange}">
+      <div style="font-family:${BODY_FONT};font-weight:500;font-size:13px;line-height:1.55;color:${BRAND.black}">${text}</div>
+    </td>
+  </tr></table>`
+
+/** A compact two-column list, for availability and similar. */
+export const miniList = (items: Array<[string, string]>) =>
+  `<table role="presentation" cellpadding="0" cellspacing="0" width="100%">${items
+    .map(
+      ([k, v]) =>
+        `<tr><td style="padding:6px 0;font-family:${BODY_FONT};font-size:13px;color:${BRAND.charcoal};border-bottom:1px solid rgba(24,24,24,0.06)">${k}</td>
+         <td align="right" style="padding:6px 0;font-family:${BODY_FONT};font-weight:600;font-size:13px;font-variant-numeric:tabular-nums;color:${BRAND.black};border-bottom:1px solid rgba(24,24,24,0.06)">${v}</td></tr>`,
+    )
+    .join('')}</table>`

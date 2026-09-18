@@ -12,15 +12,40 @@ import { type LeaseSnapshot, where, money, daysSince } from './snapshot'
 
 export type Severity = 'urgent' | 'watch'
 
+export interface FindingRow {
+  /** Who it concerns. */
+  who: string
+  /** Where — property and unit. */
+  where?: string
+  /** Money at stake, when there is any. */
+  amount?: number
+  /** Short qualifier: "197d late", "autopay OFF". */
+  note?: string
+  /** Phone or email, so the row is actionable without a lookup. */
+  contact?: string
+  /** True for the ones that need attention first. */
+  severe?: boolean
+}
+
 export interface Finding {
   severity: Severity
   /** Short group name, used as the heading in the email. */
   group: string
-  /** One line per affected lease. */
-  lines: string[]
+  /** Structured rows — rendered as a table in HTML, lines in plain text. */
+  rows: FindingRow[]
+  /** Total money across the rows, when meaningful. */
+  total?: number
   /** What to do about it. */
   action: string
 }
+
+/** Plain-text rendering of a finding's rows, for the text fallback. */
+export const findingLines = (f: Finding): string[] =>
+  f.rows.map((r) =>
+    [r.who, r.where, r.amount != null ? money(r.amount) : null, r.note, r.contact]
+      .filter(Boolean)
+      .join(' · '),
+  )
 
 /** A rental that completed but whose money never arrived. */
 export function unpaidNewRentals(all: LeaseSnapshot[]): Finding | null {
@@ -33,8 +58,12 @@ export function unpaidNewRentals(all: LeaseSnapshot[]): Finding | null {
   const total = hits.reduce((t, s) => t + s.openBalance, 0)
   return {
     severity: 'urgent',
-    group: `Rentals that never collected — ${money(total)} outstanding`,
-    lines: hits.map((s) => `${s.name} · ${where(s)} — ${money(s.openBalance)} owed, rented ${daysSince(s.createdAt)}d ago, nothing ever paid${s.phone ? ` · ${s.phone}` : ''}`),
+    group: 'Rentals that never collected',
+    total,
+    rows: hits.map((s) => ({
+      who: s.name, where: where(s), amount: s.openBalance,
+      note: `rented ${daysSince(s.createdAt)}d ago · never paid`, contact: s.phone, severe: true,
+    })),
     action: 'Take payment by phone and check why the card never charged. These tenants have keys and a gate code.',
   }
 }
@@ -46,10 +75,14 @@ export function noAutopay(all: LeaseSnapshot[]): Finding | null {
   const total = hits.reduce((t, s) => t + s.openBalance, 0)
   return {
     severity: 'urgent',
-    group: `Owing with no autopay — ${money(total)} across ${hits.length}`,
-    lines: hits
+    group: 'Owing with no autopay',
+    total,
+    rows: hits
       .sort((a, b) => b.openBalance - a.openBalance)
-      .map((s) => `${s.name} · ${where(s)} — ${money(s.openBalance)}${s.daysLate ? `, ${s.daysLate}d late` : ''}${s.phone ? ` · ${s.phone}` : ''}`),
+      .map((s) => ({
+        who: s.name, where: where(s), amount: s.openBalance,
+        note: s.daysLate ? `${s.daysLate}d late` : undefined, contact: s.phone, severe: s.daysLate >= 30,
+      })),
     action: 'No card is enrolled, so these will not collect on their own. Enrol a card or chase payment.',
   }
 }
@@ -64,7 +97,10 @@ export function newLeaseWithoutAutopay(all: LeaseSnapshot[]): Finding | null {
   return {
     severity: 'urgent',
     group: 'New rentals with no autopay',
-    lines: hits.map((s) => `${s.name} · ${where(s)} — rented ${daysSince(s.createdAt)}d ago, autopay OFF${s.email ? ` · ${s.email}` : ''}`),
+    rows: hits.map((s) => ({
+      who: s.name, where: where(s), note: `rented ${daysSince(s.createdAt)}d ago · autopay OFF`,
+      contact: s.email ?? s.phone, severe: true,
+    })),
     action: 'Enrol a card now, while they are still expecting to hear from us. Left alone these become next month’s arrears.',
   }
 }
@@ -91,7 +127,7 @@ export function zeroRent(all: LeaseSnapshot[], floor = 1): Finding | null {
   return {
     severity: 'urgent',
     group: 'Rented at no charge',
-    lines: hits.map((s) => `${s.name} · ${where(s)} — rent ${money(s.rent)}`),
+    rows: hits.map((s) => ({ who: s.name, where: where(s), amount: s.rent })),
     action: 'Check the rate in Hummingbird. A $0 group in the back office can be rented straight off the website.',
   }
 }
@@ -104,8 +140,13 @@ export function delinquency(all: LeaseSnapshot[]): Finding | null {
   const total = late.reduce((t, s) => t + s.openBalance, 0)
   return {
     severity: late.some((s) => s.daysLate >= 30) ? 'urgent' : 'watch',
-    group: `Past due — ${money(total)} across ${late.length}`,
-    lines: late.slice(0, 25).map((s) => `[${bucket(s.daysLate)}] ${s.name} · ${where(s)} — ${money(s.openBalance)}, ${s.daysLate}d late${s.autopay ? '' : ' · NO AUTOPAY'}${s.phone ? ` · ${s.phone}` : ''}`),
+    group: 'Past due',
+    total,
+    rows: late.slice(0, 25).map((s) => ({
+      who: s.name, where: where(s), amount: s.openBalance,
+      note: `${bucket(s.daysLate)} · ${s.daysLate}d late${s.autopay ? '' : ' · NO AUTOPAY'}`,
+      contact: s.phone, severe: s.daysLate >= 30,
+    })),
     action: 'Work the 30d+ list first. Anything marked NO AUTOPAY will not fix itself.',
   }
 }
@@ -177,11 +218,17 @@ export async function abandonedCheckouts(all: LeaseSnapshot[]): Promise<Finding 
   if (!hits.length) return null
   return {
     severity: 'urgent',
-    group: `Started renting online and didn’t finish — ${hits.length}`,
-    lines: hits.map((e) => {
+    group: 'Started renting online and didn’t finish',
+    rows: hits.map((e) => {
       const d = (e.detail ?? {}) as { facility?: string; space?: string }
       const hrs = Math.round((Date.now() - Date.parse(e.created_at)) / 3600_000)
-      return `${e.name ?? 'Someone'} — ${d.space ?? 'a space'} at ${d.facility ?? 'one of the sites'}, ${hrs}h ago · ${e.contact ?? ''}${e.phone ? ` · ${e.phone}` : ''}`
+      return {
+        who: e.name ?? 'Someone',
+        where: `${d.space ?? 'a space'} · ${d.facility ?? 'one of the sites'}`,
+        note: `${hrs}h ago`,
+        contact: [e.contact, e.phone].filter(Boolean).join(' · '),
+        severe: true,
+      }
     }),
     action: 'They picked a space and entered their details, then stopped at payment. Call them — they were ready to rent.',
   }
@@ -202,8 +249,11 @@ export async function unusedSignInCodes(): Promise<Finding | null> {
   if (!hits.length) return null
   return {
     severity: 'watch',
-    group: `Asked for a sign-in code and never used it — ${hits.length}`,
-    lines: hits.map((e) => `${e.name ?? 'Someone'} · ${e.contact ?? ''} — ${Math.round((Date.now() - Date.parse(e.created_at)) / 3600_000)}h ago`),
+    group: 'Asked for a sign-in code and never used it',
+    rows: hits.map((e) => ({
+      who: e.name ?? 'Someone', contact: e.contact ?? undefined,
+      note: `${Math.round((Date.now() - Date.parse(e.created_at)) / 3600_000)}h ago`,
+    })),
     action: 'Either the email never arrived or they gave up. Worth checking the first few while online payments are new.',
   }
 }
@@ -221,10 +271,13 @@ export async function repeatedCardFailures(): Promise<Finding | null> {
   if (!hits.length) return null
   return {
     severity: 'urgent',
-    group: `Cards failing repeatedly — ${hits.length}`,
-    lines: hits.map(([c, list]) => {
+    group: 'Cards failing repeatedly',
+    rows: hits.map(([c, list]) => {
       const kinds = [...new Set(list.map((e) => ((e.detail ?? {}) as { kind?: string }).kind ?? '?'))].join(', ')
-      return `${list[0].name ?? c} — ${list.length} failures in 48h (${kinds})${list[0].phone ? ` · ${list[0].phone}` : ''}`
+      return {
+        who: list[0].name ?? c, note: `${list.length} failures in 48h · ${kinds}`,
+        contact: list[0].phone ?? c, severe: list.length >= 3,
+      }
     }),
     action: 'Two or more failures is either their bank blocking us or a bug on our side. Worth a call, and worth checking the reason we logged.',
   }

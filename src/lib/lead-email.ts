@@ -29,6 +29,14 @@ export type LeadNotification = {
   cc?: string | string[]
   /** Overrides the email subject line when set. */
   subject?: string
+  /**
+   * A body built by the caller, for notices the standard field panel cannot
+   * express — the operational sweep, which needs tables and figures rather
+   * than name/email/phone rows. Compose it with the helpers in email-shell.
+   */
+  bodyHtml?: string
+  /** Heading override, when the lead "name" is not the right title. */
+  heading?: string
 }
 
 const DEFAULT_TO = 'lyvia@journey.storage'
@@ -104,8 +112,10 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<void
   const html = emailShell({
     preheader: subject,
     eyebrow,
-    heading: escapeHtml(lead.name),
-    bodyHtml: panel(
+    heading: lead.heading ?? escapeHtml(lead.name),
+    // A caller that has built its own body (the ops sweep) passes it through;
+    // everything else gets the standard field panel.
+    bodyHtml: lead.bodyHtml ?? panel(
       rows(
         ([
           ['Email', lead.email],
