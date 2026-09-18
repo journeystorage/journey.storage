@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { payLease, type PayCard } from '@/lib/nectar/account'
 import { classifyFailure } from '@/lib/nectar/failure'
 import { sendLeadNotification } from '@/lib/lead-email'
+import { recordEvent } from '@/lib/ops/events'
 
 interface PayBody {
   leaseId?: string
@@ -58,6 +59,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     // Same as the rental: say whether it was the card or us.
     const f = classifyFailure(err, { route: 'account/pay', leaseId }, 'payment')
+    await recordEvent({ kind: 'card_failed', contact: leaseId, detail: { kind: f.kind, where: 'paybill', amount } })
     // Production logs aren't reachable from a dev machine, and a tenant who
     // can't pay is a tenant who goes delinquent — so the provider's verbatim
     // reason comes back with the response and also goes to staff by email.

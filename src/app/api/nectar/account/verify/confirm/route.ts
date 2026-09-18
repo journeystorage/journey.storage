@@ -11,6 +11,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { findContactFor } from '@/lib/nectar/account'
 import { VERIFY_COOKIE, issueSession, normalizeContact, verifyCode } from '@/lib/account-verify'
 import { sendLeadNotification } from '@/lib/lead-email'
+import { recordEvent } from '@/lib/ops/events'
 
 export async function POST(req: NextRequest) {
   let body: { contact?: string; code?: string }
@@ -55,6 +56,8 @@ export async function POST(req: NextRequest) {
         owing.length ? `Total outstanding: ${money(total)}` : '',
       ].filter((l) => l !== '').join('\n'),
     }).catch(() => {})
+
+    await recordEvent({ kind: 'code_confirmed', contact, name: found.name })
 
     const res = NextResponse.json({ ok: true, name: found.name })
     res.cookies.set(VERIFY_COOKIE, issueSession({ contactId: found.contactId, contact: normalizeContact(contact) }), {

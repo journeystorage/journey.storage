@@ -147,3 +147,95 @@ export function runAllChecks(all: LeaseSnapshot[]): Finding[] {
     delinquency(all),
   ].filter((f): f is Finding => f !== null)
 }
+
+// ---------------------------------------------------------------------------
+// Checks over the people signals (src/lib/ops/events.ts) rather than leases.
+// These catch customers who never became a lease, so nothing in the storage
+// system would ever show them.
+// ---------------------------------------------------------------------------
+
+import { recentEvents, type StoredEvent } from './events'
+
+const contactOf = (e: StoredEvent) => (e.contact ?? '').toLowerCase()
+
+/** Reached the payment step and never finished. The most valuable call list. */
+export async function abandonedCheckouts(all: LeaseSnapshot[]): Promise<Finding | null> {
+  // An hour's grace: checkout legitimately takes a few minutes, and the charge
+  // itself can run to a minute.
+  const started = (await recentEvents(['checkout_started'], 72)).filter(
+    (e) => Date.now() - Date.parse(e.created_at) > 3600_000,
+  )
+  if (!started.length) return null
+  const rented = new Set(all.map((s) => (s.email ?? '').toLowerCase()).filter(Boolean))
+  const seen = new Set<string>()
+  const hits = started.filter((e) => {
+    const c = contactOf(e)
+    if (!c || rented.has(c) || seen.has(c)) return false
+    seen.add(c)
+    return true
+  })
+  if (!hits.length) return null
+  return {
+    severity: 'urgent',
+    group: `Started renting online and didn’t finish — ${hits.length}`,
+    lines: hits.map((e) => {
+      const d = (e.detail ?? {}) as { facility?: string; space?: string }
+      const hrs = Math.round((Date.now() - Date.parse(e.created_at)) / 3600_000)
+      return `${e.name ?? 'Someone'} — ${d.space ?? 'a space'} at ${d.facility ?? 'one of the sites'}, ${hrs}h ago · ${e.contact ?? ''}${e.phone ? ` · ${e.phone}` : ''}`
+    }),
+    action: 'They picked a space and entered their details, then stopped at payment. Call them — they were ready to rent.',
+  }
+}
+
+/** Asked for a sign-in code and never used it. */
+export async function unusedSignInCodes(): Promise<Finding | null> {
+  const events = await recentEvents(['code_requested', 'code_confirmed'], 48)
+  const confirmed = new Set(events.filter((e) => e.kind === 'code_confirmed').map(contactOf))
+  const seen = new Set<string>()
+  const hits = events.filter((e) => {
+    const c = contactOf(e)
+    if (e.kind !== 'code_requested' || !c || confirmed.has(c) || seen.has(c)) return false
+    if (Date.now() - Date.parse(e.created_at) < 3600_000) return false
+    seen.add(c)
+    return true
+  })
+  if (!hits.length) return null
+  return {
+    severity: 'watch',
+    group: `Asked for a sign-in code and never used it — ${hits.length}`,
+    lines: hits.map((e) => `${e.name ?? 'Someone'} · ${e.contact ?? ''} — ${Math.round((Date.now() - Date.parse(e.created_at)) / 3600_000)}h ago`),
+    action: 'Either the email never arrived or they gave up. Worth checking the first few while online payments are new.',
+  }
+}
+
+/** The same person failing a card more than once — bank block, or our bug. */
+export async function repeatedCardFailures(): Promise<Finding | null> {
+  const events = await recentEvents(['card_failed'], 48)
+  const byContact = new Map<string, StoredEvent[]>()
+  for (const e of events) {
+    const c = contactOf(e)
+    if (!c) continue
+    byContact.set(c, [...(byContact.get(c) ?? []), e])
+  }
+  const hits = [...byContact.entries()].filter(([, list]) => list.length >= 2)
+  if (!hits.length) return null
+  return {
+    severity: 'urgent',
+    group: `Cards failing repeatedly — ${hits.length}`,
+    lines: hits.map(([c, list]) => {
+      const kinds = [...new Set(list.map((e) => ((e.detail ?? {}) as { kind?: string }).kind ?? '?'))].join(', ')
+      return `${list[0].name ?? c} — ${list.length} failures in 48h (${kinds})${list[0].phone ? ` · ${list[0].phone}` : ''}`
+    }),
+    action: 'Two or more failures is either their bank blocking us or a bug on our side. Worth a call, and worth checking the reason we logged.',
+  }
+}
+
+/** The people-signal checks, which need a round trip each. */
+export async function runPeopleChecks(all: LeaseSnapshot[]): Promise<Finding[]> {
+  const [abandoned, codes, cards] = await Promise.all([
+    abandonedCheckouts(all),
+    unusedSignInCodes(),
+    repeatedCardFailures(),
+  ])
+  return [abandoned, cards, codes].filter((f): f is Finding => f !== null)
+}

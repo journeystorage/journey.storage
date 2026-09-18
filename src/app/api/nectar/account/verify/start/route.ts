@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { findContactFor } from '@/lib/nectar/account'
 import { canSend, codeFor, currentWindow, maskEmail } from '@/lib/account-verify'
 import { emailShell, brandedFrom, p, label, panel, BRAND } from '@/lib/email-shell'
+import { recordEvent } from '@/lib/ops/events'
 
 async function sendCode(to: string, name: string, code: string): Promise<boolean> {
   const key = process.env.RESEND_API_KEY
@@ -64,6 +65,7 @@ export async function POST(req: NextRequest) {
     if (!ok) {
       return NextResponse.json({ error: 'We couldn’t send a code right now — please call us.' }, { status: 503 })
     }
+    await recordEvent({ kind: 'code_requested', contact, name: found.name })
     return NextResponse.json({ sent: true, email: maskEmail(found.email) })
   } catch {
     return NextResponse.json({ error: 'We couldn’t start verification — please try again or call us.' }, { status: 502 })

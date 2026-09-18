@@ -13,6 +13,7 @@ import { getContactBasics } from '@/lib/nectar/account'
 import { sendMoveInConfirmation } from '@/lib/move-in-email'
 import { sendLeadNotification } from '@/lib/lead-email'
 import { classifyFailure } from '@/lib/nectar/failure'
+import { recordEvent } from '@/lib/ops/events'
 
 interface RentBody {
   facility?: string
@@ -151,6 +152,9 @@ export async function POST(req: NextRequest) {
     // details together with the provider's own words. They can finish the
     // rental by phone, and we get the real cause without guessing.
     const who = [tenant?.first, tenant?.last].filter(Boolean).join(' ') || 'Online renter'
+    if (f.retryCard && tenant?.email) {
+      await recordEvent({ kind: 'card_failed', contact: tenant.email, name: who, phone: tenant.phone, detail: { kind: f.kind, where: 'rental' } })
+    }
     await sendLeadNotification({
       name: who,
       email: tenant?.email ?? '',

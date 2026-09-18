@@ -14,7 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { timingSafeEqual } from 'crypto'
 import { takeSnapshot, money } from '@/lib/ops/snapshot'
-import { runAllChecks, collectedYesterday, portfolioSummary, type Finding } from '@/lib/ops/checks'
+import { runAllChecks, runPeopleChecks, collectedYesterday, portfolioSummary, type Finding } from '@/lib/ops/checks'
 import { getSpaceMix } from '@/lib/nectar/spaces'
 import { FACILITIES } from '@/lib/nectar/facilities'
 import { sendLeadNotification } from '@/lib/lead-email'
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
   const dryRun = req.nextUrl.searchParams.get('dryRun') === '1'
   try {
     const snapshot = await takeSnapshot()
-    const findings = runAllChecks(snapshot)
+    const findings = [...runAllChecks(snapshot), ...(await runPeopleChecks(snapshot))]
     const collected = collectedYesterday(snapshot)
     const summary = portfolioSummary(snapshot)
     const health = await facilityHealth()

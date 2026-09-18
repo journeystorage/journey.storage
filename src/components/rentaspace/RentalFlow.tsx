@@ -219,6 +219,19 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
       if (!ok && !preview) { setApiError('We couldn’t hold this space — it may have just been taken. Try another size, or call us.'); return }
       setStep(1); return
     }
+    if (stepName === 'Your details' && !verified) {
+      // Remember who they are before the payment step. If they drop out now,
+      // this is the only record that they were ever here.
+      fetch('/api/nectar/checkout/started', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          facility: facility.slug,
+          spaceLabel: `${space.size}${space.category ? ` · ${space.category}` : ''}`,
+          name: details.name, email: details.email, phone: details.phone,
+        }),
+      }).catch(() => {})
+      setStep((s) => s + 1); return
+    }
     if (stepName === 'Protection') {
       if (real) {
         setProcessing(true); setApiError(null)
@@ -266,7 +279,7 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
   }
   const back = () => setStep((s) => Math.max(s - 1, 0))
 
-  const primaryBtn = 'inline-flex items-center justify-center gap-2 rounded-sm bg-orange px-6 py-3.5 text-[0.9375rem] font-bold text-warm-white shadow-[0_2px_8px_rgba(232,98,42,.3)] transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:hover:scale-100'
+  const primaryBtn = 'inline-flex items-center justify-center gap-2 rounded-sm bg-orange px-6 py-3.5 text-[0.9375rem] font-bold text-black shadow-[0_2px_8px_rgba(255,99,32,.3)] transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:hover:scale-100'
   const glassCard = `${R} border border-warm-white/10 bg-warm-white/[0.04]`
   const optionBase = `flex w-full items-center justify-between rounded-sm border p-4 text-left transition-colors duration-150`
   const dateLong = (iso: string) => new Date(iso + 'T00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -297,7 +310,7 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
     <div className="fixed inset-0 z-[130] flex items-stretch justify-center overflow-y-auto bg-black/80 backdrop-blur-md sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Rent a ${space.size} space`}>
       <div className={`grain relative flex min-h-full w-full max-w-4xl flex-col overflow-hidden bg-black text-warm-white antialiased sm:min-h-0 sm:max-h-[92vh] sm:rounded-tl-[32px] sm:rounded-tr-[6px] sm:rounded-br-[6px] sm:rounded-bl-[6px]`}>
         {/* Orange radial glow */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 z-[1]" style={{ background: 'radial-gradient(ellipse 70% 55% at 50% 0%, rgba(232,98,42,0.12), transparent 70%)' }} />
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-[1]" style={{ background: 'radial-gradient(ellipse 70% 55% at 50% 0%, rgba(255,99,32,0.12), transparent 70%)' }} />
         {/* Dot grid */}
         <div aria-hidden className="pointer-events-none absolute inset-0 z-[1] opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, #F5F0E8 0.7px, transparent 0.7px)', backgroundSize: '22px 22px' }} />
         {/* Ghost watermark */}
@@ -308,7 +321,7 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
         {/* Header */}
         <div className="sticky top-0 z-[5] flex items-center justify-between gap-4 border-b border-warm-white/[0.07] bg-black/70 px-5 py-4 backdrop-blur-md lg:px-10">
           <div className="flex items-center gap-3">
-            {preview && <span className="rounded-sm bg-orange px-2.5 py-1 text-[0.625rem] font-black uppercase tracking-[0.15em] text-warm-white">Preview</span>}
+            {preview && <span className="rounded-sm bg-orange px-2.5 py-1 text-[0.625rem] font-black uppercase tracking-[0.15em] text-black">Preview</span>}
             <div>
               <p className="text-[0.9375rem] font-black leading-tight tracking-[-0.02em] text-warm-white">Rent a {space.size} space</p>
               <p className="text-[0.75rem] text-warm-white/50">Journey.Storage™ — {facility.short}, Granbury TX</p>
@@ -455,7 +468,7 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
                       </span>
                       <span className="flex items-center gap-3">
                         <span className="text-[1.125rem] font-black text-orange">{money(p.premium)}<span className="text-[0.75rem] font-bold text-warm-white/40">/mo</span></span>
-                        <span className={`grid h-5 w-5 place-items-center rounded-full border-2 ${active ? 'border-orange bg-orange text-warm-white' : 'border-warm-white/25'}`}>{active && <Check className="h-3 w-3" strokeWidth={3} aria-hidden />}</span>
+                        <span className={`grid h-5 w-5 place-items-center rounded-full border-2 ${active ? 'border-orange bg-orange text-black' : 'border-warm-white/25'}`}>{active && <Check className="h-3 w-3" strokeWidth={3} aria-hidden />}</span>
                       </span>
                     </button>
                   )
@@ -602,13 +615,13 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
               <p className="mt-3 text-[1rem] leading-[1.6] text-warm-white/50">Your {space.size} space at {facility.short} is {rentResult ? 'rented' : 'reserved'}. A confirmation and lease PDF are on the way to {details.email || 'your email'}.</p>
               <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className={`relative overflow-hidden ${R} border border-warm-white/10 bg-warm-white/[0.05] p-5 text-left`}>
-                  <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(232,98,42,0.18) 0%, transparent 60%)' }} />
+                  <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(255,99,32,0.18) 0%, transparent 60%)' }} />
                   <p className="relative flex items-center gap-2 text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45"><KeyRound className="h-3.5 w-3.5 text-orange" aria-hidden />Gate code</p>
                   <p className="relative mt-1.5 text-[1.875rem] font-black tracking-[0.12em] text-warm-white">{rentResult?.gatePin ? rentResult.gatePin : `${gateCode}#`}</p>
                   <p className="relative text-[0.75rem] text-warm-white/45">24/7 access · non-transferable</p>
                 </div>
                 <div className={`relative overflow-hidden ${R} border border-warm-white/10 bg-warm-white/[0.05] p-5 text-left`}>
-                  <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(232,98,42,0.18) 0%, transparent 60%)' }} />
+                  <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(255,99,32,0.18) 0%, transparent 60%)' }} />
                   <p className="relative text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Your space</p>
                   <p className="relative mt-1.5 text-[1.875rem] font-black text-warm-white">{rentResult?.unitNumber ? `Unit ${rentResult.unitNumber}` : space.size}</p>
                   <p className="relative text-[0.75rem] text-warm-white/45">{rentResult ? (rentResult.unitNumber ? `${space.size} · ${facility.address}` : 'Unit number in your confirmation email') : `${unitNo} · ${facility.address}`}</p>
