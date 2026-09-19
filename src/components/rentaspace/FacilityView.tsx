@@ -157,11 +157,17 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
   const gLen = f.gallery.length
   const reviewsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Journey Storage ${f.short} Granbury TX`)}`
 
+  // Hero slides load one at a time: only slide 1 is in the first paint, and each
+  // slide that finishes loading mounts the next. `loaded` = how many have arrived.
+  const [loaded, setLoaded] = useState(0)
+  const markLoaded = (i: number) => setLoaded((l) => Math.max(l, i + 1))
+
   useEffect(() => {
     if (n < 2) return
-    const t = setInterval(() => setSlide((s) => (s + 1) % n), 3000)
+    // Never rotate onto a slide that hasn't arrived yet
+    const t = setInterval(() => setSlide((s) => ((s + 1) % n < loaded ? (s + 1) % n : s)), 3000)
     return () => clearInterval(t)
-  }, [n])
+  }, [n, loaded])
 
   const go = useCallback((d: number) => setSlide((s) => (s + d + n) % n), [n])
 
@@ -282,9 +288,21 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
 
       {/* ── HERO CAROUSEL ── */}
       <section className="grain relative h-[460px] overflow-hidden bg-black lg:h-[540px]">
-        {f.slides.map((sl, i) => (
+        {f.slides.map((sl, i) => i <= loaded && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={sl.src} src={sl.src} alt={i === slide ? sl.alt : ''} className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${i === slide ? 'opacity-100' : 'opacity-0'}`} />
+          <img
+            key={sl.src}
+            src={sl.src}
+            srcSet={`${sl.src.replace('.webp', '-960.webp')} 960w, ${sl.src.replace('.webp', '-1280.webp')} 1280w, ${sl.src} 1920w`}
+            sizes="100vw"
+            fetchPriority={i === 0 ? 'high' : 'low'}
+            decoding={i === 0 ? 'sync' : 'async'}
+            // A slide that finished before hydration never fires onLoad
+            ref={(el) => { if (el?.complete && el.naturalWidth) markLoaded(i) }}
+            onLoad={() => markLoaded(i)}
+            alt={i === slide ? sl.alt : ''}
+            className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700 ${i === slide ? 'opacity-100' : 'opacity-0'}`}
+          />
         ))}
         <div className="absolute inset-0 bg-charcoal/30 mix-blend-multiply" />
         <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(24,24,24,0.60) 0%, rgba(24,24,24,0.25) 45%, rgba(24,24,24,0.88) 100%)' }} />
@@ -319,7 +337,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
               {f.gallery.map((g, i) => (
                 <button key={g.thumb} onClick={() => setLightbox(i)} aria-label={`View photo: ${g.alt}`} className="btn-spring relative h-12 w-16 overflow-hidden rounded-lg ring-2 ring-warm-white/40 hover:ring-warm-white lg:h-14 lg:w-20">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={g.thumb} alt={g.alt} className="h-full w-full object-cover" />
+                  <img src={g.thumb} alt={g.alt} fetchPriority="low" decoding="async" className="h-full w-full object-cover" />
                 </button>
               ))}
               <button onClick={() => setLightbox(0)} className="ml-1 text-[0.8125rem] font-bold text-warm-white underline-offset-4 transition-colors hover:text-terracotta hover:underline">View all photos</button>
@@ -333,7 +351,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
             <button onClick={() => go(1)} aria-label="Next photo" className="btn-spring absolute right-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 text-warm-white backdrop-blur hover:bg-black/70 sm:grid"><ChevronRight className="h-6 w-6" aria-hidden /></button>
             <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 gap-2">
               {f.slides.map((_, i) => (
-                <button key={i} onClick={() => setSlide(i)} aria-label={`Go to photo ${i + 1}`} className={`h-2 rounded-full transition-all duration-300 ${i === slide ? 'w-6 bg-orange' : 'w-2 bg-warm-white/60 hover:bg-warm-white'}`} />
+                <button key={i} onClick={() => { setLoaded((l) => Math.max(l, i)); setSlide(i) }} aria-label={`Go to photo ${i + 1}`} className={`h-2 rounded-full transition-all duration-300 ${i === slide ? 'w-6 bg-orange' : 'w-2 bg-warm-white/60 hover:bg-warm-white'}`} />
               ))}
             </div>
           </>

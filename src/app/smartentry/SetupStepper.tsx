@@ -46,7 +46,7 @@ const STEPS: Step[] = [
     ),
     frame: (
       <Image
-        src="/images/smartentry/shot-store.png"
+        src="/images/smartentry/shot-store.webp"
         alt="App Store listing for Storage Smart Entry by Nokē, published by Noke Inc"
         width={660}
         height={248}
@@ -65,7 +65,7 @@ const STEPS: Step[] = [
     ),
     frame: (
       <Image
-        src="/images/smartentry/shot-login.png"
+        src="/images/smartentry/shot-login.webp"
         alt="Login screen: your cell number, then the 6-digit PIN"
         width={800}
         height={330}
@@ -85,7 +85,7 @@ const STEPS: Step[] = [
     ),
     frame: (
       <Image
-        src="/images/smartentry/shot-bluetooth.png"
+        src="/images/smartentry/shot-bluetooth.webp"
         alt="iOS prompt: Storage Smart Entry would like to use Bluetooth. Tap OK."
         width={760}
         height={522}

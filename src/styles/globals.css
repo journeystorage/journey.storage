@@ -127,6 +127,17 @@ body {
   to { opacity: 1; }
 }
 
+/* Home hero entrance. CSS, not framer-motion: the copy used to be server-rendered
+   at opacity 0 and stayed invisible until the JS bundle hydrated (slow-phone LCP). */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: none; }
+}
+.hero-rise {
+  animation: hero-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--rise-delay, 0s);
+}
+
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }

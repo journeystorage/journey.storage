@@ -390,7 +390,7 @@ export default function MoveOutPage() {
                       >
                         <div className="relative h-24 overflow-hidden">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={p.image} alt={`${p.name} facility`} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                          <img src={p.image} alt={`${p.name} facility`} loading="lazy" decoding="async" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" aria-hidden="true" />
                           {p.badge && (
                             <span className="absolute left-2.5 top-2.5 rounded-full bg-orange px-2 py-0.5 text-[0.62rem] font-bold text-warm-white shadow-[0_2px_8px_rgba(232,98,42,0.35)]">{p.badge}</span>

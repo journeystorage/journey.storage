@@ -91,7 +91,7 @@ export default function RentASpaceView() {
       <section className="grain relative overflow-hidden">
         <div className="absolute inset-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/granbury/hero-interior.webp" alt="" className="h-full w-full object-cover object-center" />
+          <img src="/images/granbury/hero-interior.webp" srcSet="/images/granbury/hero-interior-960.webp 960w, /images/granbury/hero-interior.webp 1600w" sizes="100vw" fetchPriority="high" alt="" className="h-full w-full object-cover object-center" />
           <div className="absolute inset-0 bg-charcoal/40 mix-blend-multiply" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(24,24,24,0.78) 0%, rgba(24,24,24,0.55) 42%, rgba(24,24,24,0.88) 100%)' }} />
           <div className="absolute inset-0" style={{ background: 'radial-gradient(90% 70% at 50% 45%, rgba(24,24,24,0.45) 0%, transparent 70%)' }} />
@@ -208,7 +208,7 @@ export default function RentASpaceView() {
           <article className="card-spring group r-jr relative flex flex-col overflow-hidden border border-black/[0.05] bg-white">
             <div className="relative h-44 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/granbury/rs-card-th-aerial.webp" alt="Temple Hall facility aerial" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img src="/images/granbury/rs-card-th-aerial.webp" loading="lazy" decoding="async" alt="Temple Hall facility aerial" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
               <span className="shadow-cta absolute left-4 top-4 rounded-full bg-orange px-3 py-1 text-[0.8125rem] font-bold text-warm-white">350+ spaces</span>
             </div>
@@ -238,7 +238,7 @@ export default function RentASpaceView() {
           <article className="card-spring group r-jr relative flex flex-col overflow-hidden border border-black/[0.05] bg-white">
             <div className="relative h-44 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/granbury/rs-card-wh-aerial.webp" alt="Western Hills facility aerial" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img src="/images/granbury/rs-card-wh-aerial.webp" loading="lazy" decoding="async" alt="Western Hills facility aerial" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
               <span className="absolute left-4 top-4 rounded-full bg-charcoal px-3 py-1 text-[0.8125rem] font-bold text-warm-white">100+ units</span>
             </div>
@@ -268,7 +268,7 @@ export default function RentASpaceView() {
           <article className="card-spring group r-jr relative flex flex-col overflow-hidden border border-black/[0.05] bg-white">
             <div className="relative h-44 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/granbury/rs-card-cl-aerial.webp" alt="Cleveland Rd facility aerial" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img src="/images/granbury/rs-card-cl-aerial.webp" loading="lazy" decoding="async" alt="Cleveland Rd facility aerial" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
               <span className="absolute left-4 top-4 rounded-full bg-charcoal px-3 py-1 text-[0.8125rem] font-bold text-warm-white">Newest</span>
             </div>
@@ -320,15 +320,15 @@ export default function RentASpaceView() {
             <div className="grid grid-cols-2 gap-3">
               <div className="shadow-card r-jr relative col-span-2 aspect-[16/9] overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/granbury/rs-gallery-aerial.webp" alt="Aerial of Temple Hall facility" className="h-full w-full object-cover" />
+                <img src="/images/granbury/rs-gallery-aerial.webp" loading="lazy" decoding="async" alt="Aerial of Temple Hall facility" className="h-full w-full object-cover" />
               </div>
               <div className="shadow-card r-jr relative aspect-[4/3] overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/granbury/rs-gallery-climate.webp" alt="Climate-controlled units" className="h-full w-full object-cover" />
+                <img src="/images/granbury/rs-gallery-climate.webp" loading="lazy" decoding="async" alt="Climate-controlled units" className="h-full w-full object-cover" />
               </div>
               <div className="shadow-card r-jr relative aspect-[4/3] overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/granbury/rs-gallery-office.webp" alt="Rental office" className="h-full w-full object-cover" />
+                <img src="/images/granbury/rs-gallery-office.webp" loading="lazy" decoding="async" alt="Rental office" className="h-full w-full object-cover" />
               </div>
             </div>
           </div>
