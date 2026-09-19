@@ -19,6 +19,8 @@ export async function POST(req: NextRequest) {
     const matches = await findLeasesByContact(contact)
     return NextResponse.json({
       found: matches.length > 0,
+      // Whether to offer the hosted payment page (Tenant Inc's one-time link)
+      // or the "pay by phone" panel. Same switch as the pay-link route.
       payOnline: process.env.NECTAR_BILLPAY_LIVE === 'true',
       name: matches[0]?.name ?? null,
       totalDue: +matches.reduce((s, m) => s + (m.balance > 0 ? m.balance : 0), 0).toFixed(2),

@@ -1,5 +1,5 @@
 import 'server-only'
-import { nectarV2 } from './client'
+import { nectarV2, nectarV1 } from './client'
 import { COMPANY_ID, facilityByPropertyId } from './facilities'
 
 // ---------------------------------------------------------------------------
@@ -341,4 +341,25 @@ export async function getContactBasics(contactId: string): Promise<{ first: stri
   } catch {
     return null
   }
+}
+
+
+/**
+ * A one-time hosted payment link for a tenant — Tenant Inc's supported way to
+ * collect from an existing tenant, and the answer to the v2 payment endpoint
+ * that crashed on contact_id (their engineering team, 2026-09-18).
+ *
+ * The tenant pays on Hummingbird's own page and the payment posts to their
+ * ledger automatically, so no card details ever reach us. The link is scoped
+ * to the CONTACT, not a lease — it cannot be limited to one space or amount
+ * (lease_id and amount query params are ignored) — and it expires at midnight
+ * local time, so generate one per request and never store it.
+ *
+ * It is a bearer credential to pay on that account: only ever hand it to a
+ * verified session, and never log it.
+ */
+export async function getPaymentLink(contactId: string): Promise<string | null> {
+  const { data } = await nectarV1<{ link?: string }>(`companies/${co()}/contacts/${contactId}/one-time-link`)
+  const link = data.link
+  return typeof link === 'string' && /^https:\/\//.test(link) ? link : null
 }

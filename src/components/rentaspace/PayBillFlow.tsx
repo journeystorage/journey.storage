@@ -4,13 +4,16 @@ import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { facilities as ALL_FACILITIES, PHONE } from '@/lib/constants'
 import { X, Check, ChevronLeft, ChevronRight, ChevronDown, Search, Wallet, CreditCard, CalendarClock, PlusCircle, ShieldCheck } from 'lucide-react'
-import { formatCardNumber, formatExpiry, formatZip, cardDigits, parseExpiry, expiryIsPast } from '@/lib/card-format'
 
 /**
  * Pay Bill — real tenant payment.
  *   1. Look up the account by email/phone (/api/nectar/account/lookup)
  *   2. Show the live balance
- *   3. Pay by card (/api/nectar/account/pay → leases/{id}/payment)
+ *   3. Pay on the provider's hosted page (/api/nectar/account/pay-link).
+ *      We deliberately do NOT take card details: the v2 charge endpoint
+ *      crashes inside Tenant Inc's code, and their engineering team confirmed
+ *      the one-time payment link is the supported route for an existing
+ *      tenant. It also means no card data ever reaches us.
  * Card data is sent to our server route only; never stored client-side.
  */
 
@@ -143,8 +146,6 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
   // Per-lease outcome — paying N spaces is N charges, so some can fail.
   const [results, setResults] = useState<Array<{ leaseId: string; ok: boolean; error?: string }>>([])
   const [lookupMsg, setLookupMsg] = useState<string | null>(null)
-  const [card, setCard] = useState({ number: '', exp: '', cvc: '' })
-  const [billing, setBilling] = useState({ name: '', address1: '', city: '', state: '', zip: '' })
   // Card payments are switched off while Tenant Inc's payment endpoint is
   // failing; the lookup tells us whether to show the card form or route to phone.
   const [payOnline, setPayOnline] = useState(true)
@@ -168,6 +169,8 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
   // The provider's own words + reference, shown small under the error so a
   // tenant on the phone — or we — can see what actually went wrong.
   const [payDetail, setPayDetail] = useState<{ detail: string | null; reference: string | null } | null>(null)
+  // The hosted page is open in another tab; the balance here updates once it posts.
+  const [openedPaymentPage, setOpenedPaymentPage] = useState(false)
 
   const stepName: StepName = STEPS[step]
   const payable = accounts.filter((a) => a.balance > 0)
@@ -229,7 +232,9 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
     // Nothing owed anywhere: the button becomes a plain "Done".
     if (stepName === 'Balance') return payable.length === 0 || (chosen.length > 0 && amountDue > 0)
     if (stepName === 'Payment' && !payOnline) return false // the call CTA lives in the panel
-    if (stepName === 'Payment') return cardDigits(card.number).length >= 12 && !!parseExpiry(card.exp) && !expiryIsPast(card.exp) && card.cvc.length >= 3 && !!billing.name && !!billing.address1 && !!billing.city && !!billing.state && !!billing.zip
+    // Nothing for us to validate any more: the tenant fills the card in on the
+    // provider's page, so all we need is a space selected.
+    if (stepName === 'Payment') return chosen.length > 0 && !openedPaymentPage
     return true
   }
 
@@ -305,42 +310,40 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
    * and record each outcome — a later one failing must not erase an earlier
    * success, and the receipt has to say exactly what went through.
    */
-  async function pay(): Promise<boolean> {
-    if (!chosen.length) return false
-    const exp = parseExpiry(card.exp)
-    if (!exp) { setPayError('Check the expiry date on your card.'); return false }
-    const { mm, yyyy: yy } = exp
-    const cardPayload = { card_number: card.number.replace(/\s/g, ''), cvv2: card.cvc, exp_mo: mm, exp_yr: yy, name_on_card: billing.name, address: billing.address1, city: billing.city, state: billing.state, zip: billing.zip }
-    const out: Array<{ leaseId: string; ok: boolean; error?: string }> = []
-    for (const a of chosen) {
-      try {
-        const r = await fetch('/api/nectar/account/pay', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ leaseId: a.leaseId, amount: a.balance, card: cardPayload }) })
-        const j = await r.json()
-        if (!(r.ok && j.ok) && (j?.detail || j?.reference)) setPayDetail({ detail: j.detail ?? null, reference: j.reference ?? null })
-        out.push(r.ok && j.ok ? { leaseId: a.leaseId, ok: true } : { leaseId: a.leaseId, ok: false, error: j.error ?? 'Payment declined.' })
-      } catch {
-        out.push({ leaseId: a.leaseId, ok: false, error: 'Connection problem.' })
+  /**
+   * Hand the tenant a one-time hosted payment link. We don't take the card
+   * ourselves: the v2 payment endpoint crashes inside Tenant Inc's code, and
+   * this is the route their engineering team confirmed.
+   */
+  async function openPaymentPage(): Promise<boolean> {
+    setPayError(null); setPayDetail(null)
+    try {
+      const r = await fetch('/api/nectar/account/pay-link', { method: 'POST' })
+      const j = await r.json()
+      if (!r.ok || !j?.link) {
+        if (j?.detail || j?.reference) setPayDetail({ detail: j.detail ?? null, reference: j.reference ?? null })
+        setPayError(j?.error ?? 'We couldn’t open the payment page just now.')
+        return false
       }
+      // A new tab keeps their verified Pay Bill session intact behind it.
+      window.open(j.link, '_blank', 'noopener,noreferrer')
+      setOpenedPaymentPage(true)
+      return true
+    } catch {
+      setPayError('We couldn’t reach the payment page. Please check your connection, or call us.')
+      return false
     }
-    setResults(out)
-    const anyOk = out.some((r) => r.ok)
-    const failures = out.filter((r) => !r.ok)
-    if (failures.length && anyOk) {
-      setPayError(`We couldn’t complete ${failures.length} of ${out.length} payments — see below.`)
-    } else if (failures.length) {
-      setPayError(failures[0].error ?? 'Payment could not be processed.')
-    }
-    // Land on the receipt whenever anything succeeded, so the tenant sees it.
-    return anyOk
   }
+
 
   const next = async () => {
     if (stepName === 'Account') { if (await lookup()) setStep(1); return }
     if (stepName === 'Payment') {
-      setProcessing(true); setPayError(null); setPayDetail(null)
-      const ok = await pay()
+      setProcessing(true)
+      // Opening the hosted page is the last thing we do; the tenant finishes
+      // there, so there is no receipt step of ours to advance to.
+      await openPaymentPage()
       setProcessing(false)
-      if (ok) setStep(3)
       return
     }
     setStep((s) => Math.min(s + 1, STEPS.length - 1))
@@ -739,23 +742,18 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
                   <p className="mt-3 text-[0.6875rem] leading-relaxed text-warm-white/45">Each space is billed separately, so {chosen.length} charges totalling {money(amountDue)} will appear on your statement.</p>
                 )}
               </div>
-              <div className="mt-6 space-y-3">
-                <input inputMode="numeric" autoComplete="cc-number" placeholder="Card number" value={card.number} onChange={(e) => setCard({ ...card, number: formatCardNumber(e.target.value) })} className={FIELD} />
-                <div className="grid grid-cols-2 gap-3">
-                  <input inputMode="numeric" autoComplete="cc-exp" maxLength={7} placeholder="MM/YY" value={card.exp} onChange={(e) => setCard({ ...card, exp: formatExpiry(e.target.value, card.exp) })} className={FIELD} />
-                  <input inputMode="numeric" autoComplete="cc-csc" placeholder="CVC" value={card.cvc} onChange={(e) => setCard({ ...card, cvc: cardDigits(e.target.value).slice(0, 4) })} className={FIELD} />
-                </div>
-                {expiryIsPast(card.exp) && (
-                  <p className="text-[0.8125rem] font-bold text-[#E8A87C]">That expiry date has passed — check the date on your card.</p>
-                )}
-                <p className="pt-2 text-[0.75rem] font-bold uppercase tracking-[0.15em] text-warm-white/40">Billing address</p>
-                <input placeholder="Cardholder name" value={billing.name} onChange={(e) => setBilling({ ...billing, name: e.target.value })} className={FIELD} />
-                <input placeholder="Street address" value={billing.address1} onChange={(e) => setBilling({ ...billing, address1: e.target.value })} className={FIELD} />
-                <div className="grid grid-cols-[1fr_80px_100px] gap-3">
-                  <input placeholder="City" value={billing.city} onChange={(e) => setBilling({ ...billing, city: e.target.value })} className={FIELD} />
-                  <input placeholder="State" maxLength={2} value={billing.state} onChange={(e) => setBilling({ ...billing, state: e.target.value.toUpperCase() })} className={FIELD} />
-                  <input inputMode="numeric" autoComplete="postal-code" placeholder="ZIP" value={billing.zip} onChange={(e) => setBilling({ ...billing, zip: formatZip(e.target.value) })} className={FIELD} />
-                </div>
+              {/* Payment happens on Hummingbird's own hosted page. Taking card
+                  details here used an endpoint that crashes inside Tenant
+                  Inc's code, and their team confirmed the one-time link is the
+                  supported route — so no card details reach us at all. */}
+              <div className={`mt-6 ${glassCard} p-4`}>
+                <p className="flex items-start gap-2.5 text-[0.875rem] leading-relaxed text-warm-white/75">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-sage-green" aria-hidden />
+                  <span>You&rsquo;ll finish on our payment provider&rsquo;s secure page. Your card details go straight to them &mdash; we never see or store them.</span>
+                </p>
+                <p className="mt-3 text-[0.75rem] leading-relaxed text-warm-white/45">
+                  The page opens in a new tab and covers everything on your account. Your link is good for today only.
+                </p>
               </div>
               {payError && (
                 <div className="mt-4 rounded-sm border border-[#D4956A]/40 bg-[#D4956A]/10 px-4 py-3" role="alert">
@@ -769,7 +767,11 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
                   )}
                 </div>
               )}
-              <p className="mt-4 rounded-sm border border-warm-white/[0.08] bg-warm-white/[0.04] px-3 py-2.5 text-[0.75rem] leading-relaxed text-warm-white/55">Secured by Tenant Payments. Your card is charged {money(amountDue)} and applied to {chosen.length > 1 ? 'the spaces above' : 'your account'}.</p>
+              {openedPaymentPage && (
+                <p className="mt-4 rounded-sm border border-sage-green/30 bg-sage-green/[0.08] px-3 py-2.5 text-[0.8125rem] leading-relaxed text-warm-white/80">
+                  The payment page is open in another tab. Once you&rsquo;ve paid there, your balance here updates within a few minutes.
+                </p>
+              )}
             </div>
           )}
 
@@ -825,7 +827,8 @@ export default function PayBillFlow({ facility, onClose: closePanel }: { facilit
                 {looking ? 'Finding…' : processing ? 'Processing…'
                   : stepName === 'Account'
                     ? (verifyStage === 'sending' ? 'Sending code…' : verifyStage === 'checking' ? 'Checking…' : (verifyStage === 'code' ? 'Confirm code' : 'Send me a code'))
-                  : stepName === 'Balance' ? (payable.length === 0 ? 'Done' : chosen.length ? (payOnline ? 'Continue to payment' : 'How to pay') : 'Select a space') : `Pay ${money(amountDue)}`}
+                  : stepName === 'Balance' ? (payable.length === 0 ? 'Done' : chosen.length ? (payOnline ? 'Continue to payment' : 'How to pay') : 'Select a space')
+                  : openedPaymentPage ? 'Payment page opened' : `Pay ${money(amountDue)} securely`}
                 {!looking && !processing && <ChevronRight className="h-4 w-4" aria-hidden />}
               </button>
               )}

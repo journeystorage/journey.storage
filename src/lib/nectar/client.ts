@@ -194,3 +194,47 @@ export async function nectarV2<T>(path: string, opts: NectarRequestOptions = {})
 
   return { data: (inner.data ?? ({} as T)), requestId };
 }
+
+
+// ---------------------------------------------------------------------------
+// v1 app-scoped API.
+//
+// Almost everything lives under .../v2, but Tenant Inc's supported way to
+// collect a payment from an existing tenant is the one-time payment link,
+// which is only on .../v1 (confirmed by their engineering team, 2026-09-18,
+// after the v2 payment endpoints returned 500s and 409s).
+// ---------------------------------------------------------------------------
+
+const V1_BASE = BASE_URL.replace(/\/v2\/?$/, '/v1')
+
+export async function nectarV1<T>(path: string, opts: NectarRequestOptions = {}): Promise<{ data: T; requestId?: string }> {
+  if (!API_KEY) throw new NectarError("NECTAR_API_KEY is not configured", 500, "ConfigMissing")
+  if (!APP_ID) throw new NectarError("NECTAR_APP_ID is not configured", 500, "ConfigMissing")
+
+  const url = new URL(V1_BASE + (path.startsWith("/") ? path : `/${path}`))
+  for (const [k, v] of Object.entries(opts.query ?? {})) {
+    if (v !== undefined) url.searchParams.set(k, String(v))
+  }
+
+  const res = await fetch(url, {
+    method: opts.method ?? "GET",
+    headers: {
+      "X-storageapi-key": API_KEY,
+      "X-storageapi-date": String(Math.floor(Date.now() / 1000)),
+      ...(opts.body !== undefined ? { "Content-Type": "application/json" } : {}),
+    },
+    body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+    cache: "no-store",
+  })
+
+  let env: { message?: string; applicationData?: Record<string, Array<{ status?: number; data?: T; msg?: string }>>; meta?: { requestId?: string } } | undefined
+  try { env = await res.json() } catch { /* non-JSON */ }
+  const inner = env?.applicationData?.[APP_ID]?.[0]
+
+  if (!res.ok || !inner || (inner.status !== undefined && inner.status >= 400)) {
+    const status = inner?.status ?? res.status
+    console.error("[nectar] v1 request failed", { path, httpStatus: res.status, innerStatus: inner?.status, msg: inner?.msg })
+    throw new NectarError(inner?.msg ?? env?.message ?? `Nectar v1 request failed (${status})`, status, undefined, env?.meta?.requestId)
+  }
+  return { data: (inner.data ?? ({} as T)), requestId: env?.meta?.requestId }
+}

@@ -8,20 +8,33 @@ Last reviewed: 2026-09-18.
 
 ## Blocked on Tenant Inc
 
-**Pay Bill cannot take a card.** `POST companies/{co}/leases/{id}/payment`
-returns HTTP 500 `Cannot read properties of undefined (reading 'contact_id')`
-— an unhandled crash in their code, not a validation or card problem. We
-cannot work around it: the endpoint accepts only `payment_amount` and
-`payment_method_id` (34 other field names rejected), and no alternative charge
-endpoint exists. `NECTAR_BILLPAY_LIVE=false`, so tenants get the "pay by
-phone" panel. Ticket text is in the session notes.
+**~~Pay Bill cannot take a card.~~ SOLVED 2026-09-18** — Tenant Inc's
+engineering team replied: the v2 charge endpoints are not the supported route
+for an existing tenant. The supported one is a **one-time hosted payment
+link**, on `/v1` rather than `/v2`:
+
+    GET /v1/companies/{company_id}/contacts/{contact_id}/one-time-link
+
+Verified working: it returns a `tenantpay.tenantinc.com` link, valid until
+midnight local time, and the tenant pays on Hummingbird's page with the
+payment posting to their ledger automatically. Pay Bill now uses it, so no
+card details reach us at all. Two consequences to know:
+
+- The link is scoped to the **contact**, not a lease. It cannot be limited to
+  one space or one amount (`lease_id` and `amount` params are ignored), so the
+  hosted page covers the whole account and our per-space selection is now
+  only about showing what's owed.
+- It is a bearer credential — anyone with the link can pay on that account —
+  so it is only ever issued to a session that has verified by code, is never
+  logged and never stored.
 
 **Rentals do not always collect.** The rental flow never charges at checkout —
 Tenant stores the card and collects afterwards. Where autopay enrols, money
 arrives same day or next. Where it doesn't, it never arrives at all.
 
 **No API way to change an autopay card**, so Pay Bill's autopay controls are
-status-only.
+status-only. Worth re-asking Tenant Inc now that they've pointed us at `/v1` —
+there may be a supported route there too.
 
 ---
 

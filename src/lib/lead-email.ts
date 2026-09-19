@@ -66,6 +66,7 @@ const SOURCE_LABELS: Record<string, { subject: (name: string) => string; eyebrow
   'paybill-signin': { subject: (n) => `Pay Bill sign-in — ${n}`, eyebrow: 'Pay Bill sign-in' },
   'paybill-failed': { subject: () => 'Pay Bill payment FAILED', eyebrow: 'Pay Bill payment failed' },
   'paybill-paid': { subject: () => 'Pay Bill payment received', eyebrow: 'Pay Bill payment received' },
+  'paybill-link': { subject: () => 'Pay Bill — tenant opened the payment page', eyebrow: 'Opened the payment page' },
   'autopay-request': { subject: (n) => `Autopay requested — ${n}`, eyebrow: 'Autopay requested' },
   'ops-alert': { subject: (n) => `Action needed — ${n}`, eyebrow: 'Action needed' },
   'ops-digest': { subject: () => 'Daily summary', eyebrow: 'Daily summary' },
