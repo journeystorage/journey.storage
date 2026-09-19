@@ -314,7 +314,7 @@ ${band(DARK, foot, { dots: true })}
 }
 
 /**
- * One large figure on the cream band — a sign-in code, a gate code. Ink at
+ * One large figure on the cream band — a sign-in code, say. Ink at
  * 800, never orange: orange type on a light ground fails contrast.
  */
 export const bigFigure = (text: string) =>
@@ -328,7 +328,7 @@ export const link = (href: string, text: string) =>
   `<a href="${href}" style="color:${ON_CREAM};font-weight:700;text-decoration:underline;text-decoration-color:${BRAND.orange};text-underline-offset:3px">${text}</a>`
 
 /**
- * A large figure for the dark hero band — a gate code. On dark it may be the
+ * A large figure for the dark hero band — a unit number. On dark it may be the
  * composition's orange; here it stays Warm White so the heading tick and the
  * button remain the only orange accents.
  */

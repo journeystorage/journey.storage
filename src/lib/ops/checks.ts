@@ -68,7 +68,7 @@ export function unpaidNewRentals(all: LeaseSnapshot[]): Finding | null {
       who: s.name, where: where(s), amount: s.openBalance,
       note: `rented ${daysSince(s.createdAt)}d ago · never paid`, contact: s.phone, severe: true,
     })),
-    action: 'Take payment by phone and check why the card never charged. These tenants have keys and a gate code.',
+    action: 'Take payment and check why the card never charged. These tenants already have access to their space.',
   }
 }
 

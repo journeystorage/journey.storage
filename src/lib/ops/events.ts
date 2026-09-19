@@ -20,6 +20,12 @@ export type OpsEventKind =
   | 'code_requested'
   | 'code_confirmed'
   | 'card_failed'
+  /**
+   * A payment we have already told staff about. `contact` holds the ledger
+   * row's id — it is the dedupe key, not a person — so the watcher can run
+   * often without repeating itself.
+   */
+  | 'payment_seen'
 
 const TABLE = 'ops_events'
 
@@ -52,7 +58,7 @@ export function isTestContact(contact?: string | null): boolean {
 }
 
 export async function recordEvent(e: OpsEvent): Promise<void> {
-  if (isTestContact(e.contact)) return
+  if (e.kind !== 'payment_seen' && isTestContact(e.contact)) return
   try {
     await getSupabaseServer().from(TABLE).insert({
       kind: e.kind,
@@ -83,7 +89,9 @@ export async function recentEvents(kinds: OpsEventKind[], hours: number): Promis
       .order('created_at', { ascending: false })
       .limit(1000)
     if (error) throw error
-    return ((data ?? []) as StoredEvent[]).filter((e) => !isTestContact(e.contact))
+    return ((data ?? []) as StoredEvent[]).filter(
+      (e) => e.kind === 'payment_seen' || !isTestContact(e.contact),
+    )
   } catch (err) {
     console.error('[ops-events] read failed', err instanceof Error ? err.message : err)
     return []
@@ -95,4 +103,22 @@ export async function cardFailureCount(contact: string, hours = 24): Promise<num
   const key = contact.toLowerCase().trim()
   if (!key) return 0
   return (await recentEvents(['card_failed'], hours)).filter((e) => e.contact === key).length
+}
+
+/** Record several events at once — one insert, for the payment watcher. */
+export async function recordEvents(events: OpsEvent[]): Promise<void> {
+  if (!events.length) return
+  try {
+    await getSupabaseServer().from(TABLE).insert(
+      events.map((e) => ({
+        kind: e.kind,
+        contact: (e.contact ?? '').toLowerCase().trim() || null,
+        name: e.name ?? null,
+        phone: e.phone ?? null,
+        detail: e.detail ?? {},
+      })),
+    )
+  } catch (err) {
+    console.error('[ops-events] batch write failed', err instanceof Error ? err.message : err)
+  }
 }

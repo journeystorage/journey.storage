@@ -304,7 +304,6 @@ export interface RentalResult {
   leaseId: string
   paymentId?: string
   paymentMethodId?: string
-  gatePin?: string
   status?: string
   documentUrl?: string
   signed: boolean
@@ -365,7 +364,6 @@ export async function completeRental(i: CompleteRentalInput): Promise<RentalResu
     leaseId: lease.lease_id,
     paymentId: lease.payment_id,
     paymentMethodId: lease.payment_method_id,
-    gatePin: lease.tenants?.[0]?.pin,
     status: lease.status,
     documentUrl: documents[0]?.src,
     signed: docData.signed ?? false,

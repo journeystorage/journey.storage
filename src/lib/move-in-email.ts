@@ -48,7 +48,6 @@ export interface MoveInEmailData {
   billDay: number
   lineItems: Array<{ name: string; amount: number }>
   totalDue: number
-  gatePin?: string | null
   signed: boolean
   documentUrl?: string | null
   /**
@@ -99,14 +98,11 @@ function longDate(ymd: string): string {
 export function renderMoveInEmail(data: MoveInEmailData): { subject: string; html: string } {
   const fac = FACILITY_DISPLAY[data.facilitySlug] ?? { name: data.facilitySlug, address: 'Granbury, TX' }
   const first = esc(data.tenantFirst.trim() || 'there')
-  const pin = data.gatePin?.trim() || ''
   const spaceLabel = data.spaceLabel ? esc(data.spaceLabel.slice(0, 80)) : 'Self storage space'
   const unit = data.unitNumber ? esc(String(data.unitNumber).slice(0, 20)) : ''
   const docUrl = data.documentUrl && /^https:\/\//.test(data.documentUrl) ? data.documentUrl : ''
 
-  const subject = pin
-    ? 'You’re all moved in — your gate code & receipt'
-    : 'You’re all moved in — your receipt'
+  const subject = 'You’re all moved in — your receipt'
 
   // The receipt, with the total set apart under a rule.
   const receipt = panel(
@@ -123,7 +119,6 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
   )
 
   const next: Array<[string, string]> = [
-    ...(pin ? [['Head over anytime', `Use gate code <b>${esc(pin)}</b> at the keypad for 24/7 access to your space.`] as [string, string]] : []),
     ['Manage everything online', `View payments, update your card, or move out from ${link(`${SITE}/rentaspace`, 'journey.storage')} — no phone call needed.`],
     [
       'Keep your lease handy',
@@ -134,13 +129,11 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
   ]
 
   const html = emailShell({
-    preheader: pin ? `Your gate code is ${pin}. Everything for your new space is inside.` : 'Everything for your new space is inside.',
+    preheader: 'Everything for your new space is inside.',
     eyebrow: 'Move-in confirmed',
     heading: `You’re all <b>moved in, ${first}</b>`,
-    // The one thing they need on day one, in the dark band where it reads first.
-    highlight: pin
-      ? heroFigure(esc(pin.split('').join(' ')), 'Your gate code', '24/7 access, every day of the year · non-transferable')
-      : undefined,
+    // The unit number is what they need on day one.
+    highlight: unit ? heroFigure(`Unit ${unit}`, 'Your space', `${spaceLabel} · ${esc(fac.address)}`) : undefined,
     bodyHtml:
       p(`Your space at ${esc(fac.name)} is rented and ready. Everything you need is right here.`) +
       section('Your rental') +

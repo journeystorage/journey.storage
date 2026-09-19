@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { X, Check, ChevronLeft, ChevronRight, ShieldCheck, FileText, CreditCard, KeyRound } from 'lucide-react'
+import { X, Check, ChevronLeft, ChevronRight, ShieldCheck, FileText, CreditCard } from 'lucide-react'
 import { formatCardNumber, formatExpiry, formatZip, cardDigits, parseExpiry, expiryIsPast } from '@/lib/card-format'
 
 /**
@@ -82,7 +82,7 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
   const [hold, setHold] = useState<{ token: string; unitId: string; dossierToken?: string; spaceMixId?: string; promotionId?: string } | null>(null)
   const [realQuote, setRealQuote] = useState<{ dueToday: number; monthlyRent: number; billDay: number; lineItems: { name: string; amount: number }[] } | null>(null)
   const [realPlans, setRealPlans] = useState<{ id: string; coverage: number; premium: number }[] | null>(null)
-  const [rentResult, setRentResult] = useState<{ gatePin?: string | null; leaseId?: string; unitNumber?: string | null; documentUrl?: string | null } | null>(null)
+  const [rentResult, setRentResult] = useState<{ leaseId?: string; unitNumber?: string | null; documentUrl?: string | null } | null>(null)
   const [apiError, setApiError] = useState<string | null>(null)
   const real = !!hold // live mode once a hold is placed
   const dims = useMemo(() => { const m = space.size.match(/(\d+)\s*×\s*(\d+)/); return m ? { width: Number(m[1]), length: Number(m[2]) } : {} as { width?: number; length?: number } }, [space.size])
@@ -90,7 +90,6 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
   const stepName: StepName = STEPS[step]
   const plans = realPlans && realPlans.length ? realPlans : PLANS
   const plan = plans.find((p) => p.id === planId) ?? plans[0]
-  const gateCode = useMemo(() => String(1000 + Math.floor(Math.random() * 8999)), [])
   const unitNo = useMemo(() => `${'ABCD'[Math.floor(Math.random() * 4)]}-${100 + Math.floor(Math.random() * 240)}`, [])
 
   useEffect(() => {
@@ -191,7 +190,7 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
         card: { card_number: card.number.replace(/\s/g, ''), cvv2: card.cvc, exp_mo: mm, exp_yr: yy, name_on_card: details.name, address: details.address, city: details.city, state: details.state, zip: card.zip || details.zip },
       }) })
       const j = await r.json()
-      if (r.ok && j.ok) { setRentResult({ gatePin: j.gatePin, leaseId: j.leaseId, unitNumber: j.unitNumber, documentUrl: j.documentUrl }); return true }
+      if (r.ok && j.ok) { setRentResult({ leaseId: j.leaseId, unitNumber: j.unitNumber, documentUrl: j.documentUrl }); return true }
       // The route classifies the failure — a declined card, a space that went,
       // or a problem on our side — so pass that through instead of a shrug.
       if (j?.error) setFailure({ message: j.error, retryCard: j.retryCard === true, reference: j.reference ?? null })
@@ -252,7 +251,7 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
           [0, 'Securing your payment…'],
           [6, 'Processing your card…'],
           [14, 'Creating your lease…'],
-          [26, 'Assigning your unit & gate code…'],
+          [26, 'Assigning your unit…'],
           [40, 'Almost there — finalizing with the facility…'],
         ]
         const t0 = Date.now()
@@ -279,7 +278,7 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
   }
   const back = () => setStep((s) => Math.max(s - 1, 0))
 
-  const primaryBtn = 'inline-flex items-center justify-center gap-2 rounded-sm bg-orange px-6 py-3.5 text-[0.9375rem] font-bold text-black shadow-[0_2px_8px_rgba(255,99,32,.3)] transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:hover:scale-100'
+  const primaryBtn = 'inline-flex items-center justify-center gap-2 rounded-sm bg-orange px-6 py-3.5 text-[0.9375rem] font-bold text-warm-white shadow-[0_2px_8px_rgba(232,98,42,.3)] transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:hover:scale-100'
   const glassCard = `${R} border border-warm-white/10 bg-warm-white/[0.04]`
   const optionBase = `flex w-full items-center justify-between rounded-sm border p-4 text-left transition-colors duration-150`
   const dateLong = (iso: string) => new Date(iso + 'T00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -310,7 +309,7 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
     <div className="fixed inset-0 z-[130] flex items-stretch justify-center overflow-y-auto bg-black/80 backdrop-blur-md sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label={`Rent a ${space.size} space`}>
       <div className={`grain relative flex min-h-full w-full max-w-4xl flex-col overflow-hidden bg-black text-warm-white antialiased sm:min-h-0 sm:max-h-[92vh] sm:rounded-tl-[32px] sm:rounded-tr-[6px] sm:rounded-br-[6px] sm:rounded-bl-[6px]`}>
         {/* Orange radial glow */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 z-[1]" style={{ background: 'radial-gradient(ellipse 70% 55% at 50% 0%, rgba(255,99,32,0.12), transparent 70%)' }} />
+        <div aria-hidden className="pointer-events-none absolute inset-0 z-[1]" style={{ background: 'radial-gradient(ellipse 70% 55% at 50% 0%, rgba(232,98,42,0.12), transparent 70%)' }} />
         {/* Dot grid */}
         <div aria-hidden className="pointer-events-none absolute inset-0 z-[1] opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(circle, #F5F0E8 0.7px, transparent 0.7px)', backgroundSize: '22px 22px' }} />
         {/* Ghost watermark */}
@@ -321,7 +320,7 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
         {/* Header */}
         <div className="sticky top-0 z-[5] flex items-center justify-between gap-4 border-b border-warm-white/[0.07] bg-black/70 px-5 py-4 backdrop-blur-md lg:px-10">
           <div className="flex items-center gap-3">
-            {preview && <span className="rounded-sm bg-orange px-2.5 py-1 text-[0.625rem] font-black uppercase tracking-[0.15em] text-black">Preview</span>}
+            {preview && <span className="rounded-sm bg-orange px-2.5 py-1 text-[0.625rem] font-black uppercase tracking-[0.15em] text-warm-white">Preview</span>}
             <div>
               <p className="text-[0.9375rem] font-black leading-tight tracking-[-0.02em] text-warm-white">Rent a {space.size} space</p>
               <p className="text-[0.75rem] text-warm-white/50">Journey.Storage™ — {facility.short}, Granbury TX</p>
@@ -468,7 +467,7 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
                       </span>
                       <span className="flex items-center gap-3">
                         <span className="text-[1.125rem] font-black text-orange">{money(p.premium)}<span className="text-[0.75rem] font-bold text-warm-white/40">/mo</span></span>
-                        <span className={`grid h-5 w-5 place-items-center rounded-full border-2 ${active ? 'border-orange bg-orange text-black' : 'border-warm-white/25'}`}>{active && <Check className="h-3 w-3" strokeWidth={3} aria-hidden />}</span>
+                        <span className={`grid h-5 w-5 place-items-center rounded-full border-2 ${active ? 'border-orange bg-orange text-warm-white' : 'border-warm-white/25'}`}>{active && <Check className="h-3 w-3" strokeWidth={3} aria-hidden />}</span>
                       </span>
                     </button>
                   )
@@ -613,15 +612,11 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
               <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-sage-green/20 text-sage-green ring-1 ring-sage-green/30"><Check className="h-9 w-9" strokeWidth={3} aria-hidden /></div>
               <h2 className="mt-5 text-[2rem] font-black leading-[1.02] tracking-[-0.02em] text-warm-white">You&rsquo;re all moved in{details.name ? `, ${details.name.split(' ')[0]}` : ''}!</h2>
               <p className="mt-3 text-[1rem] leading-[1.6] text-warm-white/50">Your {space.size} space at {facility.short} is {rentResult ? 'rented' : 'reserved'}. A confirmation and lease PDF are on the way to {details.email || 'your email'}.</p>
-              <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {/* No gate code: access is not issued as a keypad PIN any more, so
+                  the unit number is the one thing they need from this screen. */}
+              <div className="mt-7 grid grid-cols-1 gap-3">
                 <div className={`relative overflow-hidden ${R} border border-warm-white/10 bg-warm-white/[0.05] p-5 text-left`}>
-                  <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(255,99,32,0.18) 0%, transparent 60%)' }} />
-                  <p className="relative flex items-center gap-2 text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45"><KeyRound className="h-3.5 w-3.5 text-orange" aria-hidden />Gate code</p>
-                  <p className="relative mt-1.5 text-[1.875rem] font-black tracking-[0.12em] text-warm-white">{rentResult?.gatePin ? rentResult.gatePin : `${gateCode}#`}</p>
-                  <p className="relative text-[0.75rem] text-warm-white/45">24/7 access · non-transferable</p>
-                </div>
-                <div className={`relative overflow-hidden ${R} border border-warm-white/10 bg-warm-white/[0.05] p-5 text-left`}>
-                  <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(255,99,32,0.18) 0%, transparent 60%)' }} />
+                  <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(90% 120% at 100% 0%, rgba(232,98,42,0.18) 0%, transparent 60%)' }} />
                   <p className="relative text-[0.6875rem] font-bold uppercase tracking-[0.15em] text-warm-white/45">Your space</p>
                   <p className="relative mt-1.5 text-[1.875rem] font-black text-warm-white">{rentResult?.unitNumber ? `Unit ${rentResult.unitNumber}` : space.size}</p>
                   <p className="relative text-[0.75rem] text-warm-white/45">{rentResult ? (rentResult.unitNumber ? `${space.size} · ${facility.address}` : 'Unit number in your confirmation email') : `${unitNo} · ${facility.address}`}</p>
