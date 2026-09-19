@@ -32,7 +32,27 @@ export interface OpsEvent {
   detail?: Record<string, unknown>
 }
 
+/**
+ * Test and probe contacts. Reserved domains (RFC 2606 / 6761) can never be a
+ * real customer, and the named addresses are ones used to verify these
+ * pipelines. They are refused on write and ignored on read, so a test can
+ * never turn up in an alert — even if nobody cleans the table.
+ */
+const TEST_DOMAIN = /@([a-z0-9-]+\.)*(invalid|test|example|localhost)$|@example\.(com|net|org)$/i
+const TEST_ADDRESSES = new Set([
+  'deploy.probe@journey.storage',
+  'sender.test@journey.storage',
+  'subject.test@journey.storage',
+  'sandbox.tester@example.com',
+  'diagnostic.donotuse@journey.storage',
+])
+export function isTestContact(contact?: string | null): boolean {
+  const c = (contact ?? '').trim().toLowerCase()
+  return !!c && (TEST_DOMAIN.test(c) || TEST_ADDRESSES.has(c))
+}
+
 export async function recordEvent(e: OpsEvent): Promise<void> {
+  if (isTestContact(e.contact)) return
   try {
     await getSupabaseServer().from(TABLE).insert({
       kind: e.kind,
@@ -63,7 +83,7 @@ export async function recentEvents(kinds: OpsEventKind[], hours: number): Promis
       .order('created_at', { ascending: false })
       .limit(1000)
     if (error) throw error
-    return (data ?? []) as StoredEvent[]
+    return ((data ?? []) as StoredEvent[]).filter((e) => !isTestContact(e.contact))
   } catch (err) {
     console.error('[ops-events] read failed', err instanceof Error ? err.message : err)
     return []

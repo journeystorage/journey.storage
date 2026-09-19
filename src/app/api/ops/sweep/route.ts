@@ -60,10 +60,15 @@ const block = (f: Finding) =>
 
 /** A finding's headline figures, for the dark hero band. */
 const findingFigures = (f: Finding) =>
-  statBand([
-    stat(f.total != null ? moneyShort(f.total) : String(f.rows.length), f.total != null ? 'at stake' : 'to deal with', 'alert'),
-    stat(String(f.rows.length), f.rows.length === 1 ? 'account' : 'accounts'),
-  ])
+  statBand(
+    f.total != null
+      ? [
+          stat(moneyShort(f.total), 'at stake', 'alert'),
+          stat(String(f.rows.length), f.rows.length === 1 ? 'account' : 'accounts'),
+        ]
+      : // No money attached, so a second figure would only repeat the first.
+        [stat(String(f.rows.length), f.rows.length === 1 ? 'to deal with' : 'to deal with', 'alert')],
+  )
 
 /** How many rows an alert lists before summarising the rest. */
 const ROW_CAP = 15

@@ -1,5 +1,6 @@
 import 'server-only'
-import { type LeaseSnapshot, where, money, daysSince } from './snapshot'
+import { type LeaseSnapshot, where, money, daysSince, prettyContact } from './snapshot'
+import { facilityBySlug } from '@/lib/nectar/facilities'
 
 // ---------------------------------------------------------------------------
 // What the sweep looks for. Each check returns findings worth a human's time.
@@ -236,11 +237,13 @@ export async function abandonedCheckouts(all: LeaseSnapshot[]): Promise<Finding 
     rows: hits.map((e) => {
       const d = (e.detail ?? {}) as { facility?: string; space?: string }
       const hrs = Math.round((Date.now() - Date.parse(e.created_at)) / 3600_000)
+      // The rental flow records the facility's slug; show the name people use.
+      const site = d.facility ? facilityBySlug(d.facility)?.displayName ?? d.facility : 'one of the sites'
       return {
         who: e.name ?? 'Someone',
-        where: `${d.space ?? 'a space'} · ${d.facility ?? 'one of the sites'}`,
+        where: `${d.space ?? 'a space'} · ${site}`,
         note: `${hrs}h ago`,
-        contact: [e.contact, e.phone].filter(Boolean).join(' · '),
+        contact: [e.contact, prettyContact(e.phone ?? undefined)].filter(Boolean).join(' · '),
         severe: true,
       }
     }),
