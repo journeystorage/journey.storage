@@ -40,6 +40,13 @@ export interface LeaseSnapshot {
   createdAt?: string
   /** Ledger payment rows, newest first. */
   payments: Array<{ date: string; amount: number; status?: string }>
+  /**
+   * True only when the lease record was actually read. The other fields
+   * default to empty values (rent 0, no site), so a lease that failed to read
+   * looks exactly like a space rented for nothing — which produced false
+   * "rented at no charge" alerts. Checks must skip leases where this is false.
+   */
+  readOk: boolean
 }
 
 interface TenantRow {
@@ -62,6 +69,18 @@ async function allTenantRows(): Promise<TenantRow[]> {
     if (offset + 100 >= (data.paging?.total ?? 0)) break
   }
   return rows
+}
+
+/** Retry a read a couple of times with a short back-off — rate limits pass. */
+async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
+  let last: unknown
+  for (let i = 0; i < attempts; i++) {
+    try { return await fn() } catch (e) {
+      last = e
+      if (i < attempts - 1) await new Promise((r) => setTimeout(r, 500 * (i + 1)))
+    }
+  }
+  throw last
 }
 
 /** Run `work` over `items` a few at a time, so we don't hammer the API. */
@@ -93,10 +112,12 @@ export async function takeSnapshot(): Promise<LeaseSnapshot[]> {
       lifetimePayments: 0,
       createdAt: row.Lease?.created_at ?? row.created_at ?? row.Lease?.start_date,
       payments: [],
+      readOk: false,
     }
     try {
-      const { data } = await nectarV2<{ lease?: Record<string, unknown> }>(`companies/${co()}/leases/${leaseId}`)
-      const lz = (data.lease ?? {}) as Record<string, unknown>
+      const data = await withRetry(() => nectarV2<{ lease?: Record<string, unknown> }>(`companies/${co()}/leases/${leaseId}`))
+      const lz = (data.data.lease ?? {}) as Record<string, unknown>
+      if (!Object.keys(lz).length) throw new Error('empty lease record')
       const metrics = (lz.Metrics ?? {}) as Record<string, unknown>
       snap.rent = Number(lz.rent ?? 0)
       snap.openBalance = Number(lz.open_balance ?? lz.balance ?? 0)
@@ -108,7 +129,12 @@ export async function takeSnapshot(): Promise<LeaseSnapshot[]> {
       const unit = (lz.Unit ?? {}) as { number?: string | number; property_id?: string }
       if (unit.number != null) snap.unitNumber = String(unit.number)
       if (unit.property_id) snap.propertyName = facilityByPropertyId(unit.property_id)?.displayName
-    } catch { /* leave defaults; a single unreadable lease must not fail the sweep */ }
+      snap.readOk = true
+    } catch (e) {
+      // Leave readOk false. One unreadable lease must not fail the sweep — and
+      // must not be reported as a problem with the tenant either.
+      console.warn('[ops] lease unreadable', leaseId, e instanceof Error ? e.message : e)
+    }
 
     try {
       const { data } = await nectarV2<{ ledger?: Array<{ date?: string; payments?: number; status?: string; description?: string }> }>(

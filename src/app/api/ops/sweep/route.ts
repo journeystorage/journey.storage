@@ -205,6 +205,14 @@ export async function GET(req: NextRequest) {
         ['On autopay', `${summary.autopayOn} of ${summary.leases} (${pct}%)`],
         ['Not on autopay', `${summary.leases - summary.autopayOn}`],
       ]) +
+      // Said out loud rather than dropped silently: these were left out of
+      // every check above, so they are the only leases today's figures can't vouch for.
+      (summary.unreadable
+        ? para(
+            `${summary.unreadable} lease${summary.unreadable === 1 ? '' : 's'} couldn’t be read from the storage system this run and ${summary.unreadable === 1 ? 'was' : 'were'} left out of the checks rather than guessed at. Usually a passing slowdown — it clears on the next run.`,
+            { muted: true, small: true },
+          )
+        : '') +
       section('Availability') +
       miniList(
         health.rows.map((r) => {

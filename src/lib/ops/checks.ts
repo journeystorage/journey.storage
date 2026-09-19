@@ -175,10 +175,13 @@ export function collectedYesterday(all: LeaseSnapshot[]): { count: number; total
   return { count: rows.length, total, lines: rows }
 }
 
-export function portfolioSummary(all: LeaseSnapshot[]) {
+export function portfolioSummary(everything: LeaseSnapshot[]) {
+  const all = everything.filter((s) => s.readOk)
   const owing = all.filter((s) => s.openBalance > 0)
   return {
     leases: all.length,
+    /** Leases that could not be read this run — excluded from every figure. */
+    unreadable: everything.length - all.length,
     autopayOn: all.filter((s) => s.autopay).length,
     owingCount: owing.length,
     owingTotal: owing.reduce((t, s) => t + s.openBalance, 0),
@@ -186,7 +189,10 @@ export function portfolioSummary(all: LeaseSnapshot[]) {
   }
 }
 
-export function runAllChecks(all: LeaseSnapshot[]): Finding[] {
+export function runAllChecks(everything: LeaseSnapshot[]): Finding[] {
+  // A lease that failed to read carries default values (rent 0, no site) that
+  // are indistinguishable from real problems. Only judge what was read.
+  const all = everything.filter((s) => s.readOk)
   return [
     unpaidNewRentals(all),
     newLeaseWithoutAutopay(all),
