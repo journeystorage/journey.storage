@@ -20,7 +20,7 @@
 //   MOVE_IN_EMAIL_FROM   – sender (falls back to LEAD_NOTIFY_FROM, then resend.dev)
 //   MOVE_IN_NOTIFY_TO    – internal copy recipient (default: lyvia@journey.storage)
 
-import { brandedFrom, emailShell, p, section, miniList, rows, panel, pills, steps, link, heroFigure } from './email-shell'
+import { brandedFrom, emailShell, p, section, miniList, rows, panel, pills, steps, link, heroFigure, callout } from './email-shell'
 
 const OWNER_INBOX = 'lyvia@journey.storage'
 const DEFAULT_FROM = 'Journey.Storage <onboarding@resend.dev>'
@@ -102,7 +102,8 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
   const unit = data.unitNumber ? esc(String(data.unitNumber).slice(0, 20)) : ''
   const docUrl = data.documentUrl && /^https:\/\//.test(data.documentUrl) ? data.documentUrl : ''
 
-  const subject = 'You’re all moved in — your receipt'
+  // Access is the thing they need first, so the subject leads with it.
+  const subject = 'You’re all moved in — here’s how to get in'
 
   // The receipt, with the total set apart under a rule.
   const receipt = panel(
@@ -118,18 +119,12 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
     ]),
   )
 
-  const next: Array<[string, string]> = [
-    ['Manage everything online', `View payments, update your card, or move out from ${link(`${SITE}/rentaspace`, 'journey.storage')} — no phone call needed.`],
-    [
-      'Keep your lease handy',
-      docUrl
-        ? `Your signed rental agreement is ready — ${link(docUrl, 'download it here (PDF)')}.`
-        : 'Your signed rental agreement is on file — call us any time for a copy.',
-    ],
-  ]
+  const nextLeaseLine = docUrl
+    ? `Your signed rental agreement is ready — ${link(docUrl, 'download it here (PDF)')}.`
+    : 'Your signed rental agreement is on file — call us any time for a copy.'
 
   const html = emailShell({
-    preheader: 'Everything for your new space is inside.',
+    preheader: 'Your phone is your key. Setting it up takes about five minutes.',
     eyebrow: 'Move-in confirmed',
     heading: `You’re all <b>moved in, ${first}</b>`,
     // The unit number is what they need on day one.
@@ -148,11 +143,37 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
           }</span>`,
         ],
       ]) +
+      section('Getting in') +
+      p('Your gate and your unit both open from one free app — there are no keys to collect and no keypad code. It takes about five minutes to set up, and it’s worth doing before your first visit.') +
+      steps([
+        [
+          'Find the text message we sent you',
+          'It arrives automatically once your space is set up and holds the two things you need: a download link and a 6-digit PIN. Keep it until you’re logged in.',
+        ],
+        [
+          'Download the app',
+          `Search your app store for “Storage Smart Entry”, or go straight to ${link('https://noke.app', 'noke.app')}. It’s free, on iPhone and Android.`,
+        ],
+        [
+          'Log in, then pick your own password',
+          'Your username is your cell number and your password is the 6-digit PIN from the text. The app will ask you to choose a password of at least 8 characters.',
+        ],
+        [
+          'Allow Bluetooth when it asks',
+          'On Android, allow Location too. That’s how your phone finds the lock when you walk up to it — it isn’t used to track where you are.',
+        ],
+      ]) +
+      callout(
+        'If you tap “Don’t Allow”, nothing will open — no Bluetooth means no gate and no unit. Already tapped it? Open your phone’s Settings, find Storage Smart Entry, and switch Bluetooth (and Location on Android) back on.',
+        'Important',
+      ) +
+      p(`Full guide with photos, including what to do at the gate and at your door: ${link(`${SITE}/smartentry`, 'journey.storage/smartentry')}.`, { small: true }) +
       section('Receipt') +
       receipt +
-      section('What’s next') +
-      steps(next),
-    cta: { label: 'Manage my account', href: `${SITE}/rentaspace` },
+      section('Also good to know') +
+      p(`View payments, update your card or move out from ${link(`${SITE}/rentaspace`, 'journey.storage')} — no phone call needed.`) +
+      p(nextLeaseLine),
+    cta: { label: 'Set up Smart Entry', href: `${SITE}/smartentry` },
     footNote: `Questions? Call us at ${link(PHONE_TEL, PHONE_DISPLAY)} — Mon–Fri 8:30–5, Sat 8:30–3.`,
     legal:
       'Clean, secure, month-to-month self storage in Granbury, TX · 212 Temple Hall Hwy · 409 Western Hills Trl · 3501 McCreary Rd.<br>' +

@@ -198,7 +198,7 @@ export const dataTable = (rowsIn: EmailRow[]) =>
  * harder than an orange tint would, and keeps orange to one point of tension.
  */
 export const callout = (text: string, title = 'What to do') =>
-  `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:18px 0 0"><tr>
+  `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:18px 0 16px"><tr>
     <td style="padding:16px 20px;background:${BRAND.black};border-radius:22px">
       <div style="margin:0 0 4px;font-family:${FONT};font-weight:800;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:${ON_DARK_MUTED}">${title}</div>
       <div style="font-family:${FONT};font-weight:400;font-size:15px;line-height:1.45;color:${ON_DARK}">${text}</div>
@@ -328,14 +328,15 @@ export const link = (href: string, text: string) =>
   `<a href="${href}" style="color:${ON_CREAM};font-weight:700;text-decoration:underline;text-decoration-color:${BRAND.orange};text-underline-offset:3px">${text}</a>`
 
 /**
- * A large figure for the dark hero band — a unit number. On dark it may be the
- * composition's orange; here it stays Warm White so the heading tick and the
+ * A large figure for the dark hero band — a unit number, or a code. Pass
+ * `spaced` for a run of digits that reads better with air between characters;
+ * words need normal tracking. It stays Warm White so the heading tick and the
  * button remain the only orange accents.
  */
-export const heroFigure = (value: string, labelText: string, sub?: string) =>
+export const heroFigure = (value: string, labelText: string, sub?: string, opts: { spaced?: boolean } = {}) =>
   `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:26px 0 0;border-top:1px solid rgba(255,252,248,0.14)"><tr><td style="padding-top:20px">
     ${label(labelText, true)}
-    <div style="font-family:${FONT};font-weight:800;font-size:46px;line-height:1.05;letter-spacing:0.14em;font-variant-numeric:tabular-nums;color:${ON_DARK}">${value}</div>
+    <div style="font-family:${FONT};font-weight:800;font-size:46px;line-height:1.05;letter-spacing:${opts.spaced ? '0.14em' : '-0.4px'};font-variant-numeric:tabular-nums;color:${ON_DARK}">${value}</div>
     ${sub ? `<div style="margin-top:6px;font-family:${FONT};font-weight:400;font-size:13px;color:${ON_DARK_MUTED}">${sub}</div>` : ''}
   </td></tr></table>`
 
