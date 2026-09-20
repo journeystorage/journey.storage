@@ -124,7 +124,7 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
     : 'Your signed rental agreement is on file — call us any time for a copy.'
 
   const html = emailShell({
-    preheader: 'Your phone is your key. Setting it up takes about five minutes.',
+    preheader: 'Your phone is your key — set it up before your first visit.',
     eyebrow: 'Move-in confirmed',
     heading: `You’re all <b>moved in, ${first}</b>`,
     // The unit number is what they need on day one.
@@ -144,7 +144,7 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
         ],
       ]) +
       section('Getting in') +
-      p('Your gate and your unit both open from one free app — there are no keys to collect and no keypad code. It takes about five minutes to set up, and it’s worth doing before your first visit.') +
+      p('Your gate and your unit both open from one free app — there are no keys to collect and no keypad code. Do this before your first visit.') +
       steps([
         [
           'Find the text message we sent you',
@@ -174,7 +174,7 @@ export function renderMoveInEmail(data: MoveInEmailData): { subject: string; htm
       p(`View payments, update your card or move out from ${link(`${SITE}/rentaspace`, 'journey.storage')} — no phone call needed.`) +
       p(nextLeaseLine),
     cta: { label: 'Set up Smart Entry', href: `${SITE}/smartentry` },
-    footNote: `Questions? Call us at ${link(PHONE_TEL, PHONE_DISPLAY)} — Mon–Fri 8:30–5, Sat 8:30–3.`,
+    footNote: `Questions? Call us at ${link(PHONE_TEL, PHONE_DISPLAY)}.`,
     legal:
       'Clean, secure, month-to-month self storage in Granbury, TX · 212 Temple Hall Hwy · 409 Western Hills Trl · 3501 McCreary Rd.<br>' +
       `Formerly Granbury Self Storage · You received this because you rented a space online.<br>© ${new Date().getFullYear()} Journey Storage 001, LLC`,
