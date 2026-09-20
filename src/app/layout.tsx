@@ -55,9 +55,21 @@ const GTM_ID = 'GTM-NL5KP8QJ'
 const lato = Lato({
   subsets: ['latin'],
   weight: ['300', '400', '700', '900'],
-  style: ['normal', 'italic'],
+  style: ['normal'],
   variable: '--font-lato',
   display: 'swap',
+})
+
+// Italics only appear in footers and small print. Same 'Lato' family, so
+// `italic` still resolves to the real face — it just isn't preloaded ahead of
+// the hero image on every page (8 preloaded font files -> 4).
+const latoItalic = Lato({
+  subsets: ['latin'],
+  weight: ['300', '400', '700', '900'],
+  style: ['italic'],
+  variable: '--font-lato-italic',
+  display: 'swap',
+  preload: false,
 })
 
 export const metadata: Metadata = {
@@ -101,7 +113,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={lato.variable}>
+    <html lang="en" className={`${lato.variable} ${latoItalic.variable}`}>
       {/* journey_property is mapped to GA4 content_group in GTM, so sibling
           sites sharing this container (managed.journey.storage) stay separable
           in standard reports — page paths alone collide on "/". */}
