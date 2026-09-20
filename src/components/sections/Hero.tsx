@@ -24,14 +24,8 @@ export default function Hero() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const fadeUp = (delay: number) =>
-    prefersReducedMotion
-      ? {}
-      : {
-          initial: { opacity: 0, y: 40 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const, delay },
-        }
+  // CSS-driven (see .hero-rise in globals.css) so the copy paints before hydration
+  const rise = (delay: number) => ({ '--rise-delay': `${delay}s` }) as React.CSSProperties
 
   return (
     <section id={sectionIds.hero} className="grain relative h-screen min-h-[700px] overflow-hidden bg-black">
@@ -88,41 +82,41 @@ export default function Hero() {
       <div className="relative z-10 flex h-full items-end pb-[14vh] lg:items-center lg:pb-0">
         <div className="mx-auto w-full max-w-content px-5 md:px-8 lg:px-16">
           <div className="max-w-[750px]">
-            <motion.div className="mb-6 flex items-center gap-3" {...fadeUp(0.1)}>
+            <div className="hero-rise mb-6 flex items-center gap-3" style={rise(0.1)}>
               <div className="h-px w-8 bg-orange" />
               <span className="text-label font-bold uppercase tracking-[0.2em] text-orange">
                 Journey.Storage&trade;
               </span>
-            </motion.div>
+            </div>
 
             {/* H1 — BIGGER: 4rem mobile → 9rem xl */}
-            <motion.h1
-              className="text-[3.5rem] leading-[0.86] sm:text-[4.5rem] md:text-[6rem] lg:text-[8rem] xl:text-[9rem] font-black uppercase text-warm-white"
-              {...fadeUp(0.2)}
+            <h1
+              className="hero-rise text-[3.5rem] leading-[0.86] sm:text-[4.5rem] md:text-[6rem] lg:text-[8rem] xl:text-[9rem] font-black uppercase text-warm-white"
+              style={rise(0.2)}
             >
               Space to
               <br />
               move on.
-            </motion.h1>
+            </h1>
 
-            <motion.p
-              className="mt-8 max-w-[440px] lg:max-w-[480px] text-xl leading-[1.7] text-warm-white/70"
-              {...fadeUp(0.45)}
+            <p
+              className="hero-rise mt-8 max-w-[440px] lg:max-w-[480px] text-xl leading-[1.7] text-warm-white/70"
+              style={rise(0.45)}
             >
               A <strong className="font-semibold text-warm-white/90">new kind</strong> of storage company.
               <br className="hidden lg:block" />
               Built for <strong className="font-semibold text-warm-white/90">people in motion</strong>,
               not for boxes sitting still.
-            </motion.p>
+            </p>
 
-            <motion.div className="mt-12" {...fadeUp(0.65)}>
+            <div className="hero-rise mt-12" style={rise(0.65)}>
               <Button
                 variant="primary"
                 onClick={() => router.push('/rentaspace')}
               >
                 Rent a Space
               </Button>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>

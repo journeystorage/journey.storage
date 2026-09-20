@@ -38,7 +38,15 @@ const nextConfig: NextConfig = {
           root: __dirname,
     },
     async headers() {
-        return [{ source: '/:path*', headers: securityHeaders }]
+        // public/ files default to max-age=0, so every photo was revalidated on
+        // every view. Filenames aren't hashed, so a week (not immutable): when
+        // replacing a photo in place, give it a new filename.
+        const mediaCache = [{ key: 'Cache-Control', value: 'public, max-age=604800, stale-while-revalidate=2592000' }]
+        return [
+            { source: '/:path*', headers: securityHeaders },
+            { source: '/images/:path*', headers: mediaCache },
+            { source: '/videos/:path*', headers: mediaCache },
+        ]
     },
 }
 

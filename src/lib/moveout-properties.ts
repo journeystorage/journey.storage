@@ -23,7 +23,7 @@ export const MOVEOUT_PROPERTIES: MoveOutProperty[] = [
     cityState: 'Granbury, TX 76049',
     phone: '(817) 579-0607',
     phoneHref: '+18175790607',
-    image: '/images/granbury/temple-hall-aerial.jpg',
+    image: '/images/granbury/temple-hall-aerial-800.webp',
     badge: '350+ spaces',
   },
   {
@@ -33,7 +33,7 @@ export const MOVEOUT_PROPERTIES: MoveOutProperty[] = [
     cityState: 'Granbury, TX 76049',
     phone: '(817) 579-0607',
     phoneHref: '+18175790607',
-    image: '/images/granbury/western-hills-aerial-2.jpg',
+    image: '/images/granbury/western-hills-aerial-2-800.webp',
     badge: '100+ spaces',
   },
   {
@@ -43,7 +43,7 @@ export const MOVEOUT_PROPERTIES: MoveOutProperty[] = [
     cityState: 'Granbury, TX 76049',
     phone: '(817) 579-0607',
     phoneHref: '+18175790607',
-    image: '/images/granbury/cleveland-aerial.jpg',
+    image: '/images/granbury/cleveland-aerial-800.webp',
     badge: 'Newest',
   },
 ]

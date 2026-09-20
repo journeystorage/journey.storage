@@ -331,13 +331,16 @@ export default function SmartEntryPage() {
       <main className="bg-warm-white">
         {/* ── Hero ───────────────────────────────────────────────── */}
         <header className="grain relative flex min-h-[min(92vh,860px)] items-end overflow-hidden bg-black text-warm-white">
-          <Image
-            src={`${IMG}/hero-corridor.jpg`}
-            alt="A tenant walking a corridor of storage units with her phone in hand"
-            fill
-            priority
+          {/* Native img: images.unoptimized means next/image can't emit a srcSet,
+              and phones were pulling the full 2107px JPG. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`${IMG}/hero-corridor-1920.webp`}
+            srcSet={`${IMG}/hero-corridor-960.webp 960w, ${IMG}/hero-corridor-1920.webp 1920w`}
             sizes="100vw"
-            className="object-cover object-[62%_50%]"
+            fetchPriority="high"
+            alt="A tenant walking a corridor of storage units with her phone in hand"
+            className="absolute inset-0 h-full w-full object-cover object-[62%_50%]"
           />
           {/* Warm multiply plus scrim so the photo sits in the Journey palette
               and the type stays legible over the darkest part of the frame. */}
@@ -387,7 +390,7 @@ export default function SmartEntryPage() {
             <aside className="rounded-[20px_4px_20px_4px] border border-warm-white/12 bg-warm-white/[0.06] p-[22px] backdrop-blur-sm">
               <div className="flex items-center gap-3.5 border-b border-warm-white/12 pb-4">
                 <Image
-                  src={`${IMG}/app-icon.png`}
+                  src={`${IMG}/app-icon.webp`}
                   alt="Storage Smart Entry app icon"
                   width={52}
                   height={52}
