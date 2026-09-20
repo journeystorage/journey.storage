@@ -2,7 +2,7 @@
 
 Running list of what's outstanding on the rental flow, Pay Bill and the
 operational alerting. Newest findings at the top of each section.
-Last reviewed: 2026-09-18.
+Last reviewed: 2026-09-20 (full audit).
 
 ---
 
@@ -35,6 +35,18 @@ arrives same day or next. Where it doesn't, it never arrives at all.
 **No API way to change an autopay card**, so Pay Bill's autopay controls are
 status-only. Worth re-asking Tenant Inc now that they've pointed us at `/v1` —
 there may be a supported route there too.
+
+---
+
+## Needs you (not code)
+
+| # | Action | Why |
+|---|---|---|
+| 1 | Add `.github/workflows/ops-payments.yml` via the GitHub web UI | Written locally; Claude cannot push workflow files. Without it, payment notifications never run. |
+| 2 | Set `MOVE_IN_EMAIL_LIVE=true` when the move-in wording is signed off | Until then the confirmation goes only to the owner, marked "[not sent to tenant …]". |
+| 3 | Add a root SPF record: `v=spf1 include:_spf.google.com ~all` | Still missing; affects mail you send by hand from Google Workspace. DMARC is now present. |
+| 4 | Confirm the Noke setup text fires for a **website** rental | The move-in email tells tenants to wait for it. If provisioning needs a staff step, they'd be stranded. |
+| 5 | Ask Tenant Inc whether `/v1` has a supported route to change an autopay card | The last thing Pay Bill can't do. |
 
 ---
 
@@ -73,6 +85,11 @@ hand from Google Workspace. Resend's own records are done and verified.
   art and no price.
 - **`noAutopay` and `delinquency` overlap** in the sweep — the same lease
   appears in both when someone is late *and* unenrolled.
+- **Dead code:** `/api/nectar/account/pay`, `payLease()` and
+  `savePaymentMethod()` are no longer reachable now that Pay Bill uses the
+  hosted link. Harmless, but worth deleting so nobody revives the broken path.
+- **Move-in email previews** carry a `[TEST]` subject prefix but nothing in the
+  body says so, so a forwarded preview reads as a real confirmation.
 
 ---
 
