@@ -13,6 +13,10 @@
 // sender, tenants get the email directly and the owner inbox is bcc'd.
 //
 // Env:
+//   MOVE_IN_EMAIL_LIVE     – must be "true" before a tenant ever receives this.
+//                            Unset (the default) sends the owner a copy marked
+//                            "[not sent to tenant …]" instead, so the wording
+//                            can be reviewed without mailing a customer.
 //   MOVE_IN_EMAIL_DISABLED – set to "true" to stop sending entirely (use this
 //                            once Tenant Inc's own move-in email is branded,
 //                            so tenants don't get two confirmations)
@@ -197,12 +201,20 @@ export async function sendMoveInConfirmation(data: MoveInEmailData): Promise<voi
 
   const { subject, html } = renderMoveInEmail(data)
 
-  // Unverified sender: Resend rejects mail to anyone but the account owner, so
-  // deliver the owner-inbox copy only — flagged so it's obvious the tenant has
-  // NOT received it yet.
-  const to = verifiedSender ? data.tenantEmail : ownerInbox
-  const bcc = verifiedSender ? [ownerInbox] : undefined
-  const finalSubject = verifiedSender ? subject : `[not sent to tenant ${data.tenantEmail}] ${subject}`
+  // Reaching the tenant needs BOTH a verified sender and MOVE_IN_EMAIL_LIVE
+  // set explicitly. Default is owner-only: a confirmation going to a customer
+  // is not something to switch on by side effect, and until the wording has
+  // been signed off it should land nowhere but the owner's inbox.
+  //
+  // Unverified sender is the other reason to hold it back — Resend rejects
+  // mail to anyone but the account owner, so the tenant would get nothing.
+  const liveToTenants = process.env.MOVE_IN_EMAIL_LIVE === 'true'
+  const sendToTenant = verifiedSender && liveToTenants
+  const to = sendToTenant ? data.tenantEmail : ownerInbox
+  const bcc = sendToTenant ? [ownerInbox] : undefined
+  const finalSubject = sendToTenant
+    ? subject
+    : `[not sent to tenant ${data.tenantEmail}] ${subject}`
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
