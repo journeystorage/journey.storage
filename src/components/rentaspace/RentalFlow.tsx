@@ -114,9 +114,19 @@ export default function RentalFlow({ facility, space, preview = false, onAccount
   type Held = { token: string; unitId: string; dossierToken?: string; spaceMixId?: string; promotionId?: string }
   async function doHold(): Promise<Held | null> {
     try {
-      const r = await fetch('/api/nectar/checkout/hold', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ facility: facility.slug, width: dims.width, length: dims.length }) })
+      const r = await fetch('/api/nectar/checkout/hold', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ facility: facility.slug, width: dims.width, length: dims.length, category: space.category ?? undefined }) })
       const j = await r.json()
-      if (r.ok && j.holdToken) return { token: j.holdToken, unitId: j.unitId, dossierToken: j.dossierToken, spaceMixId: j.spaceMixId, promotionId: j.promotionId }
+      if (r.ok && j.holdToken) {
+        // Refuse a space of the wrong kind rather than renting it. Climate
+        // control is a different product at a different price.
+        const wanted = /no\s*climate/i.test(space.category ?? '') ? false : /climate/i.test(space.category ?? '') ? true : null
+        if (wanted !== null && typeof j.climate === 'boolean' && j.climate !== wanted) {
+          setApiError(`We couldn’t hold a ${wanted ? 'climate-controlled' : 'standard'} ${space.size} just now. Please try another size, or call us.`)
+          return null
+        }
+        return { token: j.holdToken, unitId: j.unitId, dossierToken: j.dossierToken, spaceMixId: j.spaceMixId, promotionId: j.promotionId }
+      }
+      if (!r.ok && j?.error) setApiError(j.error)
     } catch { /* fall through */ }
     return null
   }

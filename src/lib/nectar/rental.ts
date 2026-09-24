@@ -44,6 +44,43 @@ export interface Tier {
   vacant?: RangeBucket
   promo?: Array<{ id: string; name: string; type: string; value: number }>
   allocated_promo?: { id?: string; name?: string; type?: string; value?: number; channel?: string }
+  /**
+   * The space-group this tier came from, e.g. "Climate Control > No Premium
+   * Location". This is the ONLY place climate control is recorded: two tiers
+   * of the same size carry the same description and the same space_type_id,
+   * and differ only by group. Flattening tiers without it is what rented a
+   * customer a standard 10x10 when they picked the climate-controlled one.
+   */
+  groupName?: string
+  /** Derived from groupName. null when the group doesn't say either way. */
+  climate?: boolean | null
+}
+
+/**
+ * Whether a space group is climate controlled. Order matters: "No Climate
+ * Control > …" contains "climate control", so the negative must be tested
+ * first — a plain /climate/i test marks non-climate groups as climate.
+ */
+export function climateFromGroupName(name?: string): boolean | null {
+  if (!name) return null
+  if (/no\s*climate/i.test(name)) return false
+  if (/climate/i.test(name)) return true
+  return null
+}
+
+/**
+ * Whether a customer-facing category is climate controlled. These come from
+ * space-mix and read "Temple Hall Hwy - Climate Controlled" / "- Standard
+ * Storage" / "- Office Suite" — a different vocabulary from the tier groups.
+ */
+export function climateFromCategory(category?: string | null): boolean | null {
+  if (!category) return null
+  if (/no\s*climate/i.test(category)) return false
+  if (/climate/i.test(category)) return true
+  // "Standard Storage" is explicitly not climate controlled. Anything else
+  // (an office suite, say) says nothing either way, so don't guess.
+  if (/standard/i.test(category)) return false
+  return null
 }
 
 export interface Offer {
@@ -109,8 +146,15 @@ export async function getTiers(propertyId: string, spaceGroupId: string): Promis
   )
   const tiers: Tier[] = []
   for (const v of Object.values(data.spaceGroupProfile ?? {})) {
-    const groups = (v as { groups?: Array<{ tiers?: Tier[] }> })?.groups
-    if (Array.isArray(groups)) for (const g of groups) for (const t of g.tiers ?? []) tiers.push(t)
+    const groups = (v as { groups?: Array<{ name?: string; tiers?: Tier[] }> })?.groups
+    if (Array.isArray(groups)) {
+      for (const g of groups) {
+        for (const t of g.tiers ?? []) {
+          // Keep the group: it is the only record of climate control.
+          tiers.push({ ...t, groupName: g.name, climate: climateFromGroupName(g.name) })
+        }
+      }
+    }
   }
   return tiers
 }
@@ -140,27 +184,59 @@ export async function getInsurances(propertyId: string, unitTypeIds: string[]): 
  */
 export async function resolveBookableUnit(
   propertyId: string,
-  want: { width?: number | null; length?: number | null },
-): Promise<{ unitId: string; tierId: string; spaceMixId?: string; dossierToken?: string; spaceTypeId?: string; promotionId?: string } | null> {
+  want: { width?: number | null; length?: number | null; climate?: boolean | null },
+): Promise<{
+  unitId: string
+  tierId: string
+  spaceMixId?: string
+  dossierToken?: string
+  spaceTypeId?: string
+  promotionId?: string
+  /** What was actually resolved, so the caller can check it got what it asked for. */
+  climate?: boolean | null
+  groupName?: string
+} | null> {
   const groups = await getSpaceGroups(propertyId)
   const group = groups.find((g) => g.is_default === 1 && g.active === 1) ?? groups.find((g) => g.active === 1) ?? groups[0]
   if (!group) return null
   const tiers = (await getTiers(propertyId, group.id)).filter((t) => (t.vacant?.count ?? 0) > 0)
   if (!tiers.length) return null
+
   const dimMatch = (t: Tier) => want.width != null && want.length != null && Number(t.width) === want.width && Number(t.length) === want.length
-  // When a size was asked for, hold THAT size or nothing. Falling back to
-  // whatever tier happened to be first would quietly rent someone a different
-  // space at a different price than the one they chose.
   const asked = want.width != null && want.length != null
-  const tier = asked ? tiers.find(dimMatch) : tiers[0]
+  const candidates = asked ? tiers.filter(dimMatch) : tiers
+  if (!candidates.length) return null
+
+  // Climate control is a different space at a different price, and several
+  // sizes exist in both. Matching on dimensions alone handed whoever was
+  // listed first — a standard 10x10 to someone who chose climate-controlled,
+  // and the reverse on 10x20. If a preference was expressed, honour it or
+  // fail; never substitute the other kind.
+  let tier: Tier | undefined
+  if (typeof want.climate === 'boolean') {
+    tier = candidates.find((t) => t.climate === want.climate)
+    if (!tier) return null
+  } else {
+    tier = candidates[0]
+  }
   if (!tier) return null
+
   const offers = await getOffers(propertyId, tier.tier_id)
   const offer = offers.find((o) => o.unit_id)
   if (!offer?.unit_id) return null
   // Online-channel promotion for this tier (Tenant lists it but won't auto-apply
   // it — the id must be passed to quote/lease for the discount to take effect).
   const promotionId = tier.allocated_promo?.id ?? tier.promo?.[0]?.id
-  return { unitId: offer.unit_id, tierId: tier.tier_id, spaceMixId: offer.space_mix_id, dossierToken: offer.dossier?.token, spaceTypeId: tier.space_type_id, promotionId }
+  return {
+    unitId: offer.unit_id,
+    tierId: tier.tier_id,
+    spaceMixId: offer.space_mix_id,
+    dossierToken: offer.dossier?.token,
+    spaceTypeId: tier.space_type_id,
+    promotionId,
+    climate: tier.climate,
+    groupName: tier.groupName,
+  }
 }
 
 // ── Hold + quote (verified) ─────────────────────────────────────────────────
