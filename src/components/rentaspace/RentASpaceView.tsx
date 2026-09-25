@@ -7,7 +7,7 @@ import RentFooter from '@/components/rentaspace/RentFooter'
 import PayBillFlow from '@/components/rentaspace/PayBillFlow'
 import { openSizeGuide } from '@/components/SizeGuideModal'
 import { resolveSearch } from '@/lib/space-search'
-import { hubFaqs, sizeRows } from '@/components/rentaspace/hub-content'
+import { hubFaqs, sizeRows, businessUses } from '@/components/rentaspace/hub-content'
 
 const SCOPED_CSS = `
 #rentaspace .track-tight{letter-spacing:-.03em}
@@ -374,8 +374,28 @@ export default function RentASpaceView() {
         </div>
       </section>
 
+      {/* ── BUSINESS STORAGE ── */}
+      <section id="business" className="border-y border-black/[0.05] bg-white">
+        <div className="mx-auto max-w-content px-5 py-20 lg:px-16 lg:py-24">
+          <div className="mx-auto max-w-2xl text-center">
+            <div className="eyebrow center"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">For business</span></div>
+            <h2 className="track-tight mt-3 text-[2rem] font-black leading-tight text-black lg:text-[2.5rem]">Business storage in Granbury</h2>
+            <p className="mt-3 text-[1.0625rem] leading-relaxed text-stone">Contractors, small businesses and home offices use Journey the way they&rsquo;d use a second garage: commercial storage units, month-to-month, with a gate that opens at six in the morning.</p>
+          </div>
+          <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
+            {businessUses.map((u) => (
+              <div key={u.title} className="shadow-card r-jr flex flex-col border border-black/[0.05] bg-warm-white p-6">
+                <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">{u.title}</h3>
+                <p className="mt-2 flex-1 text-[0.9375rem] leading-relaxed text-stone">{u.body}</p>
+                <a href={u.href} className="mt-5 inline-flex items-center gap-1.5 font-bold text-black transition-colors hover:text-orange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">{u.cta}<span aria-hidden>→</span></a>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── HOURS / INFO ── */}
-      <section className="mx-auto max-w-content px-5 pb-16 lg:px-16 lg:pb-20">
+      <section className="mx-auto max-w-content px-5 py-16 lg:px-16 lg:py-20">
         <div className="shadow-card r-jr grid grid-cols-1 gap-6 border border-black/[0.05] bg-white p-6 text-center sm:grid-cols-3 lg:p-8">
           <div>
             <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Open 24/7</p>

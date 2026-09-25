@@ -14,7 +14,7 @@ import { SizeGuideLink } from '@/components/SizeGuideModal'
  *    yet, so each storage type links to the facility that owns that keyword.
  *  - NAP (name, address, phone) per facility in an <address>, from the same
  *    `facilities` constant the schema uses. Must match Google Business Profile.
- *  - 19 crawlable links + the size-guide button. Stay under 25.
+ *  - 20 crawlable links + the size-guide button. Stay under 25.
  *  - Markets without a page (Malakoff) are text, not links: no 404s.
  */
 
@@ -24,6 +24,7 @@ const storageTypes = [
   { label: 'Drive-up storage units', href: '/rentaspace' },
   { label: 'Small storage units', sub: '5×5 · 5×10', href: '/rentaspace#sizes' },
   { label: 'Large storage units', sub: '10×20 · 10×30', href: '/rentaspace#sizes' },
+  { label: 'Business & contractor storage', href: '/rentaspace#business' },
 ]
 
 const locationLinks = [

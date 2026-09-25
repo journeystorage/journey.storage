@@ -79,6 +79,7 @@ const templeHall: Facility = {
     { q: 'What can’t I store?', a: 'No hazardous, flammable, or perishable items, and nothing living (people, animals, or plants). If you’re unsure about something, just ask.' },
     { q: 'Is autopay available?', a: 'Yes. Set up autopay and manage everything — payments, documents, move-out — online, anytime.' },
     { q: 'Is this the old Granbury Self Storage #1?', a: 'Yes. Same address, 212 Temple Hall Hwy, now run by Journey with online rental and smart entry. Existing customers keep their space.' },
+    { q: 'Can I store business records or inventory here?', a: 'Yes. Climate-controlled units at Temple Hall are a good fit for document storage, samples and stock that heat would damage. Month-to-month, so a business can scale up or down as needed.' },
   ],
 }
 

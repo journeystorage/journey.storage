@@ -31,8 +31,35 @@ export const hubFaqs = [
     a: 'No. Month-to-month, no deposit, and move-out is a photo in the app.',
   },
   {
+    q: 'Do you offer business and contractor storage?',
+    a: 'Yes. Small businesses, contractors and home offices rent the same units on the same month-to-month terms: drive-up units for tools, equipment and inventory, climate-controlled units for records and samples. The gate opens from your phone any hour, so early starts and late returns are no problem.',
+  },
+  {
     q: 'Do you serve towns outside Granbury?',
     a: 'Yes. Acton, DeCordova, Tolar, Cresson, Glen Rose and Stephenville customers all use these three locations. All of Hood County is an easy drive on 377 or 144.',
+  },
+] as const
+
+// Business storage use cases for the hub's "Business storage in Granbury"
+// section. Each card links to the location or section that fits the use.
+export const businessUses = [
+  {
+    title: 'Contractors & equipment',
+    body: 'Drive-up storage units for tools, materials and equipment. Pull the truck up, roll the door, load, go. Western Hills Trail is all drive-up.',
+    href: '/rentaspace/westernhillstrl',
+    cta: 'See Western Hills Trl',
+  },
+  {
+    title: 'Inventory & overflow',
+    body: 'E-commerce stock, seasonal merchandise, event gear. Sizes from 5×10 to 10×30 on month-to-month terms, so your storage grows and shrinks with sales.',
+    href: '/rentaspace#sizes',
+    cta: 'Compare sizes',
+  },
+  {
+    title: 'Records & documents',
+    body: 'Files, samples and anything paper belong in a climate-controlled unit at Temple Hall Hwy or McCreary Rd, out of the Texas heat.',
+    href: '/rentaspace/templehallhwy',
+    cta: 'See Temple Hall Hwy',
   },
 ] as const
 

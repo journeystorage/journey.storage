@@ -76,6 +76,7 @@ const mcCreary: Facility = {
     { q: 'What can’t I store?', a: 'No hazardous, flammable, or perishable items, and nothing living (people, animals, or plants). If you’re unsure about something, just ask.' },
     { q: 'Is autopay available?', a: 'Yes. Set up autopay and manage everything — payments, documents, move-out — online, anytime.' },
     { q: 'Is McCreary Rd the same as the Cleveland Road location?', a: 'Yes. Granbury Self Storage #3 off Cleveland Road is now Journey on McCreary Rd, at 3501 McCreary Rd. Same gate, new smart locks, online rental.' },
+    { q: 'Can a business rent storage here?', a: 'Yes. Businesses use McCreary Rd for inventory overflow, equipment and records: drive-up units for anything you load often, climate-controlled units for anything heat would damage. Month-to-month, no long-term contract.' },
   ],
 }
 
