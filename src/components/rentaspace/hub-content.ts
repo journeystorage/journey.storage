@@ -67,8 +67,8 @@ export const businessUses = [
 // Granbury locations (curated fallback data on the facility pages). Replace
 // with live Tenant Inc pricing when the API is wired in.
 export const sizeRows = [
-  { label: 'Small storage units', sizes: '5×5 and 5×10', fits: 'Boxes, a dorm room, seasonal gear.', from: 25, art: '5x10' },
-  { label: 'Medium storage units', sizes: '10×10 and 10×15', fits: 'A one- or two-bedroom apartment.', from: 72, art: '10x10' },
+  { label: 'Small storage units', sizes: '5×5 · 5×10', fits: 'Boxes, a dorm room, seasonal gear.', from: 25, art: '5x10' },
+  { label: 'Medium storage units', sizes: '10×10 · 10×15', fits: 'A one- or two-bedroom apartment.', from: 72, art: '10x10' },
   { label: 'Large storage units', sizes: '10×20', fits: 'A three-bedroom house, or a car.', from: 139, art: '10x20' },
   { label: 'Extra-large storage units', sizes: '10×30', fits: 'A large home, or a vehicle plus the boxes.', from: 199, art: '10x30' },
 ] as const

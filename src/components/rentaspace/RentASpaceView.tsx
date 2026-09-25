@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, MapPin, Phone, CheckCircle2, CalendarDays, Zap, Check, ChevronDown, Ruler } from 'lucide-react'
+import { Search, MapPin, Phone, CheckCircle2, CalendarDays, Zap, Check, ChevronDown, Ruler, Hammer, Package, FileText } from 'lucide-react'
+import { SizeArt, getSizeArt } from '@/lib/sizeArt'
 import RentFooter from '@/components/rentaspace/RentFooter'
 import PayBillFlow from '@/components/rentaspace/PayBillFlow'
 import { openSizeGuide } from '@/components/SizeGuideModal'
@@ -352,44 +353,59 @@ export default function RentASpaceView() {
 
       {/* ── SIZES & PRICES ── */}
       <section id="sizes" className="mx-auto max-w-content px-5 py-20 lg:px-16 lg:py-24">
-        <div className="mx-auto max-w-2xl text-center">
-          <div className="eyebrow center"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Sizes and prices</span></div>
-          <h2 className="track-tight mt-3 text-[2rem] font-black leading-tight text-black lg:text-[2.5rem]">Storage unit sizes and prices</h2>
-          <p className="mt-3 text-[1.0625rem] leading-relaxed text-stone">Sizes are the same at every location. Prices are online rates and vary by location and type; the first month is half off on select sizes.</p>
-        </div>
-        <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {sizeRows.map((row) => (
-            <div key={row.label} className="shadow-card r-jr flex flex-col border border-black/[0.05] bg-white p-6">
-              <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-orange">{row.sizes}</p>
-              <h3 className="track-tight mt-2 text-[1.25rem] font-black leading-snug text-black">{row.label}</h3>
-              <p className="mt-2 text-[0.9375rem] leading-relaxed text-stone">{row.fits}</p>
-              <p className="mt-4 whitespace-nowrap leading-none"><span className="text-[0.8125rem] font-bold text-stone">from </span><span className="text-[1.75rem] font-black text-black">${row.from}</span><span className="text-[0.8125rem] font-bold text-stone">/mo</span></p>
-            </div>
-          ))}
-        </div>
-        <div className="mt-8 text-center">
-          <button type="button" onClick={openSizeGuide} className="btn-spring inline-flex items-center gap-2 rounded-xl border-2 border-black/85 px-6 py-3 font-bold text-black hover:bg-black hover:text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">
-            <Ruler className="h-4 w-4" strokeWidth={2} aria-hidden />See what fits in each size
-          </button>
+        <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
+          <div>
+            <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Sizes and prices</span></div>
+            <h2 className="track-tight mt-3 text-[2rem] font-black leading-[1.05] text-black lg:text-[2.5rem]">Storage unit sizes<br />and prices.</h2>
+            <p className="mt-4 max-w-md text-[1.0625rem] leading-relaxed text-stone">Sizes are the same at every location. Prices are online rates and vary by location and type; the first month is half off on select sizes.</p>
+            <button type="button" onClick={openSizeGuide} className="btn-spring mt-7 inline-flex items-center gap-2 rounded-xl border-2 border-black/85 px-6 py-3 font-bold text-black hover:bg-black hover:text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">
+              <Ruler className="h-4 w-4" strokeWidth={2} aria-hidden />See what fits in each size
+            </button>
+          </div>
+          <ul className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4 sm:gap-x-6">
+            {sizeRows.map((row) => {
+              const art = getSizeArt(row.art)
+              return (
+                <li key={row.label} className="border-t-2 border-black/[0.08] pt-5">
+                  <div className="relative aspect-[3/4] w-[64px] overflow-hidden rounded-xl shadow-[0_3px_12px_-4px_rgba(24,24,24,0.3)]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${art?.tint ?? 'rgba(232,98,42,0.12)'} 100%)` }}>
+                    <SizeArt artKey={row.art} className="absolute inset-0 h-full w-full" />
+                  </div>
+                  <p className="track-tight mt-4 text-[1.375rem] font-black leading-none text-black">{row.sizes}</p>
+                  <h3 className="mt-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-stone">{row.label}</h3>
+                  <p className="mt-2.5 text-[0.875rem] leading-relaxed text-stone">{row.fits}</p>
+                  <p className="mt-3 whitespace-nowrap leading-none"><span className="text-[0.75rem] font-bold text-stone">from </span><span className="text-[1.25rem] font-black text-orange">${row.from}</span><span className="text-[0.75rem] font-bold text-stone">/mo</span></p>
+                </li>
+              )
+            })}
+          </ul>
         </div>
       </section>
 
       {/* ── BUSINESS STORAGE ── */}
       <section id="business" className="border-y border-black/[0.05] bg-white">
         <div className="mx-auto max-w-content px-5 py-20 lg:px-16 lg:py-24">
-          <div className="mx-auto max-w-2xl text-center">
-            <div className="eyebrow center"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">For business</span></div>
-            <h2 className="track-tight mt-3 text-[2rem] font-black leading-tight text-black lg:text-[2.5rem]">Business storage in Granbury</h2>
-            <p className="mt-3 text-[1.0625rem] leading-relaxed text-stone">Contractors, small businesses and home offices use Journey the way they&rsquo;d use a second garage: commercial storage units, month-to-month, with a gate that opens at six in the morning.</p>
-          </div>
-          <div className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
-            {businessUses.map((u) => (
-              <div key={u.title} className="shadow-card r-jr flex flex-col border border-black/[0.05] bg-warm-white p-6">
-                <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">{u.title}</h3>
-                <p className="mt-2 flex-1 text-[0.9375rem] leading-relaxed text-stone">{u.body}</p>
-                <a href={u.href} className="mt-5 inline-flex items-center gap-1.5 font-bold text-black transition-colors hover:text-orange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">{u.cta}<span aria-hidden>→</span></a>
-              </div>
-            ))}
+          <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-20">
+            <div>
+              <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">For business</span></div>
+              <h2 className="track-tight mt-3 text-[2rem] font-black leading-[1.05] text-black lg:text-[2.5rem]">Business storage<br />in Granbury.</h2>
+              <p className="mt-4 max-w-md text-[1.0625rem] leading-relaxed text-stone">Contractors, small businesses and home offices use Journey the way they&rsquo;d use a second garage: commercial storage units, month-to-month, with a gate that opens at six in the morning.</p>
+              <a href="#locations" className="btn-spring shadow-cta mt-7 inline-flex items-center gap-2 rounded-xl bg-orange px-7 py-3.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Find a location<span aria-hidden>→</span></a>
+            </div>
+            <ul className="divide-y divide-black/[0.07]">
+              {businessUses.map((u, i) => {
+                const Icon = [Hammer, Package, FileText][i] ?? Package
+                return (
+                  <li key={u.title} className="grid grid-cols-[2.75rem_1fr] gap-5 py-6 first:pt-0 last:pb-0">
+                    <span className="grid h-11 w-11 place-items-center rounded-full bg-orange/[0.12] text-orange"><Icon className="h-5 w-5" strokeWidth={2} aria-hidden /></span>
+                    <div>
+                      <h3 className="track-tight text-[1.125rem] font-black leading-snug text-black">{u.title}</h3>
+                      <p className="mt-1.5 max-w-[52ch] text-[0.9375rem] leading-relaxed text-stone">{u.body}</p>
+                      <a href={u.href} className="mt-3 inline-flex items-center gap-1.5 text-[0.9375rem] font-bold text-black transition-colors hover:text-orange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">{u.cta}<span aria-hidden>→</span></a>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
           </div>
         </div>
       </section>
