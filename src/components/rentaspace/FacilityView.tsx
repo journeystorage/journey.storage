@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef, type FormEvent } from 'react'
-import { MapPin, Phone, Menu, Star, Check, ChevronRight, ChevronLeft, ChevronDown, X, Ruler, Sparkles } from 'lucide-react'
+import { useState, useEffect, useCallback, useMemo, useRef, type FormEvent } from 'react'
+import { MapPin, Phone, Star, Check, ChevronRight, ChevronLeft, ChevronDown, X, Ruler, Sparkles, Snowflake, Warehouse } from 'lucide-react'
 import { SizeArt, getSizeArt } from '@/lib/sizeArt'
 import { openSizeGuide } from '@/components/SizeGuideModal'
 import RentFooter from '@/components/rentaspace/RentFooter'
 import RentalFlow from '@/components/rentaspace/RentalFlow'
 import PayBillFlow from '@/components/rentaspace/PayBillFlow'
+import { facilities } from '@/lib/constants'
 
 export type Unit = {
   size: string
@@ -20,6 +21,26 @@ export type Unit = {
 export type UnitGroup = { category: string; blurb: string; units: Unit[] }
 // Live availability card from GET /api/nectar/spaces/[facility] (preview-only).
 type LiveSpace = { id: string; size: string | null; available: number; inStock: boolean; onlinePrice: number | null; fromPrice: number | null; category: string | null }
+
+// Every size with artwork in public/videos (storage-<key>-sm.webm).
+const SIZE_ART_KEYS = new Set(['5x5', '5x10', '10x10', '10x15', '10x20', '10x25', '10x30', '12x12', '12x20', '15x20'])
+const liveArtKey = (size: string | null): string | null => {
+  if (!size) return null
+  const k = size.replace(/\s*×\s*/, 'x').toLowerCase()
+  return SIZE_ART_KEYS.has(k) ? k : null
+}
+const liveSqft = (size: string | null): number | null => {
+  const m = size?.match(/(\d+)\s*×\s*(\d+)/)
+  return m ? Number(m[1]) * Number(m[2]) : null
+}
+// Tidy raw back-office category names: drop a leading "Facility - " prefix
+// (e.g. "Temple Hall Hwy - Standard Storage" → "Standard Storage"), the
+// "Granbury/Ganbury" locale word (incl. the back-office typo), and any
+// trailing "#1" group suffix.
+const cleanCat = (cat: string | null): string =>
+  (cat ? cat.replace(/^.*?\s[-–]\s/, '').replace(/\bGr?anbury\b/gi, '').replace(/#\s*\d+/g, '').replace(/\s+/g, ' ').trim() : '') || 'Storage'
+// Climate-controlled vs standard, for the category filter + header treatment.
+const isClimate = (cat: string): boolean => /climate/i.test(cat)
 export type Facility = {
   slug: string
   name: string
@@ -36,12 +57,36 @@ export type Facility = {
   gallery: { thumb: string; full: string; alt: string }[]
   mapQuery: string
   amenities: string[]
+  /** Heading over the About section. Carries this facility's primary search phrase. */
+  aboutHeading?: string
   about: string[]
+  /** One or two sentences: where it is and which towns it serves. */
+  directions?: string
+  /** Places for schema `areaServed`. */
+  areaServed?: string[]
   groups: UnitGroup[]
   faqs: { q: string; a: string }[]
 }
 
 const PHONE_TEL = 'tel:+18175790607'
+
+// Unit-group headings name the size class and the sizes in it, e.g.
+// "Small storage units · 5×5, 5×10". The data keeps its short category key.
+const GROUP_LABEL: Record<string, string> = {
+  Small: 'Small storage units',
+  Medium: 'Medium storage units',
+  Large: 'Large storage units',
+  'X-Large': 'Extra-large storage units',
+}
+const groupHeading = (g: UnitGroup): string =>
+  `${GROUP_LABEL[g.category] ?? g.category} · ${g.units.map((u) => u.size.replace(/\s*×\s*/, '×')).join(', ')}`
+
+// One-line descriptor for the "other locations" cards.
+const SIBLING_BLURB: Record<string, string> = {
+  templehallhwy: 'Climate-controlled and drive-up, RV parking',
+  westernhillstrl: 'All drive-up, near Harbor Lakes',
+  mccrearyrd: 'Newest location, large units to 10×30',
+}
 
 const SCOPED_CSS = `
 #facility .track-tight{letter-spacing:-.03em}
@@ -79,7 +124,13 @@ function Nav({ onSizeGuide, onPayBill }: { onSizeGuide: () => void; onPayBill?: 
             <a href={PHONE_TEL} className="btn-spring rounded-full border-2 border-warm-white/80 px-5 py-2 text-[0.9375rem] font-bold text-warm-white hover:bg-warm-white hover:text-black">Pay Bill</a>
           )}
         </div>
-        <button className="text-warm-white lg:hidden" aria-label="Menu"><Menu className="h-7 w-7" strokeWidth={2} aria-hidden /></button>
+        {/* Mobile: the desktop links collapse, so lead with the one action a
+            returning tenant needs here. */}
+        {onPayBill ? (
+          <button onClick={onPayBill} className="btn-spring rounded-full border-2 border-warm-white/80 px-4 py-1.5 text-[0.875rem] font-bold text-warm-white hover:bg-warm-white hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange lg:hidden">Pay Bill</button>
+        ) : (
+          <a href={PHONE_TEL} className="btn-spring rounded-full border-2 border-warm-white/80 px-4 py-1.5 text-[0.875rem] font-bold text-warm-white hover:bg-warm-white hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange lg:hidden">Pay Bill</a>
+        )}
       </nav>
     </header>
   )
@@ -108,7 +159,7 @@ function SizeVideo({ art, tint }: { art: string; tint: string }) {
     return () => io.disconnect()
   }, [])
   return (
-    <div ref={ref} className="relative aspect-[3/4] w-[86px] shrink-0 cursor-pointer overflow-hidden rounded-xl shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)] transition-transform duration-300 ease-out will-change-transform hover:z-30 hover:scale-[1.85] hover:shadow-[0_16px_40px_-10px_rgba(24,24,24,0.5)]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${tint} 100%)` }}>
+    <div ref={ref} className="relative aspect-[3/4] w-[76px] shrink-0 cursor-zoom-in overflow-hidden rounded-xl shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)] transition-transform duration-300 ease-out will-change-transform [transform-origin:top_left] hover:z-30 hover:scale-[1.8] hover:shadow-[0_16px_40px_-10px_rgba(24,24,24,0.5)]" style={{ background: `linear-gradient(165deg, #F5F0E8 0%, ${tint} 100%)` }}>
       <SizeArt artKey={art} className="absolute inset-0 h-full w-full" />
       {show && (
         <video src={`/videos/storage-${art}-sm.webm`} autoPlay muted loop playsInline preload="none" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
@@ -126,6 +177,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
   const [live, setLive] = useState<{ status: 'off' | 'loading' | 'ok' | 'error'; spaces: LiveSpace[]; error?: string }>({ status: 'off', spaces: [] })
   const [rentalSpace, setRentalSpace] = useState<{ size: string; price: number; category?: string | null } | null>(null)
   const [payBill, setPayBill] = useState(false)
+  const [catFilter, setCatFilter] = useState<'all' | 'climate' | 'standard'>('all')
   const n = f.slides.length
   const gLen = f.gallery.length
   const reviewsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Journey Storage ${f.short} Granbury TX`)}`
@@ -142,8 +194,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
   // from the Nectar API into the page, so you can see the integration render without
   // touching the public page. No-op unless the flag is present.
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('preview') !== 'live') return
-    setPreview(true)
+    if (new URLSearchParams(window.location.search).get('preview') === 'live') setPreview(true)
     setLive({ status: 'loading', spaces: [] })
     fetch(`/api/nectar/spaces/${f.slug}`)
       .then(async (r) => {
@@ -154,6 +205,35 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       .then((j) => setLive({ status: 'ok', spaces: (j.spaces ?? []) as LiveSpace[] }))
       .catch((e: unknown) => setLive({ status: 'error', spaces: [], error: e instanceof Error ? e.message : String(e) }))
   }, [f.slug])
+
+  // Live availability grouped by category (in-stock, priced), cheapest group first.
+  const liveGroups = useMemo(() => {
+    if (live.status !== 'ok') return []
+    const inStock = live.spaces.filter((s) => s.inStock && s.size && (s.onlinePrice ?? 0) > 0)
+    const byCat = new Map<string, LiveSpace[]>()
+    for (const s of inStock) {
+      const c = cleanCat(s.category)
+      const arr = byCat.get(c) ?? []
+      arr.push(s)
+      byCat.set(c, arr)
+    }
+    return [...byCat.entries()]
+      .map(([category, spaces]) => ({
+        category,
+        spaces: spaces.sort((a, b) => (a.onlinePrice ?? 0) - (b.onlinePrice ?? 0)),
+        min: Math.min(...spaces.map((s) => s.onlinePrice ?? Infinity)),
+      }))
+      .sort((a, b) => a.min - b.min)
+  }, [live])
+
+  // Category filter (Climate / Standard) — only surfaced when a facility has both.
+  const hasClimate = liveGroups.some((g) => isClimate(g.category))
+  const hasStandard = liveGroups.some((g) => !isClimate(g.category))
+  const showCatFilter = live.status === 'ok' && hasClimate && hasStandard
+  const visibleGroups = useMemo(
+    () => liveGroups.filter((g) => (catFilter === 'all' ? true : catFilter === 'climate' ? isClimate(g.category) : !isClimate(g.category))),
+    [liveGroups, catFilter],
+  )
 
   useEffect(() => {
     if (lightbox === null) return
@@ -205,25 +285,49 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
     }
   }
 
+  const pageUrl = `https://journey.storage/rentaspace/${f.slug}`
+  const onlinePrices = f.groups.flatMap((g) => g.units.map((u) => u.online))
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SelfStorage',
+    '@id': pageUrl,
     name: `Journey.Storage — ${f.short}`,
-    image: `https://journey.storage${f.slides[0]?.src ?? ''}`,
+    image: f.slides.map((s) => `https://journey.storage${s.src}`),
     telephone: '+18175790607',
-    url: `https://journey.storage/rentaspace/${f.slug}`,
-    priceRange: '$',
+    url: pageUrl,
+    priceRange: onlinePrices.length ? `$${Math.min(...onlinePrices)} - $${Math.max(...onlinePrices)}` : '$',
     address: { '@type': 'PostalAddress', streetAddress: f.address, addressLocality: 'Granbury', addressRegion: 'TX', postalCode: '76049', addressCountry: 'US' },
+    hasMap: `https://www.google.com/maps?q=${encodeURIComponent(f.mapQuery)}`,
+    areaServed: (f.areaServed ?? ['Granbury', 'Hood County']).map((name) => ({ '@type': 'Place', name })),
+    amenityFeature: f.amenities.map((name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })),
     openingHoursSpecification: [
       { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '00:00', closes: '23:59', description: 'Gate access' },
     ],
+    parentOrganization: { '@type': 'Organization', name: 'Journey.Storage', url: 'https://journey.storage' },
   }
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://journey.storage/' },
+      { '@type': 'ListItem', position: 2, name: 'Rent a Space', item: 'https://journey.storage/rentaspace' },
+      { '@type': 'ListItem', position: 3, name: f.short, item: pageUrl },
+    ],
+  }
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: f.faqs.map((q) => ({ '@type': 'Question', name: q.q, acceptedAnswer: { '@type': 'Answer', text: q.a } })),
+  }
+  const siblings = facilities.filter((s) => s.slug !== f.slug)
 
   return (
     <div id="facility" className="bg-warm-white pb-16 text-black antialiased lg:pb-0">
       <style dangerouslySetInnerHTML={{ __html: SCOPED_CSS }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <Nav onSizeGuide={openSizeGuide} onPayBill={preview ? () => setPayBill(true) : undefined} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <Nav onSizeGuide={openSizeGuide} onPayBill={() => setPayBill(true)} />
 
       {/* ── HERO CAROUSEL ── */}
       <section className="grain relative h-[460px] overflow-hidden bg-black lg:h-[540px]">
@@ -274,8 +378,8 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
 
         {n > 1 && (
           <>
-            <button onClick={() => go(-1)} aria-label="Previous photo" className="btn-spring absolute left-4 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 text-warm-white backdrop-blur hover:bg-black/70"><ChevronLeft className="h-6 w-6" aria-hidden /></button>
-            <button onClick={() => go(1)} aria-label="Next photo" className="btn-spring absolute right-4 top-1/2 z-20 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 text-warm-white backdrop-blur hover:bg-black/70"><ChevronRight className="h-6 w-6" aria-hidden /></button>
+            <button onClick={() => go(-1)} aria-label="Previous photo" className="btn-spring absolute left-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 text-warm-white backdrop-blur hover:bg-black/70 sm:grid"><ChevronLeft className="h-6 w-6" aria-hidden /></button>
+            <button onClick={() => go(1)} aria-label="Next photo" className="btn-spring absolute right-4 top-1/2 z-20 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-black/40 text-warm-white backdrop-blur hover:bg-black/70 sm:grid"><ChevronRight className="h-6 w-6" aria-hidden /></button>
             <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 gap-2">
               {f.slides.map((_, i) => (
                 <button key={i} onClick={() => setSlide(i)} aria-label={`Go to photo ${i + 1}`} className={`h-2 rounded-full transition-all duration-300 ${i === slide ? 'w-6 bg-orange' : 'w-2 bg-warm-white/60 hover:bg-warm-white'}`} />
@@ -295,99 +399,128 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       </div>
 
       {/* ── MAIN: spaces + sidebar ── */}
-      <section className="mx-auto max-w-content px-5 py-12 lg:px-16 lg:py-16">
+      <section id="spaces" className="mx-auto max-w-content px-5 py-12 lg:px-16 lg:py-16">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:gap-12">
           <div>
             <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Rent a space</span></div>
-            <h2 className="track-tight mt-3 text-[1.75rem] font-black text-black lg:text-[2.25rem]">Choose your space</h2>
-            <p className="mt-2 text-[1.0625rem] leading-relaxed text-stone">Reserve online in minutes — lock in the online rate, move in when you like. Month-to-month, no deposit, no long-term commitment.</p>
+            <h2 className="track-tight mt-3 text-[1.75rem] font-black text-black lg:text-[2.25rem]">Storage units and prices on {f.short}</h2>
+            <p className="mt-2 text-[1.0625rem] leading-relaxed text-stone">Rent online in minutes — lock in the online rate, move in when you like. Month-to-month, no deposit, no long-term commitment.</p>
 
-            {preview && (
-              <div className="mt-8 rounded-2xl border-2 border-dashed border-orange/50 bg-orange/[0.04] p-5 lg:p-6">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-orange px-3 py-1 text-[0.6875rem] font-black uppercase tracking-wide text-warm-white"><Sparkles className="h-3.5 w-3.5" aria-hidden />Live preview</span>
-                  <span className="text-[0.875rem] font-bold text-charcoal">Real-time availability &amp; pricing from the Tenant Inc API</span>
-                </div>
-                <p className="mt-2 text-[0.8125rem] leading-relaxed text-stone">Sandbox data — the sizes look odd because it&rsquo;s a shared test facility. On go-live this becomes your real Granbury spaces. This panel is only visible with <span className="font-bold">?preview=live</span>; the public page is untouched.</p>
-
-                {live.status === 'loading' && <p className="mt-4 text-[0.9375rem] font-bold text-stone">Loading live availability…</p>}
-                {live.status === 'error' && (
-                  <p className="mt-4 text-[0.9375rem] font-bold text-[#D94A4A]">Live feed unavailable: {live.error}. <span className="font-normal text-stone">(Expected on the production URL until API keys are set in Hostinger — works locally where the sandbox key is set.)</span></p>
-                )}
-                {live.status === 'ok' && (() => {
-                  const inStock = live.spaces.filter((s) => s.inStock)
-                  const shown = inStock.slice(0, 12)
-                  return (
-                    <>
-                      <p className="mt-4 text-[0.75rem] font-bold uppercase tracking-wide text-orange">{inStock.length} sizes available now · {live.spaces.length} total returned</p>
-                      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-                        {shown.map((s) => {
-                          const rentable = s.onlinePrice != null && s.size
-                          return (
-                            <button
-                              key={s.id}
-                              type="button"
-                              disabled={!rentable}
-                              onClick={() => rentable && setRentalSpace({ size: s.size!, price: s.onlinePrice!, category: s.category })}
-                              className="unit group/live rounded-xl border border-black/[0.06] bg-warm-white p-3 text-left disabled:cursor-default disabled:opacity-70"
-                            >
-                              <p className="text-[1.125rem] font-black tracking-[-0.02em] text-black">{s.size ?? '—'}</p>
-                              <p className="mt-0.5 text-[0.75rem] font-bold text-[#5c8a52]">{s.available} available</p>
-                              <p className="mt-2 leading-none">
-                                {s.onlinePrice != null
-                                  ? <><span className="text-[1.25rem] font-black text-orange">${s.onlinePrice}</span><span className="text-[0.75rem] font-bold text-stone">/mo</span></>
-                                  : <span className="text-[0.8125rem] font-bold text-stone">Call for price</span>}
-                              </p>
-                              {rentable && <span className="mt-2 inline-flex items-center gap-1 text-[0.75rem] font-bold text-orange opacity-0 transition-opacity group-hover/live:opacity-100">Rent online<ChevronRight className="h-3 w-3" aria-hidden /></span>}
-                            </button>
-                          )
-                        })}
-                      </div>
-                      {inStock.length > shown.length && <p className="mt-3 text-[0.8125rem] text-stone">+{inStock.length - shown.length} more available sizes returned by the API…</p>}
-                      <p className="mt-3 text-[0.75rem] font-bold text-orange">↑ Click any space to walk the full online rental — move-in, lease signing, payment, gate code.</p>
-                    </>
-                  )
-                })()}
-              </div>
-            )}
-
-            {f.groups.map((group) => (
-              <div key={group.category} className="mt-10">
-                <div className="flex items-baseline justify-between border-b border-black/[0.08] pb-2">
-                  <h3 className="text-[1.25rem] font-black text-black">{group.category}</h3>
-                  <span className="text-[0.875rem] text-stone">{group.blurb}</span>
-                </div>
-                <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {group.units.map((u) => {
-                    const art = getSizeArt(u.art)
+            {showCatFilter && (
+              <div className="mt-7">
+                <p className="mb-2 text-[0.6875rem] font-bold uppercase tracking-[0.18em] text-stone/70">Filter by type</p>
+                <div className="grid w-full grid-cols-3 gap-1 rounded-full border border-black/[0.08] bg-warm-white p-1 shadow-[0_2px_10px_-6px_rgba(24,24,24,0.35)] sm:inline-flex sm:w-auto sm:gap-1.5">
+                  {([
+                    { key: 'all', label: 'All spaces', short: 'All', Icon: null },
+                    { key: 'climate', label: 'Climate Controlled', short: 'Climate', Icon: Snowflake },
+                    { key: 'standard', label: 'Standard', short: 'Standard', Icon: Warehouse },
+                  ] as const).map(({ key, label, short, Icon }) => {
+                    const active = catFilter === key
                     return (
-                      <div key={u.size} className="unit r-jr flex h-full flex-col border border-black/[0.06] bg-warm-white p-5">
-                        <div className="mb-5 flex items-start gap-4">
-                          <SizeVideo art={u.art} tint={art?.tint ?? 'rgba(232,98,42,0.1)'} />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <h4 className="text-[1.375rem] font-black tracking-[-0.02em] text-black">{u.size}</h4>
-                                <p className="mt-0.5 text-[0.8125rem] text-stone">{u.sqft} sq ft · {u.fits}</p>
-                              </div>
-                              <div className="shrink-0 text-right">
-                                <p className="text-[0.6875rem] font-bold uppercase tracking-wide text-stone">In store <span className="line-through">${u.walkIn}</span></p>
-                                <p className="leading-none"><span className="text-[1.625rem] font-black text-orange">${u.online}</span><span className="text-[0.8125rem] font-bold text-stone">/mo online</span></p>
-                                <p className="mt-1 text-[0.6875rem] font-bold text-[#5c8a52]">1st month ${Math.round(u.online / 2)}</p>
-                              </div>
-                            </div>
-                            <div className="mt-3 flex min-h-[3.25rem] flex-wrap content-start gap-1.5">
-                              {u.tags.map((t) => (<span key={t} className={`h-fit rounded-full px-2.5 py-1 text-[0.75rem] font-bold ${t === 'Climate-controlled' ? 'bg-sage-green/15 text-[#5c8a52]' : 'bg-sand/25 text-charcoal'}`}>{t}</span>))}
-                            </div>
-                          </div>
-                        </div>
-                        <button onClick={() => preview ? setRentalSpace({ size: u.size, price: u.online, category: u.tags[0] ?? null }) : openReserve(u.size)} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>
-                      </div>
+                      <button
+                        key={key}
+                        onClick={() => setCatFilter(key)}
+                        aria-pressed={active}
+                        className={`btn-spring inline-flex items-center justify-center gap-1.5 rounded-full px-2 py-2 text-[0.8125rem] font-bold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange sm:px-3.5 sm:py-1.5 ${active ? 'bg-charcoal text-warm-white shadow-[0_2px_8px_-3px_rgba(24,24,24,0.5)]' : 'text-charcoal hover:bg-black/[0.05]'}`}
+                      >
+                        {Icon && <Icon className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} aria-hidden />}
+                        <span className="sm:hidden">{short}</span>
+                        <span className="hidden sm:inline">{label}</span>
+                      </button>
                     )
                   })}
                 </div>
               </div>
-            ))}
+            )}
+
+            {live.status === 'ok' && liveGroups.length > 0 ? (
+              // ── LIVE availability + pricing (real Tenant Inc data) ──
+              visibleGroups.map((group) => {
+                const climate = isClimate(group.category)
+                return (
+                <div key={group.category} className="mt-10">
+                  <div className={`flex items-center justify-between border-b-2 pb-2.5 ${climate ? 'border-sage-green/40' : 'border-orange/35'}`}>
+                    <div className="flex items-center gap-2.5">
+                      <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${climate ? 'bg-sage-green/15 text-[#5c8a52]' : 'bg-orange/12 text-orange'}`}>
+                        {climate ? <Snowflake className="h-[1.05rem] w-[1.05rem]" strokeWidth={2.25} aria-hidden /> : <Warehouse className="h-[1.05rem] w-[1.05rem]" strokeWidth={2.25} aria-hidden />}
+                      </span>
+                      <h3 className="text-[1.375rem] font-black tracking-[-0.01em] text-black">{group.category}</h3>
+                    </div>
+                    <span className="text-[0.875rem] text-stone">{group.spaces.length} size{group.spaces.length > 1 ? 's' : ''} available</span>
+                  </div>
+                  <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {group.spaces.map((s) => {
+                      const artKey = liveArtKey(s.size)
+                      const art = artKey ? getSizeArt(artKey) : null
+                      const sqft = liveSqft(s.size)
+                      const price = s.onlinePrice!
+                      return (
+                        <div key={s.id} className="unit r-jr flex h-full flex-col border border-black/[0.06] bg-warm-white p-5">
+                          <div className="mb-5 flex items-start gap-4">
+                            {artKey ? (
+                              <SizeVideo art={artKey} tint={art?.tint ?? 'rgba(232,98,42,0.1)'} />
+                            ) : (
+                              <div className="grid aspect-[3/4] w-[76px] shrink-0 place-items-center rounded-xl text-center shadow-[0_3px_12px_-4px_rgba(24,24,24,0.35)]" style={{ background: 'linear-gradient(165deg, #F5F0E8 0%, rgba(232,98,42,0.12) 100%)' }}>
+                                <span className="px-1 text-[0.9rem] font-black leading-tight text-charcoal">{s.size}</span>
+                              </div>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-baseline justify-between gap-2">
+                                <h4 className="whitespace-nowrap text-[1.375rem] font-black tracking-[-0.02em] text-black">{s.size}</h4>
+                                <p className="shrink-0 whitespace-nowrap leading-none"><span className="text-[1.5rem] font-black text-orange">${price}</span><span className="text-[0.75rem] font-bold text-stone">/mo</span></p>
+                              </div>
+                              <p className="mt-1 text-[0.8125rem] leading-snug text-stone">{sqft ? `${sqft} sq ft · ` : ''}{group.category}</p>
+                              <p className="mt-1.5 text-[0.75rem] font-bold text-[#5c8a52]">1st month ${Math.round(price / 2)}</p>
+                              {s.available > 0 && s.available <= 3 && (
+                                <div className="mt-2.5">
+                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-sage-green/15 px-2.5 py-1 text-[0.75rem] font-bold text-[#5c8a52]"><span className="h-1.5 w-1.5 rounded-full bg-sage-green" aria-hidden />{s.available === 1 ? 'Only 1 left' : `Only ${s.available} left`}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <button onClick={() => setRentalSpace({ size: s.size!, price, category: group.category })} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+                )
+              })
+            ) : (
+              // ── Fallback: curated sizes (while live loads, or if the feed is down) ──
+              f.groups.map((group) => (
+                <div key={group.category} className="mt-10">
+                  <div className="flex items-baseline justify-between gap-4 border-b border-black/[0.08] pb-2">
+                    <h3 className="text-[1.25rem] font-black text-black">{groupHeading(group)}</h3>
+                    <span className="text-[0.875rem] text-stone">{group.blurb}</span>
+                  </div>
+                  <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {group.units.map((u) => {
+                      const art = getSizeArt(u.art)
+                      return (
+                        <div key={u.size} className="unit r-jr flex h-full flex-col border border-black/[0.06] bg-warm-white p-5">
+                          <div className="mb-5 flex items-start gap-4">
+                            <SizeVideo art={u.art} tint={art?.tint ?? 'rgba(232,98,42,0.1)'} />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-baseline justify-between gap-2">
+                                <h4 className="whitespace-nowrap text-[1.375rem] font-black tracking-[-0.02em] text-black">{u.size}</h4>
+                                <p className="shrink-0 whitespace-nowrap leading-none"><span className="text-[1.5rem] font-black text-orange">${u.online}</span><span className="text-[0.75rem] font-bold text-stone">/mo</span></p>
+                              </div>
+                              <p className="mt-1 text-[0.8125rem] leading-snug text-stone">{u.sqft} sq ft · {u.fits}</p>
+                              <p className="mt-1 text-[0.6875rem] font-bold text-stone">In store <span className="line-through">${u.walkIn}</span> · <span className="text-[#5c8a52]">1st month ${Math.round(u.online / 2)}</span></p>
+                              <div className="mt-2.5 flex flex-wrap content-start gap-1.5">
+                                {u.tags.map((t) => (<span key={t} className={`h-fit rounded-full px-2.5 py-1 text-[0.75rem] font-bold ${t === 'Climate-controlled' ? 'bg-sage-green/15 text-[#5c8a52]' : 'bg-sand/25 text-charcoal'}`}>{t}</span>))}
+                              </div>
+                            </div>
+                          </div>
+                          <button onClick={() => setRentalSpace({ size: u.size, price: u.online, category: u.tags[0] ?? null })} className="btn-spring shadow-cta mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-2.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Rent this space<span aria-hidden>→</span></button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))
+            )}
 
             <p className="mt-8 text-[0.8125rem] italic text-stone/70">Online rates shown — final price is confirmed at checkout. First-month offer applies to new rentals on select sizes.</p>
           </div>
@@ -412,14 +545,14 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
             </button>
 
             <div className="r-jr border border-black/[0.06] bg-warm-white p-5 shadow-card">
-              <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Amenities</p>
+              <h2 className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Features: gated, cameras, 24/7 smart entry</h2>
               <ul className="mt-3 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
                 {f.amenities.map((a) => (<li key={a} className="flex items-center gap-2 text-[0.875rem] text-charcoal"><Check className="h-4 w-4 shrink-0 text-sage-green" strokeWidth={2.5} aria-hidden />{a}</li>))}
               </ul>
             </div>
 
             <div className="r-jr border border-black/[0.06] bg-warm-white p-5 shadow-card">
-              <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Common questions</p>
+              <h2 className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Common questions</h2>
               <div className="mt-2 divide-y divide-black/[0.07]">
                 {f.faqs.map((faq) => (
                   <details key={faq.q} className="group py-3">
@@ -438,9 +571,39 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
         <div className="mx-auto max-w-content px-5 py-14 lg:px-16 lg:py-20">
           <div className="max-w-3xl">
             <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">About this location</span></div>
-            <h2 className="track-tight mt-3 text-[1.75rem] font-black leading-tight text-black lg:text-[2.25rem]">Self storage on {f.short}, Granbury.</h2>
+            <h2 className="track-tight mt-3 text-[1.75rem] font-black leading-tight text-black lg:text-[2.25rem]">{f.aboutHeading ?? `Self storage on ${f.short}, Granbury.`}</h2>
             <div className="mt-5 space-y-4 text-[1.0625rem] leading-relaxed text-stone">{f.about.map((p, i) => (<p key={i}>{p}</p>))}</div>
           </div>
+
+          {f.directions && (
+            <div className="mt-12 max-w-3xl">
+              <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Getting here</span></div>
+              <h2 className="track-tight mt-3 text-[1.5rem] font-black leading-tight text-black lg:text-[1.75rem]">Getting here from Granbury.</h2>
+              <p className="mt-4 text-[1.0625rem] leading-relaxed text-stone">{f.directions}</p>
+              <a href={`https://www.google.com/maps?q=${encodeURIComponent(f.mapQuery)}`} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 font-bold text-black transition-colors hover:text-orange">
+                <MapPin className="h-4 w-4 text-orange" strokeWidth={2} aria-hidden />Open in Google Maps
+              </a>
+            </div>
+          )}
+
+          {siblings.length > 0 && (
+            <div className="mt-12">
+              <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Also in Granbury</span></div>
+              <h2 className="track-tight mt-3 text-[1.5rem] font-black leading-tight text-black lg:text-[1.75rem]">Our other Granbury locations.</h2>
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:max-w-3xl">
+                {siblings.map((s) => (
+                  <a key={s.slug} href={`/rentaspace/${s.slug}`} className="btn-spring r-jr flex items-center justify-between gap-3 border border-black/[0.06] bg-white p-5 shadow-card hover:border-orange/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">
+                    <span>
+                      <span className="block text-[1.0625rem] font-black text-black">{s.name}</span>
+                      <span className="mt-0.5 block text-[0.875rem] text-stone">{SIBLING_BLURB[s.slug] ?? `${s.street}, ${s.city}`}</span>
+                      <span className="mt-1 block text-[0.8125rem] text-stone">{s.street}, {s.city}, {s.region} {s.zip}</span>
+                    </span>
+                    <ChevronRight className="h-5 w-5 shrink-0 text-orange" aria-hidden />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -456,7 +619,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
           <h2 className="track-tighter mt-4 text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3rem]">Your space is waiting.</h2>
           <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] font-light text-warm-white/70 lg:text-[1.25rem]">Reserve your space at {f.short} today — clear pricing, month-to-month, rented online in minutes.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <button onClick={() => openReserve('')} className="btn-spring shadow-cta rounded-sm bg-orange px-8 py-3.5 font-bold text-warm-white">Reserve a space</button>
+            <button onClick={() => document.getElementById('spaces')?.scrollIntoView({ behavior: 'smooth' })} className="btn-spring shadow-cta rounded-sm bg-orange px-8 py-3.5 font-bold text-warm-white">Rent a Space</button>
             <a href={f.tel} className="btn-spring rounded-sm border-2 border-warm-white/70 px-8 py-3.5 font-bold text-warm-white hover:bg-warm-white hover:text-black">Call us</a>
           </div>
         </div>
@@ -464,11 +627,12 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
 
       <RentFooter />
 
-      {/* ── RENTAL FLOW (preview-only demo checkout) ── */}
+      {/* ── RENTAL FLOW (real online move-in) ── */}
       {rentalSpace && (
         <RentalFlow
-          facility={{ short: f.short, address: f.address, city: f.city, phone: f.phone, tel: f.tel }}
+          facility={{ slug: f.slug, short: f.short, address: f.address, city: f.city, phone: f.phone, tel: f.tel }}
           space={rentalSpace}
+          preview={preview}
           onClose={() => setRentalSpace(null)}
         />
       )}
@@ -481,7 +645,7 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
       {/* ── STICKY MOBILE CTA ── */}
       <div className="fixed inset-x-0 bottom-0 z-40 flex gap-2 border-t border-black/10 bg-warm-white/95 p-3 backdrop-blur lg:hidden">
         <a href={f.tel} className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-black/85 py-3 font-bold text-black"><Phone className="h-4 w-4" strokeWidth={2} aria-hidden />Call</a>
-        <button onClick={() => openReserve('')} className="shadow-cta flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-orange py-3 font-bold text-warm-white">Reserve a space</button>
+        <button onClick={() => document.getElementById('spaces')?.scrollIntoView({ behavior: 'smooth' })} className="shadow-cta flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-orange py-3 font-bold text-warm-white">Rent a Space</button>
       </div>
 
 

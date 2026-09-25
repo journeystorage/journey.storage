@@ -53,6 +53,9 @@ export default function HowItWorks() {
             <br />
             <span className="font-light text-warm-white/40">the friction.</span>
           </h2>
+          <p className="mx-auto mt-5 max-w-[520px] text-[1.0625rem] font-light leading-[1.6] text-warm-white/50">
+            Online storage rental in four steps. No office visit, no paperwork, no waiting.
+          </p>
         </motion.div>
 
         {/* Desktop: 5-column */}

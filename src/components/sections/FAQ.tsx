@@ -7,8 +7,8 @@ import { sectionIds } from '@/lib/constants'
 
 const faqs = [
   {
-    question: 'When is Journey opening?',
-    answer: "We're building our first facilities now. Contact us and we'll notify you the moment we open near you. Early members get priority access.",
+    question: "Where are Journey's storage units?",
+    answer: "Today, three locations in Granbury, Texas: 212 Temple Hall Hwy, 409 Western Hills Trail and 3501 McCreary Rd, all open with 24/7 gate access. More locations are coming; the Rent a Space page always has the current list.",
   },
   {
     question: 'How does pricing work?',
@@ -16,7 +16,7 @@ const faqs = [
   },
   {
     question: 'What sizes are available?',
-    answer: "From compact 5\u00d75 closets (~25 sq ft) for boxes and seasonal gear, to 10\u00d725 garage-size spaces (~250 sq ft) that fit an entire household. Mid-range options like 5\u00d710, 10\u00d710, and 10\u00d715 cover everything in between.",
+    answer: "From compact 5\u00d75 closets (25 sq ft) for boxes and seasonal gear, to 10\u00d730 spaces (300 sq ft) that fit a whole household or a vehicle. Mid-range options like 5\u00d710, 10\u00d710, 10\u00d715 and 10\u00d720 cover everything in between.",
   },
   {
     question: 'What types of storage do you offer?',
@@ -31,6 +31,17 @@ const faqs = [
     answer: "Empty your space, snap a photo, and send it through the app. You'll get approval in seconds. Access turns off, and you're done. No calls, no office visits, no waiting.",
   },
 ]
+
+// FAQPage structured data — makes these answers eligible for FAQ rich results.
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.question,
+    acceptedAnswer: { '@type': 'Answer', text: f.answer },
+  })),
+}
 
 function FAQItem({ item, isOpen, onToggle, index, isInView }: {
   item: typeof faqs[0]
@@ -91,6 +102,7 @@ export default function FAQ() {
 
   return (
     <section ref={ref} id={sectionIds.faq} className="grain relative overflow-hidden bg-black py-20 lg:py-28">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       {/* Radial glow */}
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true" style={{
         background: 'radial-gradient(ellipse 50% 40% at 50% 20%, rgba(232,98,42,0.04), transparent)',
