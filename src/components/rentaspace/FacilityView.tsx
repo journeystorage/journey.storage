@@ -83,7 +83,7 @@ const groupHeading = (g: UnitGroup): string =>
 
 // One-line descriptor for the "other locations" cards.
 const SIBLING_BLURB: Record<string, string> = {
-  templehallhwy: 'Climate-controlled and drive-up, RV parking',
+  templehallhwy: 'Climate-controlled and drive-up, 350+ spaces',
   westernhillstrl: 'All drive-up, near Harbor Lakes',
   mccrearyrd: 'Newest location, large units to 10×30',
 }

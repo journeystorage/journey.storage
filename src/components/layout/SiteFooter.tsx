@@ -14,17 +14,16 @@ import { SizeGuideLink } from '@/components/SizeGuideModal'
  *    yet, so each storage type links to the facility that owns that keyword.
  *  - NAP (name, address, phone) per facility in an <address>, from the same
  *    `facilities` constant the schema uses. Must match Google Business Profile.
- *  - 21 crawlable links + the size-guide button. Stay under 25.
+ *  - 19 crawlable links + the size-guide button. Stay under 25.
  *  - Markets without a page (Malakoff) are text, not links: no 404s.
  */
 
+// Every type goes to the locations hub so the renter picks a location first.
 const storageTypes = [
-  { label: 'Climate-controlled storage', href: '/rentaspace/templehallhwy' },
-  { label: 'Drive-up storage units', href: '/rentaspace/westernhillstrl' },
+  { label: 'Climate-controlled storage', href: '/rentaspace' },
+  { label: 'Drive-up storage units', href: '/rentaspace' },
   { label: 'Small storage units', sub: '5×5 · 5×10', href: '/rentaspace#sizes' },
-  { label: 'Large storage units', sub: '10×20 · 10×30', href: '/rentaspace/mccrearyrd' },
-  { label: 'RV & boat storage', href: '/rentaspace/templehallhwy' },
-  { label: 'Vehicle & trailer storage', href: '/rentaspace/westernhillstrl' },
+  { label: 'Large storage units', sub: '10×20 · 10×30', href: '/rentaspace#sizes' },
 ]
 
 const locationLinks = [
@@ -43,7 +42,7 @@ const resourceLinks = [
 // One-line descriptor per facility for the NAP cards. Keyed by slug so it
 // stays in step with `facilities`.
 const FACILITY_BLURB: Record<string, string> = {
-  templehallhwy: 'Climate-controlled & drive-up · RV parking',
+  templehallhwy: 'Climate-controlled & drive-up · 350+ spaces',
   westernhillstrl: 'All drive-up · near Harbor Lakes',
   mccrearyrd: 'Newest location · units to 10×30',
 }
@@ -177,7 +176,7 @@ export default function SiteFooter() {
               <li>
                 <span className="block py-1.5 text-[0.9375rem] leading-snug text-stone">
                   Malakoff, TX · Cedar Creek Lake
-                  <span className="block text-[0.6875rem] font-extrabold uppercase tracking-[0.12em] text-stone/80">Coming 2027</span>
+                  <span className="block text-[0.6875rem] font-extrabold uppercase tracking-[0.12em] text-stone/80">Coming 2026</span>
                 </span>
               </li>
             </ul>

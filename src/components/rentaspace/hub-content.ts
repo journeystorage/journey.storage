@@ -16,7 +16,7 @@ export const hubFaqs = [
   },
   {
     q: 'Which Journey location is closest to Lake Granbury?',
-    a: 'Western Hills Trail, by the Harbor Lakes neighborhood on the west side of town. Temple Hall Hwy is a few minutes further and has climate-controlled spaces and RV parking.',
+    a: 'Western Hills Trail, by the Harbor Lakes neighborhood on the west side of town. Temple Hall Hwy is a few minutes further and has climate-controlled spaces.',
   },
   {
     q: 'Do you have climate-controlled storage in Granbury?',
