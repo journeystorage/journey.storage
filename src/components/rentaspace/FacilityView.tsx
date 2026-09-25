@@ -7,6 +7,7 @@ import { openSizeGuide } from '@/components/SizeGuideModal'
 import RentFooter from '@/components/rentaspace/RentFooter'
 import RentalFlow from '@/components/rentaspace/RentalFlow'
 import PayBillFlow from '@/components/rentaspace/PayBillFlow'
+import { facilities } from '@/lib/constants'
 
 export type Unit = {
   size: string
@@ -56,12 +57,36 @@ export type Facility = {
   gallery: { thumb: string; full: string; alt: string }[]
   mapQuery: string
   amenities: string[]
+  /** Heading over the About section. Carries this facility's primary search phrase. */
+  aboutHeading?: string
   about: string[]
+  /** One or two sentences: where it is and which towns it serves. */
+  directions?: string
+  /** Places for schema `areaServed`. */
+  areaServed?: string[]
   groups: UnitGroup[]
   faqs: { q: string; a: string }[]
 }
 
 const PHONE_TEL = 'tel:+18175790607'
+
+// Unit-group headings name the size class and the sizes in it, e.g.
+// "Small storage units · 5×5, 5×10". The data keeps its short category key.
+const GROUP_LABEL: Record<string, string> = {
+  Small: 'Small storage units',
+  Medium: 'Medium storage units',
+  Large: 'Large storage units',
+  'X-Large': 'Extra-large storage units',
+}
+const groupHeading = (g: UnitGroup): string =>
+  `${GROUP_LABEL[g.category] ?? g.category} · ${g.units.map((u) => u.size.replace(/\s*×\s*/, '×')).join(', ')}`
+
+// One-line descriptor for the "other locations" cards.
+const SIBLING_BLURB: Record<string, string> = {
+  templehallhwy: 'Climate-controlled and drive-up, RV parking',
+  westernhillstrl: 'All drive-up, near Harbor Lakes',
+  mccrearyrd: 'Newest location, large units to 10×30',
+}
 
 const SCOPED_CSS = `
 #facility .track-tight{letter-spacing:-.03em}
@@ -266,24 +291,48 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
     }
   }
 
+  const pageUrl = `https://journey.storage/rentaspace/${f.slug}`
+  const onlinePrices = f.groups.flatMap((g) => g.units.map((u) => u.online))
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SelfStorage',
+    '@id': pageUrl,
     name: `Journey.Storage — ${f.short}`,
-    image: `https://journey.storage${f.slides[0]?.src ?? ''}`,
+    image: f.slides.map((s) => `https://journey.storage${s.src}`),
     telephone: '+18175790607',
-    url: `https://journey.storage/rentaspace/${f.slug}`,
-    priceRange: '$',
+    url: pageUrl,
+    priceRange: onlinePrices.length ? `$${Math.min(...onlinePrices)} - $${Math.max(...onlinePrices)}` : '$',
     address: { '@type': 'PostalAddress', streetAddress: f.address, addressLocality: 'Granbury', addressRegion: 'TX', postalCode: '76049', addressCountry: 'US' },
+    hasMap: `https://www.google.com/maps?q=${encodeURIComponent(f.mapQuery)}`,
+    areaServed: (f.areaServed ?? ['Granbury', 'Hood County']).map((name) => ({ '@type': 'Place', name })),
+    amenityFeature: f.amenities.map((name) => ({ '@type': 'LocationFeatureSpecification', name, value: true })),
     openingHoursSpecification: [
       { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], opens: '00:00', closes: '23:59', description: 'Gate access' },
     ],
+    parentOrganization: { '@type': 'Organization', name: 'Journey.Storage', url: 'https://journey.storage' },
   }
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://journey.storage/' },
+      { '@type': 'ListItem', position: 2, name: 'Rent a Space', item: 'https://journey.storage/rentaspace' },
+      { '@type': 'ListItem', position: 3, name: f.short, item: pageUrl },
+    ],
+  }
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: f.faqs.map((q) => ({ '@type': 'Question', name: q.q, acceptedAnswer: { '@type': 'Answer', text: q.a } })),
+  }
+  const siblings = facilities.filter((s) => s.slug !== f.slug)
 
   return (
     <div id="facility" className="bg-warm-white pb-16 text-black antialiased lg:pb-0">
       <style dangerouslySetInnerHTML={{ __html: SCOPED_CSS }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <Nav onSizeGuide={openSizeGuide} onPayBill={() => setPayBill(true)} />
 
       {/* ── HERO CAROUSEL ── */}
@@ -372,8 +421,8 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_360px] lg:gap-12">
           <div>
             <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Rent a space</span></div>
-            <h2 className="track-tight mt-3 text-[1.75rem] font-black text-black lg:text-[2.25rem]">Choose your space</h2>
-            <p className="mt-2 text-[1.0625rem] leading-relaxed text-stone">Reserve online in minutes — lock in the online rate, move in when you like. Month-to-month, no deposit, no long-term commitment.</p>
+            <h2 className="track-tight mt-3 text-[1.75rem] font-black text-black lg:text-[2.25rem]">Storage units and prices on {f.short}</h2>
+            <p className="mt-2 text-[1.0625rem] leading-relaxed text-stone">Rent online in minutes — lock in the online rate, move in when you like. Month-to-month, no deposit, no long-term commitment.</p>
 
             {showCatFilter && (
               <div className="mt-7">
@@ -459,8 +508,8 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
               // ── Fallback: curated sizes (while live loads, or if the feed is down) ──
               f.groups.map((group) => (
                 <div key={group.category} className="mt-10">
-                  <div className="flex items-baseline justify-between border-b border-black/[0.08] pb-2">
-                    <h3 className="text-[1.25rem] font-black text-black">{group.category}</h3>
+                  <div className="flex items-baseline justify-between gap-4 border-b border-black/[0.08] pb-2">
+                    <h3 className="text-[1.25rem] font-black text-black">{groupHeading(group)}</h3>
                     <span className="text-[0.875rem] text-stone">{group.blurb}</span>
                   </div>
                   <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -514,14 +563,14 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
             </button>
 
             <div className="r-jr border border-black/[0.06] bg-warm-white p-5 shadow-card">
-              <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Amenities</p>
+              <h2 className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Features: gated, cameras, 24/7 smart entry</h2>
               <ul className="mt-3 grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
                 {f.amenities.map((a) => (<li key={a} className="flex items-center gap-2 text-[0.875rem] text-charcoal"><Check className="h-4 w-4 shrink-0 text-sage-green" strokeWidth={2.5} aria-hidden />{a}</li>))}
               </ul>
             </div>
 
             <div className="r-jr border border-black/[0.06] bg-warm-white p-5 shadow-card">
-              <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Common questions</p>
+              <h2 className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Common questions</h2>
               <div className="mt-2 divide-y divide-black/[0.07]">
                 {f.faqs.map((faq) => (
                   <details key={faq.q} className="group py-3">
@@ -540,9 +589,39 @@ export default function FacilityView({ facility: f }: { facility: Facility }) {
         <div className="mx-auto max-w-content px-5 py-14 lg:px-16 lg:py-20">
           <div className="max-w-3xl">
             <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">About this location</span></div>
-            <h2 className="track-tight mt-3 text-[1.75rem] font-black leading-tight text-black lg:text-[2.25rem]">Self storage on {f.short}, Granbury.</h2>
+            <h2 className="track-tight mt-3 text-[1.75rem] font-black leading-tight text-black lg:text-[2.25rem]">{f.aboutHeading ?? `Self storage on ${f.short}, Granbury.`}</h2>
             <div className="mt-5 space-y-4 text-[1.0625rem] leading-relaxed text-stone">{f.about.map((p, i) => (<p key={i}>{p}</p>))}</div>
           </div>
+
+          {f.directions && (
+            <div className="mt-12 max-w-3xl">
+              <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Getting here</span></div>
+              <h2 className="track-tight mt-3 text-[1.5rem] font-black leading-tight text-black lg:text-[1.75rem]">Getting here from Granbury.</h2>
+              <p className="mt-4 text-[1.0625rem] leading-relaxed text-stone">{f.directions}</p>
+              <a href={`https://www.google.com/maps?q=${encodeURIComponent(f.mapQuery)}`} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-2 font-bold text-black transition-colors hover:text-orange">
+                <MapPin className="h-4 w-4 text-orange" strokeWidth={2} aria-hidden />Open in Google Maps
+              </a>
+            </div>
+          )}
+
+          {siblings.length > 0 && (
+            <div className="mt-12">
+              <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Also in Granbury</span></div>
+              <h2 className="track-tight mt-3 text-[1.5rem] font-black leading-tight text-black lg:text-[1.75rem]">Our other Granbury locations.</h2>
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:max-w-3xl">
+                {siblings.map((s) => (
+                  <a key={s.slug} href={`/rentaspace/${s.slug}`} className="btn-spring r-jr flex items-center justify-between gap-3 border border-black/[0.06] bg-white p-5 shadow-card hover:border-orange/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">
+                    <span>
+                      <span className="block text-[1.0625rem] font-black text-black">{s.name}</span>
+                      <span className="mt-0.5 block text-[0.875rem] text-stone">{SIBLING_BLURB[s.slug] ?? `${s.street}, ${s.city}`}</span>
+                      <span className="mt-1 block text-[0.8125rem] text-stone">{s.street}, {s.city}, {s.region} {s.zip}</span>
+                    </span>
+                    <ChevronRight className="h-5 w-5 shrink-0 text-orange" aria-hidden />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

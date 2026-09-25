@@ -13,17 +13,17 @@ const mcCreary: Facility = {
   rating: '4.8',
   reviews: 61,
   slides: [
-    { src: '/images/granbury/cl-slide-1.webp', alt: 'Aerial view of the McCreary Rd facility' },
-    { src: '/images/granbury/cl-slide-2.webp', alt: 'Storage buildings exterior' },
-    { src: '/images/granbury/cl-slide-3.webp', alt: 'Climate-controlled interior spaces' },
-    { src: '/images/granbury/cl-slide-4.webp', alt: 'Storage spaces' },
+    { src: '/images/granbury/cl-slide-1.webp', alt: 'Aerial view of the McCreary Rd storage units, Granbury TX' },
+    { src: '/images/granbury/cl-slide-2.webp', alt: 'Storage buildings with drive-up units at McCreary Rd' },
+    { src: '/images/granbury/cl-slide-3.webp', alt: 'Climate-controlled storage units inside the McCreary Rd building' },
+    { src: '/images/granbury/cl-slide-4.webp', alt: 'Storage units at McCreary Rd, Granbury TX' },
   ],
   promo: '50% off your first month',
   gallery: [
-    { thumb: '/images/granbury/cl-t-1.webp', full: '/images/granbury/cl-p-1.webp', alt: 'Aerial view of the facility' },
-    { thumb: '/images/granbury/cl-t-2.webp', full: '/images/granbury/cl-p-2.webp', alt: 'Storage buildings exterior' },
-    { thumb: '/images/granbury/cl-t-3.webp', full: '/images/granbury/cl-p-3.webp', alt: 'Climate-controlled interior' },
-    { thumb: '/images/granbury/cl-t-4.webp', full: '/images/granbury/cl-p-4.webp', alt: 'Storage spaces' },
+    { thumb: '/images/granbury/cl-t-1.webp', full: '/images/granbury/cl-p-1.webp', alt: 'Aerial view of the McCreary Rd storage units, Granbury TX' },
+    { thumb: '/images/granbury/cl-t-2.webp', full: '/images/granbury/cl-p-2.webp', alt: 'Storage buildings with drive-up units at McCreary Rd' },
+    { thumb: '/images/granbury/cl-t-3.webp', full: '/images/granbury/cl-p-3.webp', alt: 'Climate-controlled storage units inside the McCreary Rd building' },
+    { thumb: '/images/granbury/cl-t-4.webp', full: '/images/granbury/cl-p-4.webp', alt: 'Storage units at McCreary Rd, Granbury TX' },
   ],
   mapQuery: '3501 McCreary Rd, Granbury, TX 76049',
   amenities: [
@@ -41,11 +41,14 @@ const mcCreary: Facility = {
     'Moving carts on-site',
     'Vehicle & RV parking',
   ],
+  aboutHeading: 'Granbury’s newest large storage units.',
   about: [
-    'JOURNEY.STORAGE™ on McCreary Road (formerly Granbury Self Storage, off Cleveland Road) is our newest Granbury location — serving Acton, DeCordova Bend, and the south side of US-377 with clean, modern spaces.',
-    'Choose fully climate-controlled interior spaces for furniture, electronics, and keepsakes, or wide drive-up spaces you can pull right up to. Bright LED lighting, roll-up doors, concrete drive aisles, and a fully gated perimeter watched around the clock.',
-    'Month-to-month, no deposit, no long-term commitment, and 24/7 gate access — reserve online in minutes and move in on your schedule.',
+    'JOURNEY.STORAGE™ on McCreary Road (formerly Granbury Self Storage, off Cleveland Road) is the newest of our three Granbury locations and the one built for big moves. Units run from 5×5 to 10×30, with large 10×20 and 10×30 spaces that take a three-bedroom house, or a car plus the boxes. Serving Acton, DeCordova Bend and the south side of US-377.',
+    'Choose climate-controlled interior units for furniture, electronics and keepsakes, or drive-up units you pull right up to, with vehicle and RV parking on site. Bright LED lighting, roll-up doors, concrete drive aisles, and a fully gated perimeter on camera around the clock.',
+    'If you are moving to Granbury, between closings, or storing a whole household during a renovation, this is the location we point people to first. Month-to-month, no deposit, no long-term commitment, and 24/7 smart entry. Rent online in minutes and move in on your schedule.',
   ],
+  directions: '3501 McCreary Rd, Granbury, the former Cleveland Road location. Serving Acton, DeCordova Bend, Glen Rose and the south side of US-377.',
+  areaServed: ['Granbury', 'Hood County', 'Acton', 'DeCordova', 'Glen Rose'],
   groups: [
     { category: 'Small', blurb: 'A closet to a single room', units: [
       { size: '5 × 5', art: '5x5', sqft: 25, fits: 'A few boxes & small furniture', walkIn: 39, online: 29, tags: ['Climate-controlled', 'Interior', 'Ground-level'] },
@@ -72,6 +75,7 @@ const mcCreary: Facility = {
     { q: 'Can I store a car, boat, or RV?', a: 'Yes — McCreary Rd offers drive-up spaces and vehicle & RV parking. Larger 10×20 and 10×30 spaces fit a vehicle plus household goods.' },
     { q: 'What can’t I store?', a: 'No hazardous, flammable, or perishable items, and nothing living (people, animals, or plants). If you’re unsure about something, just ask.' },
     { q: 'Is autopay available?', a: 'Yes. Set up autopay and manage everything — payments, documents, move-out — online, anytime.' },
+    { q: 'Is McCreary Rd the same as the Cleveland Road location?', a: 'Yes. Granbury Self Storage #3 off Cleveland Road is now Journey on McCreary Rd, at 3501 McCreary Rd. Same gate, new smart locks, online rental.' },
   ],
 }
 
@@ -79,7 +83,7 @@ const OG_IMG = 'https://journey.storage/images/granbury/cl-p-1.webp'
 export const metadata: Metadata = {
   title: 'Self Storage on McCreary Rd, Granbury TX | JOURNEY.STORAGE™',
   description:
-    'Rent a clean, secure storage space at JOURNEY.STORAGE™ on McCreary Rd in Granbury, TX (formerly Granbury Self Storage). Our newest facility with climate-controlled & drive-up spaces from $29/mo, 24/7 gated access. Reserve online in minutes.',
+    'Granbury’s newest storage units on McCreary Rd. 10x10 to 10x30 climate-controlled and drive-up units, vehicle parking, 24/7 smart entry. From $29/mo.',
   alternates: { canonical: '/rentaspace/mccrearyrd' },
   openGraph: {
     title: 'Self Storage on McCreary Rd, Granbury TX | JOURNEY.STORAGE™',

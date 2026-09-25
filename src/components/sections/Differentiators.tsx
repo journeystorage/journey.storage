@@ -24,8 +24,8 @@ const cards = [
     number: '03',
   },
   {
-    hook: 'Smart, safe, always open.',
-    body: "Smart access. Digital locks. Trust made physical.",
+    hook: 'Smart entry, 24/7 access.',
+    body: "Digital locks that open from your phone. Gated, lit, on camera. Trust made physical.",
     color: 'bg-sand',
     textDark: true,
     number: '04',

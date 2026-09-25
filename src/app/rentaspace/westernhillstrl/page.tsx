@@ -3,7 +3,7 @@ import FacilityView, { type Facility } from '@/components/rentaspace/FacilityVie
 
 const westernHills: Facility = {
   slug: 'westernhillstrl',
-  name: 'Self Storage on Western Hills Trail',
+  name: 'Drive-Up Self Storage on Western Hills Trail',
   short: 'Western Hills Trl',
   formerly: 'Granbury Self Storage',
   address: '409 Western Hills Trail',
@@ -13,15 +13,15 @@ const westernHills: Facility = {
   rating: '4.9',
   reviews: 94,
   slides: [
-    { src: '/images/granbury/wh-slide-1.webp', alt: 'Aerial view of the Western Hills facility' },
-    { src: '/images/granbury/wh-slide-2.webp', alt: 'Rows of drive-up storage spaces' },
+    { src: '/images/granbury/wh-slide-1.webp', alt: 'Aerial view of the Western Hills Trail drive-up storage units, Granbury TX' },
+    { src: '/images/granbury/wh-slide-2.webp', alt: 'Rows of drive-up storage units with roll-up doors at Western Hills Trail' },
     { src: '/images/granbury/wh-slide-3.webp', alt: 'Wide drive aisle between spaces' },
     { src: '/images/granbury/wh-slide-4.webp', alt: 'Open drive-up space' },
   ],
   promo: '50% off your first month',
   gallery: [
-    { thumb: '/images/granbury/wh-t-1.webp', full: '/images/granbury/wh-p-1.webp', alt: 'Aerial view of the facility' },
-    { thumb: '/images/granbury/wh-t-2.webp', full: '/images/granbury/wh-p-2.webp', alt: 'Rows of drive-up spaces' },
+    { thumb: '/images/granbury/wh-t-1.webp', full: '/images/granbury/wh-p-1.webp', alt: 'Aerial view of the Western Hills Trail drive-up storage units, Granbury TX' },
+    { thumb: '/images/granbury/wh-t-2.webp', full: '/images/granbury/wh-p-2.webp', alt: 'Rows of drive-up storage units at Western Hills Trail' },
     { thumb: '/images/granbury/wh-t-3.webp', full: '/images/granbury/wh-p-3.webp', alt: 'Wide drive aisle' },
     { thumb: '/images/granbury/wh-t-4.webp', full: '/images/granbury/wh-p-4.webp', alt: 'Open drive-up space' },
     { thumb: '/images/granbury/wh-t-5.webp', full: '/images/granbury/wh-p-5.webp', alt: 'Roll-up door detail' },
@@ -43,11 +43,14 @@ const westernHills: Facility = {
     'Boxes & moving supplies',
     'Vehicle & trailer parking',
   ],
+  aboutHeading: 'Drive-up storage units near Harbor Lakes.',
   about: [
-    'JOURNEY.STORAGE™ on Western Hills Trail (formerly Granbury Self Storage) serves the west side of Granbury and the Harbor Lakes and Pecan Plantation communities, just off Highway 377 — 100+ clean, gated drive-up spaces built for easy, roll-up-and-go access.',
-    'Every space is ground-level with a wide, well-lit roll-up door, so you can pull your vehicle right up and load in minutes — perfect for lake gear, tools, seasonal storage, or a small business’s overflow.',
-    'Month-to-month, no deposit, no long-term commitment, and 24/7 gate access — rent online in minutes and move in on your schedule.',
+    'JOURNEY.STORAGE™ on Western Hills Trail (formerly Granbury Self Storage) is all drive-up storage: 100+ clean, gated, ground-level units with roll-up doors, wide lit aisles, and a gate that opens from your phone. It serves the west side of Granbury and the Harbor Lakes and Pecan Plantation communities, just off Highway 377.',
+    'Pull up at six in the morning, load, go. That makes it the pick for contractors and equipment, business inventory, and anyone who is in and out every week. It is also the Journey location closest to Lake Granbury, with boat and trailer parking for the gear that lives on the water from spring to fall.',
+    'No climate control here; for that, Temple Hall Hwy and McCreary Rd are a short drive. Month-to-month, no deposit, no long-term commitment, and 24/7 smart entry. Rent online in minutes and move in on your schedule.',
   ],
+  directions: '409 Western Hills Trail is on the west side of Granbury by the Harbor Lakes neighborhood, off Highway 377. Serving west Granbury, Harbor Lakes, Pecan Plantation, Tolar and Cresson.',
+  areaServed: ['Granbury', 'Hood County', 'Harbor Lakes', 'Pecan Plantation', 'Lake Granbury', 'Tolar', 'Cresson'],
   groups: [
     { category: 'Small', blurb: 'A closet to a single room', units: [
       { size: '5 × 5', art: '5x5', sqft: 25, fits: 'A few boxes & small furniture', walkIn: 35, online: 25, tags: ['Drive-up', 'Ground-level'] },
@@ -74,17 +77,18 @@ const westernHills: Facility = {
     { q: 'Can I store a boat, trailer, or vehicle?', a: 'Yes — with drive-up access and vehicle & trailer parking, Western Hills is a great fit for lake and outdoor gear. Larger 10×20 and 10×30 spaces fit a vehicle plus household goods.' },
     { q: 'What can’t I store?', a: 'No hazardous, flammable, or perishable items, and nothing living (people, animals, or plants). If you’re unsure about something, just ask.' },
     { q: 'Is autopay available?', a: 'Yes. Set up autopay and manage everything — payments, documents, move-out — online, anytime.' },
+    { q: 'How close is Western Hills to Lake Granbury?', a: 'It sits by the Harbor Lakes neighborhood on the west side of town, a few minutes from the water. It is the closest Journey location to the lake.' },
   ],
 }
 
 const OG_IMG = 'https://journey.storage/images/granbury/wh-p-1.webp'
 export const metadata: Metadata = {
-  title: 'Drive-Up Storage on Western Hills Trl, Granbury TX | JOURNEY.STORAGE™',
+  title: 'Drive-Up Storage Units, Western Hills Trl | JOURNEY.STORAGE™',
   description:
-    'Rent a clean, gated drive-up storage space at JOURNEY.STORAGE™ on Western Hills Trail in Granbury, TX (formerly Granbury Self Storage). Ground-level spaces from $25/mo, 24/7 gated access. Reserve online in minutes.',
+    'Drive-up storage units near Harbor Lakes, Western Hills Trail, Granbury TX, from $25/mo. Roll-up doors, boat and trailer parking, 24/7 smart entry.',
   alternates: { canonical: '/rentaspace/westernhillstrl' },
   openGraph: {
-    title: 'Drive-Up Storage on Western Hills Trl, Granbury TX | JOURNEY.STORAGE™',
+    title: 'Drive-Up Storage Units, Western Hills Trl | JOURNEY.STORAGE™',
     description: 'Gated drive-up storage from $25/mo, 24/7 access, serving west Granbury & Harbor Lakes. Formerly Granbury Self Storage.',
     url: 'https://journey.storage/rentaspace/westernhillstrl',
     type: 'website',

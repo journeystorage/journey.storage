@@ -103,10 +103,10 @@ export default function Hero() {
               className="hero-rise mt-8 max-w-[440px] lg:max-w-[480px] text-xl leading-[1.7] text-warm-white/70"
               style={rise(0.45)}
             >
-              A <strong className="font-semibold text-warm-white/90">new kind</strong> of storage company.
+              <strong className="font-semibold text-warm-white/90">Self storage</strong> you rent online:
               <br className="hidden lg:block" />
-              Built for <strong className="font-semibold text-warm-white/90">people in motion</strong>,
-              not for boxes sitting still.
+              month-to-month, <strong className="font-semibold text-warm-white/90">24/7 smart entry</strong>,
+              no hidden fees.
             </p>
 
             <div className="hero-rise mt-12" style={rise(0.65)}>

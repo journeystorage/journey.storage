@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, MapPin, Phone, CheckCircle2, CalendarDays, Zap, Check } from 'lucide-react'
+import { Search, MapPin, Phone, CheckCircle2, CalendarDays, Zap, Check, ChevronDown, Ruler } from 'lucide-react'
 import RentFooter from '@/components/rentaspace/RentFooter'
 import PayBillFlow from '@/components/rentaspace/PayBillFlow'
 import { openSizeGuide } from '@/components/SizeGuideModal'
 import { resolveSearch } from '@/lib/space-search'
+import { hubFaqs, sizeRows } from '@/components/rentaspace/hub-content'
 
 const SCOPED_CSS = `
 #rentaspace .track-tight{letter-spacing:-.03em}
@@ -105,12 +106,12 @@ export default function RentASpaceView() {
 
         <div className="relative z-[2] mx-auto max-w-content px-5 pb-24 pt-[150px] lg:px-16 lg:pb-28 lg:pt-[188px]">
           <div className="mx-auto max-w-3xl text-center">
-            <span className="mb-5 inline-block text-[0.8125rem] font-bold uppercase tracking-[0.22em] text-terracotta">Clean · Secure · Month-to-month</span>
+            <span className="mb-5 inline-block text-[0.8125rem] font-bold uppercase tracking-[0.22em] text-terracotta">Storage locations · Month-to-month</span>
             <h1 className="track-tighter text-[2.75rem] font-black leading-[0.98] text-warm-white sm:text-[3.75rem] lg:text-[4.25rem]">
               Space to move on.
             </h1>
             <p className="mt-5 text-[1.0625rem] font-light leading-relaxed text-warm-white/85 lg:text-[1.25rem]">
-              Storage built for people in motion — not for boxes sitting still. Find a clean, secure space near you and reserve online in minutes.
+              Find a storage location near you, see live prices, rent online, and move in today. Storage built for people in motion, not for boxes sitting still.
             </p>
 
             <form className="mx-auto mt-9 max-w-xl" onSubmit={handleSearch}>
@@ -177,8 +178,8 @@ export default function RentASpaceView() {
       <section id="locations" className="mx-auto max-w-content px-5 py-20 lg:px-16 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
           <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Storage without the friction</span></div>
-          <h2 className="track-tight mt-3 text-[2rem] font-black leading-tight text-black lg:text-[2.5rem]">Our Granbury locations</h2>
-          <p className="mt-3 text-[1.0625rem] leading-relaxed text-stone">Three facilities across Granbury. Pick the one nearest you and reserve online — someone who understands your moment is close by.</p>
+          <h2 className="track-tight mt-3 text-[2rem] font-black leading-tight text-black lg:text-[2.5rem]">Storage units in Granbury, TX</h2>
+          <p className="mt-3 text-[1.0625rem] leading-relaxed text-stone">Three locations across Granbury. Pick the one nearest you and rent online — someone who understands your moment is close by.</p>
           {searchMsg && (
             <div
               className={[
@@ -208,12 +209,13 @@ export default function RentASpaceView() {
           <article className="card-spring group r-jr relative flex flex-col overflow-hidden border border-black/[0.05] bg-white">
             <div className="relative h-44 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/granbury/rs-card-th-aerial.webp" loading="lazy" decoding="async" alt="Temple Hall facility aerial" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img src="/images/granbury/rs-card-th-aerial.webp" loading="lazy" decoding="async" alt="Aerial view of JOURNEY.STORAGE™ climate-controlled and drive-up storage units on Temple Hall Hwy, Granbury TX" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
               <span className="shadow-cta absolute left-4 top-4 rounded-full bg-orange px-3 py-1 text-[0.8125rem] font-bold text-warm-white">350+ spaces</span>
             </div>
             <div className="flex flex-1 flex-col p-6">
-              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">JOURNEY.STORAGE™ — Temple Hall Hwy</h3>
+              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">Temple Hall Hwy</h3>
+              <p className="mt-1 text-[0.875rem] font-bold text-charcoal">Climate-controlled and drive-up storage units</p>
               <div className="mt-2 flex items-center gap-2 text-[0.875rem]">
                 <span className="inline-flex items-center gap-1.5 font-bold text-sage-green"><span className="h-2 w-2 rounded-full bg-sage-green" />Open 24/7</span>
                 <span className="text-stone">· gate access</span>
@@ -238,12 +240,13 @@ export default function RentASpaceView() {
           <article className="card-spring group r-jr relative flex flex-col overflow-hidden border border-black/[0.05] bg-white">
             <div className="relative h-44 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/granbury/rs-card-wh-aerial.webp" loading="lazy" decoding="async" alt="Western Hills facility aerial" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img src="/images/granbury/rs-card-wh-aerial.webp" loading="lazy" decoding="async" alt="Aerial view of JOURNEY.STORAGE™ drive-up storage units on Western Hills Trail, Granbury TX" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
               <span className="absolute left-4 top-4 rounded-full bg-charcoal px-3 py-1 text-[0.8125rem] font-bold text-warm-white">100+ units</span>
             </div>
             <div className="flex flex-1 flex-col p-6">
-              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">JOURNEY.STORAGE™ — Western Hills Trl</h3>
+              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">Western Hills Trl</h3>
+              <p className="mt-1 text-[0.875rem] font-bold text-charcoal">All drive-up storage units, near Harbor Lakes</p>
               <div className="mt-2 flex items-center gap-2 text-[0.875rem]">
                 <span className="inline-flex items-center gap-1.5 font-bold text-sage-green"><span className="h-2 w-2 rounded-full bg-sage-green" />Open 24/7</span>
                 <span className="text-stone">· gate access</span>
@@ -264,16 +267,17 @@ export default function RentASpaceView() {
             </div>
           </article>
 
-          {/* #3 Cleveland Rd */}
+          {/* #3 McCreary Rd (the former Cleveland Rd location) */}
           <article className="card-spring group r-jr relative flex flex-col overflow-hidden border border-black/[0.05] bg-white">
             <div className="relative h-44 overflow-hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/granbury/rs-card-cl-aerial.webp" loading="lazy" decoding="async" alt="Cleveland Rd facility aerial" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img src="/images/granbury/rs-card-cl-aerial.webp" loading="lazy" decoding="async" alt="Aerial view of JOURNEY.STORAGE™ storage units on McCreary Rd, Granbury TX" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
               <span className="absolute left-4 top-4 rounded-full bg-charcoal px-3 py-1 text-[0.8125rem] font-bold text-warm-white">Newest</span>
             </div>
             <div className="flex flex-1 flex-col p-6">
-              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">JOURNEY.STORAGE™ — McCreary Rd</h3>
+              <h3 className="track-tight text-[1.25rem] font-black leading-snug text-black">McCreary Rd</h3>
+              <p className="mt-1 text-[0.875rem] font-bold text-charcoal">Newest location, large storage units to 10×30</p>
               <div className="mt-2 flex items-center gap-2 text-[0.875rem]">
                 <span className="inline-flex items-center gap-1.5 font-bold text-sage-green"><span className="h-2 w-2 rounded-full bg-sage-green" />Open 24/7</span>
                 <span className="text-stone">· gate access</span>
@@ -293,6 +297,17 @@ export default function RentASpaceView() {
               </div>
             </div>
           </article>
+        </div>
+
+        {/* Market copy — one block per city. This is where the city phrase lives;
+            when a second market opens it gets its own H2 + cards + block. */}
+        <div className="mx-auto mt-16 max-w-3xl">
+          <h3 className="track-tight text-[1.5rem] font-black leading-tight text-black lg:text-[1.75rem]">Self storage in Granbury, what to expect.</h3>
+          <div className="mt-4 space-y-4 text-[1.0625rem] leading-relaxed text-stone">
+            <p>Journey runs the three former Granbury Self Storage properties: storage units in Granbury, TX on Temple Hall Highway, Western Hills Trail and McCreary Road. Every location is gated with cameras and lit aisles, and every space opens from your phone with smart entry, so the gate is yours 24/7, not just office hours.</p>
+            <p>Spaces run from a 5×5 closet to a 10×30 that takes a whole household or a car, in climate-controlled buildings or drive-up rows with roll-up doors. Online rates start at $25 a month, month-to-month, no deposit, and you can leave whenever the move is done.</p>
+            <p>We&rsquo;re minutes from downtown Granbury and Lake Granbury, and we serve all of Hood County: Acton, DeCordova, Tolar, Cresson, Glen Rose and Stephenville are all an easy drive on 377 or 144.</p>
+          </div>
         </div>
       </section>
 
@@ -320,23 +335,47 @@ export default function RentASpaceView() {
             <div className="grid grid-cols-2 gap-3">
               <div className="shadow-card r-jr relative col-span-2 aspect-[16/9] overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/granbury/rs-gallery-aerial.webp" loading="lazy" decoding="async" alt="Aerial of Temple Hall facility" className="h-full w-full object-cover" />
+                <img src="/images/granbury/rs-gallery-aerial.webp" loading="lazy" decoding="async" alt="Aerial view of the Temple Hall Hwy storage facility, Granbury TX" className="h-full w-full object-cover" />
               </div>
               <div className="shadow-card r-jr relative aspect-[4/3] overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/granbury/rs-gallery-climate.webp" loading="lazy" decoding="async" alt="Climate-controlled units" className="h-full w-full object-cover" />
+                <img src="/images/granbury/rs-gallery-climate.webp" loading="lazy" decoding="async" alt="Climate-controlled storage units inside the Temple Hall Hwy building" className="h-full w-full object-cover" />
               </div>
               <div className="shadow-card r-jr relative aspect-[4/3] overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/images/granbury/rs-gallery-office.webp" loading="lazy" decoding="async" alt="Rental office" className="h-full w-full object-cover" />
+                <img src="/images/granbury/rs-gallery-office.webp" loading="lazy" decoding="async" alt="Rental office at the Temple Hall Hwy location" className="h-full w-full object-cover" />
               </div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* ── SIZES & PRICES ── */}
+      <section id="sizes" className="mx-auto max-w-content px-5 py-20 lg:px-16 lg:py-24">
+        <div className="mx-auto max-w-2xl text-center">
+          <div className="eyebrow center"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Sizes and prices</span></div>
+          <h2 className="track-tight mt-3 text-[2rem] font-black leading-tight text-black lg:text-[2.5rem]">Storage unit sizes and prices</h2>
+          <p className="mt-3 text-[1.0625rem] leading-relaxed text-stone">Sizes are the same at every location. Prices are online rates and vary by location and type; the first month is half off on select sizes.</p>
+        </div>
+        <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {sizeRows.map((row) => (
+            <div key={row.label} className="shadow-card r-jr flex flex-col border border-black/[0.05] bg-white p-6">
+              <p className="text-[0.75rem] font-bold uppercase tracking-[0.18em] text-orange">{row.sizes}</p>
+              <h3 className="track-tight mt-2 text-[1.25rem] font-black leading-snug text-black">{row.label}</h3>
+              <p className="mt-2 text-[0.9375rem] leading-relaxed text-stone">{row.fits}</p>
+              <p className="mt-4 whitespace-nowrap leading-none"><span className="text-[0.8125rem] font-bold text-stone">from </span><span className="text-[1.75rem] font-black text-black">${row.from}</span><span className="text-[0.8125rem] font-bold text-stone">/mo</span></p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-8 text-center">
+          <button type="button" onClick={openSizeGuide} className="btn-spring inline-flex items-center gap-2 rounded-xl border-2 border-black/85 px-6 py-3 font-bold text-black hover:bg-black hover:text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">
+            <Ruler className="h-4 w-4" strokeWidth={2} aria-hidden />See what fits in each size
+          </button>
+        </div>
+      </section>
+
       {/* ── HOURS / INFO ── */}
-      <section className="mx-auto max-w-content px-5 py-16 lg:px-16 lg:py-20">
+      <section className="mx-auto max-w-content px-5 pb-16 lg:px-16 lg:pb-20">
         <div className="shadow-card r-jr grid grid-cols-1 gap-6 border border-black/[0.05] bg-white p-6 text-center sm:grid-cols-3 lg:p-8">
           <div>
             <p className="text-[0.8125rem] font-bold uppercase tracking-wide text-orange">Open 24/7</p>
@@ -351,7 +390,22 @@ export default function RentASpaceView() {
             <p className="mt-1 text-[0.9375rem] leading-relaxed text-charcoal">Questions? Call us<br />(817) 579-0607</p>
           </div>
         </div>
-        
+      </section>
+
+      {/* ── FAQ ── */}
+      <section id="faq" className="border-y border-black/[0.05] bg-white">
+        <div className="mx-auto max-w-3xl px-5 py-20 lg:px-16 lg:py-24">
+          <div className="eyebrow"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Common questions</span></div>
+          <h2 className="track-tight mt-3 text-[2rem] font-black leading-tight text-black lg:text-[2.5rem]">Questions about storage in Granbury</h2>
+          <div className="mt-6 divide-y divide-black/[0.07]">
+            {hubFaqs.map((faq) => (
+              <details key={faq.q} className="group py-4">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[1.0625rem] font-bold text-black">{faq.q}<ChevronDown className="h-4 w-4 shrink-0 text-orange transition-transform duration-200 group-open:rotate-180" aria-hidden /></summary>
+                <p className="mt-2 max-w-[640px] text-[0.9375rem] leading-relaxed text-stone">{faq.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* ── CTA BAND ── */}
@@ -364,7 +418,7 @@ export default function RentASpaceView() {
         <div className="relative z-[2] mx-auto max-w-content px-5 py-16 text-center lg:px-16 lg:py-20">
           <div className="eyebrow center"><span className="text-[0.75rem] font-bold uppercase tracking-[0.2em] text-orange">Space to move on</span></div>
           <h2 className="track-tighter mt-4 text-[2.25rem] font-black leading-[1.02] text-warm-white lg:text-[3rem]">Find your space today.</h2>
-          <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] font-light text-warm-white/70 lg:text-[1.25rem]">Find your space in Granbury today. Clear pricing, no lock-in, and a team that gets your moment.</p>
+          <p className="mx-auto mt-4 max-w-xl text-[1.0625rem] font-light text-warm-white/70 lg:text-[1.25rem]">Pick a location, see live prices, rent online. Clear pricing, no lock-in, and a team that gets your moment.</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <a href="#locations" className="btn-spring shadow-cta rounded-sm bg-orange px-8 py-3.5 font-bold text-warm-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange">Find a space</a>
             <a href="tel:+18175790607" className="btn-spring rounded-sm border-2 border-warm-white/70 px-8 py-3.5 font-bold text-warm-white hover:bg-warm-white hover:text-black">Call us</a>

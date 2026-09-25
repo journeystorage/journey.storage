@@ -108,11 +108,11 @@ export default function Waitlist() {
             <div className="h-px w-8 bg-orange" />
           </div>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-warm-white leading-[0.95]">
-            Be the first.
+            Be the first to know.
           </h2>
           <p className="mx-auto mt-4 max-w-[400px] text-body font-light leading-[1.7] text-warm-white/40">
-            Sign up and we&apos;ll let you know when Journey is ready in your
-            area. Plus early access and updates.
+            Granbury is open. Sign up and we&apos;ll let you know the moment Journey
+            opens near you, with early access and updates.
           </p>
         </motion.div>
 

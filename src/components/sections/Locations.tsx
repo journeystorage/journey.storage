@@ -106,10 +106,10 @@ export default function Locations({ seeAllHref }: { seeAllHref?: string } = {}) 
           Storage without the friction
         </span>
         <h2 className="mx-auto max-w-[880px] text-[2.2rem] font-black leading-[1.05] tracking-[-0.03em] text-warm-white lg:text-[3.2rem]">
-          Find a clean, secure space near you
+          Find a secure storage unit near you
         </h2>
-        <p className="mx-auto mt-3.5 text-[1.05rem] font-light leading-[1.5] text-warm-white/80 lg:text-[1.2rem]">
-          Rent online in minutes.
+        <p className="mx-auto mt-3.5 max-w-[640px] text-[1.05rem] font-light leading-[1.5] text-warm-white/80 lg:text-[1.2rem]">
+          Gated, on camera, smart entry from your phone. Now open at three locations in Granbury, Texas. Rent online in minutes.
         </p>
 
         <form className="mx-auto mt-8 w-full max-w-[560px]" onSubmit={handleSearch}>
@@ -184,7 +184,7 @@ export default function Locations({ seeAllHref }: { seeAllHref?: string } = {}) 
             <span className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full shadow-[0_6px_16px_-6px_rgba(24,24,24,0.6)]">
               <Image
                 src={loc.img}
-                alt={`Journey Storage — ${loc.name}, Granbury TX`}
+                alt={`Aerial view of JOURNEY.STORAGE™ storage units on ${loc.name}, Granbury TX`}
                 fill
                 unoptimized
                 sizes="56px"
