@@ -20,7 +20,7 @@ const faqs = [
   },
   {
     question: 'What types of storage do you offer?',
-    answer: "Self storage, climate-controlled spaces, drive-up access, indoor storage, and vehicle & RV parking. Every facility is designed with digital locks, 24/7 access, and the same quality experience across all space types.",
+    answer: "Self storage, climate-controlled spaces, drive-up access, indoor storage, and business storage for contractors, inventory and records. Every facility is designed with digital locks, 24/7 access, and the same quality experience across all space types.",
   },
   {
     question: 'How does digital access work?',

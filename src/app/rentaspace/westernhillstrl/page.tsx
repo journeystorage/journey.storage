@@ -78,6 +78,7 @@ const westernHills: Facility = {
     { q: 'What can’t I store?', a: 'No hazardous, flammable, or perishable items, and nothing living (people, animals, or plants). If you’re unsure about something, just ask.' },
     { q: 'Is autopay available?', a: 'Yes. Set up autopay and manage everything — payments, documents, move-out — online, anytime.' },
     { q: 'How close is Western Hills to Lake Granbury?', a: 'It sits by the Harbor Lakes neighborhood on the west side of town, a few minutes from the water. It is the closest Journey location to the lake.' },
+    { q: 'Is Western Hills a good fit for contractors?', a: 'Yes. Every unit is drive-up with a roll-up door, so tools, materials and equipment load straight from the truck, and the gate opens from your phone at any hour for early starts.' },
   ],
 }
 
