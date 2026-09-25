@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   if (!cfg) return NextResponse.json({ error: 'Unknown facility' }, { status: 404 })
   try {
     const climate = typeof body.climate === 'boolean' ? body.climate : climateFromCategory(body.category)
-    const unit = await resolveBookableUnit(cfg.propertyId, { width: body.width, length: body.length, climate })
+    const unit = await resolveBookableUnit(cfg.propertyId, { width: body.width, length: body.length, climate, category: body.category })
     if (!unit) {
       // Deliberately specific: a climate-controlled space being gone is not the
       // same as the size being gone, and substituting the other kind is exactly

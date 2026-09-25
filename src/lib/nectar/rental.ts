@@ -182,12 +182,48 @@ export async function getInsurances(propertyId: string, unitTypeIds: string[]): 
  * then pulls the offer carrying a unit_id. Returns the pieces the hold/quote
  * steps need. Width/length come from the space-mix card the user clicked.
  */
+
+/** A unit as the property listing returns it — enough to pick the right one. */
+export interface PropertyUnit {
+  id: string
+  number?: string
+  width?: number | string
+  length?: number | string
+  state?: string
+  space_mix_id?: string
+  price?: number
+  Category?: { name?: string }
+}
+
+/**
+ * Every unit at a property. There is no server-side filter, so this pages the
+ * lot (~4 calls for 322 units) and the caller filters.
+ */
+export async function getPropertyUnits(propertyId: string): Promise<PropertyUnit[]> {
+  const out: PropertyUnit[] = []
+  for (let offset = 0; offset < 2000; offset += 100) {
+    const { data } = await nectarV2<{ units?: PropertyUnit[]; paging?: { total?: number } }>(
+      `companies/${co()}/properties/${propertyId}/units`,
+      { query: { limit: 100, offset } },
+    )
+    const page = data.units ?? []
+    if (!page.length) break
+    out.push(...page)
+    if (offset + 100 >= (data.paging?.total ?? 0)) break
+  }
+  return out
+}
+
+/** Category names compared loosely — case and spacing shouldn't matter. */
+const sameCategory = (a?: string | null, b?: string | null) =>
+  !!a && !!b && a.trim().toLowerCase().replace(/\s+/g, ' ') === b.trim().toLowerCase().replace(/\s+/g, ' ')
+
 export async function resolveBookableUnit(
   propertyId: string,
-  want: { width?: number | null; length?: number | null; climate?: boolean | null },
+  want: { width?: number | null; length?: number | null; climate?: boolean | null; category?: string | null },
 ): Promise<{
   unitId: string
-  tierId: string
+  tierId?: string
   spaceMixId?: string
   dossierToken?: string
   spaceTypeId?: string
@@ -207,26 +243,56 @@ export async function resolveBookableUnit(
   const candidates = asked ? tiers.filter(dimMatch) : tiers
   if (!candidates.length) return null
 
-  // Climate control is a different space at a different price, and several
-  // sizes exist in both. Matching on dimensions alone handed whoever was
-  // listed first — a standard 10x10 to someone who chose climate-controlled,
-  // and the reverse on 10x20. If a preference was expressed, honour it or
-  // fail; never substitute the other kind.
-  let tier: Tier | undefined
-  if (typeof want.climate === 'boolean') {
-    tier = candidates.find((t) => t.climate === want.climate)
-    if (!tier) return null
-  } else {
-    tier = candidates[0]
-  }
-  if (!tier) return null
+  // Only some properties split their tiers by climate: Temple Hall has
+  // "Climate Control > …" groups, McCreary lumps everything into "all units".
+  const tiersKnowClimate = candidates.some((t) => typeof t.climate === 'boolean')
+  const wantsSpecific = !!want.category || typeof want.climate === 'boolean'
 
+  // Prefer the tier that matches, so the promotion and tier id are right.
+  const tier =
+    tiersKnowClimate && typeof want.climate === 'boolean'
+      ? candidates.find((t) => t.climate === want.climate)
+      : candidates[0]
+  const promotionId = tier?.allocated_promo?.id ?? tier?.promo?.[0]?.id
+
+  // When the customer asked for a particular kind of space, pick the actual
+  // unit by its category rather than trusting the tier grouping. Climate
+  // control, drive-up and standard are different products at different prices,
+  // and at McCreary they all share one "all units" tier — matching on the tier
+  // alone either rents the wrong kind or, if the match is strict, nothing at all.
+  if (wantsSpecific) {
+    const units = (await getPropertyUnits(propertyId)).filter(
+      (u) =>
+        u.state === 'Available' &&
+        (!asked || (Number(u.width) === want.width && Number(u.length) === want.length)),
+    )
+    if (!units.length) return null
+
+    let pool = want.category ? units.filter((u) => sameCategory(u.Category?.name, want.category)) : []
+    // Fall back to the climate flag when the exact category isn't recognised —
+    // never to "any unit of that size", which is the bug this replaces.
+    if (!pool.length && typeof want.climate === 'boolean') {
+      pool = units.filter((u) => climateFromCategory(u.Category?.name) === want.climate)
+    }
+    if (!pool.length) return null
+
+    const unit = pool[0]
+    return {
+      unitId: unit.id,
+      tierId: tier?.tier_id,
+      spaceMixId: unit.space_mix_id,
+      spaceTypeId: tier?.space_type_id,
+      promotionId,
+      climate: climateFromCategory(unit.Category?.name),
+      groupName: unit.Category?.name,
+    }
+  }
+
+  // No preference expressed: the original path, via the tier's offers.
+  if (!tier) return null
   const offers = await getOffers(propertyId, tier.tier_id)
   const offer = offers.find((o) => o.unit_id)
   if (!offer?.unit_id) return null
-  // Online-channel promotion for this tier (Tenant lists it but won't auto-apply
-  // it — the id must be passed to quote/lease for the discount to take effect).
-  const promotionId = tier.allocated_promo?.id ?? tier.promo?.[0]?.id
   return {
     unitId: offer.unit_id,
     tierId: tier.tier_id,
