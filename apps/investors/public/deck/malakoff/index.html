@@ -1,0 +1,825 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}img{max-width:100%}
+.person .ph2{overflow:hidden;padding:0}
+.person .ph2 img{width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
+
+/* ── Lightbox — carried over from the previous deck: click any facility
+   photograph to expand it, click anywhere or press Esc to close. ── */
+.photo{cursor:zoom-in}
+.lb{position:fixed;inset:0;z-index:9000;display:none;align-items:center;justify-content:center;
+  padding:44px;background:rgba(12,12,12,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);cursor:zoom-out}
+.lb.on{display:flex}
+.lb img{max-width:100%;max-height:100%;width:auto;height:auto;border-radius:14px;
+  box-shadow:0 40px 120px rgba(0,0,0,.6);animation:lbin .32s cubic-bezier(.16,1,.3,1)}
+@keyframes lbin{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.lb img{animation:none}}
+.lb__x{position:absolute;top:18px;right:18px;width:46px;height:46px;border:0;cursor:pointer;
+  border-radius:900px;background:rgba(255,255,255,.12);color:#F5F0E8;font-size:20px;display:grid;place-items:center}
+.lb__x:hover{background:var(--orange-2,#E8622A)}
+.lb__x:focus-visible{outline:3px solid var(--orange-2,#E8622A);outline-offset:3px}
+
+/* Brand: dark surfaces carry the 8px dot tile, never a flat fill. */
+:root{--dots:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><rect width='8' height='8' fill='%23181818'/><rect x='1' y='1' width='6' height='6' rx='1.6' fill='%231d1d1d'/></svg>")}
+.slide:not(.cream):not(.hero){background-image:var(--dots);background-repeat:repeat}
+
+/* Slides whose content is shorter than the frame were sitting at the top with
+   a long gap beneath. These centre instead, so the composition sits balanced. */
+.slide > .inner{display:flex;flex-direction:column;justify-content:center}
+
+/* ── Closing slide: a quieter, more considered finish. The deal terms are the
+   last thing an investor reads, so they get air and hairlines rather than a
+   boxed grid. ── */
+.slide[data-title="The terms"] .terms{
+  background:transparent;border:0;border-radius:0;overflow:visible;
+}
+.slide[data-title="The terms"] .term{
+  grid-template-columns:190px 1fr;gap:18px;padding:9px 0;font-size:14px;
+  border-bottom:1px solid rgba(24,24,24,.09);
+}
+.slide[data-title="The terms"] .term:last-child{border-bottom:0}
+.slide[data-title="The terms"] .term .k{font-size:10.5px;letter-spacing:.16em}
+  width:34%;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  font-weight:800;color:var(--mute-dk);padding-right:26px;white-space:nowrap;
+}
+.slide[data-title="The terms"] .display{letter-spacing:-1.4px;font-size:38px}
+.slide[data-title="The terms"] .lede{max-width:34ch}
+
+/* The milestone strip reads as the final beat, so give it room and a rule. */
+.slide[data-title="The terms"] .timel{margin-top:26px;padding-top:22px;border-top:1px solid rgba(24,24,24,.12)}
+.signoff{
+  margin-top:20px;padding-top:14px;border-top:1px solid rgba(24,24,24,.10);
+  display:flex;align-items:baseline;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--mute-dk);
+}
+.signoff em{font-style:italic;font-weight:300;letter-spacing:0;text-transform:none;font-size:15px;color:var(--ink)}
+
+/* Two slides ran past the frame once measured while active (hidden slides
+   report zero height, which masked this earlier). Trimmed to fit 1440x820. */
+.slide[data-title="A facility built new"] .gallery{gap:12px}
+.slide[data-title="A facility built new"] .gallery .photo{height:246px}
+.slide[data-title="A facility built new"] .head{margin-bottom:16px}
+.slide[data-title="The operator"] .head{margin-bottom:14px}
+.slide[data-title="The operator"] .card{padding:14px 16px}
+.slide[data-title="The operator"] .tiles .v{font-size:30px}
+
+/* ── Closing slide: fewer competing blocks, more air. ── */
+.closing-mail{
+  margin-top:16px;font-size:14px;color:var(--mute-dk);
+}
+.closing-mail a{
+  color:var(--ink);font-weight:700;text-decoration:none;
+  border-bottom:1px solid rgba(232,98,42,.45);padding-bottom:1px;
+}
+.closing-mail a:hover{border-bottom-color:var(--orange)}
+.closing-mail a:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+.slide[data-title="The terms"] .btn-primary{margin-top:4px}
+.slide[data-title="The terms"] .small{margin-top:22px;opacity:.75}
+.slide[data-title="The terms"] .lede{margin-bottom:26px}
+/* The milestone strip is supporting detail, not a third headline. */
+.slide[data-title="The terms"] .timeline h4{font-size:12px;letter-spacing:.04em}
+.slide[data-title="The terms"] .timeline p{font-size:12px;opacity:.8}
+.slide[data-title="The terms"] .signoff{font-size:10px;letter-spacing:.18em;opacity:.55;margin-top:12px;padding-top:10px}
+
+/* ── Closing slide, rebuilt to the earlier layout: the terms sit in one card
+   at the top, then the close is centred beneath them. ── */
+.termcard{border:1px solid rgba(24,24,24,.12);border-radius:16px;padding:12px 20px 8px;margin-top:10px}
+.slide:not(.cream) .termcard{border-color:rgba(255,255,255,.12)}
+.termcard__label{
+  margin:0 0 6px; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase;
+  font-weight:800; color:var(--mute-dk);
+}
+.slide:not(.cream) .termcard__label{color:var(--mute)}
+.termcard .terms{
+  border:0;background:transparent;border-radius:0;
+  display:grid;grid-template-columns:1fr 1fr;column-gap:44px;
+}
+.termcard .term{
+  /* 1fr auto let the value column wrap onto a second line and doubled the
+     card height. A fixed label column leaves the value the full remainder. */
+  grid-template-columns:146px 1fr; gap:12px; padding:2px 0; font-size:12px;
+  border-bottom:1px solid rgba(24,24,24,.07); align-items:baseline;
+}
+.slide:not(.cream) .termcard .term{border-bottom-color:rgba(255,255,255,.07)}
+.termcard .term:nth-last-child(-n+2){border-bottom:0}
+.termcard .term .k{
+  font-size:13.5px; letter-spacing:0; text-transform:none; font-weight:400;
+  color:var(--mute-dk); padding-top:0;
+}
+.slide:not(.cream) .termcard .term .k{color:var(--mute)}
+.termcard .term > span:last-child{text-align:right}
+.termcard__note{margin-top:8px;font-size:11.5px}
+
+.closing-block{text-align:center;margin-top:10px}
+.closing-block .display{margin:0 auto}
+.closing-block .lede{margin:6px auto 12px;max-width:70ch;font-size:14.5px}
+.closing-block .closing-mail{margin-top:14px}
+</style></head><body><title>Malakoff Offering Deck</title>
+<link rel="stylesheet" href="/deck/malakoff/assets/lato.css">
+<style>
+:root{
+  --ink:#181818; --ink-2:#222222; --ink-3:#2C2A27;
+  --cream:#F9F3EA; --paper:#FFFCF8; --sand:#E8DACE; --sand-2:#CEC5B6;
+  --mute:#9B9691; --mute-dk:#615C53;
+  --orange:#E8622A; --orange-2:#E8622A; --orange-soft:rgba(255,99,32,.14);
+  --flag:#F5C842; --flag-ink:#2A2200;
+  --gx:clamp(20px,5vw,84px);
+  color-scheme:dark;
+  font-family:"Lato",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ink);color:var(--paper);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow:hidden}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+a{color:inherit}
+img{max-width:100%;display:block}
+p,h1,h2,h3,h4{margin:0}
+h1,h2,h3{text-wrap:balance}
+.num{font-variant-numeric:tabular-nums lining-nums}
+
+/* deck */
+.deck{position:relative;height:100%;width:100%}
+.slide{position:absolute;inset:0;display:none;overflow:auto;overscroll-behavior:contain;background:var(--ink);
+  background-image:radial-gradient(rgba(255,255,255,.035) 1px,transparent 1px);background-size:14px 14px}
+.slide.on{display:block;animation:in .45s ease both}
+@keyframes in{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.slide.back.on{animation-name:inb}
+@keyframes inb{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+.slide.cream{background-color:var(--cream);color:var(--ink);background-image:none;color-scheme:light}
+.inner{min-height:100%;padding:calc(74px + env(safe-area-inset-top,0px)) var(--gx) 74px;position:relative;max-width:1400px;margin-inline:auto}
+.inner::before,.inner::after{content:"";position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.06);pointer-events:none}
+.inner::before{left:var(--gx)}.inner::after{right:var(--gx)}
+.cream .inner::before,.cream .inner::after{background:rgba(0,0,0,.07)}
+
+/* chrome */
+.top{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:calc(14px + env(safe-area-inset-top,0px)) var(--gx) 14px;pointer-events:none}
+.top>*{pointer-events:auto}
+.logo{height:16px;width:auto}
+.logo-dark{display:none}
+body.on-cream .logo-dark{display:block}body.on-cream .logo-light{display:none}
+body.on-cream .conf{color:var(--mute-dk)}
+body.on-cream .dots button{background:rgba(0,0,0,.15)}body.on-cream .dots button.on{background:var(--orange)}
+body.on-cream .hint{color:var(--mute-dk)}
+.conf{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+.cream .conf{color:var(--mute-dk)}
+.progress{position:fixed;left:0;top:0;height:3px;background:var(--orange);z-index:30;transition:width .4s ease;width:0}
+.navbar{position:fixed;right:var(--gx);bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;align-items:center;gap:8px}
+.nb{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(34,34,34,.85);color:var(--paper);display:grid;place-items:center;cursor:pointer;font-size:16px;backdrop-filter:blur(8px)}
+.nb:hover{background:var(--orange);border-color:var(--orange);color:#F5F0E8}
+.nb:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.counter{padding:0 16px;height:40px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(34,34,34,.85);display:flex;align-items:center;gap:6px;font-size:12px;letter-spacing:.12em;color:var(--sand-2);backdrop-filter:blur(8px)}
+.counter b{color:var(--orange);font-weight:800}
+.dots{position:fixed;left:var(--gx);bottom:calc(30px + env(safe-area-inset-bottom,0px));z-index:20;display:flex;gap:6px;flex-wrap:wrap;max-width:40vw}
+.dots button{width:22px;height:4px;border-radius:2px;border:0;background:rgba(255,255,255,.18);cursor:pointer;padding:0}
+.dots button.on{background:var(--orange)}
+.hint{position:fixed;left:50%;bottom:calc(26px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);z-index:20}
+@media (max-width:720px){.hint,.dots{display:none}.conf{display:none}}
+.draft{position:fixed;top:0;left:0;right:0;z-index:40;background:var(--flag);color:var(--flag-ink);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;text-align:center;padding:5px 12px}
+body.has-draft .top{padding-top:calc(34px + env(safe-area-inset-top,0px))}
+body.has-draft .progress{top:24px}
+
+/* type */
+.eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--orange);font-weight:700}
+.eyebrow.mute{color:var(--mute)}.cream .eyebrow.mute{color:var(--mute-dk)}
+.display{font-weight:300;text-transform:uppercase;line-height:1.02;letter-spacing:-.02em}
+.display b{font-weight:800}
+h1.display{font-size:clamp(38px,5.6vw,72px)}
+h2.display{font-size:clamp(28px,3.4vw,46px)}
+.lede{font-size:clamp(15px,1.25vw,18px);line-height:1.5;color:var(--sand-2);max-width:36em;font-weight:300}
+.lede b{color:var(--paper);font-weight:700}
+.cream .lede{color:var(--mute-dk)}.cream .lede b{color:var(--ink)}
+.small{font-size:12px;color:var(--mute);line-height:1.5}.cream .small{color:var(--mute-dk)}
+.flag{display:inline;background:var(--flag);color:var(--flag-ink);font-weight:700;padding:.05em .35em;border-radius:4px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+
+/* layout blocks */
+.head{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:24px clamp(24px,4vw,64px);align-items:end;margin-bottom:clamp(22px,3vw,36px)}
+.head .lhs{border-left:3px solid var(--orange);padding-left:clamp(16px,2.4vw,32px)}
+.head .eyebrow{display:block;margin-bottom:12px}
+@media (max-width:820px){.head{grid-template-columns:1fr}}
+.two{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:16px}
+.two.eq{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media (max-width:900px){.two{grid-template-columns:1fr}}
+.stack{display:grid;gap:14px;align-content:start}
+.card{background:var(--ink-2);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:22px;min-width:0}
+.cream .card{background:var(--paper);border-color:rgba(0,0,0,.08)}
+.card h3{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;line-height:1.25;margin-bottom:10px}
+.card p{font-size:14px;line-height:1.55;color:var(--sand-2)}
+.cream .card p{color:var(--mute-dk)}
+.card p b{color:var(--paper);font-weight:700}.cream .card p b{color:var(--ink)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:rgba(255,255,255,.08);border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+.stats>div{background:var(--ink-2);padding:18px 18px}
+.stats .v{font-size:clamp(24px,2.4vw,32px);font-weight:800;letter-spacing:-.02em;line-height:1}
+.stats .l{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-top:7px}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.tile{background:var(--paper);border:1px solid rgba(0,0,0,.08);border-radius:16px;padding:18px 18px 16px;min-width:0}
+.tile .v{font-size:clamp(28px,2.6vw,36px);font-weight:800;color:var(--orange);letter-spacing:-.03em;line-height:1;overflow-wrap:anywhere}
+.tile .k{font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;margin-top:8px;color:var(--ink)}
+.tile .d{font-size:12px;color:var(--mute-dk);margin-top:3px}
+.slide:not(.cream) .tile{background:var(--ink-2);border-color:rgba(255,255,255,.07)}
+.slide:not(.cream) .tile .k{color:var(--paper)}.slide:not(.cream) .tile .d{color:var(--mute)}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:999px;padding:12px 20px;font-weight:700;font-size:14px;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn .arrow{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:rgba(0,0,0,.25)}
+.btn-primary{background:var(--orange);color:#F5F0E8}
+.btn-ghost{background:var(--ink-2);color:var(--paper);border-color:rgba(255,255,255,.12)}
+.btn:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+
+/* photos */
+.photo{position:relative;border-radius:14px;overflow:hidden;background:#2a2926;aspect-ratio:4/3;max-width:100%}
+.photo img{width:100%;height:100%;object-fit:cover}
+.photo .cap{position:absolute;left:12px;bottom:10px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#F5F0E8;background:rgba(24,24,24,.6);padding:5px 9px;border-radius:6px;backdrop-filter:blur(6px)}
+.photo.ph{display:grid;place-items:center;background:linear-gradient(135deg,#2c2a27,#1d1c1a);border:1px dashed rgba(255,255,255,.15)}
+.photo.ph .cap{position:static;background:none;color:var(--mute)}
+.cream .photo.ph{background:linear-gradient(135deg,#efe6da,#e4d9cb);border-color:rgba(0,0,0,.15)}
+.cream .photo.ph .cap{color:var(--mute-dk)}
+.gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.gallery .photo:first-child{grid-column:span 2;aspect-ratio:auto}
+@media (max-width:700px){.gallery{grid-template-columns:1fr 1fr}.gallery .photo:first-child{grid-column:span 2;aspect-ratio:16/8}}
+
+/* hero */
+.hero .inner{display:flex;flex-direction:column;justify-content:center;padding-bottom:74px}
+.hero .inner::before,.hero .inner::after{display:none}
+.hero-bg{position:absolute;inset:0;background:#1a1917 center/cover no-repeat}
+.hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(24,24,24,.92) 0%,rgba(24,24,24,.65) 45%,rgba(24,24,24,.25) 100%),linear-gradient(0deg,rgba(24,24,24,1) 0%,rgba(24,24,24,.15) 45%,rgba(24,24,24,.4) 100%)}
+.hero .content{position:relative}
+.hero-tag{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:999px;padding:6px 14px 6px 9px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--sand-2);margin-bottom:22px}
+.hero-tag i{width:8px;height:8px;border-radius:50%;background:var(--orange);display:inline-block;box-shadow:0 0 0 4px var(--orange-soft)}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));margin-top:30px;border-top:1px solid rgba(255,255,255,.12);max-width:960px}
+.kpi{padding:18px 18px 0 0;border-right:1px solid rgba(255,255,255,.12);margin-right:18px}
+.kpi:last-child{border-right:0}
+.kpi .v{font-size:clamp(22px,2.6vw,34px);font-weight:800;letter-spacing:-.02em;line-height:1}
+.kpi .l{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-top:7px}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}.kpi{border-right:0;margin-right:0}}
+@media (max-width:520px){.kpis{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:900px){}
+/* J mark: orange notch + cream J, like the site's icon */
+
+/* thesis */
+.thesis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1px;background:rgba(0,0,0,.1);border:1px solid rgba(0,0,0,.1);border-radius:18px;overflow:hidden}
+.thesis>div{background:var(--cream);padding:22px 18px 24px;display:flex;flex-direction:column;gap:10px}
+.thesis .n{font-weight:800;color:var(--orange);font-size:12px;letter-spacing:.1em}
+.thesis h3{font-size:16px;font-weight:800;line-height:1.2;text-transform:uppercase}
+.thesis p{font-size:13px;color:var(--mute-dk);line-height:1.5}
+@media (max-width:1000px){.thesis{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:640px){.thesis{grid-template-columns:1fr}}
+.blocks{margin-top:26px;height:34px;background:
+  repeating-linear-gradient(90deg,var(--orange) 0 34px,transparent 34px 46px,var(--orange) 46px 80px,transparent 80px 126px);
+  border-radius:0;opacity:.95;-webkit-mask:linear-gradient(90deg,#000 80%,transparent);mask:linear-gradient(90deg,#000 80%,transparent)}
+.blocks.j{background:
+  repeating-linear-gradient(90deg,var(--orange) 0 34px,transparent 34px 46px,var(--orange) 46px 80px,transparent 80px 92px,var(--sand) 92px 118px,transparent 118px 138px)}
+
+/* basis bars */
+.basis{display:grid;gap:12px;margin-top:16px}
+.brow{display:grid;grid-template-columns:170px 1fr 100px;gap:14px;align-items:center;font-size:13px}
+.brow .lab{color:var(--sand-2)}
+.brow .bar{height:28px;border-radius:7px;background:rgba(255,255,255,.08);position:relative;overflow:hidden}
+.brow .bar i{position:absolute;inset:0 auto 0 0;border-radius:7px;background:var(--ink-3)}
+.brow.j .bar i{background:var(--orange)}
+.brow .val{font-weight:800;text-align:right;font-size:16px}
+@media (max-width:640px){.brow{grid-template-columns:1fr;gap:5px}.brow .val{text-align:left}}
+
+/* charts + tables */
+.chart-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline;margin-bottom:10px}
+.chart-head .t{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--mute);font-weight:700}
+.legend{display:flex;gap:14px;font-size:11px;color:var(--sand-2)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+svg text{font-family:"Lato",system-ui,sans-serif}
+.stat-inline{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap}
+.stat-inline .v{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.stat-inline .l{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);font-weight:700;text-align:left;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.12)}
+.tbl td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.07);vertical-align:top}
+.tbl td.r,.tbl th.r{text-align:right}
+.tbl tr.total td{font-weight:800;border-top:1px solid rgba(255,255,255,.2);border-bottom:0}
+.tbl tr.em td{font-weight:700;background:rgba(255,255,255,.03)}
+.cream .tbl th{color:var(--mute-dk);border-color:rgba(0,0,0,.14)}
+.cream .tbl td{border-color:rgba(0,0,0,.08)}
+.cream .tbl tr.total td{border-color:rgba(0,0,0,.25)}
+.cream .tbl tr.em td{background:rgba(0,0,0,.03)}
+.scroll{overflow-x:auto}
+.tbl.compact{font-size:12px}.tbl.compact td{padding:6px 8px}.tbl.compact th{padding:6px 8px}.tbl .sub{font-weight:400;letter-spacing:0;text-transform:none}
+.capgrid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:14px;align-items:start}
+.lhs-bar{border-left:3px solid var(--orange);padding-left:clamp(16px,2vw,28px);margin-bottom:6px}
+@media (max-width:900px){.capgrid{grid-template-columns:1fr}}
+.grade{display:inline-block;min-width:24px;text-align:center;border-radius:6px;padding:1px 6px;font-weight:800;font-size:11px}
+.gB{background:#E9E2D6;color:#3B372F}.gC{background:#F3D6C6;color:#7A3A1C}.gD{background:#F0BFB0;color:#7A1F1F}
+
+/* plan steps */
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:900px){.steps{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:520px){.steps{grid-template-columns:1fr}}
+.step{background:var(--ink-2);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.step .photo{border-radius:0;aspect-ratio:16/8}
+.step .body{padding:16px 16px 18px}
+.step .n{color:var(--orange);font-weight:800;font-size:20px;letter-spacing:-.02em}
+.step h3{font-size:13px;text-transform:uppercase;font-weight:800;margin:4px 0 6px}
+.step p{font-size:13px;color:var(--sand-2)}
+.big{display:grid;gap:8px;align-content:start}
+.big .v{font-size:34px;font-weight:800;color:var(--orange);letter-spacing:-.03em;line-height:1}
+
+/* risks / alignment */
+.risks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.risks.two-col{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.risks,.risks.two-col{grid-template-columns:1fr 1fr}}
+@media (max-width:640px){.risks,.risks.two-col{grid-template-columns:1fr}}
+.risk{background:var(--ink-2);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:18px 20px;display:grid;gap:6px;align-content:start;min-width:0}
+.cream .risk{background:var(--paper);border-color:rgba(0,0,0,.08)}
+.risk .k{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);font-weight:700}
+.cream .risk .k{color:var(--mute-dk)}
+.risk h3{font-size:14px;font-weight:800;text-transform:uppercase}
+.risk p{font-size:13px;color:var(--sand-2)}.cream .risk p{color:var(--mute-dk)}
+.risk p b{color:var(--paper)}.cream .risk p b{color:var(--ink)}
+
+/* team */
+.person{display:grid;grid-template-columns:80px minmax(0,1fr);gap:16px;align-items:start}
+.person .ph2{width:80px;height:80px;border-radius:12px;background:linear-gradient(135deg,var(--orange-2),#7a2f0e);display:grid;place-items:center;font-weight:800;font-size:22px;color:#F5F0E8}
+.person h3{font-size:16px;font-weight:300;text-transform:uppercase;margin:0}
+.person h3 b{font-weight:800}
+.person .role{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);font-weight:700;margin:3px 0 6px}
+
+/* terms */
+.terms{border-radius:14px;overflow:hidden;border:1px solid rgba(0,0,0,.08);background:var(--paper)}
+.term{font-size:12px;display:grid;grid-template-columns:170px 1fr;gap:12px;padding:7px 14px;border-bottom:1px solid rgba(0,0,0,.07);font-size:13px}
+.term:last-child{border-bottom:0}
+.term .k{color:var(--mute-dk);font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding-top:2px}
+@media (max-width:600px){.term{grid-template-columns:1fr;gap:3px}}
+.timeline{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:700px){.timeline{grid-template-columns:1fr 1fr}}
+.tstep{padding:14px 14px 0 0;border-top:2px solid rgba(0,0,0,.12);position:relative}
+.tstep::before{content:"";position:absolute;top:-6px;left:0;width:10px;height:10px;border-radius:50%;background:var(--orange)}
+.tstep .d{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--mute-dk);font-weight:700}
+.tstep h4{margin:4px 0 3px;font-size:13px;font-weight:800;text-transform:uppercase}
+.tstep p{font-size:12px;color:var(--mute-dk)}
+.contact{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.pill{border:1px solid rgba(0,0,0,.15);border-radius:999px;padding:8px 14px;font-size:12px;color:var(--ink);background:transparent;text-decoration:none;user-select:all}
+.disc{columns:2;column-gap:40px;font-size:12px;line-height:1.6;color:var(--mute);max-width:1100px}
+.disc h4{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--sand-2);margin:0 0 6px;break-after:avoid}
+.disc p{margin-bottom:16px;break-inside:avoid}
+@media (max-width:800px){.disc{columns:1}}
+</style>
+
+<div class="draft">Working draft · highlighted values are placeholders awaiting the model · not for distribution</div>
+<div class="progress" id="progress"></div>
+<div class="top">
+  <img class="logo logo-light" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA3MzA2LjI0IDUzMS4xIj4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuMy4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjMgQnVpbGQgMTgyKSAgLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgeyBmaWxsOiAjRTg2MjJBOyB9CgogICAgICAuc3QxIHsgZmlsbDogI0Y1RjBFODsgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGcgaWQ9IkxheWVyXzEtMiI+CiAgICA8Zz4KICAgICAgPHBvbHlnb24gY2xhc3M9InN0MSIgcG9pbnRzPSIyNzEzLjcxIDExLjkgMjcxMy4yMiAyNDAuMDIgMjUyMS4zNyAxMi4wMyAyMzgxLjI3IDExLjk4IDIzODEuMjcgNTE2LjYyIDI1NDcuMzQgNTE2LjY2IDI1NDcuODMgMjg4LjU0IDI3MzkuNzMgNTE2LjU5IDI4NzkuOCA1MTYuMjYgMjg3OS43OCAxMS45NCAyNzEzLjcxIDExLjkiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTIzMTEuNTcsMjAwLjQxYy0uNC03MC45OC0zNy4yOS0xMzIuMzMtMTAyLjU3LTE2Mi40Mi0zNS40Mi0xNi40LTcyLjk5LTI1LjU2LTExMy41NC0yNS42NmwtMjU5LjI5LS42Mi4wNCw1MDQuOTFoMTcwLjA1bDEuMDItMTI2LjU3YzE3LjA0LS40MiwzMC45Ni0xLjAxLDQ2LjM4LjI2bDg2LjQyLDEyNi4zLDE4MS40Mi0uNjQtMTA1LjMyLTE1NS40NGM2NC4wOC0zMS4yMiw5NS43OS05MS45OCw5NS40LTE2MC4xMmgwWk0yMDg1Ljg4LDI2MC4yNWMtMjUuNDQsMi4yOS01MC45NS43NS03OC44NCwxLjAxbC0uMjQtMTE3Ljc2YzQ1LjcsMS4yNCwxMjkuNTgtMTUuOTQsMTMyLjY4LDU1LjM0LDEuNTEsMzQuNzEtMjAuMTIsNTguNDEtNTMuNTksNjEuNDJoLS4wMVoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTEwNjYuODksMzAuNThjLTg3LjQ0LTQwLjc4LTE4OS43OS00MC43Ni0yNzcuMjIsMC05Mi42MSw0My4xNi0xNDcuMjEsMTMyLjY0LTE0Ny4yLDIzMy43MiwwLDEwMC45OSw1NC41NCwxOTAuNjEsMTQ3LjIxLDIzMy42OCw4Ny4zNSw0MC42LDE4OS41Myw0MS4yNSwyNzguMjUtLjU1LDkyLjkyLTQzLjc4LDE0Ni0xMzMuMDMsMTQ2LjExLTIzMy4xNC4xMS0xMDEuMDctNTQuNjItMTkwLjU2LTE0Ny4xNS0yMzMuNzFoMFpNMTAzNC45NSwzMTEuMjdjLTE0Ljc5LDQ5LjE4LTU3LjA1LDc5LjE4LTEwNS4zMiw3OS43NS00OS42OC41OS05Mi43MS0zMC0xMDcuNzUtNzguNzUtOS43NC0zMS41OC05LjcyLTY0LjQxLDAtOTUuOTUsMTQuNzUtNDcuOTEsNTYuNjMtNzguMjcsMTA1LjA1LTc4Ljc5LDQ5LjYzLS41NCw5Mi43MiwyOS45OCwxMDcuNzIsNzguNzgsOS40NSwzMC43NCwxMCw2Mi43MS4zLDk0Ljk3aDBaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0xNjA0LjM2LDI5MC4wOWMwLDE5LjM5LTIuNjEsMzcuNjEtOC45Miw1NC43Ni05Ljc4LDMxLjQtMzcuNTMsNDYuNjctNjkuNTcsNDYuMjQtMzAuODgtLjQyLTU3LjM4LTE1Ljg4LTY2LjcyLTQ2LjI1LTYuODItMTcuMTYtOC4yNy0zNS4zNC05LjEtNTQuNzVWMTEuOTJoLTE3MC4zN2wtLjA4LDI4Ni44NmMxLjAyLDMzLjQ0LDUuNjksNjMuNiwxNy4zMyw5NC4zMSw0OC4zNCwxMzMuMSwyMTUuNDksMTU3Ljc5LDMzMy43OCwxMTguNTUsOTQuMTItMzEuMjMsMTQxLjAzLTExNy4yNSwxNDEuMDktMjEyLjg1bC4xOS0yODYuOTMtMTY3LjUuMzEtLjEzLDI3Ny45MWgwWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMzExMy4wNywzMjIuNThsMjEzLjk4LS42My0uMTgtMTIxLjk3LTIxMy41OS0uNDljLS4zMi0yMC44NS0xLjI5LTM5LjY1LjUxLTU5LjI5bDI0Mi42OC0uMjEtLjA4LTEyOC4xOGgtNDExLjA0djUwNC45N2w0MjAuMzkuMDIuMDctMTI4LjIyLTI1Mi41Ni0uMzYtLjE5LTY1LjYzaC4wMVoiLz4KICAgICAgPHBvbHlnb24gY2xhc3M9InN0MSIgcG9pbnRzPSIzNzE1LjIzIDE4NS4yMSAzNjEyIDExLjg4IDM0MzIuMjggMTIuMTIgMzYyMi44MSAzMzEuMjEgMzYyMy4wNiA1MTYuNjYgMzc5My4yNiA1MTYuNjUgMzc5My41MyAzMzQuMDcgMzk4My42MSAxMi41NiAzODE5LjUxIDEyLjE3IDM3MTUuMjMgMTg1LjIxIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yNDguOTMsMTIuMTZsLjI4LDEyNy42NiwxNTQuNS40Mi4wOSwxMzguNDdjLjAxLDE4Ljg4LS42OCwzNy4yMS01LjA3LDU1LjAzLTEyLjgzLDY0LjI1LTg4LjAzLDU1LjI1LTE0OS41Nyw1NS4yNWwuNDQsMTM5LjQzLDk1LjU2LTEuNDhjNDAuODctMy41OSw4MC4xNy04LjMxLDExNy45MS0yNC4zMiw0OC41OS0xOC45MSw3OC42OS01OC4xNyw5OC4xMS0xMDYuMTgsMTEuNjgtMjguODcsMTUuNzMtNjguNywxNS43My0xMDYuMzRWMTIuMjZsLTI1OS40My0uMDloLTY4LjU1LDBaIi8+CiAgICA8L2c+CiAgICA8Y2lyY2xlIGNsYXNzPSJzdDAiIGN4PSIzOTU2LjYiIGN5PSI0NzguMTEiIHI9IjUyLjk5Ii8+CiAgICA8Zz4KICAgICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTQzNzAuMzgsNzMuMTljLTIuMTYsNC4wOC01LjI3LDYuMTEtOS4zNSw2LjExLTMuMTIsMC03LjEzLTIuMjEtMTIuMDQtNi42NS00LjkyLTQuNDMtMTEuNTctOS4zNS0xOS45NS0xNC43NC04LjM5LTUuMzktMTguODctMTAuMzYtMzEuNDYtMTQuOTItMTIuNTgtNC41NS0yOC4xLTYuODMtNDYuNTYtNi44M3MtMzQuNjksMi42NC00OC43MSw3LjkxLTI1Ljc3LDEyLjQ2LTM1LjIzLDIxLjU3Yy05LjQ3LDkuMTEtMTYuNjYsMTkuNjUtMjEuNTcsMzEuNjQtNC45MiwxMS45OS03LjM3LDI0LjU3LTcuMzcsMzcuNzUsMCwxNy4yNiwzLjY1LDMxLjUyLDEwLjk2LDQyLjc4LDcuMzEsMTEuMjcsMTYuOTUsMjAuODUsMjguOTQsMjguNzYsMTEuOTgsNy45MSwyNS41OCwxNC41Niw0MC44LDE5Ljk1LDE1LjIyLDUuMzksMzAuODUsMTAuNzMsNDYuOTEsMTYsMTYuMDUsNS4yNywzMS42OSwxMS4wOSw0Ni45MiwxNy40NCwxNS4yMiw2LjM1LDI4LjgyLDE0LjMyLDQwLjgsMjMuOTFzMjEuNjMsMjEuMzksMjguOTQsMzUuNDEsMTAuOTYsMzEuNDYsMTAuOTYsNTIuMzEtMy42Niw0MS40LTEwLjk2LDYwLjIyYy03LjMxLDE4LjgyLTE3LjkyLDM1LjE3LTMxLjgyLDQ5LjA3LTEzLjksMTMuOS0zMC45MiwyNC44Ny01MS4wNSwzMi44OS0yMC4xMyw4LjAzLTQzLjE0LDEyLjA0LTY5LjAyLDEyLjA0LTMzLjU2LDAtNjIuNDQtNS45My04Ni42NC0xNy44LTI0LjIxLTExLjg2LTQ1LjQyLTI4LjEtNjMuNjMtNDguNzFsMTAuMDctMTUuODJjMi44OC0zLjU5LDYuMjMtNS4zOSwxMC4wNy01LjM5LDIuMTYsMCw0LjkxLDEuNDQsOC4yNyw0LjMxLDMuMzUsMi44OCw3LjQzLDYuNDEsMTIuMjIsMTAuNiw0Ljc5LDQuMiwxMC41NCw4Ljc1LDE3LjI2LDEzLjY2LDYuNzEsNC45MiwxNC41LDkuNDcsMjMuMzcsMTMuNjYsOC44Niw0LjIsMTkuMDUsNy43MywzMC41NiwxMC42czI0LjU2LDQuMzEsMzkuMTksNC4zMWMyMC4xMywwLDM4LjExLTMuMDYsNTMuOTItOS4xNywxNS44Mi02LjExLDI5LjE4LTE0LjQ0LDQwLjA4LTI0Ljk5LDEwLjktMTAuNTQsMTkuMjMtMjMuMDYsMjQuOTktMzcuNTcsNS43NS0xNC41LDguNjMtMzAuMDIsOC42My00Ni41NiwwLTE3Ljk4LTMuNjYtMzIuNzctMTAuOTYtNDQuNC03LjMxLTExLjYyLTE2Ljk2LTIxLjMzLTI4Ljk0LTI5LjEyLTExLjk5LTcuNzktMjUuNTktMTQuMzItNDAuOC0xOS41OS0xNS4yMi01LjI3LTMwLjg2LTEwLjQzLTQ2LjkyLTE1LjQ2cy0zMS43LTEwLjY2LTQ2LjkyLTE2LjljLTE1LjIyLTYuMjMtMjguODItMTQuMi00MC44LTIzLjkxLTExLjk5LTkuNzEtMjEuNjMtMjEuODEtMjguOTQtMzYuMzFzLTEwLjk2LTMyLjY1LTEwLjk2LTU0LjQ2YzAtMTcuMDEsMy4yNC0zMy40Myw5LjcxLTQ5LjI1czE1Ljk0LTI5Ljc4LDI4LjQtNDEuODgsMjcuODYtMjEuODEsNDYuMi0yOS4xMmMxOC4zMy03LjMxLDM5LjI0LTEwLjk2LDYyLjczLTEwLjk2LDI2LjM2LDAsNTAuMDMsNC4yLDcxLDEyLjU4LDIwLjk3LDguMzksNDAuMDgsMjEuMjEsNTcuMzQsMzguNDdsLTguNjMsMTYuNTR2LjAyaC0uMDFaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik00ODM4LjgsNDIuNjNoLTE3OC42N3Y0NzcuNDJoLTM3LjAzVjQyLjYzaC0xNzkuNzVWMTEuMzZoMzk1LjQ1djMxLjI4aDBaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik01MzMyLjM5LDI2NS41MmMwLDM5LjMxLTUuODgsNzQuOTYtMTcuNjIsMTA2Ljk1LTExLjc1LDMyLTI4LjI4LDU5LjMyLTQ5LjYxLDgxLjk3cy00Ni45Miw0MC4xNS03Ni43NSw1Mi40OWMtMjkuODQsMTIuMzUtNjIuNzMsMTguNTEtOTguNjgsMTguNTFzLTY4Ljc5LTYuMTctOTguNS0xOC41MWMtMjkuNzItMTIuMzQtNTUuMjUtMjkuODQtNzYuNTctNTIuNDktMjEuMzMtMjIuNjUtMzcuODctNDkuOTctNDkuNjEtODEuOTctMTEuNzUtMzItMTcuNjItNjcuNjQtMTcuNjItMTA2Ljk1czUuODctNzQuNiwxNy42Mi0xMDYuNTljMTEuNzQtMzIsMjguMjgtNTkuMzIsNDkuNjEtODEuOTdzNDYuODUtNDAuMiw3Ni41Ny01Mi42N2MyOS43MS0xMi40Niw2Mi41NS0xOC42OSw5OC41LTE4LjY5czY4Ljg0LDYuMTcsOTguNjgsMTguNTFjMjkuODQsMTIuMzUsNTUuNDIsMjkuOSw3Ni43NSw1Mi42N3MzNy44Nyw1MC4xNSw0OS42MSw4Mi4xNWMxMS43NCwzMiwxNy42Miw2Ny41MywxNy42MiwxMDYuNTloMFpNNTI5NC4yOCwyNjUuNTJjMC0zNS40Ny00LjkyLTY3LjM0LTE0Ljc0LTk1LjYzLTkuODMtMjguMjgtMjMuNzMtNTIuMjUtNDEuNy03MS45cy0zOS41NC0zNC42OS02NC43MS00NS4xMi01Mi45Ny0xNS42NC04My40LTE1LjY0LTU3Ljg4LDUuMjEtODMuMDQsMTUuNjRjLTI1LjE3LDEwLjQzLTQ2LjgsMjUuNDctNjQuODksNDUuMTItMTguMSwxOS42NS0zMi4xMiw0My42Mi00Mi4wNiw3MS45LTkuOTUsMjguMjgtMTQuOTIsNjAuMTYtMTQuOTIsOTUuNjNzNC45Nyw2Ny42NSwxNC45Miw5NS44MWM5Ljk0LDI4LjE2LDIzLjk2LDUyLjA3LDQyLjA2LDcxLjcyLDE4LjA5LDE5LjY1LDM5LjcyLDM0LjY0LDY0Ljg5LDQ0Ljk0LDI1LjE3LDEwLjMxLDUyLjg1LDE1LjQ2LDgzLjA0LDE1LjQ2czU4LjI0LTUuMTUsODMuNC0xNS40NmMyNS4xNy0xMC4zLDQ2Ljc0LTI1LjI4LDY0LjcxLTQ0Ljk0LDE3Ljk3LTE5LjY1LDMxLjg3LTQzLjU2LDQxLjctNzEuNzIsOS44Mi0yOC4xNiwxNC43NC02MC4wOSwxNC43NC05NS44MVoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTU3NzEuNjksNTIwLjA1aC0zMS42NGMtNC4wOCwwLTcuNDktLjY2LTEwLjI1LTEuOTgtMi43Ni0xLjMxLTUuMzQtMy43Ny03LjczLTcuMzdsLTE2My4yMS0yMDYuMzVjLTEuOTItMi42My0zLjktNC45MS01LjkzLTYuODMtMi4wNC0xLjkyLTQuMzEtMy40Mi02LjgzLTQuNDktMi41Mi0xLjA4LTUuNTItMS44NS04Ljk5LTIuMzQtMy40OC0uNDgtNy43My0uNzItMTIuNzYtLjcyaC02Ni41MXYyMzAuMDhoLTM3LjAzVjExLjM2aDEzMC4xNGM1OC40NywwLDEwMi4yOCwxMS4zMiwxMzEuNCwzMy45N3M0My42OCw1NS45LDQzLjY4LDk5Ljc2YzAsMTkuNDEtMy4zNiwzNy4xNS0xMC4wNyw1My4yMXMtMTYuMzYsMzAuMTQtMjguOTQsNDIuMjQtMjcuODEsMjEuOTktNDUuNjYsMjkuNjZjLTE3Ljg2LDcuNjctMzcuOTMsMTIuODItNjAuMjIsMTUuNDYsNS43NSwzLjYsMTAuOSw4LjM5LDE1LjQ2LDE0LjM4bDE3NS4wOCwyMjAuMDFoMFpNNTU0NS45MiwyNjIuNjVjMjIuNTMsMCw0Mi43Mi0yLjcsNjAuNTgtOC4wOSwxNy44NS01LjM5LDMyLjk1LTEzLjEyLDQ1LjMtMjMuMTksMTIuMzQtMTAuMDcsMjEuNzUtMjIuMTcsMjguMjItMzYuMzFzOS43MS0zMC4wNyw5LjcxLTQ3LjgxYzAtMzYuMTktMTEuODEtNjMuMDMtMzUuNDEtODAuNTMtMjMuNjEtMTcuNDktNTguMDYtMjYuMjQtMTAzLjM2LTI2LjI0aC05My4xMXYyMjIuMTdoODguMDgtLjAxWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNjI3Mi44Myw1MjAuMDVoLTI4LjRjLTMuMzYsMC02LjExLS45LTguMjctMi43cy0zLjg0LTQuMTMtNS4wMy03LjAxbC01OS42OC0xNDcuNzVoLTI0OS44NWwtNTkuNjgsMTQ3Ljc1Yy0uOTYsMi42NC0yLjY0LDQuOTItNS4wMyw2LjgzLTIuNCwxLjkyLTUuMjcsMi44OC04LjYzLDIuODhoLTI4LjA0bDIwOC4xNS01MDguNjloMzYuMzFsMjA4LjE1LDUwOC42OVpNNjE2MC4zLDMzNS4yNmwtMTAzLjU0LTI1Ny4wNGMtMy42LTguMzktNy4wNy0xOC40NS0xMC40My0zMC4yLTEuNDQsNS43NS0zLDExLjIxLTQuNjcsMTYuMzYtMS42OCw1LjE2LTMuNDgsOS44OS01LjM5LDE0LjJsLTEwMy41NCwyNTYuNjhoMjI3LjU3WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNjcyMy45OSwyODkuMjV2MTgwLjgzYy0yNS40MSwxNy45OC01Mi40OSwzMS43Ni04MS4yNSw0MS4zNHMtNjEuMTEsMTQuMzgtOTcuMDYsMTQuMzhjLTQwLjI2LDAtNzYuNDYtNi4xNy0xMDguNTctMTguNTEtMzIuMTItMTIuMzQtNTkuNS0yOS44NC04Mi4xNS01Mi40OXMtNDAuMDMtNTAuMDMtNTIuMTMtODIuMTVjLTEyLjEtMzIuMTEtMTguMTUtNjcuODItMTguMTUtMTA3LjEzczUuOTMtNzQuOTYsMTcuNzktMTA2Ljk1YzExLjg2LTMyLDI4Ljg4LTU5LjMyLDUxLjA1LTgxLjk3czQ4Ljk1LTQwLjE0LDgwLjM1LTUyLjQ5YzMxLjM5LTEyLjM0LDY2Ljc0LTE4LjUxLDEwNi4wNS0xOC41MSwxOS40MSwwLDM3LjMzLDEuMzIsNTMuNzUsMy45NSwxNi40MSwyLjY0LDMxLjY5LDYuNTMsNDUuODQsMTEuNjgsMTQuMTQsNS4xNiwyNy4zMiwxMS41LDM5LjU0LDE5LjA1czIzLjk2LDE2LjI0LDM1LjIzLDI2LjA2bC0xMC4wNywxNS44MmMtMy4zNiw1Ljc1LTguMzksNy4wNy0xNS4xLDMuOTUtMy41OS0xLjQ0LTguNzUtNC43OS0xNS40Ni0xMC4wNy02LjcxLTUuMjctMTUuOTQtMTAuNzktMjcuNjgtMTYuNTQtMTEuNzUtNS43NS0yNi4zMS0xMC45LTQzLjY4LTE1LjQ2LTE3LjM4LTQuNTUtMzguNTMtNi44My02My40NS02LjgzLTMzLjA3LDAtNjIuOTcsNS4yNy04OS42OSwxNS44Mi0yNi43MywxMC41NS00OS40OSwyNS42NS02OC4zMSw0NS4zcy0zMy4zMiw0My42Mi00My41LDcxLjljLTEwLjE5LDI4LjI4LTE1LjI4LDYwLjA0LTE1LjI4LDk1LjI3czUuMDksNjcuODMsMTUuMjgsOTYuMzVjMTAuMTgsMjguNTIsMjQuOTIsNTIuNzMsNDQuMjIsNzIuNjIsMTkuMjksMTkuOSw0Mi43MiwzNS4xMSw3MC4yOCw0NS42NiwyNy41NiwxMC41NSw1OC42LDE1LjgyLDkzLjExLDE1LjgyLDE1LjEsMCwyOS4wNi0uOTYsNDEuODgtMi44OHMyNS4wNC00LjYxLDM2LjY3LTguMDljMTEuNjItMy40NywyMi44OC03Ljc5LDMzLjc5LTEyLjk0LDEwLjktNS4xNSwyMS45OS0xMC45NiwzMy4yNS0xNy40NHYtMTM2Ljk3aC05Ny40MmMtMi42NCwwLTQuODUtLjg0LTYuNjUtMi41Mi0xLjgtMS42Ny0yLjctMy41OS0yLjctNS43NXYtMjAuMTNoMTQwLjIxdi4wMmguMDFaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik03MTIzLjAyLDQ4OS40OWwtLjcyLDMwLjU2aC0zMDQuODZWMTEuMzZoMzA0Ljg2djMwLjU2aC0yNjcuODN2MjA1LjYzaDIyMi44OXYyOS44NGgtMjIyLjg5djIxMi4xaDI2OC41NVoiLz4KICAgIDwvZz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik04NSwxMzkuODJoMTY0LjE2djI0OS4xNkgwdi0xNjQuMTZjMC00Ni45MSwzOC4wOS04NSw4NS04NVoiLz4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNzIyOS45Niw0NjcuNzloLTE4LjkydjUzLjE1aC0xMS42N3YtNTMuMTVoLTE4Ljkydi05LjU5aDQ5LjUxdjkuNTlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik03MzA2LjI0LDQ1OC4ydjYyLjc0aC0xMC4yOHYtNDAuNTNjMC0xLjYyLjA5LTMuMzcuMjYtNS4yNWwtMTguOTYsMzUuNjJjLS45LDEuNzEtMi4yNywyLjU2LTQuMTIsMi41NmgtMS42NWMtMS44NSwwLTMuMjMtLjg1LTQuMTItMi41NmwtMTkuMTgtMzUuNzVjLjA5Ljk1LjE2LDEuOS4yMiwyLjgyLjA2LjkzLjA5LDEuNzguMDksMi41NnY0MC41M2gtMTAuMjh2LTYyLjc0aDguODFjLjUyLDAsLjk3LjAxLDEuMzUuMDRzLjcyLjEsMS4wMi4yMi41OC4zLjgyLjU2LjQ4LjYxLjcyLDEuMDRsMTguNzksMzQuODRjLjQ5LjkzLjk1LDEuODgsMS4zNywyLjg2LjQyLjk4LjgzLDIsMS4yNCwzLjA0LjQtMS4wNy44Mi0yLjEsMS4yNi0zLjFzLjktMS45NiwxLjM5LTIuODlsMTguNTMtMzQuNzZjLjIzLS40My40OC0uNzguNzQtMS4wNC4yNi0uMjYuNTQtLjQ1Ljg1LS41Ni4zLS4xMi42NC0uMTksMS4wMi0uMjJzLjgyLS4wNCwxLjM1LS4wNGg4LjgxLS4wNVoiLz4KICAgIDwvZz4KICA8L2c+Cjwvc3ZnPg==" alt="Journey.Storage"><img class="logo logo-dark" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA3MzA2LjI0IDUzMS4xIj4KICA8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMzAuMy4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogMi4xLjMgQnVpbGQgMTgyKSAgLS0+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5zdDAgeyBmaWxsOiAjRTg2MjJBOyB9CgogICAgICAuc3QxIHsgZmlsbDogIzE4MTgxODsgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CiAgPGcgaWQ9IkxheWVyXzEtMiI+CiAgICA8Zz4KICAgICAgPHBvbHlnb24gY2xhc3M9InN0MSIgcG9pbnRzPSIyNzEzLjcxIDExLjkgMjcxMy4yMiAyNDAuMDIgMjUyMS4zNyAxMi4wMyAyMzgxLjI3IDExLjk4IDIzODEuMjcgNTE2LjYyIDI1NDcuMzQgNTE2LjY2IDI1NDcuODMgMjg4LjU0IDI3MzkuNzMgNTE2LjU5IDI4NzkuOCA1MTYuMjYgMjg3OS43OCAxMS45NCAyNzEzLjcxIDExLjkiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTIzMTEuNTcsMjAwLjQxYy0uNC03MC45OC0zNy4yOS0xMzIuMzMtMTAyLjU3LTE2Mi40Mi0zNS40Mi0xNi40LTcyLjk5LTI1LjU2LTExMy41NC0yNS42NmwtMjU5LjI5LS42Mi4wNCw1MDQuOTFoMTcwLjA1bDEuMDItMTI2LjU3YzE3LjA0LS40MiwzMC45Ni0xLjAxLDQ2LjM4LjI2bDg2LjQyLDEyNi4zLDE4MS40Mi0uNjQtMTA1LjMyLTE1NS40NGM2NC4wOC0zMS4yMiw5NS43OS05MS45OCw5NS40LTE2MC4xMmgwWk0yMDg1Ljg4LDI2MC4yNWMtMjUuNDQsMi4yOS01MC45NS43NS03OC44NCwxLjAxbC0uMjQtMTE3Ljc2YzQ1LjcsMS4yNCwxMjkuNTgtMTUuOTQsMTMyLjY4LDU1LjM0LDEuNTEsMzQuNzEtMjAuMTIsNTguNDEtNTMuNTksNjEuNDJoLS4wMVoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTEwNjYuODksMzAuNThjLTg3LjQ0LTQwLjc4LTE4OS43OS00MC43Ni0yNzcuMjIsMC05Mi42MSw0My4xNi0xNDcuMjEsMTMyLjY0LTE0Ny4yLDIzMy43MiwwLDEwMC45OSw1NC41NCwxOTAuNjEsMTQ3LjIxLDIzMy42OCw4Ny4zNSw0MC42LDE4OS41Myw0MS4yNSwyNzguMjUtLjU1LDkyLjkyLTQzLjc4LDE0Ni0xMzMuMDMsMTQ2LjExLTIzMy4xNC4xMS0xMDEuMDctNTQuNjItMTkwLjU2LTE0Ny4xNS0yMzMuNzFoMFpNMTAzNC45NSwzMTEuMjdjLTE0Ljc5LDQ5LjE4LTU3LjA1LDc5LjE4LTEwNS4zMiw3OS43NS00OS42OC41OS05Mi43MS0zMC0xMDcuNzUtNzguNzUtOS43NC0zMS41OC05LjcyLTY0LjQxLDAtOTUuOTUsMTQuNzUtNDcuOTEsNTYuNjMtNzguMjcsMTA1LjA1LTc4Ljc5LDQ5LjYzLS41NCw5Mi43MiwyOS45OCwxMDcuNzIsNzguNzgsOS40NSwzMC43NCwxMCw2Mi43MS4zLDk0Ljk3aDBaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0xNjA0LjM2LDI5MC4wOWMwLDE5LjM5LTIuNjEsMzcuNjEtOC45Miw1NC43Ni05Ljc4LDMxLjQtMzcuNTMsNDYuNjctNjkuNTcsNDYuMjQtMzAuODgtLjQyLTU3LjM4LTE1Ljg4LTY2LjcyLTQ2LjI1LTYuODItMTcuMTYtOC4yNy0zNS4zNC05LjEtNTQuNzVWMTEuOTJoLTE3MC4zN2wtLjA4LDI4Ni44NmMxLjAyLDMzLjQ0LDUuNjksNjMuNiwxNy4zMyw5NC4zMSw0OC4zNCwxMzMuMSwyMTUuNDksMTU3Ljc5LDMzMy43OCwxMTguNTUsOTQuMTItMzEuMjMsMTQxLjAzLTExNy4yNSwxNDEuMDktMjEyLjg1bC4xOS0yODYuOTMtMTY3LjUuMzEtLjEzLDI3Ny45MWgwWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMzExMy4wNywzMjIuNThsMjEzLjk4LS42My0uMTgtMTIxLjk3LTIxMy41OS0uNDljLS4zMi0yMC44NS0xLjI5LTM5LjY1LjUxLTU5LjI5bDI0Mi42OC0uMjEtLjA4LTEyOC4xOGgtNDExLjA0djUwNC45N2w0MjAuMzkuMDIuMDctMTI4LjIyLTI1Mi41Ni0uMzYtLjE5LTY1LjYzaC4wMVoiLz4KICAgICAgPHBvbHlnb24gY2xhc3M9InN0MSIgcG9pbnRzPSIzNzE1LjIzIDE4NS4yMSAzNjEyIDExLjg4IDM0MzIuMjggMTIuMTIgMzYyMi44MSAzMzEuMjEgMzYyMy4wNiA1MTYuNjYgMzc5My4yNiA1MTYuNjUgMzc5My41MyAzMzQuMDcgMzk4My42MSAxMi41NiAzODE5LjUxIDEyLjE3IDM3MTUuMjMgMTg1LjIxIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik0yNDguOTMsMTIuMTZsLjI4LDEyNy42NiwxNTQuNS40Mi4wOSwxMzguNDdjLjAxLDE4Ljg4LS42OCwzNy4yMS01LjA3LDU1LjAzLTEyLjgzLDY0LjI1LTg4LjAzLDU1LjI1LTE0OS41Nyw1NS4yNWwuNDQsMTM5LjQzLDk1LjU2LTEuNDhjNDAuODctMy41OSw4MC4xNy04LjMxLDExNy45MS0yNC4zMiw0OC41OS0xOC45MSw3OC42OS01OC4xNyw5OC4xMS0xMDYuMTgsMTEuNjgtMjguODcsMTUuNzMtNjguNywxNS43My0xMDYuMzRWMTIuMjZsLTI1OS40My0uMDloLTY4LjU1LDBaIi8+CiAgICA8L2c+CiAgICA8Y2lyY2xlIGNsYXNzPSJzdDAiIGN4PSIzOTU2LjYiIGN5PSI0NzguMTEiIHI9IjUyLjk5Ii8+CiAgICA8Zz4KICAgICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTQzNzAuMzgsNzMuMTljLTIuMTYsNC4wOC01LjI3LDYuMTEtOS4zNSw2LjExLTMuMTIsMC03LjEzLTIuMjEtMTIuMDQtNi42NS00LjkyLTQuNDMtMTEuNTctOS4zNS0xOS45NS0xNC43NC04LjM5LTUuMzktMTguODctMTAuMzYtMzEuNDYtMTQuOTItMTIuNTgtNC41NS0yOC4xLTYuODMtNDYuNTYtNi44M3MtMzQuNjksMi42NC00OC43MSw3LjkxLTI1Ljc3LDEyLjQ2LTM1LjIzLDIxLjU3Yy05LjQ3LDkuMTEtMTYuNjYsMTkuNjUtMjEuNTcsMzEuNjQtNC45MiwxMS45OS03LjM3LDI0LjU3LTcuMzcsMzcuNzUsMCwxNy4yNiwzLjY1LDMxLjUyLDEwLjk2LDQyLjc4LDcuMzEsMTEuMjcsMTYuOTUsMjAuODUsMjguOTQsMjguNzYsMTEuOTgsNy45MSwyNS41OCwxNC41Niw0MC44LDE5Ljk1LDE1LjIyLDUuMzksMzAuODUsMTAuNzMsNDYuOTEsMTYsMTYuMDUsNS4yNywzMS42OSwxMS4wOSw0Ni45MiwxNy40NCwxNS4yMiw2LjM1LDI4LjgyLDE0LjMyLDQwLjgsMjMuOTFzMjEuNjMsMjEuMzksMjguOTQsMzUuNDEsMTAuOTYsMzEuNDYsMTAuOTYsNTIuMzEtMy42Niw0MS40LTEwLjk2LDYwLjIyYy03LjMxLDE4LjgyLTE3LjkyLDM1LjE3LTMxLjgyLDQ5LjA3LTEzLjksMTMuOS0zMC45MiwyNC44Ny01MS4wNSwzMi44OS0yMC4xMyw4LjAzLTQzLjE0LDEyLjA0LTY5LjAyLDEyLjA0LTMzLjU2LDAtNjIuNDQtNS45My04Ni42NC0xNy44LTI0LjIxLTExLjg2LTQ1LjQyLTI4LjEtNjMuNjMtNDguNzFsMTAuMDctMTUuODJjMi44OC0zLjU5LDYuMjMtNS4zOSwxMC4wNy01LjM5LDIuMTYsMCw0LjkxLDEuNDQsOC4yNyw0LjMxLDMuMzUsMi44OCw3LjQzLDYuNDEsMTIuMjIsMTAuNiw0Ljc5LDQuMiwxMC41NCw4Ljc1LDE3LjI2LDEzLjY2LDYuNzEsNC45MiwxNC41LDkuNDcsMjMuMzcsMTMuNjYsOC44Niw0LjIsMTkuMDUsNy43MywzMC41NiwxMC42czI0LjU2LDQuMzEsMzkuMTksNC4zMWMyMC4xMywwLDM4LjExLTMuMDYsNTMuOTItOS4xNywxNS44Mi02LjExLDI5LjE4LTE0LjQ0LDQwLjA4LTI0Ljk5LDEwLjktMTAuNTQsMTkuMjMtMjMuMDYsMjQuOTktMzcuNTcsNS43NS0xNC41LDguNjMtMzAuMDIsOC42My00Ni41NiwwLTE3Ljk4LTMuNjYtMzIuNzctMTAuOTYtNDQuNC03LjMxLTExLjYyLTE2Ljk2LTIxLjMzLTI4Ljk0LTI5LjEyLTExLjk5LTcuNzktMjUuNTktMTQuMzItNDAuOC0xOS41OS0xNS4yMi01LjI3LTMwLjg2LTEwLjQzLTQ2LjkyLTE1LjQ2cy0zMS43LTEwLjY2LTQ2LjkyLTE2LjljLTE1LjIyLTYuMjMtMjguODItMTQuMi00MC44LTIzLjkxLTExLjk5LTkuNzEtMjEuNjMtMjEuODEtMjguOTQtMzYuMzFzLTEwLjk2LTMyLjY1LTEwLjk2LTU0LjQ2YzAtMTcuMDEsMy4yNC0zMy40Myw5LjcxLTQ5LjI1czE1Ljk0LTI5Ljc4LDI4LjQtNDEuODgsMjcuODYtMjEuODEsNDYuMi0yOS4xMmMxOC4zMy03LjMxLDM5LjI0LTEwLjk2LDYyLjczLTEwLjk2LDI2LjM2LDAsNTAuMDMsNC4yLDcxLDEyLjU4LDIwLjk3LDguMzksNDAuMDgsMjEuMjEsNTcuMzQsMzguNDdsLTguNjMsMTYuNTR2LjAyaC0uMDFaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik00ODM4LjgsNDIuNjNoLTE3OC42N3Y0NzcuNDJoLTM3LjAzVjQyLjYzaC0xNzkuNzVWMTEuMzZoMzk1LjQ1djMxLjI4aDBaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik01MzMyLjM5LDI2NS41MmMwLDM5LjMxLTUuODgsNzQuOTYtMTcuNjIsMTA2Ljk1LTExLjc1LDMyLTI4LjI4LDU5LjMyLTQ5LjYxLDgxLjk3cy00Ni45Miw0MC4xNS03Ni43NSw1Mi40OWMtMjkuODQsMTIuMzUtNjIuNzMsMTguNTEtOTguNjgsMTguNTFzLTY4Ljc5LTYuMTctOTguNS0xOC41MWMtMjkuNzItMTIuMzQtNTUuMjUtMjkuODQtNzYuNTctNTIuNDktMjEuMzMtMjIuNjUtMzcuODctNDkuOTctNDkuNjEtODEuOTctMTEuNzUtMzItMTcuNjItNjcuNjQtMTcuNjItMTA2Ljk1czUuODctNzQuNiwxNy42Mi0xMDYuNTljMTEuNzQtMzIsMjguMjgtNTkuMzIsNDkuNjEtODEuOTdzNDYuODUtNDAuMiw3Ni41Ny01Mi42N2MyOS43MS0xMi40Niw2Mi41NS0xOC42OSw5OC41LTE4LjY5czY4Ljg0LDYuMTcsOTguNjgsMTguNTFjMjkuODQsMTIuMzUsNTUuNDIsMjkuOSw3Ni43NSw1Mi42N3MzNy44Nyw1MC4xNSw0OS42MSw4Mi4xNWMxMS43NCwzMiwxNy42Miw2Ny41MywxNy42MiwxMDYuNTloMFpNNTI5NC4yOCwyNjUuNTJjMC0zNS40Ny00LjkyLTY3LjM0LTE0Ljc0LTk1LjYzLTkuODMtMjguMjgtMjMuNzMtNTIuMjUtNDEuNy03MS45cy0zOS41NC0zNC42OS02NC43MS00NS4xMi01Mi45Ny0xNS42NC04My40LTE1LjY0LTU3Ljg4LDUuMjEtODMuMDQsMTUuNjRjLTI1LjE3LDEwLjQzLTQ2LjgsMjUuNDctNjQuODksNDUuMTItMTguMSwxOS42NS0zMi4xMiw0My42Mi00Mi4wNiw3MS45LTkuOTUsMjguMjgtMTQuOTIsNjAuMTYtMTQuOTIsOTUuNjNzNC45Nyw2Ny42NSwxNC45Miw5NS44MWM5Ljk0LDI4LjE2LDIzLjk2LDUyLjA3LDQyLjA2LDcxLjcyLDE4LjA5LDE5LjY1LDM5LjcyLDM0LjY0LDY0Ljg5LDQ0Ljk0LDI1LjE3LDEwLjMxLDUyLjg1LDE1LjQ2LDgzLjA0LDE1LjQ2czU4LjI0LTUuMTUsODMuNC0xNS40NmMyNS4xNy0xMC4zLDQ2Ljc0LTI1LjI4LDY0LjcxLTQ0Ljk0LDE3Ljk3LTE5LjY1LDMxLjg3LTQzLjU2LDQxLjctNzEuNzIsOS44Mi0yOC4xNiwxNC43NC02MC4wOSwxNC43NC05NS44MVoiLz4KICAgICAgPHBhdGggY2xhc3M9InN0MSIgZD0iTTU3NzEuNjksNTIwLjA1aC0zMS42NGMtNC4wOCwwLTcuNDktLjY2LTEwLjI1LTEuOTgtMi43Ni0xLjMxLTUuMzQtMy43Ny03LjczLTcuMzdsLTE2My4yMS0yMDYuMzVjLTEuOTItMi42My0zLjktNC45MS01LjkzLTYuODMtMi4wNC0xLjkyLTQuMzEtMy40Mi02LjgzLTQuNDktMi41Mi0xLjA4LTUuNTItMS44NS04Ljk5LTIuMzQtMy40OC0uNDgtNy43My0uNzItMTIuNzYtLjcyaC02Ni41MXYyMzAuMDhoLTM3LjAzVjExLjM2aDEzMC4xNGM1OC40NywwLDEwMi4yOCwxMS4zMiwxMzEuNCwzMy45N3M0My42OCw1NS45LDQzLjY4LDk5Ljc2YzAsMTkuNDEtMy4zNiwzNy4xNS0xMC4wNyw1My4yMXMtMTYuMzYsMzAuMTQtMjguOTQsNDIuMjQtMjcuODEsMjEuOTktNDUuNjYsMjkuNjZjLTE3Ljg2LDcuNjctMzcuOTMsMTIuODItNjAuMjIsMTUuNDYsNS43NSwzLjYsMTAuOSw4LjM5LDE1LjQ2LDE0LjM4bDE3NS4wOCwyMjAuMDFoMFpNNTU0NS45MiwyNjIuNjVjMjIuNTMsMCw0Mi43Mi0yLjcsNjAuNTgtOC4wOSwxNy44NS01LjM5LDMyLjk1LTEzLjEyLDQ1LjMtMjMuMTksMTIuMzQtMTAuMDcsMjEuNzUtMjIuMTcsMjguMjItMzYuMzFzOS43MS0zMC4wNyw5LjcxLTQ3LjgxYzAtMzYuMTktMTEuODEtNjMuMDMtMzUuNDEtODAuNTMtMjMuNjEtMTcuNDktNTguMDYtMjYuMjQtMTAzLjM2LTI2LjI0aC05My4xMXYyMjIuMTdoODguMDgtLjAxWiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNjI3Mi44Myw1MjAuMDVoLTI4LjRjLTMuMzYsMC02LjExLS45LTguMjctMi43cy0zLjg0LTQuMTMtNS4wMy03LjAxbC01OS42OC0xNDcuNzVoLTI0OS44NWwtNTkuNjgsMTQ3Ljc1Yy0uOTYsMi42NC0yLjY0LDQuOTItNS4wMyw2LjgzLTIuNCwxLjkyLTUuMjcsMi44OC04LjYzLDIuODhoLTI4LjA0bDIwOC4xNS01MDguNjloMzYuMzFsMjA4LjE1LDUwOC42OVpNNjE2MC4zLDMzNS4yNmwtMTAzLjU0LTI1Ny4wNGMtMy42LTguMzktNy4wNy0xOC40NS0xMC40My0zMC4yLTEuNDQsNS43NS0zLDExLjIxLTQuNjcsMTYuMzYtMS42OCw1LjE2LTMuNDgsOS44OS01LjM5LDE0LjJsLTEwMy41NCwyNTYuNjhoMjI3LjU3WiIvPgogICAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNjcyMy45OSwyODkuMjV2MTgwLjgzYy0yNS40MSwxNy45OC01Mi40OSwzMS43Ni04MS4yNSw0MS4zNHMtNjEuMTEsMTQuMzgtOTcuMDYsMTQuMzhjLTQwLjI2LDAtNzYuNDYtNi4xNy0xMDguNTctMTguNTEtMzIuMTItMTIuMzQtNTkuNS0yOS44NC04Mi4xNS01Mi40OXMtNDAuMDMtNTAuMDMtNTIuMTMtODIuMTVjLTEyLjEtMzIuMTEtMTguMTUtNjcuODItMTguMTUtMTA3LjEzczUuOTMtNzQuOTYsMTcuNzktMTA2Ljk1YzExLjg2LTMyLDI4Ljg4LTU5LjMyLDUxLjA1LTgxLjk3czQ4Ljk1LTQwLjE0LDgwLjM1LTUyLjQ5YzMxLjM5LTEyLjM0LDY2Ljc0LTE4LjUxLDEwNi4wNS0xOC41MSwxOS40MSwwLDM3LjMzLDEuMzIsNTMuNzUsMy45NSwxNi40MSwyLjY0LDMxLjY5LDYuNTMsNDUuODQsMTEuNjgsMTQuMTQsNS4xNiwyNy4zMiwxMS41LDM5LjU0LDE5LjA1czIzLjk2LDE2LjI0LDM1LjIzLDI2LjA2bC0xMC4wNywxNS44MmMtMy4zNiw1Ljc1LTguMzksNy4wNy0xNS4xLDMuOTUtMy41OS0xLjQ0LTguNzUtNC43OS0xNS40Ni0xMC4wNy02LjcxLTUuMjctMTUuOTQtMTAuNzktMjcuNjgtMTYuNTQtMTEuNzUtNS43NS0yNi4zMS0xMC45LTQzLjY4LTE1LjQ2LTE3LjM4LTQuNTUtMzguNTMtNi44My02My40NS02LjgzLTMzLjA3LDAtNjIuOTcsNS4yNy04OS42OSwxNS44Mi0yNi43MywxMC41NS00OS40OSwyNS42NS02OC4zMSw0NS4zcy0zMy4zMiw0My42Mi00My41LDcxLjljLTEwLjE5LDI4LjI4LTE1LjI4LDYwLjA0LTE1LjI4LDk1LjI3czUuMDksNjcuODMsMTUuMjgsOTYuMzVjMTAuMTgsMjguNTIsMjQuOTIsNTIuNzMsNDQuMjIsNzIuNjIsMTkuMjksMTkuOSw0Mi43MiwzNS4xMSw3MC4yOCw0NS42NiwyNy41NiwxMC41NSw1OC42LDE1LjgyLDkzLjExLDE1LjgyLDE1LjEsMCwyOS4wNi0uOTYsNDEuODgtMi44OHMyNS4wNC00LjYxLDM2LjY3LTguMDljMTEuNjItMy40NywyMi44OC03Ljc5LDMzLjc5LTEyLjk0LDEwLjktNS4xNSwyMS45OS0xMC45NiwzMy4yNS0xNy40NHYtMTM2Ljk3aC05Ny40MmMtMi42NCwwLTQuODUtLjg0LTYuNjUtMi41Mi0xLjgtMS42Ny0yLjctMy41OS0yLjctNS43NXYtMjAuMTNoMTQwLjIxdi4wMmguMDFaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik03MTIzLjAyLDQ4OS40OWwtLjcyLDMwLjU2aC0zMDQuODZWMTEuMzZoMzA0Ljg2djMwLjU2aC0yNjcuODN2MjA1LjYzaDIyMi44OXYyOS44NGgtMjIyLjg5djIxMi4xaDI2OC41NVoiLz4KICAgIDwvZz4KICAgIDxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik04NSwxMzkuODJoMTY0LjE2djI0OS4xNkgwdi0xNjQuMTZjMC00Ni45MSwzOC4wOS04NSw4NS04NVoiLz4KICAgIDxnPgogICAgICA8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNzIyOS45Niw0NjcuNzloLTE4LjkydjUzLjE1aC0xMS42N3YtNTMuMTVoLTE4Ljkydi05LjU5aDQ5LjUxdjkuNTlaIi8+CiAgICAgIDxwYXRoIGNsYXNzPSJzdDEiIGQ9Ik03MzA2LjI0LDQ1OC4ydjYyLjc0aC0xMC4yOHYtNDAuNTNjMC0xLjYyLjA5LTMuMzcuMjYtNS4yNWwtMTguOTYsMzUuNjJjLS45LDEuNzEtMi4yNywyLjU2LTQuMTIsMi41NmgtMS42NWMtMS44NSwwLTMuMjMtLjg1LTQuMTItMi41NmwtMTkuMTgtMzUuNzVjLjA5Ljk1LjE2LDEuOS4yMiwyLjgyLjA2LjkzLjA5LDEuNzguMDksMi41NnY0MC41M2gtMTAuMjh2LTYyLjc0aDguODFjLjUyLDAsLjk3LjAxLDEuMzUuMDRzLjcyLjEsMS4wMi4yMi41OC4zLjgyLjU2LjQ4LjYxLjcyLDEuMDRsMTguNzksMzQuODRjLjQ5LjkzLjk1LDEuODgsMS4zNywyLjg2LjQyLjk4LjgzLDIsMS4yNCwzLjA0LjQtMS4wNy44Mi0yLjEsMS4yNi0zLjFzLjktMS45NiwxLjM5LTIuODlsMTguNTMtMzQuNzZjLjIzLS40My40OC0uNzguNzQtMS4wNC4yNi0uMjYuNTQtLjQ1Ljg1LS41Ni4zLS4xMi42NC0uMTksMS4wMi0uMjJzLjgyLS4wNCwxLjM1LS4wNGg4LjgxLS4wNVoiLz4KICAgIDwvZz4KICA8L2c+Cjwvc3ZnPg==" alt="" aria-hidden="true">
+  <span class="conf">Journey.Direct · Privileged &amp; confidential</span>
+</div>
+
+<div class="deck" id="deck">
+
+<!-- 1 HERO -->
+<section class="slide hero" data-title="Cover">
+  <div class="hero-bg"><img src="/deck/malakoff/assets/malakoff/hero-drive-aisle.webp" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.remove()"></div>
+      <div class="inner"><div class="content">
+    <div class="hero-tag"><i></i>Journey.Direct · Malakoff, Texas · Closing November 16, 2026</div>
+    <h1 class="display">Invest alongside<br><b>the operator.</b></h1>
+    <p class="lede" style="margin-top:18px">Not through a fund. Not through a REIT. Directly, in a 433-space Class A facility that Journey bought below what it cost to build, and will run and report on itself.</p>
+    <div class="kpis num">
+      <div class="kpi"><div class="v">$3.1M</div><div class="l">Equity raise</div></div>
+      <div class="kpi"><div class="v">17.08%</div><div class="l">Projected LP IRR</div></div>
+      <div class="kpi"><div class="v">2.16x</div><div class="l">LP equity multiple</div></div>
+      <div class="kpi"><div class="v">$60</div><div class="l">Per sq ft basis</div></div>
+      <div class="kpi"><div class="v">5 yrs</div><div class="l">Hold · close Nov 16</div></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:28px">
+      <a class="btn btn-primary" href="#8" data-go="8">Investment summary <span class="arrow">→</span></a>
+      <a class="btn btn-ghost" href="#3" data-go="3">See the property</a>
+    </div>
+  </div>
+</div>
+</section>
+<section class="slide" data-title="Disclosures">
+  <div class="inner">
+    <div class="head">
+      <div class="lhs"><span class="eyebrow">Important · please read</span><h2 class="display">Before you <b>act on this.</b></h2></div>
+    </div>
+    <div class="disc">
+      <h4>General</h4>
+      <p>This contains privileged and confidential information and unauthorized use of this information in any manner is strictly prohibited. It is for informational purposes and is not intended to be a general solicitation or a securities offering of any kind. The information contained herein is from sources believed to be reliable, however no representation by Journey.Direct (JD) or Journey.Storage (JS), either expressed or implied, is made as to the accuracy of any information on this property and all investors should conduct their own research to determine the accuracy of any statements made. Neither JD nor JS, nor their representatives, officers, employees, affiliates, sub-contractors or vendors provide tax, legal or investment advice. Nothing in this document is intended to be or should be construed as such advice. The SEC has not passed upon the merits of or given its approval to the securities, the terms of the offering, or the accuracy or completeness of any offering materials.</p>
+      <h4>Forward-looking statements</h4>
+      <p>Potential investors and other readers are cautioned that forward-looking statements are predictions only, based on current information, assumptions and expectations that are inherently subject to risks and uncertainties that could cause future events or results to differ materially from those set forth or implied. These statements can be identified by terms such as "may", "will", "seek", "should", "expect", "anticipate", "project", "estimate", "intend", "continue" or "believe", or the negatives thereof. This document contains several future financial projections and forecasts. These estimated projections are based on numerous assumptions and hypothetical scenarios and JD and JS explicitly make no representation or warranty of any kind with respect to any financial projection or forecast.</p>
+      <h4>Past performance</h4>
+      <p>Past performance does not guarantee future results. Current performance may be lower or higher than the performance data presented. All return examples provided are based on assumptions and expectations in light of currently available information, industry trends and comparisons to competitors' financials. Actual performance may, and most likely will, substantially differ from these projections and are provided as illustrations only. JD and JS make no representations or warranties that any investor will, or is likely to, achieve profits similar to those shown herein.</p>
+      <p class="small">Journey.Direct · Dallas, TX · Privileged &amp; Confidential · Q3 2026</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2 FIVE REASONS -->
+<section class="slide cream" data-title="Five reasons">
+  <div class="inner">
+    <div class="head">
+      <div class="lhs"><span class="eyebrow">The deal in one minute</span><h2 class="display">Five reasons <b>this works.</b></h2></div>
+      <p class="lede">Most storage offerings ask you to underwrite a story. This one asks you to underwrite a building that already exists, a price that is already set, and an operator with a repeatable playbook for filling it.</p>
+    </div>
+    <div class="thesis">
+      <div><span class="n">01</span><h3>Basis below cost</h3><p>Purchased from the developer for less than the developer spent to build it. A general contractor built it without a third-party margin, and Journey is buying below even that.</p></div>
+      <div><span class="n">02</span><h3>A building we know how to run</h3><p>Journey has taken portfolio occupancy from 16.6% at acquisition to 83.7%, on facilities including ones with no tenants in place. A new building is familiar ground, not a first attempt.</p></div>
+      <div><span class="n">03</span><h3>Supply is falling</h3><p>National deliveries are projected to fall from 1,205 facilities in 2023 to 455 by 2029. The next competitor near this site is less likely to get built.</p></div>
+      <div><span class="n">04</span><h3>Run on Journey's stack</h3><p>Online rental, smart entry, automated collections. Open at 9:00 PM on a weekday when every competitor in the county is closed.</p></div>
+      <div><span class="n">05</span><h3>Aligned capital</h3><p>Journey.Direct co-invests $310,206 of its own equity, signs the debt, and is paid a promote only after your preferred return and your capital come back.</p></div>
+    </div>
+    <div class="blocks j" aria-hidden="true"></div>
+  </div>
+</section>
+
+<!-- 3 ASSET -->
+<section class="slide" data-title="The asset">
+  <div class="inner">
+    <div class="head">
+      <div class="lhs"><span class="eyebrow">The asset · 205 Sunset St, Malakoff TX 75148</span><h2 class="display">Malakoff, <b>Texas.</b></h2></div>
+      <p class="lede">Found off-market and bought directly from the developer. No broker, no competitive process. A newly built climate-controlled and drive-up facility on 5.37 acres near <b>Cedar Creek Lake</b>, acquired <b>below what it cost to build</b>.</p>
+    </div>
+    <div class="stats num" style="margin-bottom:16px">
+      <div><div class="v">433</div><div class="l">Spaces · 17 buildings</div></div>
+      <div><div class="v">94,190</div><div class="l">Net rentable sq ft</div></div>
+      <div><div class="v">5.37</div><div class="l">Net acres</div></div>
+      <div><div class="v">$60</div><div class="l">Per sq ft purchase · $13,048 per unit</div></div>
+    </div>
+    <div class="two">
+      <div class="card">
+        <span class="eyebrow mute" style="display:block;margin-bottom:10px">Why the basis is below replacement cost</span>
+        <h3>Three prices for the same building</h3>
+        <p>One of the developers is a general contractor, so the facility was built without a third-party construction margin. Journey is buying below even that number. Anyone building the same 94,190 square feet today, through a normal GC, would carry the margin on top.</p>
+        <div class="basis num">
+          <div class="brow j"><span class="lab">Journey purchase price</span><span class="bar"><i style="width:62%"></i></span><span class="val">$60 / SF</span></div>
+          <div class="brow"><span class="lab">Developer's actual cost</span><span class="bar"><i style="width:74%"></i></span><span class="val"><span class="flag">$XX / SF</span></span></div>
+          <div class="brow"><span class="lab">Replacement cost today</span><span class="bar"><i style="width:92%"></i></span><span class="val"><span class="flag">$XX / SF</span></span></div>
+        </div>
+        <p class="small" style="margin-top:10px">Bar lengths are illustrative until the developer cost and replacement estimate are confirmed. All-in basis including fees, closing and reserves: $75 per SF.</p>
+      </div>
+      <div class="photo" style="aspect-ratio:auto;min-height:260px"><img src="/deck/malakoff/assets/malakoff/aerial-site-pin.png" alt="Satellite view of the Malakoff site" onerror="this.parentNode.classList.add('ph');this.remove()"><span class="cap">Site · 205 Sunset, fronting the highway</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 FACILITY -->
+<section class="slide cream" data-title="A facility built new">
+  <div class="inner">
+    <div class="head">
+      <div class="lhs"><span class="eyebrow">The asset</span><h2 class="display">A facility <b>built new.</b></h2></div>
+      <p class="lede">A finished, code-compliant, Class A facility with the expensive part already done: entitlement, construction, utilities, gates and roads. The remaining work is leasing, which is what Journey does.</p>
+    </div>
+    <div class="gallery">
+      <div class="photo"><img src="/deck/malakoff/assets/malakoff/site-overview.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"><span class="cap">The facility</span></div>
+      <div class="photo"><img src="/deck/malakoff/assets/malakoff/interior-corridor.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"><span class="cap">Climate-controlled interior</span></div>
+      <div class="photo"><img src="/deck/malakoff/assets/malakoff/climate-building.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"><span class="cap">Climate building</span></div>
+      <div class="photo"><img src="/deck/malakoff/assets/malakoff/drive-aisle.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"><span class="cap">Drive aisle</span></div>
+      <div class="photo"><img src="/deck/malakoff/assets/malakoff/drive-up-units.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"><span class="cap">Drive-up units</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 MARKET -->
+<section class="slide" data-title="The market">
+  <div class="inner">
+    <div class="head">
+      <div class="lhs"><span class="eyebrow">The market</span><h2 class="display">Demand is arriving. <b>Supply is not.</b></h2></div>
+      <p class="lede">The last three years absorbed a record wave of new storage. That wave is over. Deliveries are projected to fall roughly 60% from the 2023 peak, leaving an operator who already owns a new building with very few new neighbors.</p>
+    </div>
+    <div class="two" style="grid-template-columns:minmax(0,6fr) minmax(0,6fr)">
+      <div class="card">
+        <div class="chart-head"><span class="t">Annual new self-storage supply · nationwide · facilities</span>
+          <span class="legend"><span><i style="background:var(--orange)"></i>New build</span><span><i style="background:#888680"></i>Expansion</span></span></div>
+        <svg viewBox="0 0 640 300" width="100%" style="max-height:340px" role="img" aria-label="Annual new self-storage supply 2023 to 2029: 1,205; 907; 668; 584; 561; 451; 455">
+          <g font-size="11" fill="#9B9691">
+            <line x1="40" x2="620" y1="250" y2="250" stroke="#3a3835"/>
+            <line x1="40" x2="620" y1="170" y2="170" stroke="#2c2a27"/><text x="34" y="174" text-anchor="end">500</text>
+            <line x1="40" x2="620" y1="90" y2="90" stroke="#2c2a27"/><text x="34" y="94" text-anchor="end">1,000</text>
+            <text x="34" y="254" text-anchor="end">0</text>
+          </g>
+          <g class="num">
+            <rect x="58" y="125.5" width="56" height="124.5" fill="#E8622A" rx="3"/><rect x="58" y="57.2" width="56" height="68.3" fill="#888680" rx="3"/><text x="86" y="48" text-anchor="middle" fill="#FFFCF8" font-size="13" font-weight="800">1,205</text><text x="86" y="272" text-anchor="middle" fill="#9B9691" font-size="12">2023</text>
+            <rect x="140" y="139.3" width="56" height="110.7" fill="#E8622A" rx="3"/><rect x="140" y="104.9" width="56" height="34.4" fill="#888680" rx="3"/><text x="168" y="96" text-anchor="middle" fill="#FFFCF8" font-size="13" font-weight="800">907</text><text x="168" y="272" text-anchor="middle" fill="#9B9691" font-size="12">2024</text>
+            <rect x="222" y="160.2" width="56" height="89.8" fill="#E8622A" rx="3"/><rect x="222" y="143.1" width="56" height="17.1" fill="#888680" rx="3"/><text x="250" y="134" text-anchor="middle" fill="#FFFCF8" font-size="13" font-weight="800">668</text><text x="250" y="272" text-anchor="middle" fill="#9B9691" font-size="12">2025</text>
+            <rect x="304" y="178.5" width="56" height="71.5" fill="#E8622A" rx="3"/><rect x="304" y="156.6" width="56" height="21.9" fill="#888680" rx="3"/><text x="332" y="148" text-anchor="middle" fill="#FFFCF8" font-size="13" font-weight="800">584</text><text x="332" y="272" text-anchor="middle" fill="#9B9691" font-size="12">2026</text>
+            <rect x="386" y="179.6" width="56" height="70.4" fill="#E8622A" rx="3"/><rect x="386" y="160.2" width="56" height="19.4" fill="#888680" rx="3"/><text x="414" y="152" text-anchor="middle" fill="#FFFCF8" font-size="13" font-weight="800">561</text><text x="414" y="272" text-anchor="middle" fill="#9B9691" font-size="12">2027</text>
+            <rect x="468" y="195.1" width="56" height="54.9" fill="#E8622A" rx="3"/><rect x="468" y="177.8" width="56" height="17.3" fill="#888680" rx="3"/><text x="496" y="170" text-anchor="middle" fill="#FFFCF8" font-size="13" font-weight="800">451</text><text x="496" y="272" text-anchor="middle" fill="#9B9691" font-size="12">2028</text>
+            <rect x="550" y="196.1" width="56" height="53.9" fill="#E8622A" rx="3"/><rect x="550" y="177.2" width="56" height="18.9" fill="#888680" rx="3"/><text x="578" y="169" text-anchor="middle" fill="#FFFCF8" font-size="13" font-weight="800">455</text><text x="578" y="272" text-anchor="middle" fill="#9B9691" font-size="12">2029</text>
+          </g>
+          <text x="620" y="292" text-anchor="end" fill="#615C53" font-size="10">2026 onward projected · source: <tspan fill="#F5C842">confirm</tspan></text>
+        </svg>
+      </div>
+      <div class="stack">
+        <div class="card"><div class="stat-inline num"><span class="v">−62%</span><span class="l">Deliveries, 2023 to 2029</span></div>
+          <p style="margin-top:6px">Absorption now outpaces new deliveries in heavily built markets. In markets like Malakoff that never overbuilt, an operator can push rate without new competition diluting demand.</p></div>
+        <div class="card"><div class="stat-inline num"><span class="v">20%+</span><span class="l">Portfolio value premium</span></div>
+          <p style="margin-top:6px">Regional portfolios trade to institutional buyers at compressed cap rates: a 5% cap versus 6% is roughly 20% more value. Malakoff is underwritten to a 6.00% exit on its own; a portfolio exit is upside, not the plan.</p></div>
+        <div class="card"><h3>Demand drivers · trade area</h3>
+          <p>Lake-home and second-home ownership around Cedar Creek Lake drives seasonal and recreational storage. Add <span class="flag">new residential construction</span> and <span class="flag">commuter growth from the DFW corridor</span>. Trade area: <span class="flag">XXK+</span> residents, <span class="flag">XX%+</span> population growth, household income <span class="flag">$XX.Xk</span>, above the county average.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 COMPETITION -->
+<section class="slide cream" data-title="Why we win">
+  <div class="inner">
+    <div class="head">
+      <div class="lhs"><span class="eyebrow">Why we win</span><h2 class="display">Graded, <b>facility by facility.</b></h2></div>
+      <p class="lede">We walked every competitor in Malakoff and Henderson County and graded the building and the web presence. The pattern is consistent: older product, office hours, no online rental, waitlists on popular sizes.</p>
+    </div>
+    <div class="two">
+      <div class="card scroll">
+        <table class="tbl">
+          <thead><tr><th>Facility</th><th>Building</th><th>Web</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td><span class="flag">Competitor A</span></td><td><span class="grade gB">B</span></td><td><span class="grade gC">C</span></td><td><span class="flag">No online rentals</span></td></tr>
+            <tr><td><span class="flag">Competitor B</span></td><td><span class="grade gB">B</span></td><td><span class="grade gC">C</span></td><td><span class="flag">Waitlist on several sizes</span></td></tr>
+            <tr><td><span class="flag">Competitor C</span></td><td><span class="grade gB">B</span></td><td><span class="grade gC">C</span></td><td><span class="flag">No climate-controlled units</span></td></tr>
+            <tr><td><span class="flag">Competitor D</span></td><td><span class="grade gD">D</span></td><td><span class="grade gD">F</span></td><td><span class="flag">Shows "Temporarily closed" on Google</span></td></tr>
+          </tbody>
+        </table>
+        <p class="small" style="margin-top:10px"><span class="flag">XX</span> competitors surveyed across Malakoff / Henderson County · grades and notes to be confirmed from the site survey</p>
+      </div>
+      <div class="stack">
+        <div class="card"><span class="eyebrow" style="display:block;margin-bottom:6px">01</span><h3>Operator-led, not fund-managed</h3><p>Every deal is sourced, operated and managed by the same team. $200M+ in acquisitions built on operations, not market timing.</p></div>
+        <div class="card"><span class="eyebrow" style="display:block;margin-bottom:6px">02</span><h3>Open at 9:00 PM on a weekday</h3><p>Rent online, sign by clickwrap, tap to enter. Our competitors close at 5:00 PM. We never close.</p></div>
+        <div class="card"><span class="eyebrow" style="display:block;margin-bottom:6px">03</span><h3>Aligned incentives</h3><p>Journey.Direct co-invests in every deal and guarantees the debt as needed.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 7 PLAN -->
+<section class="slide" data-title="The business plan">
+  <div class="inner">
+    <div class="head">
+      <div class="lhs"><span class="eyebrow">The business plan</span><h2 class="display">Four moves <b>to stabilized.</b></h2></div>
+      <p class="lede">Bought below the developer's own cost to build, and roughly <span class="flag">XX%</span> below what the same facility would cost to replace today. Leased up, run on Journey's stack, sold stabilized.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="photo"><img src="/deck/malakoff/assets/malakoff/drive-up-units.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"></div><div class="body"><span class="n">01</span><h3>Lease up</h3><p>Grow in-place revenue from $0.64 to $0.79 per SF per month.</p></div></div>
+      <div class="step"><div class="photo"><img src="/deck/malakoff/assets/malakoff/interior-corridor.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"></div><div class="body"><span class="n">02</span><h3>Fill the building</h3><p>Increase occupancy from <span class="flag">XX%</span> to <span class="flag">~XX%</span>, stabilizing in Year 4.</p></div></div>
+      <div class="step"><div class="photo"><img src="/deck/malakoff/assets/malakoff/climate-building.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"></div><div class="body"><span class="n">03</span><h3>Invest up front</h3><p>Deploy $850,000 in capex and interest reserves, including a $400,129 construction budget ($924 per unit).</p></div></div>
+      <div class="step"><div class="photo"><img src="/deck/malakoff/assets/malakoff/drive-aisle.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"></div><div class="body"><span class="n">04</span><h3>Run it on Journey's stack</h3><p>Online rental, smart entry and automated collections under the Journey.Storage brand.</p></div></div>
+    </div>
+    <div class="two" style="margin-top:14px">
+      <div class="card"><h3>Years one and two run below debt service. That is the plan, and it is funded.</h3>
+        <p>A building bought empty does not cover its interest in year one. The $850,000 raised at close covers the gap while the loan is interest-only for 36 months. By Year 3 the property covers its debt 1.65 times over; Year 4 is stabilized. Read the negative Year 1 as a funded lease-up, not a surprise.</p></div>
+      <div class="two eq">
+        <div class="card big num"><span class="v">+$4.99M</span><h3 style="margin:0">Sale over purchase price</h3><p>$5,650,000 purchase to a $10,637,812 projected sale at a 6.00% exit cap.</p></div>
+        <div class="card big num"><span class="v">13.49%</span><h3 style="margin:0">Annual value growth</h3><p>Compound growth in asset value over the 5-year hold: $13,048 to $24,568 per unit.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 SUMMARY -->
+<section class="slide cream" data-title="Investment summary">
+  <div class="inner">
+    <div class="head">
+      <div class="lhs"><span class="eyebrow">Summary overview</span><h2 class="display">The return, <b>in context.</b></h2></div>
+      <p class="lede">Self-storage deals are typically underwritten at a <b>13 to 20% net IRR</b> and a <b>1.5 to 2.5x equity multiple</b>. Malakoff is projected at 17.08% and 2.16x, inside the band on both, with a basis discount that ground-up development cannot offer as downside cover.</p>
+    </div>
+    <div class="tiles num">
+      <div class="tile"><div class="v">17.08%</div><div class="k">IRR</div><div class="d">Projected · net to LP</div></div>
+      <div class="tile"><div class="v">2.16x</div><div class="k">MOIC</div><div class="d">LP equity multiple</div></div>
+      <div class="tile"><div class="v">9.7%</div><div class="k">Yield on cost</div><div class="d">Year 5 NOI on $7.06M total cost</div></div>
+      <div class="tile"><div class="v"><span class="flag">X.X%</span></div><div class="k">Preferred</div><div class="d">Accruing and compounding</div></div>
+    </div>
+    <div class="two eq" style="margin-top:14px">
+      <div class="card">
+        <span class="eyebrow mute" style="display:block;margin-bottom:8px">Distribution waterfall</span>
+        <div class="scroll"><table class="tbl num" style="min-width:420px">
+          <thead><tr><th>Tier</th><th class="r">To LP</th><th class="r">To GP</th><th>Note</th></tr></thead>
+          <tbody>
+            <tr><td>1 · Preferred return</td><td class="r"><span class="flag">X.X%</span></td><td class="r">·</td><td>Accruing and compounding, paid before any promote</td></tr>
+            <tr><td>2 · Return of capital</td><td class="r">100%</td><td class="r">·</td><td>LP capital returned in full</td></tr>
+            <tr><td>3 · Split above the pref</td><td class="r"><span class="flag">XX%</span></td><td class="r"><span class="flag">XX%</span></td><td>Sponsor promote begins</td></tr>
+            <tr><td>4 · Above <span class="flag">XX%</span> IRR</td><td class="r"><span class="flag">XX%</span></td><td class="r"><span class="flag">XX%</span></td><td>Second promote tier</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+      <div class="card">
+        <span class="eyebrow mute" style="display:block;margin-bottom:8px">Exit sensitivity · illustrative</span>
+        <div class="scroll"><table class="tbl num" style="min-width:420px">
+          <thead><tr><th>Exit cap</th><th class="r">Sale value</th><th class="r">Over total cost</th><th class="r">Over purchase</th></tr></thead>
+          <tbody>
+            <tr><td>5.50%</td><td class="r">$11,604,891</td><td class="r">+$4.55M</td><td class="r">+$5.95M</td></tr>
+            <tr class="em"><td>6.00% (underwritten)</td><td class="r">$10,637,812</td><td class="r">+$3.58M</td><td class="r">+$4.99M</td></tr>
+            <tr><td>6.50%</td><td class="r">$9,819,523</td><td class="r">+$2.76M</td><td class="r">+$4.17M</td></tr>
+            <tr><td>7.00%</td><td class="r">$9,118,129</td><td class="r">+$2.06M</td><td class="r">+$3.47M</td></tr>
+          </tbody>
+        </table></div>
+        <p class="small" style="margin-top:8px">Holds the underwritten exit NOI ($638,269) constant and varies only the cap rate. Even 100 bp wider, the sale clears all-in cost by more than $2M.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9 CAPITAL -->
+<section class="slide" data-title="Sources, uses and the model">
+  <div class="inner">
+    <div class="capgrid">
+      <div class="stack">
+        <div class="lhs-bar"><span class="eyebrow" style="display:block;margin-bottom:10px">Capital</span><h2 class="display">Sources, uses <b>and the model.</b></h2></div>
+        <div class="card scroll" style="padding:14px 16px">
+          <span class="eyebrow mute" style="display:block;margin-bottom:4px">Sources at close</span>
+          <table class="tbl num compact"><tbody>
+            <tr><td>Acquisition loan proceeds</td><td class="r">$3,955,000</td><td class="r">56.0%</td></tr>
+            <tr><td>LP equity</td><td class="r">$2,791,850</td><td class="r">39.6%</td></tr>
+            <tr><td>GP equity (co-invest)</td><td class="r">$310,206</td><td class="r">4.4%</td></tr>
+            <tr class="total"><td>Total</td><td class="r">$7,057,056</td><td class="r">100%</td></tr>
+          </tbody></table>
+        </div>
+        <div class="card scroll" style="padding:14px 16px">
+          <span class="eyebrow mute" style="display:block;margin-bottom:4px">Uses at close</span>
+          <table class="tbl num compact"><tbody>
+            <tr><td>Purchase price</td><td class="r">$5,650,000</td><td class="r">80.1%</td></tr>
+            <tr><td>Capex &amp; interest reserves</td><td class="r">$850,000</td><td class="r">12.0%</td></tr>
+            <tr><td>Acquisition fee + DES fees</td><td class="r">$393,206</td><td class="r">5.6%</td></tr>
+            <tr><td>Closing costs</td><td class="r">$84,750</td><td class="r">1.2%</td></tr>
+            <tr><td>Acquisition loan fees</td><td class="r">$79,100</td><td class="r">1.1%</td></tr>
+            <tr class="total"><td>Total</td><td class="r">$7,057,056</td><td class="r">100%</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+      <div class="card scroll">
+        <span class="eyebrow mute" style="display:block;margin-bottom:8px">Annualized projections · expected case · P&amp;L by year</span>
+        <table class="tbl num compact" style="min-width:640px">
+          <thead><tr><th></th><th class="r">Year 1<br><span class="sub">Lease-up</span></th><th class="r">Year 2<br><span class="sub">Lease-up</span></th><th class="r">Year 3<br><span class="sub">Lease-up</span></th><th class="r">Year 4<br><span class="sub">Stabilized</span></th><th class="r">Year 5<br><span class="sub">Stabilized</span></th></tr></thead>
+          <tbody>
+            <tr><td>Rental income</td><td class="r">$183,902</td><td class="r">$454,959</td><td class="r">$667,623</td><td class="r">$853,570</td><td class="r">$916,725</td></tr>
+            <tr><td>Ancillary income</td><td class="r">$12,470</td><td class="r">$29,929</td><td class="r">$39,905</td><td class="r">$44,893</td><td class="r">$44,893</td></tr>
+            <tr><td>Fee &amp; other income</td><td class="r">$13,145</td><td class="r">$19,358</td><td class="r">$24,453</td><td class="r">$28,780</td><td class="r">$30,617</td></tr>
+            <tr><td>Bad debt</td><td class="r">($1,839)</td><td class="r">($4,550)</td><td class="r">($6,676)</td><td class="r">($8,536)</td><td class="r">($9,167)</td></tr>
+            <tr><td>Discounts</td><td class="r">($25,331)</td><td class="r">($21,650)</td><td class="r">($19,052)</td><td class="r">($15,588)</td><td class="r">($16,887)</td></tr>
+            <tr class="em"><td>Effective gross income</td><td class="r">$182,348</td><td class="r">$478,046</td><td class="r">$706,253</td><td class="r">$903,121</td><td class="r">$966,182</td></tr>
+            <tr><td>Total expenses</td><td class="r">($214,780)</td><td class="r">($226,071)</td><td class="r">($248,215)</td><td class="r">($269,144)</td><td class="r">($278,938)</td></tr>
+            <tr class="em"><td>Net operating income</td><td class="r">($32,432)</td><td class="r">$251,975</td><td class="r">$458,038</td><td class="r">$633,976</td><td class="r">$687,244</td></tr>
+            <tr><td>Yield on cost</td><td class="r">(0.47%)</td><td class="r">3.62%</td><td class="r">6.58%</td><td class="r">9.11%</td><td class="r">9.87%</td></tr>
+            <tr><td>Debt service coverage</td><td class="r">(0.12x)</td><td class="r">0.91x</td><td class="r">1.65x</td><td class="r">1.55x</td><td class="r">1.40x</td></tr>
+          </tbody>
+        </table>
+        <p class="small" style="margin-top:10px">Debt service during the interest-only period is $276,850 per year (7.00% on $3,955,000). Year 1 shortfall and Year 2 gap are covered by the $850,000 reserve raised at close.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 ALIGNMENT -->
+<section class="slide cream" data-title="Alignment and fees">
+  <div class="inner">
+    <div class="head">
+      <div class="lhs"><span class="eyebrow">Alignment and fees</span><h2 class="display">Where <b>our money sits.</b></h2></div>
+      <p class="lede">Sophisticated investors ask two questions before the returns: how much of the sponsor's own capital is in, and what the sponsor is paid regardless of outcome. Both answers are here, in the open.</p>
+    </div>
+    <div class="risks two-col">
+      <div class="risk"><span class="k">Co-investment</span><h3>$310,206 of Journey.Direct equity</h3><p>10% of the total raise, on the same terms as every LP. If the plan misses, we miss with you.</p></div>
+      <div class="risk"><span class="k">Debt</span><h3>Sponsor signs the loan</h3><p>Journey.Direct guarantees the $3,955,000 acquisition loan as required by the lender. LPs carry no recourse.</p></div>
+      <div class="risk"><span class="k">Fees at close</span><h3>$393,206 acquisition and DES fees</h3><p>5.6% of total project cost, disclosed in the uses table, covering sourcing, underwriting, due diligence and closing. <span class="flag">Capital-raising fee: confirm treatment and %.</span></p></div>
+      <div class="risk"><span class="k">Ongoing</span><h3>Management at market</h3><p>Journey.Managed operates the property under the Journey.Storage brand at <span class="flag">X%</span> of gross revenue. Asset and construction management fees: <span class="flag">confirm</span>. Promote is earned only above the pref and after return of capital.</p></div>
+    </div>
+    <div class="blocks" aria-hidden="true"></div>
+  </div>
+</section>
+
+<!-- 11 OPERATOR -->
+<section class="slide" data-title="The operator">
+  <div class="inner">
+    <div class="head">
+      <div class="lhs"><span class="eyebrow">The operator</span><h2 class="display">What &ldquo;the operator&rdquo; <b>actually means.</b></h2></div>
+      <p class="lede">Journey sources, acquires, operates, markets and reports on its own assets. There is no third-party manager between you and the building &mdash; the team that underwrote Malakoff is the team that will run it.</p>
+    </div>
+    <div class="tiles num">
+      <div class="tile"><div class="v">30</div><div class="k">Projects</div><div class="d">27 markets · 6 states</div></div>
+      <div class="tile"><div class="v">1.1M</div><div class="k">Net rentable SF</div><div class="d">7,948 spaces</div></div>
+      <div class="tile"><div class="v">$88.3M</div><div class="k">Project cost invested</div><div class="d">Total across the portfolio</div></div>
+      <div class="tile"><div class="v">$50.8M</div><div class="k">Value created over cost</div><div class="d">Achieved plus proforma stabilized</div></div>
+    </div>
+    <div class="two eq" style="margin-top:14px">
+      <div class="card"><h3>Every function in-house</h3><p>Acquisitions, construction management, revenue and marketing, smart-entry technology, collections and investor reporting all sit with the same team, under the <b>JOURNEY.STORAGE&trade;</b> brand. Nothing is handed to a third-party manager, so nothing is anyone else&rsquo;s priority.</p></div>
+      <div class="card"><h3>Underwritten to a spread, proven through lease-up</h3><p>The portfolio averages an <b>11.7% yield on cost</b> against a <b>6.2%</b> exit cap &mdash; roughly <b>550 basis points</b> created before any market movement. Occupancy across the portfolio has moved from <b>16.6%</b> to <b>83.7%</b>, including assets taken on with no tenants at all, so a new building is familiar ground rather than a first attempt.</p></div>
+    </div>
+    <div class="two eq" style="margin-top:14px">
+      <div class="card person"><div class="ph2"><img src="/deck/malakoff/assets/malakoff/home-jonah-portrait.webp" alt="Jonah M. Hall" loading="lazy"></div><div><h3>Jonah M. <b>Hall</b></h3><div class="role">Co-founder &amp; CEO</div><p>A decade in the industry across acquisitions, development, construction, capital raising and facility operations. Runs point directly and built the teams and systems around it.</p></div></div>
+      <div class="card person"><div class="ph2"><img src="/deck/malakoff/assets/malakoff/home-lyvia-portrait.webp" alt="Lyvia Hall" loading="lazy"></div><div><h3>Lyvia <b>Hall</b></h3><div class="role">Co-founder &amp; President</div><p>12+ years overseeing complex structures spanning 50+ entities: financial execution, treasury, tax strategy, investor reporting and lender relations.</p></div></div>
+    </div>
+    <p class="small" style="margin-top:12px">Portfolio figures as of Q3 2026 and include achieved and proforma stabilized values: 18 assets stabilized, 8 in lease-up, 4 sold. Past performance is not indicative of future results.</p>
+  </div>
+</section>
+
+<!-- 12 RISKS -->
+
+
+<!-- 13 TERMS -->
+<section class="slide cream" data-title="The terms">
+  <div class="inner">
+    <div class="head" style="margin-bottom:0">
+      <div class="brow"><span class="eyebrow">The terms</span></div>
+    </div>
+
+    <div class="termcard">
+      <p class="termcard__label">Terms</p>
+      <div class="terms num">
+        <div class="term"><span class="k">Equity raise</span><span>$3,102,056, inclusive of $310,206 sponsor co-invest</span></div>
+        <div class="term"><span class="k">Purchase price</span><span>$5,650,000 · $13,048 per unit · $60 per SF</span></div>
+        <div class="term"><span class="k">Financing</span><span>$3,955,000 · 56.0% LTC · 70% LTV · 7.00% fixed · 36 months interest-only</span></div>
+        <div class="term"><span class="k">Total project cost</span><span>$7,057,056</span></div>
+        <div class="term"><span class="k">Preferred return</span><span><span class="flag">X.X%</span> accruing and compounding, paid before any sponsor promote</span></div>
+        <div class="term"><span class="k">Minimum investment</span><span><span class="flag">$XX,000</span> · accredited investors only</span></div>
+        <div class="term"><span class="k">Sponsor</span><span>Journey.Direct, LLC</span></div>
+        <div class="term"><span class="k">Management</span><span>Journey.Managed, under the Journey.Storage brand</span></div>
+        <div class="term"><span class="k">Strategy</span><span>Lease-up, revenue optimization, expense reduction via automation</span></div>
+        <div class="term"><span class="k">Hold period</span><span>5 years +/−</span></div>
+        <div class="term"><span class="k">Projected exit</span><span>$10,637,812 at a 6.00% cap rate</span></div>
+      </div>
+    </div>
+
+    <p class="small termcard__note">We do cost segregation. Ask about accelerated &ldquo;bonus&rdquo; depreciation.</p>
+
+    <div class="closing-block">
+      <h2 class="display">Space to <b>move on.</b></h2>
+      <p class="lede">Closing is scheduled for <b>November&nbsp;16,&nbsp;2026</b>. Documents on request; commitments taken in order received.</p>
+      <a class="btn btn-primary" href="mailto:acquisitions@journey.storage?subject=Malakoff%20offering">Request the documents <span class="arrow">&rarr;</span></a>
+    </div>
+
+    <div class="signoff">
+      <span>Journey.Direct&trade; &middot; Malakoff, Texas</span>
+      <span>Privileged &amp; Confidential &middot; Q3 2026</span>
+    </div>
+  </div>
+</section>
+
+<!-- 14 DISCLOSURES -->
+
+
+</div>
+
+<div class="dots" id="dots" aria-label="Slides"></div>
+<div class="hint">← → or click · swipe on touch</div>
+<nav class="navbar" aria-label="Slide navigation">
+  <button class="nb" id="prev" aria-label="Previous slide">←</button>
+  <span class="counter num"><b id="cur">01</b> / <span id="tot">14</span></span>
+  <button class="nb" id="next" aria-label="Next slide">→</button>
+</nav>
+
+<script>
+(function(){
+  const slides=[...document.querySelectorAll('.slide')];
+  const n=slides.length; let i=0, dir=1;
+  const cur=document.getElementById('cur'), tot=document.getElementById('tot'), prog=document.getElementById('progress'), dots=document.getElementById('dots');
+  tot.textContent=String(n).padStart(2,'0');
+  document.body.classList.add('has-draft');
+  slides.forEach((s,k)=>{const b=document.createElement('button');b.title=s.dataset.title||('Slide '+(k+1));b.addEventListener('click',()=>go(k));dots.appendChild(b);});
+  function go(k,fromHash){
+    if(k<0||k>=n||k===i&&slides[k].classList.contains('on'))return;
+    dir=k>i?1:-1; i=k;
+    slides.forEach((s,j)=>{s.classList.toggle('on',j===i);s.classList.toggle('back',dir<0);if(j===i)s.scrollTop=0;});
+    [...dots.children].forEach((d,j)=>d.classList.toggle('on',j===i));
+    cur.textContent=String(i+1).padStart(2,'0');
+    document.body.classList.toggle('on-cream',slides[i].classList.contains('cream'));
+    prog.style.width=((i+1)/n*100)+'%';
+    if(!fromHash){try{history.replaceState(null,'','#'+(i+1))}catch(e){}}
+  }
+  document.getElementById('next').addEventListener('click',()=>go(i+1));
+  document.getElementById('prev').addEventListener('click',()=>go(i-1));
+  document.querySelectorAll('[data-go]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();go(+a.dataset.go-1)}));
+  addEventListener('keydown',e=>{
+    if(e.target.matches('input,textarea'))return;
+    if(['ArrowRight','PageDown',' ','Enter'].includes(e.key)){e.preventDefault();go(i+1)}
+    else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();go(i-1)}
+    else if(e.key==='Home'){go(0)} else if(e.key==='End'){go(n-1)}
+  });
+  let tx=null,ty=null;
+  addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY},{passive:true});
+  addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5)go(dx<0?i+1:i-1);tx=ty=null;});
+  function fromHash(){const m=(location.hash||'').match(/^#(\d+)$/);const k=m?Math.min(n,Math.max(1,+m[1]))-1:0;slides[k].classList.remove('on');go(k,true);}
+  addEventListener('hashchange',fromHash);
+  // initial
+  slides[0].classList.remove('on'); i=-1; fromHash();
+})();
+</script>
+
+<script>
+(function(){
+  var lb=document.createElement('div');
+  lb.className='lb'; lb.setAttribute('role','dialog'); lb.setAttribute('aria-modal','true');
+  lb.innerHTML='<button class="lb__x" aria-label="Close">&#10005;</button><img alt="">';
+  document.body.appendChild(lb);
+  var img=lb.querySelector('img'), x=lb.querySelector('.lb__x'), opener=null;
+  function close(){ lb.classList.remove('on'); img.src=''; if(opener) opener.focus() }
+  document.querySelectorAll('.photo').forEach(function(el){
+    var i=el.querySelector('img'); if(!i) return;
+    el.setAttribute('tabindex','0'); el.setAttribute('role','button');
+    el.setAttribute('aria-label','Expand photo: '+(i.alt||'facility'));
+    function go(e){ e.stopPropagation(); opener=el; img.src=i.currentSrc||i.src; img.alt=i.alt||'';
+                    lb.classList.add('on'); x.focus() }
+    el.addEventListener('click', go);
+    el.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(e) } });
+  });
+  lb.addEventListener('click', close);
+  x.addEventListener('click', function(e){ e.stopPropagation(); close() });
+  /* capture phase so Esc closes the lightbox without the deck also reacting */
+  document.addEventListener('keydown', function(e){
+    if(lb.classList.contains('on')){
+      if(e.key==='Escape'){ close(); e.stopPropagation() }
+      else if(e.key==='ArrowLeft'||e.key==='ArrowRight'){ e.stopPropagation() }
+    }
+  }, true);
+})();
+</script>
+</body></html>

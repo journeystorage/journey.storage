@@ -39,14 +39,25 @@ const nextConfig: NextConfig = {
               images: {
                               unoptimized: true,
               },
+              // Serves the Malakoff offering deck (a self-contained HTML
+              // document) at the clean /deck/malakoff URL. Without this it
+              // would only answer at /deck/malakoff/index.html, which is how
+              // /garland and /lanier behave.
+              async rewrites() {
+                            return [{ source: '/deck/malakoff', destination: '/deck/malakoff/index.html' }]
+              },
               async headers() {
                             // public/ files default to max-age=0, so the CDN never cached photos and every
                             // view went back to the (slow, shared) origin. Same rule as the main site.
                             // Filenames aren't hashed, so a week (not immutable): when replacing a photo
                             // in place, give it a new filename.
                             const mediaCache = [{ key: 'Cache-Control', value: 'public, max-age=604800, stale-while-revalidate=2592000' }]
+                            // Offering material: keep it out of search engines and archives
+                            // at the header level too, not only via the page's meta tag.
+                            const noIndex = [{ key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' }]
                             return [
                               { source: '/:path*', headers: securityHeaders },
+                              { source: '/deck/:path*', headers: noIndex },
                               { source: '/images/:path*', headers: mediaCache },
                               { source: '/videos/:path*', headers: mediaCache },
                             ]
