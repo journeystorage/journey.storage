@@ -4,6 +4,7 @@ import localFont from 'next/font/local'
 import { socialUrls } from '@/lib/constants'
 import '@/styles/globals.css'
 import SizeGuideModal from '@/components/SizeGuideModal'
+import RevealFailsafe from '@/components/RevealFailsafe'
 
 // Organization structured data — tells Google the official company name, logo,
 // and social profiles (helps logo/brand display and knowledge-panel eligibility).
@@ -102,7 +103,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={lato.variable}>
+    <html lang="en" className={lato.variable} suppressHydrationWarning>
       {/* journey_property is mapped to GA4 content_group in GTM, so sibling
           sites sharing this container (managed.journey.storage) stay separable
           in standard reports — page paths alone collide on "/". */}
@@ -116,6 +117,7 @@ export default function RootLayout({
         })(window,document,'script','dataLayer','${GTM_ID}');
       `}</Script>
       <body className="bg-black text-black font-sans antialiased">
+        <RevealFailsafe />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}

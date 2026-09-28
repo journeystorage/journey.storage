@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { Lato } from 'next/font/google'
 import { socialUrls } from '@/lib/constants'
 import '@/styles/globals.css'
+import RevealFailsafe from '@/components/RevealFailsafe'
 
 // Organization structured data — same brand entity as journey.storage; this
 // subdomain is a service property of the parent organization.
@@ -69,7 +70,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={lato.variable}>
+    <html lang="en" className={lato.variable} suppressHydrationWarning>
       {/* journey_property is mapped to GA4 content_group in GTM, so this
           subdomain stays separable from journey.storage in standard reports —
           both share GTM-NL5KP8QJ and their page paths collide on "/". */}
@@ -83,6 +84,7 @@ export default function RootLayout({
         })(window,document,'script','dataLayer','${GTM_ID}');
       `}</Script>
       <body className="bg-black text-black font-sans antialiased">
+        <RevealFailsafe />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}

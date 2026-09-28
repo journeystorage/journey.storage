@@ -33,7 +33,16 @@ const nextConfig: NextConfig = {
               unoptimized: true,
       },
       async headers() {
-            return [{ source: '/:path*', headers: securityHeaders }]
+            // public/ files default to max-age=0, so the CDN never cached photos and every
+            // view went back to the (slow, shared) origin. Same rule as the main site.
+            // Filenames aren't hashed, so a week (not immutable): when replacing a photo
+            // in place, give it a new filename.
+            const mediaCache = [{ key: 'Cache-Control', value: 'public, max-age=604800, stale-while-revalidate=2592000' }]
+            return [
+              { source: '/:path*', headers: securityHeaders },
+              { source: '/images/:path*', headers: mediaCache },
+              { source: '/videos/:path*', headers: mediaCache },
+            ]
       },
 }
 

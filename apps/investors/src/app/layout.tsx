@@ -2,6 +2,7 @@ import Script from 'next/script'
 import type { Metadata } from 'next'
 import { Lato, IBM_Plex_Mono } from 'next/font/google'
 import '@/styles/globals.css'
+import RevealFailsafe from '@/components/RevealFailsafe'
 
 const GTM_ID = 'GTM-5BKX85NC'
 const GA4_ID = 'G-Z02PE41PZ3'
@@ -68,7 +69,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${lato.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${lato.variable} ${plexMono.variable}`} suppressHydrationWarning>
       <Script id="gtm" strategy="afterInteractive">{`
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -88,6 +89,7 @@ export default function RootLayout({
         gtag('config', '${GA4_ID}');
       `}</Script>
       <body className="bg-black text-warm-white font-sans antialiased">
+        <RevealFailsafe />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
