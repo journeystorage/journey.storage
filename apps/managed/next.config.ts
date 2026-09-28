@@ -26,6 +26,13 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
       reactStrictMode: true,
+      experimental: {
+        // Hostinger's build (Cloud plan, since late Sept 2026) kills the child Node
+        // processes Turbopack spawns for PostCSS, failing every deploy with
+        // "node process exited before we could connect to it". Worker threads run
+        // the same loaders inside the build process instead.
+        turbopackPluginRuntimeStrategy: 'workerThreads',
+      },
       poweredByHeader: false,
       output: 'standalone',
       outputFileTracingRoot: __dirname,
