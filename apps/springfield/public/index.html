@@ -457,6 +457,43 @@ body.on-cream .dots button:hover{background:rgba(0,0,0,.3)}
 .btn-primary:hover{background:#d4561f}
 .btn-ghost:hover{background:var(--ink-3)}
 .nb:active{transform:scale(.96)}
+
+/* ── Mobile pass ─────────────────────────────────────────────────────────
+   .two.eq and .capgrid.local out-rank the base 900px collapse rules, so
+   they stayed two-up on phones and crushed slides 16, 17 and 25. */
+@media (max-width:900px){
+  .two.eq,.capgrid.local{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  /* clear the fixed prev/next pill at the foot of every slide */
+  .inner{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+  .head{margin-bottom:18px}
+
+  /* 03 platform: number sits beside the title, rows read as a list */
+  .thesis.t3>div{display:grid;grid-template-columns:28px 1fr;column-gap:10px;row-gap:4px;padding:16px 16px 18px}
+  .thesis.t3 .n{padding-top:3px}
+  .thesis.t3 h3{font-size:15px}
+  .thesis.t3 p{grid-column:2;font-size:13.5px}
+  .blocks{height:18px;margin-top:18px}
+
+  /* 17 local market: title, the two numbers, map, then the reading */
+  .local .tiles.t2{gap:10px}
+  .local .tile{padding:14px 14px 12px}
+  .local .tile .v{font-size:30px}
+  .local .photo.map{height:auto;aspect-ratio:1/1!important;max-height:none}
+  .local .card{padding:18px}
+  .list{gap:10px}
+
+  /* 25 operator: stacked cards, founders one per row */
+  .slide[data-title="The operator"] .tiles{gap:10px}
+  .slide[data-title="The operator"] .tile{padding:14px}
+  .slide[data-title="The operator"] .tiles .v{font-size:26px}
+  .slide[data-title="The operator"] .tile .k{font-size:10px;letter-spacing:.12em}
+  .slide[data-title="The operator"] .card h3{font-size:14px}
+  .person{grid-template-columns:64px minmax(0,1fr);gap:14px}
+  .person .ph2{width:64px;height:64px}
+  .person .role{font-size:9.5px}
+}
 </style></head><body>
 
 <div class="progress" id="progress"></div>
@@ -807,7 +844,7 @@ body.on-cream .dots button:hover{background:rgba(0,0,0,.3)}
 <section class="slide" data-title="The market">
   <div class="inner">
     <div class="head"><div class="lhs"><span class="eyebrow">The market · nationwide</span><h2 class="display">Self storage&rsquo;s <b>inflection point.</b></h2></div><p class="lede">A new golden age of self storage wealth creation is beginning. <b>Operators, not developers,</b> will define the next decade.</p></div>
-    <div class="two" style="grid-template-columns:minmax(0,6fr) minmax(0,6fr)">
+    <div class="two eq">
       <div class="card">
         <div class="chart-head"><span class="t">Annual new self-storage supply · nationwide · facilities</span>
           <span class="legend"><span><i style="background:var(--orange)"></i>New build</span><span><i style="background:#888680"></i>Expansion</span></span></div>
