@@ -1,0 +1,25 @@
+/* Journey — Lato, self-hosted, all 9 faces.
+ *
+ * Use this in any STANDALONE HTML: handouts, decks, print pagers, one-off pages.
+ * Next apps do NOT use this file — they load the same faces via next/font/local.
+ *
+ *   <link rel="stylesheet" href="assets/lato.css">
+ *   body { font-family: "Lato", system-ui, -apple-system, "Segoe UI", sans-serif; }
+ *
+ * WHY NOT GOOGLE FONTS: Google serves Lato in 300/400/700/900 only. Requesting
+ * weight 500, 600 or 800 returns HTTP 400. Weight 800 sets the bold phrase in
+ * every Journey heading, so Google silently collapses it to 700 and flattens the
+ * whole type system. Never <link> Lato from fonts.googleapis.com.
+ *
+ * Faces are subset to the Latin range (English, Spanish, Portuguese, French,
+ * German) — 260KB total. Regenerate with scripts/subset-fonts.sh.
+ */
+@font-face{font-family:"Lato";font-weight:300;font-style:normal;font-display:swap;src:url("fonts/Lato-Light.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:300;font-style:italic;font-display:swap;src:url("fonts/Lato-LightItalic.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:400;font-style:normal;font-display:swap;src:url("fonts/Lato-Regular.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:500;font-style:normal;font-display:swap;src:url("fonts/Lato-Medium.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:600;font-style:normal;font-display:swap;src:url("fonts/Lato-Semibold.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:600;font-style:italic;font-display:swap;src:url("fonts/Lato-SemiboldItalic.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:700;font-style:normal;font-display:swap;src:url("fonts/Lato-Bold.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:800;font-style:normal;font-display:swap;src:url("fonts/Lato-Heavy.woff2") format("woff2")}
+@font-face{font-family:"Lato";font-weight:900;font-style:normal;font-display:swap;src:url("fonts/Lato-Black.woff2") format("woff2")}
