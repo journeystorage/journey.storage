@@ -41,7 +41,7 @@
   width:34%;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
   font-weight:800;color:var(--mute-dk);padding-right:26px;white-space:nowrap;
 }
-.slide[data-title="The terms"] .display{letter-spacing:-1.4px;font-size:38px}
+.slide[data-title="The terms"] .display{letter-spacing:-1.4px;font-size:34px}
 .slide[data-title="The terms"] .lede{max-width:34ch}
 
 /* The milestone strip reads as the final beat, so give it room and a rule. */
@@ -78,11 +78,11 @@
 /* The milestone strip is supporting detail, not a third headline. */
 .slide[data-title="The terms"] .timeline h4{font-size:12px;letter-spacing:.04em}
 .slide[data-title="The terms"] .timeline p{font-size:12px;opacity:.8}
-.slide[data-title="The terms"] .signoff{font-size:10px;letter-spacing:.18em;opacity:.55;margin-top:12px;padding-top:10px}
+.slide[data-title="The terms"] .signoff{font-size:10px;letter-spacing:.18em;opacity:.55;margin-top:8px;padding-top:7px}
 
 /* ── Closing slide, rebuilt to the earlier layout: the terms sit in one card
    at the top, then the close is centred beneath them. ── */
-.termcard{border:1px solid rgba(24,24,24,.12);border-radius:16px;padding:12px 20px 8px;margin-top:10px}
+.termcard{border:1px solid rgba(24,24,24,.12);border-radius:16px;padding:10px 18px 6px;margin-top:6px}
 .slide:not(.cream) .termcard{border-color:rgba(255,255,255,.12)}
 .termcard__label{
   margin:0 0 6px; font-size:10.5px; letter-spacing:.2em; text-transform:uppercase;
@@ -96,7 +96,7 @@
 .termcard .term{
   /* 1fr auto let the value column wrap onto a second line and doubled the
      card height. A fixed label column leaves the value the full remainder. */
-  grid-template-columns:146px 1fr; gap:12px; padding:2px 0; font-size:12px;
+  grid-template-columns:142px 1fr; gap:11px; padding:1px 0; font-size:11.5px;
   border-bottom:1px solid rgba(24,24,24,.07); align-items:baseline;
 }
 .slide:not(.cream) .termcard .term{border-bottom-color:rgba(255,255,255,.07)}
@@ -109,7 +109,7 @@
 .termcard .term > span:last-child{text-align:right}
 .termcard__note{margin-top:8px;font-size:11.5px}
 
-.closing-block{text-align:center;margin-top:10px}
+.closing-block{text-align:center;margin-top:6px}
 .closing-block .display{margin:0 auto}
 .closing-block .lede{margin:6px auto 12px;max-width:70ch;font-size:14.5px}
 .closing-block .closing-mail{margin-top:14px}
@@ -372,15 +372,15 @@ svg text{font-family:"Lato",system-ui,sans-serif}
 <section class="slide hero" data-title="Cover">
   <div class="hero-bg"><img src="/deck/malakoff/assets/malakoff/hero-drive-aisle.webp" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.remove()"></div>
       <div class="inner"><div class="content">
-    <div class="hero-tag"><i></i>Journey.Direct · Malakoff, Texas · Closing November 16, 2026</div>
+    <div class="hero-tag"><i></i>Journey.Direct · Malakoff, Texas · Closing mid-November</div>
     <h1 class="display">Invest alongside<br><b>the operator.</b></h1>
-    <p class="lede" style="margin-top:18px">Not through a fund. Not through a REIT. Directly, in a 433-space Class A facility that Journey bought below what it cost to build, and will run and report on itself.</p>
+    <p class="lede" style="margin-top:18px">Not through a fund. Not through a REIT. Directly, in a 433-space Class A facility purchased below replacement cost.</p>
     <div class="kpis num">
-      <div class="kpi"><div class="v">$3.1M</div><div class="l">Equity raise</div></div>
-      <div class="kpi"><div class="v">17.08%</div><div class="l">Projected LP IRR</div></div>
-      <div class="kpi"><div class="v">2.16x</div><div class="l">LP equity multiple</div></div>
-      <div class="kpi"><div class="v">$60</div><div class="l">Per sq ft basis</div></div>
-      <div class="kpi"><div class="v">5 yrs</div><div class="l">Hold · close Nov 16</div></div>
+      <div class="kpi"><div class="v">$3.0M</div><div class="l">Equity raise</div></div>
+      <div class="kpi"><div class="v">20.24%</div><div class="l">Projected LP IRR</div></div>
+      <div class="kpi"><div class="v">2.06x</div><div class="l">LP equity multiple</div></div>
+      <div class="kpi"><div class="v">$81</div><div class="l">Per sq ft</div></div>
+      <div class="kpi"><div class="v">5 yrs</div><div class="l">Hold · closing mid-November</div></div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:28px">
       <a class="btn btn-primary" href="#8" data-go="8">Investment summary <span class="arrow">→</span></a>
@@ -414,11 +414,11 @@ svg text{font-family:"Lato",system-ui,sans-serif}
       <p class="lede">Most storage offerings ask you to underwrite a story. This one asks you to underwrite a building that already exists, a price that is already set, and an operator with a repeatable playbook for filling it.</p>
     </div>
     <div class="thesis">
-      <div><span class="n">01</span><h3>Basis below cost</h3><p>Purchased from the developer for less than the developer spent to build it. A general contractor built it without a third-party margin, and Journey is buying below even that.</p></div>
-      <div><span class="n">02</span><h3>A building we know how to run</h3><p>Journey has taken portfolio occupancy from 16.6% at acquisition to 83.7%, on facilities including ones with no tenants in place. A new building is familiar ground, not a first attempt.</p></div>
-      <div><span class="n">03</span><h3>Supply is falling</h3><p>National deliveries are projected to fall from 1,205 facilities in 2023 to 455 by 2029. The next competitor near this site is less likely to get built.</p></div>
-      <div><span class="n">04</span><h3>Run on Journey's stack</h3><p>Online rental, smart entry, automated collections. Open at 9:00 PM on a weekday when every competitor in the county is closed.</p></div>
-      <div><span class="n">05</span><h3>Aligned capital</h3><p>Journey.Direct co-invests $310,206 of its own equity, signs the debt, and is paid a promote only after your preferred return and your capital come back.</p></div>
+      <div><span class="n">01</span><h3>Basis below cost</h3><p>Purchased from the developer for less than was spent to build it, despite it being built without a market third-party general contractor margin.</p></div>
+      <div><span class="n">02</span><h3>Familiar lease-up</h3><p>With experience leasing up from zero twenty times over, a brand new property is familiar ground, not a first attempt.</p></div>
+      <div><span class="n">03</span><h3>Falling supply</h3><p>With national deliveries projected to fall from 1,205 facilities in 2023 to 455 by 2029, new competitors in this market are less and less likely.</p></div>
+      <div><span class="n">04</span><h3>Proven tech-stack</h3><p>Fast online rentals, seamless self service move-ins, convenient smart entry and access. Systems handle everything that doesn&rsquo;t require empathy. Humans handle everything that does.</p></div>
+      <div><span class="n">05</span><h3>Aligned capital</h3><p>The Sponsors are co-investing 10% of its own equity alongside you, signing on the debt, and is paid a promote only after your preferred return is paid and original capital is returned.</p></div>
     </div>
     <div class="blocks j" aria-hidden="true"></div>
   </div>
@@ -435,21 +435,21 @@ svg text{font-family:"Lato",system-ui,sans-serif}
       <div><div class="v">433</div><div class="l">Spaces · 17 buildings</div></div>
       <div><div class="v">94,190</div><div class="l">Net rentable sq ft</div></div>
       <div><div class="v">5.37</div><div class="l">Net acres</div></div>
-      <div><div class="v">$60</div><div class="l">Per sq ft purchase · $13,048 per unit</div></div>
+      <div><div class="v">$60</div><div class="l">Per sq ft of enclosed self storage (only)</div></div>
     </div>
     <div class="two">
       <div class="card">
         <span class="eyebrow mute" style="display:block;margin-bottom:10px">Why the basis is below replacement cost</span>
         <h3>Three prices for the same building</h3>
-        <p>One of the developers is a general contractor, so the facility was built without a third-party construction margin. Journey is buying below even that number. Anyone building the same 94,190 square feet today, through a normal GC, would carry the margin on top.</p>
+        <p>One of the developers is a general contractor, so the facility was built without a third-party construction margin. We are buying below even that number. Anyone building the same 94,190 square feet today, through a normal GC, would carry the margin on top.</p>
         <div class="basis num">
-          <div class="brow j"><span class="lab">Journey purchase price</span><span class="bar"><i style="width:62%"></i></span><span class="val">$60 / SF</span></div>
-          <div class="brow"><span class="lab">Developer's actual cost</span><span class="bar"><i style="width:74%"></i></span><span class="val"><span class="flag">$XX / SF</span></span></div>
-          <div class="brow"><span class="lab">Replacement cost today</span><span class="bar"><i style="width:92%"></i></span><span class="val"><span class="flag">$XX / SF</span></span></div>
+          <div class="brow j"><span class="lab">Our purchase price</span><span class="bar"><i style="width:84%"></i></span><span class="val">$81 / SF</span></div>
+          <div class="brow"><span class="lab">Developer's actual cost</span><span class="bar"><i style="width:90%"></i></span><span class="val">$87 / SF</span></div>
+          <div class="brow"><span class="lab">Replacement cost today</span><span class="bar"><i style="width:100%"></i></span><span class="val">$97 / SF</span></div>
         </div>
-        <p class="small" style="margin-top:10px">Bar lengths are illustrative until the developer cost and replacement estimate are confirmed. All-in basis including fees, closing and reserves: $75 per SF.</p>
+        <p class="small" style="margin-top:10px">All-in basis including fees, closing, reserves, technology upgrades and retrofitting: $75 per SF.</p>
       </div>
-      <div class="photo" style="aspect-ratio:auto;min-height:260px"><img src="/deck/malakoff/assets/malakoff/aerial-site-pin.png" alt="Satellite view of the Malakoff site" onerror="this.parentNode.classList.add('ph');this.remove()"><span class="cap">Site · 205 Sunset, fronting the highway</span></div>
+      <div class="photo" style="aspect-ratio:auto;min-height:260px"><img src="/deck/malakoff/assets/malakoff/aerial-site-pin.png" alt="Satellite view of the Malakoff site" onerror="this.parentNode.classList.add('ph');this.remove()"><span class="cap">Site · 205 Sunset</span></div>
     </div>
   </div>
 </section>
@@ -459,7 +459,7 @@ svg text{font-family:"Lato",system-ui,sans-serif}
   <div class="inner">
     <div class="head">
       <div class="lhs"><span class="eyebrow">The asset</span><h2 class="display">A facility <b>built new.</b></h2></div>
-      <p class="lede">A finished, code-compliant, Class A facility with the expensive part already done: entitlement, construction, utilities, gates and roads. The remaining work is leasing, which is what Journey does.</p>
+      <p class="lede">A finished, code-compliant, Class A facility with the expensive part already done: entitlement, construction, utilities, gates and roads. The remaining work is leasing, revenue management, technology upgrades and stellar operations, which is what Journey does best.</p>
     </div>
     <div class="gallery">
       <div class="photo"><img src="/deck/malakoff/assets/malakoff/site-overview.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"><span class="cap">The facility</span></div>
@@ -503,64 +503,36 @@ svg text{font-family:"Lato",system-ui,sans-serif}
       </div>
       <div class="stack">
         <div class="card"><div class="stat-inline num"><span class="v">−62%</span><span class="l">Deliveries, 2023 to 2029</span></div>
-          <p style="margin-top:6px">Absorption now outpaces new deliveries in heavily built markets. In markets like Malakoff that never overbuilt, an operator can push rate without new competition diluting demand.</p></div>
+          <p style="margin-top:6px">Absorption now outpaces new deliveries in heavily built markets. In markets like Malakoff, an operator can push rate without new competition diluting demand.</p></div>
         <div class="card"><div class="stat-inline num"><span class="v">20%+</span><span class="l">Portfolio value premium</span></div>
           <p style="margin-top:6px">Regional portfolios trade to institutional buyers at compressed cap rates: a 5% cap versus 6% is roughly 20% more value. Malakoff is underwritten to a 6.00% exit on its own; a portfolio exit is upside, not the plan.</p></div>
         <div class="card"><h3>Demand drivers · trade area</h3>
-          <p>Lake-home and second-home ownership around Cedar Creek Lake drives seasonal and recreational storage. Add <span class="flag">new residential construction</span> and <span class="flag">commuter growth from the DFW corridor</span>. Trade area: <span class="flag">XXK+</span> residents, <span class="flag">XX%+</span> population growth, household income <span class="flag">$XX.Xk</span>, above the county average.</p></div>
+          <p>Lake-home and second-home ownership around Cedar Creek Lake drives seasonal and recreational storage, with the area&rsquo;s estimated median home value nearly quadrupling over the last 20 years.</p></div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- 6 COMPETITION -->
-<section class="slide cream" data-title="Why we win">
-  <div class="inner">
-    <div class="head">
-      <div class="lhs"><span class="eyebrow">Why we win</span><h2 class="display">Graded, <b>facility by facility.</b></h2></div>
-      <p class="lede">We walked every competitor in Malakoff and Henderson County and graded the building and the web presence. The pattern is consistent: older product, office hours, no online rental, waitlists on popular sizes.</p>
-    </div>
-    <div class="two">
-      <div class="card scroll">
-        <table class="tbl">
-          <thead><tr><th>Facility</th><th>Building</th><th>Web</th><th>Note</th></tr></thead>
-          <tbody>
-            <tr><td><span class="flag">Competitor A</span></td><td><span class="grade gB">B</span></td><td><span class="grade gC">C</span></td><td><span class="flag">No online rentals</span></td></tr>
-            <tr><td><span class="flag">Competitor B</span></td><td><span class="grade gB">B</span></td><td><span class="grade gC">C</span></td><td><span class="flag">Waitlist on several sizes</span></td></tr>
-            <tr><td><span class="flag">Competitor C</span></td><td><span class="grade gB">B</span></td><td><span class="grade gC">C</span></td><td><span class="flag">No climate-controlled units</span></td></tr>
-            <tr><td><span class="flag">Competitor D</span></td><td><span class="grade gD">D</span></td><td><span class="grade gD">F</span></td><td><span class="flag">Shows "Temporarily closed" on Google</span></td></tr>
-          </tbody>
-        </table>
-        <p class="small" style="margin-top:10px"><span class="flag">XX</span> competitors surveyed across Malakoff / Henderson County · grades and notes to be confirmed from the site survey</p>
-      </div>
-      <div class="stack">
-        <div class="card"><span class="eyebrow" style="display:block;margin-bottom:6px">01</span><h3>Operator-led, not fund-managed</h3><p>Every deal is sourced, operated and managed by the same team. $200M+ in acquisitions built on operations, not market timing.</p></div>
-        <div class="card"><span class="eyebrow" style="display:block;margin-bottom:6px">02</span><h3>Open at 9:00 PM on a weekday</h3><p>Rent online, sign by clickwrap, tap to enter. Our competitors close at 5:00 PM. We never close.</p></div>
-        <div class="card"><span class="eyebrow" style="display:block;margin-bottom:6px">03</span><h3>Aligned incentives</h3><p>Journey.Direct co-invests in every deal and guarantees the debt as needed.</p></div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- 7 PLAN -->
 <section class="slide" data-title="The business plan">
   <div class="inner">
     <div class="head">
       <div class="lhs"><span class="eyebrow">The business plan</span><h2 class="display">Four moves <b>to stabilized.</b></h2></div>
-      <p class="lede">Bought below the developer's own cost to build, and roughly <span class="flag">XX%</span> below what the same facility would cost to replace today. Leased up, run on Journey's stack, sold stabilized.</p>
+      <p class="lede">Bought below the developer's own cost to build, and roughly 17% below what the same facility would cost to replace today. Leased up, run on Journey's stack, sold stabilized.</p>
     </div>
     <div class="steps">
-      <div class="step"><div class="photo"><img src="/deck/malakoff/assets/malakoff/leaseup-unit-map.webp" alt="Unit map showing leased and vacant spaces" onerror="this.parentNode.classList.add('ph');this.remove()"></div><div class="body"><span class="n">01</span><h3>Lease up</h3><p>Increase occupancy from <span class="flag">XX%</span> to <span class="flag">~XX%</span>, stabilizing in Year&nbsp;4.</p></div></div>
-      <div class="step"><div class="photo"><img src="/deck/malakoff/assets/malakoff/interior-corridor.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"></div><div class="body"><span class="n">02</span><h3>Increase revenue through ECRIs</h3><p>Grow in-place revenue from $0.64 to $0.79 per SF per month through existing-customer rate increases.</p></div></div>
-      <div class="step"><div class="photo"><img src="/deck/malakoff/assets/malakoff/climate-building.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"></div><div class="body"><span class="n">03</span><h3>Invest up front</h3><p>Deploy $850,000 in capex and interest reserves, including a $400,129 construction budget ($924 per unit).</p></div></div>
-      <div class="step"><div class="photo"><img src="/deck/malakoff/assets/malakoff/drive-aisle.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"></div><div class="body"><span class="n">04</span><h3>Run it on Journey's stack</h3><p>Online rental, smart entry and automated collections under the Journey.Storage brand.</p></div></div>
+      <div class="step"><div class="photo"><img src="/deck/malakoff/assets/malakoff/drive-up-units.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"></div><div class="body"><span class="n">01</span><h3>Grow the revenue</h3><p>Grow in-place revenue from $0.64 to $0.79 per SF per month.</p></div></div>
+      <div class="step"><div class="photo"><img src="/deck/malakoff/assets/malakoff/leaseup-unit-map.webp" alt="Unit map showing leased and vacant spaces" onerror="this.parentNode.classList.add('ph');this.remove()"></div><div class="body"><span class="n">02</span><h3>Fill the spaces</h3><p>Increase occupancy to 88%, stabilizing in Year&nbsp;4.</p></div></div>
+      <div class="step"><div class="photo"><img src="/deck/malakoff/assets/malakoff/climate-building.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"></div><div class="body"><span class="n">03</span><h3>Invest up front</h3><p>Deploy $850,000 in capex and interest reserves, including a $400,129 capex budget.</p></div></div>
+      <div class="step"><div class="photo"><img src="/deck/malakoff/assets/malakoff/drive-aisle.webp" alt="" onerror="this.parentNode.classList.add('ph');this.remove()"></div><div class="body"><span class="n">04</span><h3>Run it on Journey's stack</h3><p>Fast online rentals, seamless self service move-ins, convenient smart access under the JOURNEY.STORAGE&trade; brand.</p></div></div>
     </div>
     <div class="two" style="margin-top:14px">
       <div class="card"><h3>Years one and two run below debt service. That is the plan, and it is funded.</h3>
         <p>A building bought empty does not cover its interest in year one. The $850,000 raised at close covers the gap while the loan is interest-only for 36 months. By Year 3 the property covers its debt 1.65 times over; Year 4 is stabilized. Read the negative Year 1 as a funded lease-up, not a surprise.</p></div>
       <div class="two eq">
-        <div class="card big num"><span class="v">+$4.99M</span><h3 style="margin:0">Sale over purchase price</h3><p>$5,650,000 purchase to a $10,637,812 projected sale at a 6.00% exit cap.</p></div>
-        <div class="card big num"><span class="v">13.49%</span><h3 style="margin:0">Annual value growth</h3><p>Compound growth in asset value over the 5-year hold: $13,048 to $24,568 per unit.</p></div>
+        <div class="card big num"><span class="v">$5.28M</span><h3 style="margin:0">Sale over purchase price</h3><p>$5.65M purchase to a $10.93M projected sale at a 6.00% exit cap.</p></div>
+        <div class="card big num"><span class="v">14.1%</span><h3 style="margin:0">Annual value growth</h3><p>Compound growth in asset value over the 5-year hold.</p></div>
       </div>
     </div>
   </div>
@@ -571,13 +543,13 @@ svg text{font-family:"Lato",system-ui,sans-serif}
   <div class="inner">
     <div class="head">
       <div class="lhs"><span class="eyebrow">Summary overview</span><h2 class="display">The return, <b>in context.</b></h2></div>
-      <p class="lede">Self-storage deals are typically underwritten at a <b>13 to 20% net IRR</b> and a <b>1.5 to 2.5x equity multiple</b>. Malakoff is projected at 17.08% and 2.16x, inside the band on both, with a basis discount that ground-up development cannot offer as downside cover.</p>
+      <p class="lede">Self-storage deals are typically underwritten at a <b>13 to 20% net IRR</b> and a <b>1.5 to 2.5x equity multiple</b>. Malakoff is projected at 20.24% and 2.06x, inside the band on both, with a basis discount that ground-up development cannot offer as downside cover.</p>
     </div>
     <div class="tiles num">
-      <div class="tile"><div class="v">17.08%</div><div class="k">IRR</div><div class="d">Projected · net to LP</div></div>
-      <div class="tile"><div class="v">2.16x</div><div class="k">MOIC</div><div class="d">LP equity multiple</div></div>
-      <div class="tile"><div class="v">9.7%</div><div class="k">Yield on cost</div><div class="d">Year 5 NOI on $7.06M total cost</div></div>
-      <div class="tile"><div class="v"><span class="flag">X.X%</span></div><div class="k">Preferred</div><div class="d">Accruing and compounding</div></div>
+      <div class="tile"><div class="v">20.24%</div><div class="k">IRR</div><div class="d">Projected · net to LP</div></div>
+      <div class="tile"><div class="v">2.06x</div><div class="k">MOIC</div><div class="d">LP equity multiple</div></div>
+      <div class="tile"><div class="v">9.9%</div><div class="k">Yield on cost</div><div class="d">Year 5 NOI on $6.96M total cost</div></div>
+      <div class="tile"><div class="v">8.0%</div><div class="k">Preferred</div><div class="d">Accruing and compounding</div></div>
     </div>
     <div class="two eq" style="margin-top:14px">
       <div class="card">
@@ -585,10 +557,10 @@ svg text{font-family:"Lato",system-ui,sans-serif}
         <div class="scroll"><table class="tbl num" style="min-width:420px">
           <thead><tr><th>Tier</th><th class="r">To LP</th><th class="r">To GP</th><th>Note</th></tr></thead>
           <tbody>
-            <tr><td>1 · Preferred return</td><td class="r"><span class="flag">X.X%</span></td><td class="r">·</td><td>Accruing and compounding, paid before any promote</td></tr>
-            <tr><td>2 · Return of capital</td><td class="r">100%</td><td class="r">·</td><td>LP capital returned in full</td></tr>
-            <tr><td>3 · Split above the pref</td><td class="r"><span class="flag">XX%</span></td><td class="r"><span class="flag">XX%</span></td><td>Sponsor promote begins</td></tr>
-            <tr><td>4 · Above <span class="flag">XX%</span> IRR</td><td class="r"><span class="flag">XX%</span></td><td class="r"><span class="flag">XX%</span></td><td>Second promote tier</td></tr>
+            <tr><td>1 · Preferred return</td><td class="r">8.0%</td><td class="r">0%</td><td>Accruing and compounding, paid before any promote</td></tr>
+            <tr><td>2 · Return of capital</td><td class="r">100%</td><td class="r">0%</td><td>LP capital returned in full</td></tr>
+            <tr><td>3 · Split above the pref</td><td class="r">70%</td><td class="r">30%</td><td>Sponsor promote begins</td></tr>
+            <tr><td>4 · Above 12% IRR</td><td class="r">65%</td><td class="r">35%</td><td>Second promote tier</td></tr><tr><td>5 · Above 15% IRR</td><td class="r">60%</td><td class="r">40%</td><td>Third promote tier</td></tr>
           </tbody>
         </table></div>
       </div>
@@ -597,13 +569,13 @@ svg text{font-family:"Lato",system-ui,sans-serif}
         <div class="scroll"><table class="tbl num" style="min-width:420px">
           <thead><tr><th>Exit cap</th><th class="r">Sale value</th><th class="r">Over total cost</th><th class="r">Over purchase</th></tr></thead>
           <tbody>
-            <tr><td>5.50%</td><td class="r">$11,604,891</td><td class="r">+$4.55M</td><td class="r">+$5.95M</td></tr>
-            <tr class="em"><td>6.00% (underwritten)</td><td class="r">$10,637,812</td><td class="r">+$3.58M</td><td class="r">+$4.99M</td></tr>
-            <tr><td>6.50%</td><td class="r">$9,819,523</td><td class="r">+$2.76M</td><td class="r">+$4.17M</td></tr>
-            <tr><td>7.00%</td><td class="r">$9,118,129</td><td class="r">+$2.06M</td><td class="r">+$3.47M</td></tr>
+            <tr><td>5.50%</td><td class="r">$11.754M</td><td class="r">$4.79M</td><td class="r">$6.10M</td></tr>
+            <tr class="em"><td>6.00% (underwritten)</td><td class="r">$10.929M</td><td class="r">$3.97M</td><td class="r">$5.28M</td></tr>
+            <tr><td>6.50%</td><td class="r">$10.212M</td><td class="r">$3.25M</td><td class="r">$4.56M</td></tr>
+            <tr><td>7.00%</td><td class="r">$9.583M</td><td class="r">$2.62M</td><td class="r">$3.93M</td></tr>
           </tbody>
         </table></div>
-        <p class="small" style="margin-top:8px">Holds the underwritten exit NOI ($638,269) constant and varies only the cap rate. Even 100 bp wider, the sale clears all-in cost by more than $2M.</p>
+        <p class="small" style="margin-top:8px">Holds the underwritten exit NOI ($687k) constant and varies only the cap rate. Even 100 bp wider, the sale clears all-in cost by more than $2.6M.</p>
       </div>
     </div>
   </div>
@@ -618,21 +590,21 @@ svg text{font-family:"Lato",system-ui,sans-serif}
         <div class="card scroll" style="padding:14px 16px">
           <span class="eyebrow mute" style="display:block;margin-bottom:4px">Sources at close</span>
           <table class="tbl num compact"><tbody>
-            <tr><td>Acquisition loan proceeds</td><td class="r">$3,955,000</td><td class="r">56.0%</td></tr>
-            <tr><td>LP equity</td><td class="r">$2,791,850</td><td class="r">39.6%</td></tr>
-            <tr><td>GP equity (co-invest)</td><td class="r">$310,206</td><td class="r">4.4%</td></tr>
-            <tr class="total"><td>Total</td><td class="r">$7,057,056</td><td class="r">100%</td></tr>
+            <tr><td>Acquisition loan proceeds</td><td class="r">$3.96M</td><td class="r">56.9%</td></tr>
+            <tr><td>LP equity</td><td class="r">$2.70M</td><td class="r">38.8%</td></tr>
+            <tr><td>GP equity (co-invest)</td><td class="r">$300k</td><td class="r">4.3%</td></tr>
+            <tr class="total"><td>Total</td><td class="r">$6.96M</td><td class="r">100%</td></tr>
           </tbody></table>
         </div>
         <div class="card scroll" style="padding:14px 16px">
           <span class="eyebrow mute" style="display:block;margin-bottom:4px">Uses at close</span>
           <table class="tbl num compact"><tbody>
-            <tr><td>Purchase price</td><td class="r">$5,650,000</td><td class="r">80.1%</td></tr>
-            <tr><td>Capex &amp; interest reserves</td><td class="r">$850,000</td><td class="r">12.0%</td></tr>
-            <tr><td>Acquisition fee + DES fees</td><td class="r">$393,206</td><td class="r">5.6%</td></tr>
-            <tr><td>Closing costs</td><td class="r">$84,750</td><td class="r">1.2%</td></tr>
-            <tr><td>Acquisition loan fees</td><td class="r">$79,100</td><td class="r">1.1%</td></tr>
-            <tr class="total"><td>Total</td><td class="r">$7,057,056</td><td class="r">100%</td></tr>
+            <tr><td>Purchase price</td><td class="r">$5.65M</td><td class="r">81.2%</td></tr>
+            <tr><td>Capex &amp; interest reserves</td><td class="r">$765k</td><td class="r">11.0%</td></tr>
+            <tr><td>Acquisition fee + DES fees</td><td class="r">$380k</td><td class="r">5.5%</td></tr>
+            <tr><td>Closing costs</td><td class="r">$85k</td><td class="r">1.2%</td></tr>
+            <tr><td>Acquisition loan fees</td><td class="r">$80k</td><td class="r">1.1%</td></tr>
+            <tr class="total"><td>Total</td><td class="r">$6.96M</td><td class="r">100%</td></tr>
           </tbody></table>
         </div>
       </div>
@@ -653,7 +625,7 @@ svg text{font-family:"Lato",system-ui,sans-serif}
             <tr><td>Debt service coverage</td><td class="r">(0.12x)</td><td class="r">0.91x</td><td class="r">1.65x</td><td class="r">1.55x</td><td class="r">1.40x</td></tr>
           </tbody>
         </table>
-        <p class="small" style="margin-top:10px">Debt service during the interest-only period is $276,850 per year (7.00% on $3,955,000). Year 1 shortfall and Year 2 gap are covered by the $850,000 reserve raised at close.</p>
+        <p class="small" style="margin-top:10px">With an estimated debt service of $277k per year (7.0% on $3.96M), the assumed cash shortfalls in Year&nbsp;1 and Year&nbsp;2 are accounted for and covered by the $765k reserve raised at close.</p>
       </div>
     </div>
   </div>
@@ -667,10 +639,10 @@ svg text{font-family:"Lato",system-ui,sans-serif}
       <p class="lede">Sophisticated investors ask two questions before the returns: how much of the sponsor's own capital is in, and what the sponsor is paid regardless of outcome. Both answers are here, in the open.</p>
     </div>
     <div class="risks two-col">
-      <div class="risk"><span class="k">Co-investment</span><h3>$310,206 of Journey.Direct equity</h3><p>10% of the total raise, on the same terms as every LP. If the plan misses, we miss with you.</p></div>
-      <div class="risk"><span class="k">Debt</span><h3>Sponsor signs the loan</h3><p>Journey.Direct guarantees the $3,955,000 acquisition loan as required by the lender. LPs carry no recourse.</p></div>
-      <div class="risk"><span class="k">Fees at close</span><h3>$393,206 acquisition and DES fees</h3><p>5.6% of total project cost, disclosed in the uses table, covering sourcing, underwriting, due diligence and closing. <span class="flag">Capital-raising fee: confirm treatment and %.</span></p></div>
-      <div class="risk"><span class="k">Ongoing</span><h3>Management at market</h3><p>Journey.Managed operates the property under the Journey.Storage brand at <span class="flag">X%</span> of gross revenue. Asset and construction management fees: <span class="flag">confirm</span>. Promote is earned only above the pref and after return of capital.</p></div>
+      <div class="risk"><span class="k">Co-investment</span><h3>$300k of sponsor equity</h3><p>10% of the total raise, on the same terms as every LP. If the plan misses, we miss with you.</p></div>
+      <div class="risk"><span class="k">Debt</span><h3>Sponsor signs the loan</h3><p>The Sponsor guarantees the $3,955,000 acquisition loan as required by the lender. LPs carry no recourse.</p></div>
+      <div class="risk"><span class="k">Fees at close</span><h3>$380k acquisition fees and capital costs</h3><p>5.5% of total project cost, disclosed in the uses table, covering sourcing, underwriting, due diligence and closing.</p></div>
+      <div class="risk"><span class="k">Ongoing</span><h3>Management at market</h3><p>Journey.Managed operates the property under the JOURNEY.STORAGE™ brand at 6% of gross revenue. Promote is earned only above the pref and after return of capital.</p></div>
     </div>
     <div class="blocks" aria-hidden="true"></div>
   </div>
@@ -714,17 +686,17 @@ svg text{font-family:"Lato",system-ui,sans-serif}
     <div class="termcard">
       <p class="termcard__label">Terms</p>
       <div class="terms num">
-        <div class="term"><span class="k">Equity raise</span><span>$3,102,056, inclusive of $310,206 sponsor co-invest</span></div>
-        <div class="term"><span class="k">Purchase price</span><span>$5,650,000 · $13,048 per unit · $60 per SF</span></div>
+        <div class="term"><span class="k">Equity raise</span><span>$3,000,000, inclusive of $300,000 sponsor co-invest</span></div>
+        <div class="term"><span class="k">Purchase price</span><span>$5,650,000 · $60 per SF</span></div>
         <div class="term"><span class="k">Financing</span><span>$3,955,000 · 56.0% LTC · 70% LTV · 7.00% fixed · 36 months interest-only</span></div>
-        <div class="term"><span class="k">Total project cost</span><span>$7,057,056</span></div>
-        <div class="term"><span class="k">Preferred return</span><span><span class="flag">X.X%</span> accruing and compounding, paid before any sponsor promote</span></div>
-        <div class="term"><span class="k">Minimum investment</span><span><span class="flag">$XX,000</span> · accredited investors only</span></div>
-        <div class="term"><span class="k">Sponsor</span><span>Journey.Direct, LLC</span></div>
-        <div class="term"><span class="k">Management</span><span>Journey.Managed, under the Journey.Storage brand</span></div>
+        <div class="term"><span class="k">Total project cost</span><span>$6.96M</span></div>
+        <div class="term"><span class="k">Preferred return</span><span>8.0% accruing and compounding, paid before any sponsor promote</span></div>
+        <div class="term"><span class="k">Minimum investment</span><span>$50,000 · accredited investors only</span></div>
+        <div class="term"><span class="k">Sponsor</span><span>JOURNEY.DIRECT™</span></div>
+        <div class="term"><span class="k">Management</span><span>JOURNEY.MANAGED™, under the JOURNEY.STORAGE™ brand</span></div>
         <div class="term"><span class="k">Strategy</span><span>Lease-up, revenue optimization, expense reduction via automation</span></div>
         <div class="term"><span class="k">Hold period</span><span>5 years +/−</span></div>
-        <div class="term"><span class="k">Projected exit</span><span>$10,637,812 at a 6.00% cap rate</span></div>
+        <div class="term"><span class="k">Projected exit</span><span>$10,929,000 at a 6.00% cap rate</span></div>
       </div>
     </div>
 
@@ -732,7 +704,7 @@ svg text{font-family:"Lato",system-ui,sans-serif}
 
     <div class="closing-block">
       <h2 class="display">Space to <b>move on.</b></h2>
-      <p class="lede">Closing is scheduled for <b>November&nbsp;16,&nbsp;2026</b>. Documents on request; commitments taken in order received.</p>
+      <p class="lede">Closing is scheduled for <b>mid-November</b>. Documents on request; commitments taken in order received.</p>
       <a class="btn btn-primary" href="mailto:acquisitions@journey.storage?subject=Malakoff%20offering">Request the documents <span class="arrow">&rarr;</span></a>
     </div>
 
