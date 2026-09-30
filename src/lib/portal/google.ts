@@ -95,14 +95,23 @@ function cell(value: string): string {
   return /^[=+\-@]/.test(value) ? `'${value}` : value
 }
 
-function chicagoTimestamp(): string {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Chicago',
-    year: 'numeric', month: '2-digit', day: '2-digit',
+// Written in the spreadsheet's own time zone (File → Settings; São Paulo as
+// of Sept 2026), as the Apps Script's `new Date()` rows were, so the column
+// stays consistent. M/D/YYYY matches the sheet's en_US locale.
+let sheetTimeZone: string | null = null
+
+async function sheetTimestamp(): Promise<string> {
+  if (!sheetTimeZone) {
+    const res = await google(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?fields=properties.timeZone`)
+    sheetTimeZone = ((await res.json()) as { properties?: { timeZone?: string } }).properties?.timeZone || 'America/Chicago'
+  }
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: sheetTimeZone,
+    year: 'numeric', month: 'numeric', day: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
   }).formatToParts(new Date())
   const p = Object.fromEntries(parts.map((x) => [x.type, x.value]))
-  return `${p.year}-${p.month}-${p.day} ${p.hour === '24' ? '00' : p.hour}:${p.minute}:${p.second}`
+  return `${p.month}/${p.day}/${p.year} ${p.hour === '24' ? '00' : p.hour}:${p.minute}:${p.second}`
 }
 
 // Values are placed by header NAME, not position, so reordering columns in
@@ -114,7 +123,7 @@ export async function appendSubmission(values: Record<string, string>): Promise<
   const header = ((await headerRes.json()) as { values?: string[][] }).values?.[0] ?? []
   if (!header.length) throw new Error(`The "${TAB}" tab has no header row.`)
 
-  const all: Record<string, string> = { Timestamp: chicagoTimestamp(), ...values }
+  const all: Record<string, string> = { Timestamp: await sheetTimestamp(), ...values }
   const row = header.map((h) => (h === 'Timestamp' ? all[h] : cell(all[h] ?? '')))
   const res = await google(
     `${base}/${encodeURIComponent(`${TAB}!A1`)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
