@@ -1,26 +1,473 @@
-// GET /portal
+// GET /portal — the Accounting Intake portal page (invoice & receipt upload).
 //
-// The Accounting Intake portal is an Apps Script web app. This route only
-// sends people there. It used to be a static folder FTP'd onto the server by
-// the Deploy Accounting Intake workflow, but every Hostinger redeploy of this
-// site wiped it, so the redirect now ships with the site itself.
-//
-// The /exec URL is a live write endpoint and stays out of git: set
-// ACCOUNTING_PORTAL_URL on the main site's Hostinger instance. It is read at
-// request time, so a missing value shows a notice instead of breaking the build.
+// Ported from the Apps Script version (apps/accounting/apps-script/Index.html)
+// so the address stays journey.storage/portal. The page talks to
+// /api/portal/{session,extract,submit}; see src/lib/portal/ for the Google
+// Sheets/Drive writes, the AI reader and the team access code.
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-static'
 
 export function GET() {
-  const target = process.env.ACCOUNTING_PORTAL_URL
-  if (target?.startsWith('https://script.google.com/')) {
-    return new Response(null, {
-      status: 302,
-      headers: { Location: target, 'Cache-Control': 'no-store' },
-    })
-  }
-  return new Response(
-    'The accounting portal is temporarily unavailable. Please email lyvia@journey.storage.',
-    { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' } },
-  )
+  return new Response(PAGE, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-cache',
+      'X-Robots-Tag': 'noindex, nofollow',
+    },
+  })
 }
+
+const PAGE = String.raw`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/images/brand/favicon.svg" type="image/svg+xml">
+<title>Journey.storage — Accounting Intake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Work+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<style>
+  /* Served by the main site at /portal (src/app/portal/route.ts). Same
+     visual system as the Apps Script version — nothing restyled. */
+  :root{
+    --bg:#181818; --bg-2:#141312; --surface:#201f1d; --surface-2:#272523; --line:#34312d;
+    --ink:#f5f0e8; --muted:#888680;
+    --accent:#ff6320; --accent-hover:#ff8551; --accent-press:#db551c; --accent-tint:#33231a;
+    --ok:#7aaf6e; --danger:#e5484d; --radius:14px;
+    --display:'Barlow Condensed',Montserrat,sans-serif; --sans:'Work Sans',Montserrat,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{background:var(--bg-2);}
+  html,body{margin:0;}
+  body{background:var(--bg);color:var(--ink);
+    font:15px/1.65 var(--sans);}
+  .hidden{display:none !important;}
+  button{font-family:inherit;cursor:pointer;}
+
+  .logo-img{display:block;height:20px;width:auto;}
+
+  .wrap{max-width:760px;margin:0 auto;padding:24px 16px 60px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;
+    padding-bottom:16px;border-bottom:1px solid var(--line);}
+  .brand{display:flex;flex-direction:column;gap:6px;}
+  .brand .tag{color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;}
+  .who{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.02em;text-align:right;}
+  .who b{color:var(--ink);font-weight:600;}
+
+  .card{background:linear-gradient(180deg,var(--surface),#181715);border:1px solid var(--line);
+    border-radius:var(--radius);padding:18px 18px;margin-bottom:14px;}
+  .step{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#181818;font-weight:700;
+    font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .step h2{font-family:var(--display);font-size:22px;line-height:1.1;margin:0;font-weight:700;letter-spacing:-.005em;}
+
+  label{display:block;font-family:var(--sans);font-weight:600;text-transform:uppercase;letter-spacing:.06em;
+    margin-bottom:6px;font-size:11.5px;color:var(--muted);}
+  .req{color:var(--danger);}
+  .help{color:var(--muted);font-size:12px;margin:-2px 0 9px;text-transform:none;letter-spacing:0;}
+  input[type=text],input[type=email],input[type=date],select,textarea{
+    width:100%;background:#0e0d0c;color:var(--ink);border:1px solid var(--line);
+    border-radius:10px;padding:11px 12px;font-size:14.5px;outline:none;transition:border-color .15s,box-shadow .15s;
+    font-family:var(--sans);}
+  input::placeholder{color:var(--muted);opacity:.7;}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,99,32,.45);}
+  textarea{min-height:74px;resize:vertical;}
+  select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888680' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;padding-right:34px;}
+  .field{margin-bottom:14px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:560px){ .row2{grid-template-columns:1fr;} .who{display:none;} }
+  .filled{border-color:var(--ok) !important;box-shadow:0 0 0 3px rgba(122,175,110,.18) !important;}
+
+  .drop{border:2px dashed #423f3a;border-radius:12px;padding:30px 18px;text-align:center;color:var(--muted);
+    cursor:pointer;transition:border-color .15s,color .15s,background .15s;background:var(--surface-2);}
+  .drop.hover{border-color:var(--accent);color:var(--ink);background:#2c241d;}
+  .drop .big{font-size:30px;line-height:1;}
+  .drop strong{color:var(--ink);}
+  .file-pill{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;
+    background:#0e0d0c;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px;}
+  .file-pill .x{cursor:pointer;color:var(--muted);font-weight:700;padding:0 4px;}
+  .file-pill .x:hover{color:var(--danger);}
+
+  .bar{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap;}
+  button{border:none;border-radius:10px;padding:12px 18px;font-size:14px;font-weight:600;letter-spacing:.01em;
+    color:#181818;background:var(--accent);transition:background .15s;font-family:var(--sans);}
+  button:hover{background:var(--accent-hover);}
+  button:active{background:var(--accent-press);}
+  button.secondary{background:var(--surface-2);color:var(--ink);border:1px solid var(--line);}
+  button.secondary:hover{background:#312e2a;}
+  button.ghost{background:transparent;color:var(--accent);border:1px solid rgba(255,99,32,.4);}
+  button.ghost:hover{background:var(--accent-tint);}
+  button:disabled{opacity:.4;cursor:default;}
+  button:focus-visible,.drop:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .note{font-size:12px;color:var(--muted);}
+  .note.ok{color:var(--ok);}
+  .note.warn{color:#e0a458;}
+  .err-text{color:var(--danger);font-size:12px;margin-top:6px;display:none;}
+  .field.invalid .err-text{display:block;}
+  .field.invalid input,.field.invalid select,.field.invalid textarea{border-color:var(--danger);}
+  .spinner{width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--accent);
+    border-radius:50%;display:inline-block;animation:spin .8s linear infinite;vertical-align:-2px;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .submit-row{display:flex;gap:10px;align-items:center;margin-top:6px;}
+  .submit-row button{padding:14px 26px;font-size:15px;}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--ok);color:#181818;font-weight:600;padding:12px 18px;border-radius:10px;
+    opacity:0;pointer-events:none;transition:.25s;max-width:90%;z-index:50;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast.err{background:var(--danger);color:var(--ink);}
+  .ok-screen{text-align:center;padding:34px 12px;}
+  .ok-screen .big{font-size:46px;}
+  .ok-screen h2{font-family:var(--display);font-size:26px;font-weight:700;margin:10px 0 4px;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <img class="logo-img" src="/images/brand/logo-white-TM.svg" alt="Journey.Storage">
+      <span class="tag">Invoice &amp; Receipt Portal</span>
+    </div>
+    <span class="who" id="who">Internal — Journey team only</span>
+  </div>
+  <main id="view"></main>
+</div>
+
+<div class="toast" id="toast">Submitted</div>
+
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+
+  // ───── SERVER BRIDGE ─────
+  // Every call goes to this site's /api/portal/* routes with the team access
+  // code. Responses are always read, so a failed save shows an error instead
+  // of a false "Submitted".
+  const CODE_KEY='portal-access-code', EMAIL_KEY='portal-email';
+  function store(k,v){ try{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k,v); }catch(e){} }
+  function recall(k){ try{ return localStorage.getItem(k)||''; }catch(e){ return ''; } }
+  async function api(path, body){
+    let res, json;
+    try{ res = await fetch('/api/portal/'+path, { method:'POST', headers:{ 'x-portal-code': session.code }, body }); }
+    catch(e){ throw new Error('Could not reach the server. Check your connection and try again.'); }
+    try{ json = await res.json(); }catch(e){ json = null; }
+    if(res.status===401){ store(CODE_KEY,null); session.code=''; }
+    if(!res.ok || !json || !json.ok) throw Object.assign(new Error((json && json.error) || ('Server error (HTTP '+res.status+').')), { status:res.status });
+    return json;
+  }
+
+  const ENTITIES=['JCH','EMB','JS','JD','JSM01','JSV01','JS001','Hall Personal'];
+  const session={ code:recall(CODE_KEY), aiEnabled:false };
+  let wizState=null;
+  function resetWizState(){ wizState={file:null,wireFile:null,vendor:'',entity:'',doc_date:'',amount:'',descr:'',status:'',comments:'',email:recall(EMAIL_KEY)}; }
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function prettySize(b){ if(b<1024) return b+' B'; if(b<1048576) return (b/1024).toFixed(0)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
+  function normalizeDate(s){ const d=new Date(s); return isNaN(d)? s : d.toISOString().slice(0,10); }
+  let toastTimer;
+  function showToast(html,cls){ const t=$('#toast'); t.innerHTML=html; t.className='toast show'+(cls?' '+cls:''); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'), cls==='err'?6000:2600); }
+
+  // ───── ACCESS CODE ─────
+  function paintGate(msg){
+    $('#view').innerHTML='<div class="card">'+
+      '<div class="step"><div class="num">🔒</div><h2>Enter the team access code</h2></div>'+
+      '<div class="field'+(msg?' invalid':'')+'" id="fCode"><label for="wCode">Access code</label>'+
+        '<div class="help">Ask Accounting if you don’t have it. This browser will remember it.</div>'+
+        '<input id="wCode" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">'+
+        '<div class="err-text">'+esc(msg||'')+'</div></div>'+
+      '<div class="submit-row"><button id="wCodeGo">Continue →</button></div>'+
+    '</div>';
+    const inp=$('#wCode'), go=$('#wCodeGo');
+    inp.focus();
+    const submit=()=>{ const v=inp.value.trim(); if(!v) return; session.code=v; go.disabled=true; go.innerHTML='<span class="spinner"></span> Checking…'; boot(); };
+    go.addEventListener('click', submit);
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
+  }
+
+  // ───── FILE PREP ─────
+  // Images are downscaled to ≤2000px JPEG before the AI reader sees them:
+  // phone photos are often 4–8 MB, and the reader caps images at 5 MB. PDFs
+  // go as-is. HEIC (iPhone default) only decodes in Safari; when the canvas
+  // draw fails we fall through and send the original.
+  const MAX_UPLOAD = 20*1024*1024;
+  function isPdf(file){ return /\.pdf$/i.test(file.name||'') || file.type==='application/pdf'; }
+  async function prepareForReader(file){
+    if(isPdf(file) || !/^image\//i.test(file.type||'')) return file;
+    try{
+      const url=URL.createObjectURL(file);
+      const img=await new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url; });
+      const scale=Math.min(1, 2000/Math.max(img.naturalWidth, img.naturalHeight));
+      const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*scale); c.height=Math.round(img.naturalHeight*scale);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url);
+      const blob=await new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('encode failed')),'image/jpeg',0.88));
+      return new File([blob], file.name.replace(/\.[a-z0-9]+$/i,'')+'.jpg', { type:'image/jpeg' });
+    }catch(e){
+      return file;
+    }
+  }
+
+  // ───── BASIC READER (fallback when the AI reader is off or fails) ─────
+  function parseDoc(text, fname, kind){
+    const out={vendor:'',doc_date:'',descr:'',amount:''};
+    const t=(text||'').replace(/\u00a0/g,' ');
+    const lines=t.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+    const flat=t.replace(/\s+/g,' ');
+    const moneyRe=/([$£€]\s?\d{1,3}(?:,\d{3})*(?:\.\d{2})?|\d{1,3}(?:,\d{3})*\.\d{2})/g;
+    const toNum=s=>{ const n=parseFloat(String(s).replace(/[^0-9.]/g,'')); return isNaN(n)?0:n; };
+    const tiers = kind==='receipt'
+      ? [/amount paid|total paid|paid in full/i, /grand total|total due|amount due|balance due/i, /\btotal\b/i]
+      : [/total due|amount due|balance due|total payable|amount payable|invoice total/i, /grand total/i, /\btotal\b/i];
+    let amount=0;
+    for(const re of tiers){ lines.forEach(l=>{ if(re.test(l)) (l.match(moneyRe)||[]).forEach(m=>{ const n=toNum(m); if(n>amount)amount=n; }); }); if(amount) break; }
+    if(!amount){ const m=flat.match(/(?:total due|amount due|balance due|total paid|amount paid|grand total|total)[^0-9$£€]{0,14}([$£€]?\s?\d[\d,]*\.\d{2})/i); if(m) amount=toNum(m[1]); }
+    if(!amount){ (t.match(moneyRe)||[]).forEach(m=>{ const n=toNum(m); if(n>amount)amount=n; }); }
+    out.amount = amount? amount.toFixed(2):'';
+    const dm=t.match(/\b(\d{4}-\d{2}-\d{2}|\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{2,4}|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{1,2},?\s+\d{4})\b/i);
+    if(dm) out.doc_date=normalizeDate(dm[1]);
+    const BAD=/invoice|receipt|^date|total|amount|bill to|ship to|sold to|\btax\b|qty|description|subtotal|balance|due|paid|\bpage\b|phone|tel\b|email|www\.|http|@|suite|p\.?o\.? box|\d{5}(?:-\d{4})?$/i;
+    const SUFFIX=/\b(inc|llc|l\.l\.c|ltd|co|corp|corporation|company|studio|studios|group|services|agency|partners|associates|consulting|media|design|labs?|enterprises|solutions|systems)\b\.?/i;
+    let vendor='';
+    const lv=flat.match(/(?:bill from|sold by|remit to|pay to|vendor|supplier|from)\s*[:\-]\s*([A-Z0-9][^\n,]{2,50})/i);
+    if(lv) vendor=lv[1].trim();
+    if(!vendor){ const sl=lines.find(l=>SUFFIX.test(l) && !/bill to|ship to|sold to/i.test(l) && l.length<60); if(sl) vendor=sl.replace(/\s*[|–—-]\s.*$/,'').trim(); }
+    if(!vendor){ const top=lines.slice(0,6).find(l=>/[A-Za-z]{3,}/.test(l) && !BAD.test(l)); if(top) vendor=top; }
+    if(!vendor && fname) vendor=fname.replace(/\.[a-z0-9]+$/i,'').replace(/[_\-]+/g,' ').replace(/\b(invoice|receipt|inv|rcpt)\b/ig,'').replace(/\d{4}-\d{2}-\d{2}/,'').replace(/\s+/g,' ').trim();
+    out.vendor=vendor.slice(0,60);
+    const STOP=/\b(subtotal|total|tax|amount|qty|quantity|unit price|bill to|ship to|date|invoice\s*#|due|balance)\b/i;
+    let descr='';
+    const ld=t.match(/(?:description|memo|notes?|service|item|for)\s*[:\-]\s*(.+)/i);
+    if(ld){ descr=ld[1]; const s=descr.search(STOP); if(s>0) descr=descr.slice(0,s); }
+    if(!descr){ const item=lines.find(l=>moneyRe.test(l) && !/total|subtotal|tax|balance|amount due|amount paid|paid/i.test(l)); if(item) descr=item.replace(moneyRe,'').replace(/\s{2,}/g,' ').trim(); }
+    if(!descr && out.vendor) descr=(kind==='receipt'?'Payment to ':'Invoice from ')+out.vendor;
+    out.descr=descr.replace(/[•|]+/g,' ').replace(/\s+/g,' ').trim().slice(0,90);
+    return out;
+  }
+  async function pdfText(file){
+    let text='';
+    try{
+      if(isPdf(file) && window.pdfjsLib){
+        if(!pdfjsLib.GlobalWorkerOptions.workerSrc) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+        const buf=await file.arrayBuffer(); const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+        const pages=Math.min(pdf.numPages,3);
+        for(let i=1;i<=pages;i++){
+          const pg=await pdf.getPage(i); const c=await pg.getTextContent();
+          const rows={};
+          c.items.forEach(it=>{ const y=Math.round(it.transform[5]); (rows[y]=rows[y]||[]).push([it.transform[4], it.str]); });
+          Object.keys(rows).map(Number).sort((a,b)=>b-a).forEach(y=>{ const line=rows[y].sort((a,b)=>a[0]-b[0]).map(p=>p[1]).join(' ').replace(/\s+/g,' ').trim(); if(line) text+=line+'\n'; });
+        }
+      }
+    }catch(e){}
+    return text;
+  }
+
+  // Returns { vendor, doc_date, amount, descr, paid_status, source:'ai'|'basic', warn? }
+  async function extractFromFile(file, kind){
+    let warn;
+    if(session.aiEnabled){
+      try{
+        const fd=new FormData();
+        fd.append('file', wizState.prepared || (wizState.prepared = await prepareForReader(file)));
+        fd.append('kind', kind);
+        const r = await api('extract', fd);
+        return { vendor:r.vendor||'', doc_date:r.doc_date||'', amount:r.amount||'', descr:r.description||'', paid_status:r.paid_status||'unknown', source:'ai' };
+      }catch(e){ warn = e.message || String(e); }
+    }
+    const b = parseDoc(await pdfText(file), file.name, kind);
+    return Object.assign(b, { source:'basic', warn });
+  }
+
+  // ───── SUBMIT INVOICE/RECEIPT WIZARD ─────
+  function paintWizard(){
+    const f=wizState.file;
+    let html='<div class="card">'+
+      '<div class="step"><div class="num">1</div><h2>Drop your invoice or receipt</h2></div>'+
+      '<div class="drop" id="wizDz"><div class="big">📄</div>'+
+      '<div style="margin-top:6px">Drag a file here or <strong>click to choose</strong></div>'+
+      '<div class="help" style="margin:6px 0 0">PDF, JPG or PNG &middot; '+(session.aiEnabled?'read automatically by Claude':'reads automatically')+'</div>'+
+      '</div>'+
+      (f? '<div class="file-pill"><span>'+esc(f.name)+' <span class="note">('+prettySize(f.size)+')</span></span><span class="x" id="wizRemoveFile">✕</span></div>'+
+          '<div class="bar" style="margin-top:10px"><button type="button" class="ghost" id="wizReread">Re-read the document</button>'+
+          '<span class="note" id="wizReadStatus"></span></div>' : '')+
+      (!f? '<div class="err-text" style="display:none" id="wizFileErr">Please attach an invoice or receipt.</div>':'')+
+    '</div>';
+    if(f){
+      html+='<div class="card">'+
+        '<div class="step"><div class="num">2</div><h2>Confirm the details</h2></div>'+
+        '<div class="row2">'+
+          '<div class="field" id="fVendor"><label>Vendor name <span class="req">*</span></label><input id="wVendor" type="text" placeholder="Who is billing" value="'+esc(wizState.vendor)+'"><div class="err-text">Required.</div></div>'+
+          '<div class="field" id="fEntity"><label>Entity billed <span class="req">*</span></label><select id="wEntity"><option value="" disabled'+(!wizState.entity?' selected':'')+'>Select an entity…</option>'+
+            ENTITIES.map(e=>'<option'+(wizState.entity===e?' selected':'')+'>'+esc(e)+'</option>').join('')+
+          '</select><div class="err-text">Required.</div></div>'+
+        '</div>'+
+        '<div class="row2">'+
+          '<div class="field" id="fDate"><label>Document date <span class="req">*</span></label><input id="wDate" type="date" value="'+esc(wizState.doc_date)+'"><div class="err-text">Required.</div></div>'+
+          '<div class="field" id="fAmount"><label>Total <span class="req">*</span></label><input id="wAmount" type="text" inputmode="decimal" placeholder="$0.00" value="'+esc(wizState.amount)+'"><div class="err-text">Required.</div></div>'+
+        '</div>'+
+        '<div class="field" id="fStatus"><label>This expense <span class="req">*</span></label><select id="wStatus">'+
+          '<option value="" disabled'+(!wizState.status?' selected':'')+'>Select…</option>'+
+          '<option value="unpaid"'+(wizState.status==='unpaid'?' selected':'')+'>Needs to be paid</option>'+
+          '<option value="paid"'+(wizState.status==='paid'?' selected':'')+'>Has already been paid</option>'+
+          '<option value="receipt"'+(wizState.status==='receipt'?' selected':'')+'>Record a deposit or receipt</option>'+
+        '</select><div class="err-text">Please choose one.</div></div>'+
+        '<div class="field" id="fDescr"><label>Brief description <span class="req">*</span></label><div class="help">What was billed (auto-filled — please review).</div><textarea id="wDescr">'+esc(wizState.descr)+'</textarea><div class="err-text">Required.</div></div>'+
+      '</div>';
+      html+='<div class="card">'+
+        '<div class="step"><div class="num">3</div><h2>Wire instructions <span style="color:var(--muted);font-weight:400;font-size:14px">(optional)</span></h2></div>'+
+        '<div class="help" style="margin:-4px 0 10px">Attach a wire-instructions sheet if this is being paid by wire. PDF, JPG or PNG.</div>'+
+        '<div class="drop" id="wizWireDz"><div class="big">🏦</div><div style="margin-top:6px">Drag a file here or <strong>click to choose</strong></div><div class="help" style="margin:6px 0 0">Optional</div>'+
+        '</div>'+
+        '<div id="wizWirePill"></div>'+
+      '</div>';
+      html+='<div class="card">'+
+        '<div class="step"><div class="num">4</div><h2>Your info &amp; comments</h2></div>'+
+        '<div class="field" id="fEmail"><label>Your email <span class="req">*</span></label><div class="help">So Accounting knows who sent it. This browser will remember it.</div>'+
+          '<input id="wEmail" type="email" autocomplete="email" placeholder="you@journey.storage" value="'+esc(wizState.email||'')+'"><div class="err-text">Please enter your email.</div>'+
+        '</div>'+
+        '<div class="field"><label>Comments</label><div class="help">Anything Accounting should know (optional).</div><textarea id="wComments">'+esc(wizState.comments||'')+'</textarea></div>'+
+        '<div class="submit-row">'+
+          '<button id="wizSubmit">Submit →</button>'+
+          '<button class="secondary" id="wizClear">Clear</button>'+
+        '</div>'+
+      '</div>';
+    }
+    $('#view').innerHTML=html;
+    wireWizardEvents();
+  }
+  function wireDrop(el, onFiles){
+    el.setAttribute('role','button'); el.tabIndex=0;
+    const pick=()=>{ const inp=document.createElement('input'); inp.type='file'; inp.multiple=false; inp.accept='.pdf,image/*'; inp.onchange=()=>onFiles(inp.files); inp.click(); };
+    el.addEventListener('click', pick);
+    el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(); } });
+    el.addEventListener('dragover', e=>{ e.preventDefault(); el.classList.add('hover'); });
+    el.addEventListener('dragleave', ()=> el.classList.remove('hover'));
+    el.addEventListener('drop', e=>{ e.preventDefault(); el.classList.remove('hover'); onFiles(e.dataTransfer.files); });
+  }
+  function wireWizardEvents(){
+    const dz=$('#wizDz'); if(dz) wireDrop(dz, fl=>{ if(fl.length) setWizFile(fl[0]); });
+    const rm=$('#wizRemoveFile'); if(rm) rm.addEventListener('click', ()=>{ syncWizFromDom(); wizState.file=null; wizState.prepared=null; wizState.vendor=''; wizState.doc_date=''; wizState.amount=''; wizState.descr=''; paintWizard(); });
+    const rr=$('#wizReread'); if(rr) rr.addEventListener('click', runWizExtraction);
+    const wdz=$('#wizWireDz'); if(wdz) wireDrop(wdz, fl=>{ if(fl.length){ wizState.wireFile=fl[0]; renderWirePill(); } });
+    renderWirePill();
+    const sb2=$('#wizSubmit'); if(sb2) sb2.addEventListener('click', wizSubmitHandler);
+    const cl=$('#wizClear'); if(cl) cl.addEventListener('click', ()=>{ resetWizState(); paintWizard(); });
+  }
+  function renderWirePill(){
+    const el=$('#wizWirePill'); if(!el) return;
+    const wf=wizState.wireFile;
+    el.innerHTML = wf ? ('<div class="file-pill" style="margin-top:10px"><span>'+esc(wf.name)+' <span class="note">('+prettySize(wf.size)+')</span></span><span class="x" id="wizRemoveWire">✕</span></div>') : '';
+    const rw=$('#wizRemoveWire'); if(rw) rw.addEventListener('click', ()=>{ wizState.wireFile=null; renderWirePill(); });
+  }
+  async function runWizExtraction(){
+    if(!wizState.file) return;
+    const statusSel=$('#wStatus'); const kind=(statusSel&&statusSel.value==='receipt')?'receipt':'invoice';
+    const rb=$('#wizReread'), rs=$('#wizReadStatus');
+    if(rb) rb.disabled=true;
+    if(rs){ rs.className='note'; rs.innerHTML='<span class="spinner"></span> '+(session.aiEnabled?'Claude is reading the document…':'Reading the document…'); }
+    let ex; try{ ex=await extractFromFile(wizState.file, kind); }catch(e){ ex={vendor:'',doc_date:'',descr:'',amount:'',source:'basic',warn:e.message}; }
+    if(rb) rb.disabled=false;
+    const got=[];
+    const fill=(sel,val)=>{ const el=$(sel); if(el && !el.value){ el.value=val; el.classList.add('filled'); return true; } return false; };
+    if(ex.vendor && fill('#wVendor', ex.vendor)) got.push('vendor');
+    if(ex.doc_date && fill('#wDate', ex.doc_date)) got.push('date');
+    if(ex.amount && fill('#wAmount', ex.amount)) got.push('total');
+    if(ex.descr && fill('#wDescr', ex.descr)) got.push('description');
+    if(ex.source==='ai' && (ex.paid_status==='paid'||ex.paid_status==='unpaid') && statusSel && !statusSel.value){ statusSel.value=ex.paid_status; statusSel.classList.add('filled'); got.push('status'); }
+    if(!rs) return;
+    if(got.length){
+      rs.className='note'+(ex.source==='ai'?' ok':'');
+      rs.textContent=(ex.source==='ai'?'Claude filled in ':'Filled in ')+got.join(', ')+' — please review.';
+    } else {
+      rs.className='note warn';
+      rs.textContent='Couldn’t read it. Please enter the details manually.';
+    }
+    if(ex.warn){ rs.className='note warn'; rs.textContent += ' ('+ex.warn+')'; }
+  }
+  function syncWizFromDom(){
+    if($('#wVendor')) wizState.vendor=$('#wVendor').value;
+    if($('#wEntity')) wizState.entity=$('#wEntity').value;
+    if($('#wDate')) wizState.doc_date=$('#wDate').value;
+    if($('#wAmount')) wizState.amount=$('#wAmount').value;
+    if($('#wStatus')) wizState.status=$('#wStatus').value;
+    if($('#wDescr')) wizState.descr=$('#wDescr').value;
+    if($('#wEmail')) wizState.email=$('#wEmail').value;
+    if($('#wComments')) wizState.comments=$('#wComments').value;
+  }
+  function setWizFile(file){
+    if(file.size > MAX_UPLOAD){ showToast('That file is '+prettySize(file.size)+'. The limit is 20 MB.', 'err'); return; }
+    syncWizFromDom();
+    wizState.file=file; wizState.prepared=null; wizState.vendor=''; wizState.doc_date=''; wizState.amount=''; wizState.descr='';
+    paintWizard();
+    runWizExtraction();
+  }
+  function markInvalid(sel, bad){ const el=$(sel); if(el) el.classList.toggle('invalid', bad); return !bad; }
+  function validateWizard(){
+    let ok=true;
+    if(!wizState.file){ const fe=$('#wizFileErr'); if(fe) fe.style.display='block'; ok=false; }
+    ok = markInvalid('#fVendor', !$('#wVendor').value.trim()) && ok;
+    ok = markInvalid('#fEntity', !$('#wEntity').value) && ok;
+    ok = markInvalid('#fDate', !$('#wDate').value) && ok;
+    ok = markInvalid('#fAmount', !$('#wAmount').value.trim()) && ok;
+    ok = markInvalid('#fStatus', !$('#wStatus').value) && ok;
+    ok = markInvalid('#fDescr', !$('#wDescr').value.trim()) && ok;
+    ok = markInvalid('#fEmail', !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test($('#wEmail').value.trim())) && ok;
+    return ok;
+  }
+
+  async function wizSubmitHandler(){
+    if(!validateWizard()) return;
+    const btn=$('#wizSubmit'); btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Submitting…';
+    const vendor=$('#wVendor').value.trim(), amount=$('#wAmount').value.trim().replace(/[^0-9.]/g,''), email=$('#wEmail').value.trim();
+    try{
+      if(wizState.wireFile && wizState.wireFile.size > MAX_UPLOAD) throw new Error('The wire-instructions file is over 20 MB.');
+      // The original file is what gets archived in Drive (not the downscaled
+      // copy the reader saw), so Accounting keeps the document as received.
+      const fd=new FormData();
+      fd.append('vendor', vendor); fd.append('entity', $('#wEntity').value); fd.append('doc_date', $('#wDate').value);
+      fd.append('amount', amount); fd.append('status', $('#wStatus').value); fd.append('descr', $('#wDescr').value.trim());
+      fd.append('comments', $('#wComments').value.trim()); fd.append('email', email);
+      fd.append('file', wizState.file);
+      if(wizState.wireFile) fd.append('wireFile', wizState.wireFile);
+      const res = await api('submit', fd);
+      store(EMAIL_KEY, email);
+      showWizardSuccess(vendor, amount, res.row);
+    }catch(e){
+      if(e.status===401){ paintGate('The access code changed. Enter the new one, then submit again.'); return; }
+      btn.disabled=false; btn.textContent='Submit →';
+      showToast('Not saved: '+esc(e.message||e)+' — nothing was recorded. Please try again or email Accounting.', 'err');
+    }
+  }
+  function showWizardSuccess(vendor, amount, row){
+    $('#view').innerHTML='<div class="card ok-screen"><div class="big">✅</div>'+
+      '<h2>Submitted</h2>'+
+      '<p class="note">'+esc(vendor)+' — $'+esc(amount)+' recorded'+(row?' on row '+esc(row)+' of the Submissions sheet':'')+'.</p>'+
+      '<div class="bar" style="justify-content:center;margin-top:8px"><button id="wizAgain">Submit another</button></div></div>';
+    $('#wizAgain').addEventListener('click', ()=>{ resetWizState(); paintWizard(); });
+  }
+
+  // ───── BOOT ─────
+  async function boot(){
+    if(!session.code){ paintGate(); return; }
+    try{
+      const s = await api('session', null);
+      store(CODE_KEY, session.code);
+      session.aiEnabled=!!s.aiEnabled;
+      const who=$('#who');
+      if(who) who.textContent = 'Internal — Journey team only'+(session.aiEnabled?'':' · basic reader');
+      resetWizState();
+      paintWizard();
+    }catch(e){
+      paintGate(e.message);
+    }
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
+`

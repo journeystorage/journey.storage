@@ -22,6 +22,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.129.0",
     "@hookform/resolvers": "^5.2.2",
     "@supabase/supabase-js": "^2.104.0",
     "@tailwindcss/postcss": "^4.2.2",
