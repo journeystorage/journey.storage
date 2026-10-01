@@ -51,8 +51,11 @@ sub('</style>', """/* ---- Direct Equity Source edition ---- */
 .eyebrow::before,.slide--cream .eyebrow::before{width:11px;height:11px;margin-top:0;border-radius:2px;background:var(--orange)}
 .top__home .des-logo,.intro__word .des-logo,.rbar .des-logo{box-sizing:content-box;padding:9px 16px;border-radius:12px;background:#F5F0E8}
 .slide--cream .top__home .des-logo{padding-left:0;background:none}
-.intro__word{width:auto}
-.intro__word img.des-logo{width:auto}
+/* opening logo: Journey's width wipe (0 -> 272px) cropped the wider DES logo, so hold
+   it at full size and reveal it with a clip-path wipe instead */
+.intro__word{width:auto;overflow:visible;animation:iwdes .7s var(--ease) .5s both}
+.intro__word img.des-logo{width:min(640px,78vw);height:auto;max-width:none}
+@keyframes iwdes{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 .rbar img.des-logo{width:auto;height:24px;padding:4px 8px;border-radius:6px}
 .sign .des-logo{height:40px;padding:7px 12px;border-radius:10px;background:#F5F0E8}
 .flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:20px;position:relative}
