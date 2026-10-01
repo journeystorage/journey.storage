@@ -44,7 +44,11 @@ const nextConfig: NextConfig = {
               // would only answer at /deck/malakoff/index.html, which is how
               // /garland and /lanier behave.
               async rewrites() {
-                            return [{ source: '/deck/malakoff', destination: '/deck/malakoff/index.html' }]
+                            return [
+                              { source: '/deck/malakoff', destination: '/deck/malakoff/index.html' },
+                              // Direct Equity Source edition, built by scripts/build-malakoff-des.py
+                              { source: '/deck/malakoff-des', destination: '/deck/malakoff-des/index.html' },
+                            ]
               },
               async headers() {
                             // public/ files default to max-age=0, so the CDN never cached photos and every
