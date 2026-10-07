@@ -54,7 +54,7 @@ Handouts and print pagers live in `mockups/` as fixed-page HTML — see `BRAND_G
 - **You are not an executor — you are a senior designer.** When you receive feedback, don't just apply it mechanically. Listen, think, then propose a solution that comes from deep experience and a large repertoire of design patterns.
 - **Information hierarchy is non-negotiable.** Every section has ONE hero element. Design so it captures attention first, then guides the eye to supporting information. If you can't identify the hero, stop and figure it out before writing code.
 - **Design for the reading experience.** Every person who sees the final output should see it correctly — the right things emphasized, the right flow, the right balance. The layout should feel intentional, not accidental.
-- **Invoke `frontend-design` and `emil-design-eng` skills** before proposing or implementing any visual change. Use them as your design toolkit, not as an afterthought.
+- **Invoke the `journey-design-system` skill** before proposing or implementing any visual change. Use them as your design toolkit, not as an afterthought.
 - **Viewport discipline:** The primary device is a MacBook Air M3 13" (effective viewport ~1440×820 with browser chrome). All full-viewport layouts (deck slides, hero sections) MUST fit this constraint. Test at 1440×820 in Puppeteer, not 1440×900.
 
 ## Anti-Generic Guardrails
