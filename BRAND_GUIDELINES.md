@@ -1,78 +1,103 @@
-# Journey.Storage Brand Guidelines
+# Journey.Storage — Brand Guidelines v3.0
 
-> Single source of truth for all visual and design decisions across **Journey.Storage**, **Journey.Advisory**, and **Journey.Direct**.
+> ⚠️ **Superseded where it conflicts (2026-10-07).** The `journey-design-system` skill is the source of truth for colours, type, shapes, motion, components and voice. In particular its orange tokens win: `brand` `#ff6320` (bright marks, icons, links on dark) and `brand-2` `#e8622a` (bars, focus, links on light). Use this file only for detail the skill doesn't cover.
+
+> **The typography and layout system for new work** — handouts, decks, new pages, new sites — across Journey.Storage, Journey.Managed, Journey.Direct, the investor portal, print, and email.
+>
+> ### Scope — read this first
+>
+> **What v3.0 changes:** typography. One typeface, more weights, a new heading pattern, and the layout/motion language that goes with it.
+>
+> **What v3.0 does NOT change:**
+> - 🔒 **Logos.** The files in `public/images/brand/` stay exactly as they are. Do not re-export or recolor them.
+> - 🔒 **Brand colors.** The existing palette stays. `--color-orange` remains `#E8622A` as it is in the code today.
+>
+> **This is forward-looking.** It tells you how to build the *next* thing. It is **not** a mandate to restyle existing pages — never migrate a live page to it unless explicitly asked.
+>
+> Last revised: 2026-09-18 · Derived from the approved reference build at `web-journey-ashen.vercel.app`
 
 ---
 
 ## Table of Contents
 
-1. [Color System](#color-system)
-2. [Typography](#typography)
-3. [Spacing & Layout](#spacing--layout)
-4. [Border Radius & Shape Language](#border-radius--shape-language)
-5. [Shadows & Elevation](#shadows--elevation)
-6. [Gradients](#gradients)
-7. [Grain Texture](#grain-texture)
-8. [Section Transitions](#section-transitions)
-9. [Animations & Motion](#animations--motion)
-10. [Components](#components)
-11. [Icons](#icons)
-12. [Visual Modes](#visual-modes)
+1. [What Changed in v3.0](#what-changed-in-v30)
+2. [Color System](#color-system)
+3. [Typography](#typography)
+4. [The Heading Pattern](#the-heading-pattern)
+5. [Layout & Spacing](#layout--spacing)
+6. [Section Bands](#section-bands)
+7. [Shape & Radius](#shape--radius)
+8. [Elevation & Shadows](#elevation--shadows)
+9. [Texture](#texture)
+10. [Motion](#motion)
+11. [Components](#components)
+12. [Imagery](#imagery)
 13. [Logo Usage](#logo-usage)
-14. [Imagery Style](#imagery-style)
+14. [Verbal Identity](#verbal-identity)
 15. [Accessibility](#accessibility)
-16. [Sub-brands](#sub-brands)
-17. [Brand Positioning](#brand-positioning)
+16. [Implementation Notes](#implementation-notes)
+17. [Open Items](#open-items)
+
+---
+
+## What Changed in v3.0
+
+The short version: **one typeface, more weights, a new heading pattern.** Color and logos are untouched.
+
+| Area | Before | v3.0 |
+|------|--------|------|
+| Typeface | v2.0 called for Barlow Condensed + Work Sans | **Lato only**, everything |
+| Weights | 300 / 400 / 700 / 900 | **300 → 900 including 500, 600, 800** (self-hosted) |
+| Heading contrast | Two families | **Weight contrast within one family** |
+| Max width | 1200px | **1440px** (new layouts) |
+| Radius | 4 / 8 / 16 / 24px | **16 / 22 / 30 / 60 / pill** |
+| Easing | unspecified | **`cubic-bezier(.16,1,.3,1)`** |
+| Section transitions | gradient fades | **hard orange rule between bands** |
+| **Logos** | — | 🔒 **unchanged** |
+| **Brand colors** | — | 🔒 **unchanged** |
+
+**The rule that was deleted:** "Never use the same font for headings and body — pair a display/serif with a clean sans." That rule produced nothing we shipped, and the approved design does the opposite deliberately. Contrast now comes from **weight**, not family.
 
 ---
 
 ## Color System
 
-### Primary Palette
+> 🔒 **Unchanged in v3.0.** This section documents the palette **as it exists in the code today**. It is here for reference, not as a change. Do not swap these values.
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| **Black** | `#181818` | Primary dark background, headlines on light |
-| **Charcoal** | `#3A3835` | Card surfaces on dark, secondary backgrounds |
-| **Journey Orange** | `#E8622A` | Primary accent. Activates ONE element per composition — never scattered |
-| **Stone** | `#888680` | Supporting text, metadata, muted UI |
-| **Warm White** | `#F5F0E8` | Light backgrounds, primary text on dark. Replaces pure white everywhere |
+### Live tokens — `src/styles/globals.css`
 
-### Secondary Palette A — Warm Earth (70%+ of total usage)
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| **Terracotta** | `#D4956A` | Comfort-mode accents, warm highlights, hover states on light |
-| **Sunlight** | `#E8C547` | Reserved for maximum impact only (hero CTAs, launch announcements) |
-| **Sand** | `#C4B89A` | Soft comfort backgrounds, dividers on light sections |
-
-### Secondary Palette B — Contrast (sparingly)
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| **Sky Blue** | `#4A90D9` | Tech content, data visualizations |
-| **Ice** | `#E8F4F8` | Alternative light background for contrast sections (rare) |
-
-### Secondary Palette C — Nature (sparingly)
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| **Sage Green** | `#7AAF6E` | Growth narratives, roadmap visuals |
-
-### Error
-
-| Token | Hex | Usage |
-|-------|-----|-------|
-| **Error Red** | `#D94A4A` | Form validation, error states |
+| Token | Hex | CSS var |
+|-------|-----|---------|
+| Black | `#181818` | `--color-black` |
+| Charcoal | `#3A3835` | `--color-charcoal` |
+| **Journey Orange** | **`#E8622A`** | `--color-orange` |
+| Stone | `#888680` | `--color-stone` |
+| Warm White | `#F5F0E8` | `--color-warm-white` |
+| Terracotta | `#D4956A` | `--color-terracotta` |
+| Sunlight | `#E8C547` | `--color-sunlight` |
+| Sky Blue | `#4A90D9` | `--color-sky-blue` |
+| Ice | `#E8F4F8` | `--color-ice` |
+| Sage Green | `#7AAF6E` | `--color-sage-green` |
+| Sand | `#C4B89A` | `--color-sand` |
 
 ### Color Rules
 
-- Never use pure white (`#FFFFFF`) — always use Warm White (`#F5F0E8`).
-- Orange activates ONE point of tension per composition — never scattered decoratively.
-- Dark-first default for hero sections, investor pages, high-impact moments.
-- Never combine Palette B and Palette C in the same section.
-- Sunlight (`#E8C547`) only for maximum-impact moments.
-- Never use default Tailwind palette (indigo-500, blue-600, etc.).
+- **Never pure white.** Use Warm White `#F5F0E8`.
+- **Never pure black.** Use Black `#181818`.
+- **Never default Tailwind palette.** No `blue-600`, no `indigo-500`.
+- Orange carries **one point of tension per composition** — the section tick, the active card, *or* the CTA. Not all three.
+
+### Surface values used by the reference build
+
+The designer's build introduces two surface tones for its alternating bands. They sit very close to existing tokens and are listed so new layouts can match the reference — **not** as replacements:
+
+| Role | Reference build | Nearest existing token |
+|------|-----------------|------------------------|
+| Dark band | `#181818` | Black `#181818` — identical |
+| Card on dark | `#222222` | *(none — new)* |
+| Light band | `#F9F5EE` | Warm White `#F5F0E8` — near-identical |
+
+> **Open question for design:** whether `#222222` should become a real token, or whether new layouts should use Charcoal `#3A3835`. Left undecided — see [Open Items](#open-items).
 
 ---
 
@@ -80,533 +105,453 @@
 
 ### Typeface
 
-**Lato** — geometric sans-serif with warmth and approachability.
+**Lato** — and nothing else. No serif, no display face, no secondary family.
 
-- Source: Google Fonts via `next/font`
-- Weights: Light (300), Regular (400), Bold (700), Black (900)
-- Fallback: `'Lato', sans-serif`
-- No secondary fonts, no serifs, no decorative typefaces.
+- **Self-hosted** via `next/font/local`. **Not** `next/font/google`.
+- Weights: **300, 400, 500, 600, 700, 800, 900** + Semibold Italic
+- Stack: `"Lato", system-ui, -apple-system, "Segoe UI", sans-serif`
+- License: SIL OFL 1.1 — self-hosting is permitted
+
+> ⚠️ **Google Fonts cannot serve this.** It offers Lato in 300/400/700/900 only; requesting 500, 600, or 800 returns HTTP 400. Weight **800 is the single most important weight in the system** — it sets every bold heading phrase. Loading Lato from Google silently collapses 800 → 700 and destroys the heading contrast. Self-hosting is not an optimization, it is a requirement.
 
 ### Type Scale
 
-| Tier | Desktop | Mobile | Line Height | Weight | Usage |
-|------|---------|--------|-------------|--------|-------|
-| Display | 4.5rem (72px) | 2.75rem (44px) | 0.92 | 900 Black | Hero H1 only |
-| H1 | 3.5rem (56px) | 2rem (32px) | 1.0 | 700 Bold | Page headlines |
-| H2 | 2.5rem (40px) | 1.75rem (28px) | 1.08 | 700 Bold | Section headlines |
-| H3 | 1.75rem (28px) | 1.375rem (22px) | 1.15 | 700 Bold | Sub-section titles |
-| H4 | 1.375rem (22px) | 1.125rem (18px) | 1.25 | 700 Bold | Card titles |
-| Subhead | 1.375rem (22px) | 1.125rem (18px) | 1.4 | 300 Light | Intro phrases, emotional lines |
-| Body | 1.0625rem (17px) | 1rem (16px) | 1.7 | 400 Regular | Paragraphs, body copy |
-| Body SM | 0.9375rem (15px) | 0.875rem (14px) | 1.6 | 400 Regular | Secondary text, form labels |
-| Label | 0.8125rem (13px) | 0.75rem (12px) | 1.4 | 700 Bold | Tags, categories (uppercase + 0.2em tracking) |
-| Caption | 0.75rem (12px) | 0.6875rem (11px) | 1.5 | 400 Regular | Legal text, copyright, fine print |
+| Tier | Desktop | Mobile | Line Height | Tracking | Weight | Usage |
+|------|---------|--------|-------------|----------|--------|-------|
+| Display | 60px | 36px | 1.1 | −1.2px | 300 / 800 | Hero H1 only |
+| H1 | 50px | 32px | 1.15 | −1.0px | 300 / 800 | Page headlines |
+| H2 | 45px | 28px | 1.25 | −0.9px | 300 / 800 | Section headlines |
+| H3 | 30px | 24px | 1.2 | −0.5px | 600 | Sub-section titles |
+| H4 | 22px | 19px | 1.25 | −0.2px | 700 | Card titles |
+| Lead | 18px | 17px | 1.45 | 0 | 400 | Intro paragraphs |
+| Body | 16px | 16px | 1.4 | 0 | 400 | Default body copy |
+| Body SM | 14px | 14px | 1.5 | 0 | 400 | Secondary text, form labels |
+| Label | 13px | 12px | 1.3 | 0.12em | 800 | Uppercase tags, eyebrows |
+| Caption | 12px | 11px | 1.3 | 0 | 400 | Legal, fine print |
 
-### Typography Rules
-
-- Sentence case always — except uppercase for display hero text, labels/tags, and logo lockup.
-- Max two weights per section (typically Bold + Regular, or Black + Light).
-- One word/phrase per composition may be set in Journey Orange for activation.
-- "Space to move on." renders in Light 300 Italic, Stone color.
-- No Title Case in body text.
-- Tight tracking (`-0.03em`) on large headings, generous line-height (`1.7`) on body.
+**Note on body line-height:** v1.0 specified `1.7`. v3.0 uses **`1.4`**, matching the reference build. The tighter leading is deliberate — it keeps dark-band paragraphs dense and confident rather than airy.
 
 ---
 
-## Spacing & Layout
+## The Heading Pattern
 
-### Base Unit: 4px
+This is the signature of the brand. Get it right and everything else follows.
 
-| Token | Value | Usage |
-|-------|-------|-------|
-| space-1 | 4px | Micro (icon gaps, inline elements) |
-| space-2 | 8px | Tight (label-field gaps, icon-text) |
-| space-3 | 12px | Small gaps between related elements |
-| space-4 | 16px | Default element spacing |
-| space-6 | 24px | Medium (card content, heading-body) |
-| space-8 | 32px | Section internal padding |
-| space-12 | 48px | Large (section breaks on mobile) |
-| space-16 | 64px | Section padding (desktop) |
-| space-20 | 80px | Major section breaks |
-| space-24 | 96px | Large desktop section padding |
-| space-32 | 128px | Hero padding, maximum breathing room |
+Every section headline is **uppercase**, set in **Light 300**, with the payload phrase in **ExtraBold 800** on the same line.
 
-### Layout Constraints
+```html
+<h2 class="jrny-h2">Journeys <b>need space.</b></h2>
+<h2 class="jrny-h2">Storage without <b>the friction.</b></h2>
+<h2 class="jrny-h2">Be <b>the first.</b></h2>
+```
+
+```css
+.jrny-h2 {
+  font-size: 45px;
+  line-height: 1.25;
+  letter-spacing: -0.9px;
+  text-transform: uppercase;
+  font-weight: 300;
+}
+.jrny-h2 b { font-weight: 800; }
+```
+
+### Rules
+
+- **Write the copy in sentence case in the markup.** Uppercase is applied by CSS, never typed. This keeps the DOM readable and screen-reader output correct.
+- **The bold phrase is the subject, not the modifier.** "Storage without **the friction**" — the bold half is what the reader should leave with.
+- **Two weights per heading. Never three.**
+- The split happens **once** per headline.
+- Body copy may bold a phrase at weight **800** for the same emphasis effect — `<b>` and `<strong>` are globally 800.
+
+### The Accent Tick
+
+Section headings carry a 5px orange bar in the left margin:
+
+```css
+.jrny-accent { position: relative; }
+.jrny-accent::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 5px;
+  background: var(--color-orange);
+  left: var(--accent-x, -80px);
+  z-index: 2;
+}
+```
+
+It spans the **full height of the heading block** and sits in the gutter, outside the text column. This is the repeating section marker — use it consistently or not at all.
+
+---
+
+## Layout & Spacing
+
+### Container
+
+```css
+.wrap  { width: min(1440px, calc(100% - 64px)); margin: 0 auto; }
+.inner { padding: 0 80px; }
+```
 
 | Property | Value |
 |----------|-------|
-| Max content width | 1200px |
-| Desktop padding | 0 64px |
-| Tablet padding | 0 32px |
-| Mobile padding | 0 20px |
-| Section vertical (desktop) | 96–128px |
-| Section vertical (mobile) | 48–64px |
+| Max content width | **1440px** |
+| Viewport gutter | 32px each side (via `100% - 64px`) |
+| Inner padding (desktop) | 80px |
+| Inner padding (tablet) | 40px |
+| Inner padding (mobile) | 20px |
+| Section rhythm | **92px** vertical |
+
+### Base Unit: 4px
+
+`4 · 8 · 12 · 16 · 20 · 24 · 32 · 48 · 64 · 80 · 92 · 128`
+
+Use these. Do not reach for arbitrary Tailwind steps.
 
 ### Breakpoints
 
-| Name | Width | Tailwind prefix |
-|------|-------|-----------------|
-| Mobile | 0px | (default) |
-| Tablet | 768px | `md:` |
-| Desktop | 1024px | `lg:` |
-| Large Desktop | 1280px | `xl:` |
-| Max Width | 1440px | `2xl:` |
+| Name | Max-width | Purpose |
+|------|-----------|---------|
+| Wide | 1560px | Reduce outer gutters |
+| Desktop | 1400px | Compress inner padding |
+| Tablet | 900px | Stack two-column layouts |
+| Mobile | 600px | Single column, reduced type |
+
+**Viewport discipline:** the primary device is a MacBook Air M3 13" — effective viewport **1440×820**. Every full-viewport layout (hero sections, deck slides) must fit 1440×820, not 1440×900.
 
 ---
 
-## Border Radius & Shape Language
+## Section Bands
+
+The page alternates **full-bleed dark and cream bands**, each separated by a hard orange rule.
+
+```
+┌─ dark  (#181818 + dot texture) ─┐
+├───── 5px orange rule ───────────┤
+├─ cream (#F9F5EE)  ──────────────┤
+├───── 5px orange rule ───────────┤
+└─ dark  (#181818 + dot texture) ─┘
+```
+
+### Rules
+
+- Bands are **full-bleed**. The container constrains content, never the background.
+- The divider is a **hard orange rule** — not a gradient fade, not a soft transition.
+- **Never two cream bands in a row.** Alternation is the rhythm.
+- Dark bands are the default. Cream bands are for content that needs to breathe: the size guide, the needs list.
+- Text on cream uses Ink `#222` / Ink Muted `#615C53`. Text on dark uses Text `#FFFCF8` / Muted `#CEC5B6`.
+
+---
+
+## Shape & Radius
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| radius-sm | 4px | Form inputs, small buttons |
-| radius-md | 8px | Cards, image containers |
-| radius-lg | 16px | Hero cards, featured elements |
-| radius-xl | 24px | CTA buttons, hero badges |
-| radius-brand | Asymmetric | Brand signature — round 1–2 corners, leave others sharp |
+| `radius-sm` | 12px | Icon tiles, small chips |
+| `radius-md` | 16px | Dropdown items, inputs |
+| `radius-lg` | 22px | Cards, dropdown panels |
+| `radius-xl` | 30px | Feature panels, image containers |
+| `radius-2xl` | 60px | Large band-edge panels |
+| `radius-pill` | 900px | **All buttons**, badges, tags |
 
-### Shape Language Rules
+### Shape Rules
 
-- **Asymmetric corners** are the brand's visual fingerprint.
-- Rounding implies movement and direction.
-- All shapes are grid-based (rectangles, circles, half-circles).
-- Negative space communicates confidence.
-- Shapes should suggest motion across the frame.
-
----
-
-## Shadows & Elevation
-
-| Token | Value | Usage |
-|-------|-------|-------|
-| shadow-sm | `0 1px 2px rgba(24,24,24,0.05)` | Subtle lift on light backgrounds |
-| shadow-md | `0 4px 16px rgba(24,24,24,0.08)` | Cards on Warm White |
-| shadow-lg | `0 12px 32px rgba(24,24,24,0.12)` | Modals, dropdowns, floating elements |
-
-### Elevation Rules
-
-| Context | Surface | Shadow | Border |
-|---------|---------|--------|--------|
-| Dark backgrounds | Charcoal (`#3A3835`) | None | `1px solid rgba(255,255,255,0.06)` |
-| Light backgrounds | White / Cream | shadow-sm or shadow-md | None |
-
-Never use flat `shadow-md` from the default Tailwind palette. Use the custom layered definitions above.
+- **Buttons are always pills.** `border-radius: 900px`, height 63px, padding 14px 20px.
+- Large panels may round **selected corners** — the band-edge panels round the two corners facing the page interior and leave the bleeding edge square. This asymmetry is the brand's fingerprint; keep it intentional, not random.
+- Radii are generous. When in doubt, go larger.
 
 ---
 
-## Gradients
+## Elevation & Shadows
 
-### Radial (background overlays)
-
-Used to add subtle warmth to sections. Always orange-tinted, very low opacity:
+Never flat. Never a bare `shadow-md`. Every shadow is **layered**, **low-opacity**, and where it sits on orange, **orange-tinted**.
 
 ```css
-/* Pricing / How It Works */
-radial-gradient(ellipse 60% 50% at 50% 30%, rgba(232,98,42,0.04), transparent)
+/* floating panel on dark */
+box-shadow: 0 30px 70px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.05);
 
-/* Locations Map */
-radial-gradient(ellipse 70% 60% at 50% 50%, rgba(232,98,42,0.03), transparent)
+/* raised card */
+box-shadow: 0 10px 30px rgba(0,0,0,.6);
 
-/* Waitlist */
-radial-gradient(ellipse 50% 50% at 50% 50%, rgba(232,98,42,0.05), transparent)
+/* orange element */
+box-shadow: 0 -6px 30px rgba(232,98,42,.35);
 
-/* Final CTA */
-radial-gradient(ellipse 50% 60% at 50% 40%, rgba(232,98,42,0.06), transparent)
+/* hairline border (no blur) */
+box-shadow: inset 0 0 0 1px var(--color-line);
 
-/* About Founder */
-radial-gradient(ellipse 60% 80% at 20% 50%, rgba(232,98,42,0.06), transparent)
+/* button inner highlight */
+box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(232,98,42,.45);
 ```
 
-### Linear (hero image overlays)
+### Layering System
 
-```css
-/* Desktop hero */
-linear-gradient(to right, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.2) 100%)
+| Level | Surface | Treatment |
+|-------|---------|-----------|
+| Base | `#191919` + dot texture | No shadow |
+| Raised | `#222` | Hairline inset border |
+| Elevated | `#222` | `0 10px 30px rgba(0,0,0,.6)` |
+| Floating | `rgba(28,28,28,.96)` + `blur(16px)` | `0 30px 70px` + inset highlight |
 
-/* Mobile hero */
-linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)
-
-/* Base hero */
-linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)
-```
-
-### Divider
-
-```css
-linear-gradient(to right, transparent 0%, rgba(245,240,232,0.06) 50%, transparent 100%)
-```
-
-### Dot Grid (hero)
-
-```css
-radial-gradient(circle, #F5F0E8 0.7px, transparent 0.7px)
-/* spacing: 20px x 20px */
-```
-
-### Gradient Rules
-
-- Layer multiple radial gradients for depth.
-- Add grain texture via SVG noise filter on top.
-- Never use flat, single-direction gradients as primary design.
+Surfaces must not all sit on the same z-plane.
 
 ---
 
-## Grain Texture
+## Texture
 
-Applied as a pseudo-element on sections for tactile depth:
+Dark backgrounds are **never flat fills.** They carry an 8px SVG dot tile:
 
 ```css
-.grain::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  opacity: 0.035;           /* 0.03 on Advisory site */
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256'
-    xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence
-    type='fractalNoise' baseFrequency='0.85' numOctaves='4'
-    stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25'
-    height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 256px 256px;
+--dots: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><rect width='8' height='8' fill='%23191919'/><rect x='1' y='1' width='6' height='6' rx='1.6' fill='%231e1e1e'/></svg>");
+background: #191919 var(--dots) repeat;
+```
+
+The contrast is deliberately near-invisible (`#191919` on `#1E1E1E`) — it reads as material, not pattern.
+
+> ⚠️ **Print/PDF exception:** SVG filter-based grain balloons exported PDFs (55MB+ observed). For any fixed-page HTML destined for PDF, substitute a **baked-alpha PNG tile**. See `mockups/` for the established pattern.
+
+---
+
+## Motion
+
+### House Easing
+
+```css
+--ease: cubic-bezier(.16, 1, .3, 1);
+```
+
+This single curve covers the overwhelming majority of transitions. Supporting curves, in order of frequency:
+
+| Curve | Use |
+|-------|-----|
+| `cubic-bezier(.16,1,.3,1)` | **Default.** Reveals, transforms, panels |
+| `cubic-bezier(.2,.8,.2,1)` | Secondary transforms |
+| `cubic-bezier(.3,0,.55,1)` | Continuous / looping motion |
+| `cubic-bezier(.65,0,.15,1)` | Heavy curtain transitions (intro) |
+
+### Rules
+
+- **Only animate `transform` and `opacity`.** `background` and `color` are permitted for hover states. Nothing else.
+- **Never `transition-all`.** Name every property.
+- Durations: micro 0.2s · standard 0.35s · reveal 0.6s · curtain 1.6s
+- **Every animation must honor `prefers-reduced-motion: reduce`.** No exceptions — the reference build does this on all of them.
+
+### Line Reveal
+
+The signature entrance: headings reveal per line, masked, rising from below.
+
+```css
+.rv__line { display: block; overflow: hidden; padding-bottom: .08em; margin-bottom: -.08em; }
+.rv__in   { display: block; transform: translateY(112%); opacity: 0; }
+.rv.is-in .rv__in {
+  transform: translateY(0); opacity: 1;
+  transition: transform .6s var(--ease), opacity .3s;
+  transition-delay: var(--rv-delay);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rv .rv__in { transform: none; opacity: 1; }
 }
 ```
 
----
-
-## Section Transitions
-
-Wedge shape between sections:
-
-```css
-.wedge-top::before {
-  content: '';
-  position: absolute;
-  top: -1px;
-  left: 0;
-  right: 0;
-  height: 80px;
-  background: inherit;
-  clip-path: polygon(0 0, 100% 60px, 100% 100%, 0 100%);
-  z-index: 1;
-}
-```
-
----
-
-## Animations & Motion
-
-### Timing Tokens
-
-| Token | Duration | Easing | Usage |
-|-------|----------|--------|-------|
-| motion-fast | 150ms | ease-out | Hover states, button feedback |
-| motion-normal | 300ms | ease-out | Section reveals, nav transitions |
-| motion-slow | 500ms | ease-out | Hero entrance, page transitions |
-| motion-stagger | 100ms delay | — | Between sequential elements |
-
-### Primary Easing
-
-```
-cubic-bezier(0.22, 1, 0.36, 1)
-```
-
-Confident, forward motion. Used on all entrance animations.
-
-### Keyframe Animations
-
-**pulse-slow** — ambient map pin glow
-```css
-0%, 100% { transform: scale(1); opacity: 0.7; }
-50%      { transform: scale(1.3); opacity: 1; }
-/* 2s infinite */
-```
-
-**pin-pop** — map location entrance
-```css
-0%   { transform: scale(0); opacity: 0; }
-70%  { transform: scale(1.15); opacity: 1; }
-100% { transform: scale(1); opacity: 1; }
-/* 500ms forwards */
-```
-
-**heroFadeUp** — hero content entrance
-```css
-from { opacity: 0; transform: translateY(30px); }
-to   { opacity: 1; transform: translateY(0); }
-/* 0.7s cubic-bezier(0.22, 1, 0.36, 1) */
-```
-
-**fadeIn** — general fade
-```css
-from { opacity: 0; }
-to   { opacity: 1; }
-```
-
-**marquee** — scrolling text
-```css
-0%   { transform: translateX(0); }
-100% { transform: translateX(-50%); }
-```
-
-### Animation Patterns
-
-| Pattern | Transform | Timing |
-|---------|-----------|--------|
-| Scroll reveal | translateY(20px) to 0 + fade | 300ms |
-| Stagger reveal | Same, each child +100ms delay | 300ms each |
-| Navbar solidify | opacity 0 to 0.95 + backdrop blur | 300ms |
-| Parallax (subtle) | translateY at 0.1–0.2x scroll | Hero images only |
-| Hover lift | translateY(-2px) + shadow increase | 150ms |
-
-### Motion Rules
-
-- Only animate `transform` and `opacity`. Never `transition-all`.
-- Use spring-style easing (`cubic-bezier(0.22, 1, 0.36, 1)`).
-- Respect `prefers-reduced-motion: reduce` — disable all animations except state changes.
+Stagger lines with `--rv-delay` in ~80ms increments.
 
 ---
 
 ## Components
 
-### Buttons
+### Primary Button
 
-| Variant | Background | Text | Border | Hover |
-|---------|-----------|------|--------|-------|
-| Primary | Orange `#E8622A` | Warm White | None | brightness(1.1), shadow increase, -1px lift |
-| Secondary | Transparent | Warm White (dark) / Black (light) | 1px solid (text at 40%) | bg fill at 10%, border to 60% |
-| Ghost | Transparent | Stone `#888680` | None | text color changes to Orange |
+```css
+height: 63px;
+padding: 14px 20px;
+border-radius: 900px;
+background: var(--color-orange);   /* #E8622A — the existing brand orange */
+color: var(--color-warm-white);    /* as shipped today — see Accessibility */
+font-size: 18px;
+font-weight: 700;
+line-height: 24px;
+gap: 10px;
+transition: filter .2s, transform .2s;
+```
 
-**Button specs:**
-- Border radius: 24px (radius-xl) — fully rounded
-- Font: Lato Bold 700, body size, sentence case
-- Min height: 44px
-- Padding: 14px 28px
-- Directional arrow (`->`) on secondary/ghost variants
-- Focus ring: 2px solid Orange, 2px offset
-- Primary shadow: `0 2px 8px rgba(232,98,42,0.3)`
-- Disabled: 40% opacity, `cursor: not-allowed`
+- Always paired with a **circular arrow glyph** on the trailing edge.
+- Hover: `filter: brightness(1.06)` + `transform: translateY(-1px)`
+- Active: `transform: translateY(0)`
+- **Focus-visible is mandatory:** a 3px orange ring at 2px offset.
+- ⚠️ **Label color is an open accessibility question.** Light text on the orange fill fails AA (see [Accessibility](#accessibility)). Not changed — flagged for design.
 
-### Form Inputs
+### Interactive State Requirements
 
-- Background: `rgba(255,255,255,0.06)` on dark / white on light
-- Border: 1px solid Stone at 30% (focus: Orange)
-- Border radius: 4px (radius-sm)
-- Padding: 14px 16px
-- Placeholder: Stone color
-- Label: Lato Bold 700, body-sm, 8px gap above input
-- Error: border `#D94A4A`, caption-size message below
+Every clickable element ships **hover**, **focus-visible**, and **active**. No exceptions. Focus-visible must be distinguishable from hover — reviewers should be able to tab the entire page and always know where they are.
 
-### Cards
+### Numbered Steps
 
-| Property | Dark Background | Light Background |
-|----------|-----------------|------------------|
-| Surface | Charcoal `#3A3835` | White |
-| Border | 1px solid rgba(255,255,255,0.06) | None |
-| Shadow | None | shadow-md |
-| Radius | 8px or asymmetric | 8px or asymmetric |
-| Padding | 32px | 32px |
-| Hover | Border opacity to 0.12 | Shadow to shadow-lg |
+Process lists use two-digit orange numerals (`01`–`05`) at weight 800, paired with an uppercase title at 700 and a muted description. The numeral is the anchor; the eye should land on it first.
 
-### Differentiator Cards (colored blocks)
+### Cards on Dark
 
-- Backgrounds: Orange / Terracotta / Charcoal / Sand
-- Border radius: 16px (radius-lg)
-- Padding: 28px (mobile) / 36px (desktop)
-- Min height: 200px (mobile) / 240px (desktop)
-- Hover: translateY(-4px)
-- Ghost number: 8–10rem, opacity 0.06–0.08
-
-### Navigation
-
-**Desktop:**
-- Height: 72px
-- Background: transparent over hero, then Black at 95% + 12px backdrop blur on scroll
-- Logo: left, min 180px wide
-- Nav links: Lato Bold 700, body-sm, Warm White, 32px gap
-- CTA: Primary button, right-aligned
-
-**Mobile:**
-- Height: 64px
-- Hamburger: 24px, right side
-- Menu overlay: fullscreen, Black, fade-in 300ms
-- Items: centered, h3 size, 24px vertical gap
-- CTA: full-width at bottom
-
-### Footer
-
-- Background: Black
-- Grid: 4 columns (desktop), stacked (mobile)
-- Column headers: Lato Bold 700, label size, uppercase, Warm White
-- Links: Lato Regular 400, body-sm, Stone. Hover: Warm White
-- Social icons: 20px, Stone. Hover: Orange
-- Copyright: caption size, Stone
-- Padding: space-20 top, space-12 bottom
+Background `#222`, radius 22px, hairline inset border `var(--color-line)`, elevated shadow on hover only.
 
 ---
 
-## Icons
+## Imagery
 
-**Library:** Lucide React
-
-| Size | Usage |
-|------|-------|
-| 20px | Navigation, inline |
-| 24px | Standalone (default) |
-| 40px | Featured / hero |
-
-- Stroke width: 1.5px
-- Color: inherits text color (Warm White / Stone on dark; Black / Stone on light)
-- Hover: Orange (interactive elements)
-
----
-
-## Visual Modes
-
-### Energy Mode (dark-first)
-
-- Background: Black / Charcoal
-- Text: Warm White
-- Accent: Orange (dominant, activating)
-- Typography: Bold/Black weights, larger scale
-- Composition: Asymmetric, shapes cutting the frame, dynamic tension
-- Use for: Hero, differentiators, locations map, investor content
-
-### Comfort Mode (light)
-
-- Background: Warm White / Sand
-- Text: Black
-- Accent: Orange (restrained, warm)
-- Typography: Regular/Light weights, generous leading
-- Composition: Centered/balanced, generous negative space
-- Use for: Life moments, waitlist, blog, founder section, trust-building
-
-### Page Alternation Pattern (main site)
-
-| Section | Mode |
-|---------|------|
-| Hero | Energy (dark) |
-| Life Moments | Comfort (light) |
-| Brand Positioning | Comfort (light) |
-| How It Works | Transitional (light + bold type) |
-| Differentiators | Energy (dark) |
-| Locations Map | Energy (dark) |
-| Founded By | Comfort (light) |
-| Waitlist | Comfort (light) |
-| Footer | Energy (dark) |
+- **Real people mid-transition.** Moving, unpacking, handing over keys — never staged stock smiles against white.
+- **Warm color grade.** The photography leans amber/orange to sit with the palette.
+- Orange objects in-frame (boxes, tape, doors) tie image to brand without an overlay.
+- Where text sits over an image, apply a gradient scrim: `linear-gradient(to top, rgba(0,0,0,.6), transparent)`.
+- Images in panels inherit the panel radius.
+- **Pre-optimize every image.** `next.config.ts` sets `images.unoptimized: true`, so Next does not process them. Convert with `sharp` to WebP at true display size before committing.
 
 ---
 
 ## Logo Usage
 
-### Files
+> 🔒 **Unchanged in v3.0.** The logo files stay exactly as they are. Do not re-export, recolor, or substitute them.
 
-| File | Usage |
-|------|-------|
-| `public/images/brand/logo-white.svg` | Dark backgrounds |
-| `public/images/brand/logo-white-TM.svg` | Dark backgrounds (with TM) |
-| `public/images/brand/logo-dark.svg` | Light backgrounds |
-| `public/images/brand/logo-dark-TM.svg` | Light backgrounds (with TM) |
-| `public/images/brand/favicon.svg` | Browser tab (16px JS mark) |
-| `public/images/brand/apple-touch-icon.svg` | iOS (180x180px JS mark) |
-| `public/images/brand/og-image-default.png` | Social share (1200x630px) |
-
-### Rules
-
-- Always include the TM symbol — never omit.
-- Clear space = height of the letter "J".
-- Minimum digital size: 180px wide (nav), 120px (footer).
-- Dark backgrounds: white logo. Light backgrounds: dark logo.
-- Slogan lockup: "Space to move on." in Light 300 Italic, Stone color, space-2 gap below logo.
+- Wordmark is always full uppercase **`JOURNEY.STORAGE™`** — `JOURNEY.` bold, `STORAGE™` regular. **Locked artwork — never re-typeset it.**
+- The **™ is always present.**
+- Files live in [`public/images/brand/`](public/images/brand/): `logo-white.svg`, `logo-dark.svg`, plus `-TM` variants.
+- Use `-TM` variants in all formal, legal, and investor contexts.
+- Clear space = the height of the letter **J** on all sides.
+- Minimum sizes: print 35mm · digital 180px · J Icon 24px / 6mm · favicon 16px.
+- **J Icon** (rounded J against the orange corner block) is the compact mark for favicons, avatars, watermarks, and tight UI.
+- The oversized footer wordmark is a deliberate device — low-contrast, running the full container width.
 
 ---
 
-## Imagery Style
+## Verbal Identity
 
-### Photography Principles
+- **Primary slogan** (used with the logo): **"Space to move on."** — set in Light 300 *Italic*, Stone.
+- **Campaign slogan** (brand name absent): **"Journeys need space."**
+- **Brand promise:** "Journey holds what matters while you move forward."
+- **Two voice modes:** *Energy* (direct, confident, light) and *Comfort* (gentle, present, unhurried). Pick one per composition.
+- **Never corporate language** — no "trusted partner", "industry-leading", "best-in-class".
+- The brand manifesto is **internal only**. Never publish it as public copy.
 
-- People as subject, storage as consequence.
-- Never show storage units or boxes as the hero element.
-- Show human moments: the move, the person, the life in motion.
-- Warm color treatment throughout — no cool/blue grading.
-- Authentic, not staged.
-- Dark overlay for text legibility on hero images.
-
-### Image Containers
-
-- Default radius: 8px (radius-md)
-- Featured: asymmetric rounding (radius-brand)
-- Aspect ratios: 16:9 (hero), 4:3 (cards), 1:1 (portraits)
-
-### Image Treatments
-
-- Gradient overlay on all hero imagery: `bg-gradient-to-t from-black/60`
-- Color treatment layer with `mix-blend-multiply` where appropriate.
-
-### Asset Locations
-
-| Folder | Contents |
-|--------|----------|
-| `public/images/brand/` | Logos, favicon, og-image |
-| `public/images/hero/` | Hero backgrounds |
-| `public/images/moments/` | Life moment photography |
-| `public/images/facility/` | Facility renderings |
-| `public/images/team/` | Team/founder portraits |
-| `public/images/map/` | USA outline map SVG |
+**Three-question test before shipping anything:** Does it speak to a life moment? Does it feel like Journey — or could a competitor publish it unchanged? Does it carry the right temperature?
 
 ---
 
 ## Accessibility
 
-### WCAG 2.1 AA Compliance
+Measured against **`#E8622A`**, the Journey Orange actually in the code:
 
-- All text meets 4.5:1 contrast ratio against its background.
-- Orange on dark: passes. Orange on light: large text only (3:1 minimum).
-- Focus states: 2px solid Orange, 2px offset, on all interactive elements.
-- All content images have descriptive `alt` text. Decorative images use `aria-hidden="true"`.
-- Keyboard navigation: logical tab order, arrow keys for dropdowns.
-- Reduced motion: `prefers-reduced-motion: reduce` disables all animations except state changes.
-- Forms: labeled inputs, `aria-describedby` for errors, `aria-required` for required fields.
+| Pair | Ratio | Verdict |
+|------|-------|---------|
+| Warm White `#F5F0E8` on Black `#181818` | **15.65:1** | ✅ AAA |
+| Orange `#E8622A` on Black `#181818` | **5.25:1** | ✅ AA |
+| Stone `#888680` on Black `#181818` | **4.88:1** | ✅ AA |
+| **Black `#181818` on Orange** | **5.25:1** | ✅ AA |
+| ⚠️ White on Orange | **3.38:1** | ⚠️ large text only |
+| ⚠️ Warm White on Orange | **2.98:1** | ❌ **FAILS** |
+| ⚠️ Orange on Warm White | **2.98:1** | ❌ **FAILS** |
 
----
+### The two that bite
 
-## Sub-brands
+1. **Warm White on an orange fill fails at 2.98:1** — and that is what the CTAs use today. Black on orange would pass at 5.25:1. **Unresolved; nothing has been changed.** See the callout below.
+2. **Orange type on light grounds fails at 2.98:1.** On light backgrounds use orange for graphic elements only — rules, ticks, fills — never for text.
 
-### Journey.Advisory (consulting)
+> ⚠️ **For design, not for unilateral change.** The site ships Warm White on orange. Fixing it means either dark labels (passes, but changes every CTA) or a darker fill (keeps light text, costs the orange its brightness). **No code has been changed for this.**
 
-- Same color palette — reduced set (no Sky Blue, Ice, Sage Green).
-- Same typography and type scale.
-- Same spacing, layout, and animation system.
-- Hero badge: "JOURNEY.ADVISORY" with orange live indicator + "Consulting & Operations" subtitle.
-- Grain opacity: 0.03 (slightly softer than main site's 0.035).
-- Focus: institutional credibility, CTAs oriented toward scheduling and pricing.
+### Other requirements
 
-### Journey.Direct (investors)
-
-- Status: coming soon.
-- Black background, white text, minimal branding.
-
----
-
-## Brand Positioning
-
-| Element | Value |
-|---------|-------|
-| **Tagline** | "Space to move on." |
-| **Brand Promise** | A new kind of self-storage built for people in motion |
-| **Emotional Core** | Confidence, forward movement, intentionality |
-| **Visual DNA** | Asymmetric geometry, warm earth tones, high contrast, generous spacing |
+- Orange is never used for **small body copy** on any background.
+- Uppercase headings must be **sentence-case in markup** with `text-transform` in CSS, so screen readers do not spell out words letter by letter.
+- All motion honors `prefers-reduced-motion`.
+- Focus-visible required on every interactive element, visually distinct from hover.
+- Interactive states: derive hover/pressed from the existing `--color-orange` (lighten for hover, darken for pressed) rather than introducing new hex values. Disabled 40% opacity.
 
 ---
 
-## Development Reference
+## Implementation Notes
 
-| Property | Value |
-|----------|-------|
-| Color tokens | `src/lib/constants.ts` + CSS variables in `globals.css` |
-| Tailwind | v4 with CSS `@theme` variables |
-| Font loading | `next/font/google` — Lato 300, 400, 700, 900 |
-| Motion library | Framer Motion |
-| Icons | Lucide React (24px default) |
-| Images | Next.js Image (unoptimized for WebP support) |
-| Build | Standalone output |
+### Tailwind v4 Token Namespace
+
+Tailwind v4 reads specific namespaces. **`--font-size-*` generates nothing.** The correct namespace is **`--text-*`**:
+
+```css
+@theme {
+  /* ✅ correct */
+  --text-h2: 45px;
+  --text-h2--line-height: 1.25;
+  --text-h2--letter-spacing: -0.9px;
+
+  /* ❌ generates no class */
+  --font-size-h2: 2.5rem;
+}
+```
+
+> This is the root cause of the site-wide 16px fallback: `text-body`, `text-body-sm`, `text-label`, `text-caption`, `text-h2`, `text-h3`, `text-h4`, and `text-subhead` never existed as classes. Verified 2026-09-14 by computed-style probe on `/` and `/smartentry`. The mobile override block at the bottom of `globals.css` is dead for the same reason.
+
+> 🚨 **This is not a one-line fix — it is a visual regression pass.** Every section that looks correct today is correct *by accident of the 16px default*. Renaming the tokens resizes type on **every route at once**. Budget a full screenshot-and-compare sweep across all routes, at all four breakpoints, in the same change.
+>
+> **Until the migration lands,** new pages must use explicit Tailwind sizes (`text-[16px] leading-[1.4]`, `text-4xl md:text-5xl`) rather than the custom scale — that is what `src/app/smartentry/page.tsx` and `HowItWorks.tsx` already do. Do not "fix" a single page by switching it to the custom classes; they do not work.
+
+### Font Loading — implemented
+
+Nine faces live in `src/fonts/`, loaded via `next/font/local` in each app's `layout.tsx`:
+
+| Weight | Face | Style |
+|--------|------|-------|
+| 300 | Lato-Light | normal + italic |
+| 400 | Lato-Regular | normal |
+| 500 | Lato-Medium | normal |
+| 600 | Lato-Semibold | normal + italic |
+| 700 | Lato-Bold | normal |
+| **800** | **Lato-Heavy** | normal — **the heading weight** |
+| 900 | Lato-Black | normal |
+
+**Subset to the Latin range only** — 260KB total, down from 1.5MB unsubset. The upstream faces ship with Cyrillic and Greek that Journey has no use for.
+
+Latin covers English, **Spanish**, **Portuguese**, French, German and Italian — every accented character in Spanish and Portuguese lives in Latin-1 Supplement (`U+00C0–00FF`), inside the base latin range. Latin **Extended** (Polish, Czech, Turkish, Romanian, Vietnamese) is deliberately excluded: it costs ~72KB *per face* — 3.5× the file size — for markets Journey does not serve. If that changes, add the ranges to `scripts/subset-fonts.sh` and re-run.
+
+**Regenerate:** `./scripts/subset-fonts.sh <dir-with-full-lato-faces>`
+
+**Verifying it works.** Weight 800 failing silently is the whole risk, and it fails invisibly — the page still renders, just at 700. Measure rendered text width per weight; each must be distinct:
+
+```
+300: 709.06px   400: 717.45px   500: 719.20px   600: 721.20px
+700: 724.50px   800: 727.56px   900: 731.00px          ← all distinct ✓
+```
+
+If 800 equals 700, the Heavy face is not loading.
+
+**Apps:** main site, `investors`, `managed`, `tenant-lab` each carry their own `src/fonts/` copy — there is no shared workspace package (`packages/` does not exist), and each app deploys to its own instance. `apps/hub` is exempt.
+
+### Scope
+
+This guide governs **Journey.Storage**, **Journey.Managed**, **Journey.Direct**, the **investor portal**, **decks and print**, and **email templates**.
+
+**Exception:** `apps/hub` (the internal JARVIS-style work hub) is intentionally off-brand and exempt.
+
+---
+
+## Open Items
+
+### Done
+
+| Item | Notes |
+|------|-------|
+| ✅ **Self-host Lato** | 9 faces (300–900 + 2 italics), Latin subset, 260KB. Wired into main site, investors, managed, tenant-lab. Weight **800 verified rendering distinct** from 700 and 900 |
+| ✅ **Regeneration script** | `scripts/subset-fonts.sh`, with the reasoning in its header |
+
+That is the whole of v3.0 so far. Nothing else in the codebase has been changed.
+
+### For design to decide
+
+| # | Question | Why it matters |
+|---|----------|----------------|
+| 1 | **Text on orange fills** | Light-on-orange fails AA (2.44–2.98:1). Dark text passes (5.25:1) but changes how every CTA looks. Or darken the fill and keep light text. **Currently unchanged — still light text** |
+| 2 | **Is `#222222` a real token?** | The reference build uses it for cards on dark. Existing Charcoal is `#3A3835`. New layouts need one or the other |
+| 3 | **Body line-height 1.4 or 1.7?** | v3.0 follows the reference at 1.4. v1.0 said 1.7. Matters most for long-form (blog, legal) |
+
+### Engineering, when the type system gets used
+
+| # | Item | Notes |
+|---|------|-------|
+| 4 | `--font-size-*` → `--text-*` | Tailwind v4 builds `text-*` from `--text-*`, so the custom type scale generates **nothing** today and everything falls back to 16px. Fixing it resizes type on every route at once — a visual regression pass, not a rename. **Until then, new work should use explicit sizes** (`text-[16px] leading-[1.4]`) |
+| 5 | `/smartentry` runs v2.0 typography | Loads Barlow Condensed + Work Sans from Google. Worth aligning next time that page is touched |
+| 6 | 22 × `transition-all` | Breaks the stated motion rule, including `src/components/ui/Button.tsx`. Each needs its real property list |
+
+None of items 4–6 are urgent. They are noted so they are not rediscovered from scratch.
