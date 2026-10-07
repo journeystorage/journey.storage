@@ -1,7 +1,7 @@
 # CLAUDE.md — Frontend Website Rules
 
 ## Always Do First
-- **Invoke the `journey-design-system` skill before any visual work.** It is the source of truth for colours, type, shapes, motion, components and voice. **Where it conflicts with `BRAND_GUIDELINES.md` or anything below, the skill wins.** Visual component reference: `Journey-Design-System.html` (the library the skill was extracted from).
+- **Invoke the `journey-design-system` skill before any visual work.** It is the source of truth for colours, type, shapes, motion, components and voice. **Where it conflicts with `BRAND_GUIDELINES.md` or anything below, the skill wins.** Visual component reference: `mockups/journey-design-system.html` (the library the skill was extracted from; copy component CSS from it rather than re-deriving).
 - **Read `BRAND_GUIDELINES.md` (v3.0)** for layout and print detail the skill doesn't cover. Neither document authorizes changing existing pages: never migrate live pages unless asked.
 - **Read `DEPLOYMENT.md` before modifying any infrastructure file** (`next.config.ts`, `package.json` scripts, `turbo.json`, `apps/*/next.config.ts`).
 - **Never use `git add -A` or `git add .`** — always stage specific files by name.
